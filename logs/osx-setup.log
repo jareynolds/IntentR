@@ -1,0 +1,265 @@
+=== UbeCode macOS Setup Log ===
+Started: Sun Dec 14 12:53:18 PST 2025
+
+[0;32m[2025-12-14 12:53:18][0m Detected macOS 15.6 on arm64
+[0;34m[INFO][0m This script will install the following:
+[0;32m[2025-12-14 12:53:22][0m Xcode Command Line Tools are already installed - skipping, continuing...
+[0;32m[2025-12-14 12:53:22][0m Homebrew is already installed - skipping installation, continuing...
+[0;32m[2025-12-14 12:53:22][0m Updating Homebrew...
+==> Updating Homebrew...
+Updated 2 taps (homebrew/core and homebrew/cask).
+==> New Formulae
+auto-editor: Efficient media analysis and rendering
+bumpp: Interactive CLI that bumps your version numbers and more
+carl: Calendar for the command-line
+custom-install: Install CIA files directly to Nintendo 3DS SD card
+diffnav: Git diff pager based on delta but with a file tree
+faketty: Wrapper to exec a command in a pty, even if redirecting the output
+flecs: Fast entity component system for C & C++
+fresh-editor: Text editor for your terminal: easy, powerful and fast
+git-pages: Scalable static site server for Git forges
+git-pages-cli: Tool for publishing a site to a git-pages server
+gitlogue: Cinematic Git commit replay tool
+goat: General purpose AT Protocol CLI in Go
+gtl: Greg's Template Library of useful classes
+gup: Update binaries installed by go install
+html-to-markdown: Transforms HTML (even entire websites) into clean, readable Markdown
+install-nothing: Simulates installing things but doesn't actually install anything
+joyce: Emulates the Amstrad PCW on Unix, Windows and macOS
+labctl: CLI tool for interacting with iximiuz labs and playgrounds
+maigret: Collect a dossier on a person by username from thousands of sites
+mapscii: Whole World In Your Console
+matcha: Daily digest generator for your RSS feeds
+mcp-scan: Constrain, log and scan your MCP connections for security vulnerabilities
+mistral-vibe: Minimal CLI coding agent
+mq: Jq-like command-line tool for markdown processing
+mufetch: Neofetch-style music cli
+netshow: Interactive network connection monitor with friendly service names
+nkt: TUI for fast and simple interacting with your BibLaTeX database
+papeer: Convert websites into eBooks and Markdown
+phantom: CLI tool for seamless parallel development with Git worktrees
+py7zr: 7-zip in Python
+rad: Modern CLI scripts made easy
+redu: Ncdu for your restic repository
+rmrfrs: Filesystem cleaning tool
+rockcraft: Tool to create OCI images using the language from Snapcraft and Charmcraft
+save3ds_fuse: Extract/Import/FUSE for 3DS save/extdata/database
+slicot: Fortran subroutines library for systems and control
+svt-vp9: Scalable Video Technology for VP9 Encoder
+termshot: Creates screenshots based on terminal command output
+tfclean: Remove applied moved block, import block, etc
+thorvg: Lightweight portable library used for drawing vector-based scenes and animations
+toktop: LLM usage monitor in terminal
+tree-sitter@0.25: Incremental parsing library
+treemd: TUI and CLI dual pane markdown viewer
+ty: Extremely fast Python type checker, written in Rust
+wasm-bindgen: Facilitating high-level interactions between Wasm modules and JavaScript
+wuchale: Protobuf-like i18n from plain code
+==> New Casks
+8bitdo-ultimate-software-v2: Control every piece of your controller
+airscroll: Smooth mouse scrolling utility
+aks-desktop: Azure Kubernetes Service desktop application
+cardinal-search: Fastest file searching tool
+conar: AI-powered database and data management tool
+copilot-cli: Brings the power of Copilot coding agent directly to your terminal
+copilot-cli@prerelease: Brings the power of Copilot coding agent directly to your terminal
+dnclient: Peer-to-peer VPN client for managed nebula networks
+font-bbh-bartle
+font-bbh-bogle
+font-bbh-hegarty
+font-cause
+hyperwhisper: AI-powered speech-to-text transcription
+monocle-app: Window dimming utility
+motionik: Screen recording software
+nanoleaf: Control your Nanoleaf lights
+nessie-app: Knowledge base from AI chats
+oracle-data-modeler: Graphical tool for data modeling tasks
+papercut-mobility-print-client: Client for printing to PaperCut Mobility Print queues
+smartsheet: Spreadsheet-style project management solution
+stirling-pdf: PDF utility
+stremio@beta: Open-source media center
+vocaster-hub: Interface controller for Focusrite Vocaster One and Two
+wailbrew: Manage Homebrew packages with a UI
+xmlmind-editor: Strictly validating near WYSIWYG XML editor
+yoink: Drag and drop utility
+==> Outdated Formulae
+c-ares
+ca-certificates
+gh
+glib
+go
+icu4c@77
+jpeg-turbo
+libnghttp3
+libngtcp2
+libpng
+node
+pandoc
+pdfly
+pydantic
+python@3.14
+readline
+simdjson
+sqlite
+==> Outdated Casks
+claude-code
+
+You have 18 outdated formulae and 1 outdated cask installed.
+You can upgrade them with brew upgrade
+or list them with brew outdated.
+[0;32m[2025-12-14 12:53:27][0m Installing system dependencies via Homebrew...
+[0;32m[2025-12-14 12:53:28][0m   Installing git...
+==> Fetching downloads for: git
+✔︎ Bottle Manifest git (2.52.0_1)
+✔︎ Bottle Manifest libiconv (1.18)
+✔︎ Bottle libiconv (1.18)
+✔︎ Bottle git (2.52.0_1)
+==> Installing git dependency: libiconv
+==> Pouring libiconv--1.18.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libiconv/1.18: 32 files, 2.9MB
+==> Pouring git--2.52.0_1.arm64_sequoia.bottle.1.tar.gz
+==> Caveats
+The Tcl/Tk GUIs (e.g. gitk, git-gui) are now in the `git-gui` formula.
+Subversion interoperability (git-svn) is now in the `git-svn` formula.
+==> Summary
+🍺  /opt/homebrew/Cellar/git/2.52.0_1: 1,733 files, 59.8MB
+==> Running `brew cleanup git`...
+Disable this behaviour by setting `HOMEBREW_NO_INSTALL_CLEANUP=1`.
+Hide these hints with `HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).
+==> Caveats
+zsh completions and functions have been installed to:
+  /opt/homebrew/share/zsh/site-functions
+==> git
+The Tcl/Tk GUIs (e.g. gitk, git-gui) are now in the `git-gui` formula.
+Subversion interoperability (git-svn) is now in the `git-svn` formula.
+[0;32m[2025-12-14 12:53:33][0m   Installing wget...
+==> Fetching downloads for: wget
+✔︎ Bottle Manifest wget (1.25.0)
+✔︎ Bottle Manifest libidn2 (2.3.8)
+✔︎ Bottle libidn2 (2.3.8)
+✔︎ Bottle wget (1.25.0)
+==> Installing wget dependency: libidn2
+==> Pouring libidn2--2.3.8.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libidn2/2.3.8: 80 files, 951.9KB
+==> Pouring wget--1.25.0.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/wget/1.25.0: 92 files, 4.7MB
+==> Running `brew cleanup wget`...
+Disable this behaviour by setting `HOMEBREW_NO_INSTALL_CLEANUP=1`.
+Hide these hints with `HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).
+[0;32m[2025-12-14 12:53:36][0m   Installing curl...
+==> Fetching downloads for: curl
+✔︎ Bottle Manifest curl (8.17.0)
+✔︎ Bottle Manifest ca-certificates (2025-12-02)
+✔︎ Bottle Manifest libssh2 (1.11.1)
+✔︎ Bottle Manifest rtmpdump (2.4-20151223_3)
+✔︎ Bottle ca-certificates (2025-12-02)
+✔︎ Bottle libssh2 (1.11.1)
+✔︎ Bottle rtmpdump (2.4-20151223_3)
+✔︎ Bottle curl (8.17.0)
+==> Installing dependencies for curl: libssh2 and rtmpdump
+==> Installing curl dependency: libssh2
+==> Pouring libssh2--1.11.1.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libssh2/1.11.1: 201 files, 1.3MB
+==> Installing curl dependency: rtmpdump
+==> Pouring rtmpdump--2.4-20151223_3.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/rtmpdump/2.4-20151223_3: 21 files, 669.2KB
+==> Installing curl
+==> Pouring curl--8.17.0.arm64_sequoia.bottle.1.tar.gz
+==> Caveats
+curl is keg-only, which means it was not symlinked into /opt/homebrew,
+because macOS already provides this software and installing another version in
+parallel can cause all kinds of trouble.
+
+If you need to have curl first in your PATH, run:
+  echo 'export PATH="/opt/homebrew/opt/curl/bin:$PATH"' >> ~/.zshrc
+
+For compilers to find curl you may need to set:
+  export LDFLAGS="-L/opt/homebrew/opt/curl/lib"
+  export CPPFLAGS="-I/opt/homebrew/opt/curl/include"
+==> Summary
+🍺  /opt/homebrew/Cellar/curl/8.17.0: 551 files, 4.7MB
+==> Running `brew cleanup curl`...
+Disable this behaviour by setting `HOMEBREW_NO_INSTALL_CLEANUP=1`.
+Hide these hints with `HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).
+==> Caveats
+zsh completions have been installed to:
+  /opt/homebrew/opt/curl/share/zsh/site-functions
+==> curl
+curl is keg-only, which means it was not symlinked into /opt/homebrew,
+because macOS already provides this software and installing another version in
+parallel can cause all kinds of trouble.
+
+If you need to have curl first in your PATH, run:
+  echo 'export PATH="/opt/homebrew/opt/curl/bin:$PATH"' >> ~/.zshrc
+
+For compilers to find curl you may need to set:
+  export LDFLAGS="-L/opt/homebrew/opt/curl/lib"
+  export CPPFLAGS="-I/opt/homebrew/opt/curl/include"
+[0;32m[2025-12-14 12:53:40][0m   Installing make...
+==> Fetching downloads for: make
+✔︎ Bottle Manifest make (4.4.1)
+✔︎ Bottle make (4.4.1)
+==> Pouring make--4.4.1.arm64_sequoia.bottle.1.tar.gz
+==> Caveats
+GNU "make" has been installed as "gmake".
+If you need to use it as "make", you can add a "gnubin" directory
+to your PATH from your bashrc like:
+
+    PATH="/opt/homebrew/opt/make/libexec/gnubin:$PATH"
+==> Summary
+🍺  /opt/homebrew/Cellar/make/4.4.1: 17 files, 1.3MB
+==> Running `brew cleanup make`...
+Disable this behaviour by setting `HOMEBREW_NO_INSTALL_CLEANUP=1`.
+Hide these hints with `HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).
+[0;32m[2025-12-14 12:53:43][0m   openssl: already installed
+[0;32m[2025-12-14 12:53:44][0m   Installing jq...
+==> Fetching downloads for: jq
+✔︎ Bottle Manifest jq (1.8.1)
+✔︎ Bottle Manifest oniguruma (6.9.10)
+✔︎ Bottle jq (1.8.1)
+✔︎ Bottle oniguruma (6.9.10)
+==> Installing jq dependency: oniguruma
+==> Pouring oniguruma--6.9.10.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/oniguruma/6.9.10: 15 files, 1.5MB
+==> Pouring jq--1.8.1.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/jq/1.8.1: 20 files, 1.2MB
+==> Running `brew cleanup jq`...
+Disable this behaviour by setting `HOMEBREW_NO_INSTALL_CLEANUP=1`.
+Hide these hints with `HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).
+[0;32m[2025-12-14 12:53:46][0m System dependencies installed
+[0;32m[2025-12-14 12:53:46][0m Node.js is already installed: v20.19.5 - skipping, continuing...
+[0;32m[2025-12-14 12:53:46][0m npm is available: v10.8.2
+[0;32m[2025-12-14 12:53:46][0m Docker is already installed: Docker version 28.5.2, build ecc6942 - skipping installation, continuing...
+[0;32m[2025-12-14 12:53:47][0m Docker daemon is running
+[0;32m[2025-12-14 12:53:47][0m Go is already installed: go1.25.4
+[0;32m[2025-12-14 12:53:47][0m Go version meets requirements (>= 1.24)
+[0;32m[2025-12-14 12:53:47][0m Configuring Go environment...
+[0;32m[2025-12-14 12:53:47][0m Added Go environment to /Users/jamesreynolds/.zshrc
+[0;32m[2025-12-14 12:53:47][0m Go environment configured
+[0;32m[2025-12-14 12:53:47][0m Running environment configuration...
+[0;32m[2025-12-14 12:54:25][0m Installing web UI dependencies...
+
+added 454 packages, and audited 455 packages in 2s
+
+77 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.7.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.7.0
+npm notice To update run: npm install -g npm@11.7.0
+npm notice
+[0;32m[2025-12-14 12:54:27][0m Web UI dependencies installed
+[0;32m[2025-12-14 12:54:27][0m Validating installation...
+[0;34m[INFO][0m ✓ Git: git version 2.52.0
+[0;34m[INFO][0m ✓ Docker: Docker version 28.5.2, build ecc6942
+[0;34m[INFO][0m ✓ Docker Compose: 2.40.3-desktop.1
+[0;34m[INFO][0m ✓ Go: go1.25.4
+[0;34m[INFO][0m ✓ Node.js: v20.19.5
+[0;34m[INFO][0m ✓ npm: v10.8.2
+[0;32m[2025-12-14 12:54:27][0m All components validated successfully!
+[0;34m[INFO][0m Next steps:
+[0;34m[INFO][0m For more information, see:
+[0;32m[2025-12-14 12:54:27][0m Setup log saved to: /Users/jamesreynolds/Documents/Development/UbeCode/logs/osx-setup.log
+[0;32m[2025-12-14 12:54:27][0m Setup completed successfully!
