@@ -1,3 +1,4427 @@
 Collaboration server running on http://localhost:9084
 WebSocket server ready for connections
-User connected: XXPu1CPK28-hXD-UAAAB
+User connected: 4PyCM7Ox7FbLUkIMAAAB
+User admin@ubecode.local joining workspace default-1765770702202
+Active users in workspace-default-1765770702202: 1
+User admin@ubecode.local joining workspace default-1765770702202
+Active users in workspace-default-1765770702202: 1
+Grid update in workspace-default-1765770702202: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace default-1765770702202
+Active users in workspace-default-1765770702202: 1
+User admin@ubecode.local joining workspace default-1765770702202
+Active users in workspace-default-1765770702202: 1
+Grid update in workspace-default-1765770702202: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace default-1765770702202
+Active users in workspace-default-1765770702202: 1
+User admin@ubecode.local joining workspace default-1765770702202
+Active users in workspace-default-1765770702202: 1
+Grid update in workspace-default-1765770702202: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace default-1765770702202
+Active users in workspace-default-1765770702202: 1
+Grid update in workspace-default-1765770702202: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace default-1765770702202
+Active users in workspace-default-1765770702202: 1
+Grid update in workspace-default-1765770702202: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765770766940
+Active users in workspace-workspace-1765770766940: 1
+User admin@ubecode.local joining workspace workspace-1765770766940
+Active users in workspace-workspace-1765770766940: 1
+Grid update in workspace-workspace-1765770766940: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765770766940
+Active users in workspace-workspace-1765770766940: 1
+User admin@ubecode.local joining workspace workspace-1765770766940
+Active users in workspace-workspace-1765770766940: 1
+User admin@ubecode.local joining workspace workspace-1765770830257
+Active users in workspace-workspace-1765770830257: 1
+User admin@ubecode.local joining workspace workspace-1765770830257
+Active users in workspace-workspace-1765770830257: 1
+Grid update in workspace-workspace-1765770830257: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User disconnected: 4PyCM7Ox7FbLUkIMAAAB
+User left workspace-default-1765770702202. Remaining users: 0
+User left workspace-workspace-1765770766940. Remaining users: 0
+User left workspace-workspace-1765770830257. Remaining users: 0
+User connected: VQPPCAhNsLCcl5ZrAAAE
+User admin@ubecode.local joining workspace workspace-1765770830257
+Active users in workspace-workspace-1765770830257: 1
+User admin@ubecode.local joining workspace workspace-1765770830257
+Active users in workspace-workspace-1765770830257: 1
+Grid update in workspace-workspace-1765770830257: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765770766940
+Active users in workspace-workspace-1765770766940: 1
+User admin@ubecode.local joining workspace workspace-1765770766940
+Active users in workspace-workspace-1765770766940: 1
+Grid update in workspace-workspace-1765770766940: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765777771078
+Active users in workspace-workspace-1765777771078: 1
+User admin@ubecode.local joining workspace workspace-1765777771078
+Active users in workspace-workspace-1765777771078: 1
+Grid update in workspace-workspace-1765777771078: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+Grid update in workspace-workspace-1765777772795: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765778023728
+Active users in workspace-workspace-1765778023728: 1
+User admin@ubecode.local joining workspace workspace-1765778023728
+Active users in workspace-workspace-1765778023728: 1
+Grid update in workspace-workspace-1765778023728: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765778023728
+Active users in workspace-workspace-1765778023728: 1
+User admin@ubecode.local joining workspace workspace-1765778023728
+Active users in workspace-workspace-1765778023728: 1
+User admin@ubecode.local joining workspace workspace-1765778023728
+Active users in workspace-workspace-1765778023728: 1
+User admin@ubecode.local joining workspace workspace-1765778023728
+Active users in workspace-workspace-1765778023728: 1
+Grid update in workspace-workspace-1765778023728: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+Grid update in workspace-workspace-1765777772795: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+Grid update in workspace-workspace-1765777772795: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+Grid update in workspace-workspace-1765777772795: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+Grid update in workspace-workspace-1765777772795: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+Grid update in workspace-workspace-1765777772795: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+User admin@ubecode.local joining workspace workspace-1765777772795
+Active users in workspace-workspace-1765777772795: 1
+Grid update in workspace-workspace-1765777772795: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User disconnected: VQPPCAhNsLCcl5ZrAAAE
+User left workspace-workspace-1765770830257. Remaining users: 0
+User left workspace-workspace-1765770766940. Remaining users: 0
+User left workspace-workspace-1765777771078. Remaining users: 0
+User left workspace-workspace-1765777772795. Remaining users: 0
+User left workspace-workspace-1765778023728. Remaining users: 0
+User left workspace-workspace-1765779273496. Remaining users: 0
+User connected: nuedGMpDjuODjKDLAAAH
+User disconnected: nuedGMpDjuODjKDLAAAH
+User connected: E9DHPSlxWBcw8ebzAAAK
+User disconnected: E9DHPSlxWBcw8ebzAAAK
+User connected: 2-x7uiV5ztuh3uasAAAN
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User disconnected: 2-x7uiV5ztuh3uasAAAN
+User left workspace-workspace-1765779273496. Remaining users: 0
+User connected: ROCfH_EA_boZ2EpTAAAQ
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User disconnected: ROCfH_EA_boZ2EpTAAAQ
+User connected: kswGjhZxhiVlVKTeAAAT
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [
+    {
+      id: 'analyzed-analyzedtext17647225266270-0',
+      content: 'Environment\n' +
+        '\n' +
+        'React frontend with Go backend.\n' +
+        'Runs as a web application and renders to an Android screen. simulates the form factors of android',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Environment'
+    },
+    {
+      id: 'analyzed-analyzedtext17647239958891-1',
+      content: 'Use the Floware APIs to display emails with an AI summary in an Android app.  \n' +
+        '\n' +
+        'To create a web application using the Floware APIs. This proves that anybody can build a Floware application if the APIs were Publically documented',
+      x: 400,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-analyzedtext17648213851353-2',
+      content: 'What is the problem/challenge?\n' +
+        'Building applications for Flo has been closed development since the beginning. But, there might be some benefit from opening this up to other developers to build their own apps: a.) it would get us users quickly b.) we can generate new ideas. c.) we could charge for a developers license',
+      x: 750,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem Statement'
+    },
+    {
+      id: 'analyzed-analyzedtext17648214747174-3',
+      content: 'What is the solution?\n' +
+        '\n' +
+        'This is a POC to show that it is realitively easy to build a simple Flo app as long as the API endpoints are known.',
+      x: 1100,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Solution'
+    },
+    {
+      id: 'analyzed-text1764722526627-4',
+      content: 'Environment\n' +
+        '\n' +
+        'React frontend with Go backend.\n' +
+        'Runs as a web application and renders to an Android screen. simulates the form factors of android',
+      x: 50,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Environment'
+    },
+    {
+      id: 'analyzed-text1764723995889-5',
+      content: 'Use the Floware APIs to display emails with an AI summary in an Android app',
+      x: 400,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-text1764820962150-6',
+      content: 'To create a web application using the Floware APIs. This proves that anybody can build a Floware application if the APIs were Publically documented',
+      x: 750,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-text1764821385135-7',
+      content: 'What is the problem/challenge?\n' +
+        'Building applications for Flo has been closed development since the beginning. But, there might be some benefit from opening this up to other developers to build their own apps: a.) it would get us users quickly b.) we can generate new ideas. c.) we could charge for a developers license',
+      x: 1100,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem Statement'
+    },
+    {
+      id: 'analyzed-text1764821474717-8',
+      content: 'What is the solution?\n' +
+        '\n' +
+        'This is a POC to show that it is realitively easy to build a simple Flo app as long as the API endpoints are known.',
+      x: 50,
+      y: 550,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Solution'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-9',
+      from: 'analyzed-analyzedtext17647225266270-0',
+      to: 'analyzed-analyzedtext17647239958891-1'
+    },
+    {
+      id: 'conn-10',
+      from: 'analyzed-analyzedtext17647239958891-1',
+      to: 'analyzed-analyzedtext17648213851353-2'
+    },
+    {
+      id: 'conn-11',
+      from: 'analyzed-analyzedtext17648213851353-2',
+      to: 'analyzed-analyzedtext17648214747174-3'
+    },
+    {
+      id: 'conn-12',
+      from: 'analyzed-text1764722526627-4',
+      to: 'analyzed-text1764723995889-5'
+    },
+    {
+      id: 'conn-13',
+      from: 'analyzed-text1764820962150-6',
+      to: 'analyzed-text1764821385135-7'
+    },
+    {
+      id: 'conn-14',
+      from: 'analyzed-text1764821385135-7',
+      to: 'analyzed-text1764821474717-8'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: full-update
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [
+    {
+      id: 'analyzed-analyzedtext17647225266270-0',
+      content: 'Environment\n' +
+        '\n' +
+        'React frontend with Go backend.\n' +
+        'Runs as a web application and renders to an Android screen. simulates the form factors of android',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Environment'
+    },
+    {
+      id: 'analyzed-analyzedtext17647239958891-1',
+      content: 'Use the Floware APIs to display emails with an AI summary in an Android app.  \n' +
+        '\n' +
+        'To create a web application using the Floware APIs. This proves that anybody can build a Floware application if the APIs were Publically documented',
+      x: 400,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-analyzedtext17648213851353-2',
+      content: 'What is the problem/challenge?\n' +
+        'Building applications for Flo has been closed development since the beginning. But, there might be some benefit from opening this up to other developers to build their own apps: a.) it would get us users quickly b.) we can generate new ideas. c.) we could charge for a developers license',
+      x: 750,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem Statement'
+    },
+    {
+      id: 'analyzed-analyzedtext17648214747174-3',
+      content: 'What is the solution?\n' +
+        '\n' +
+        'This is a POC to show that it is realitively easy to build a simple Flo app as long as the API endpoints are known.',
+      x: 1100,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Solution'
+    },
+    {
+      id: 'analyzed-text1764722526627-4',
+      content: 'Environment\n' +
+        '\n' +
+        'React frontend with Go backend.\n' +
+        'Runs as a web application and renders to an Android screen. simulates the form factors of android',
+      x: 50,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Environment'
+    },
+    {
+      id: 'analyzed-text1764723995889-5',
+      content: 'Use the Floware APIs to display emails with an AI summary in an Android app',
+      x: 400,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-text1764820962150-6',
+      content: 'To create a web application using the Floware APIs. This proves that anybody can build a Floware application if the APIs were Publically documented',
+      x: 750,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-text1764821385135-7',
+      content: 'What is the problem/challenge?\n' +
+        'Building applications for Flo has been closed development since the beginning. But, there might be some benefit from opening this up to other developers to build their own apps: a.) it would get us users quickly b.) we can generate new ideas. c.) we could charge for a developers license',
+      x: 1100,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem Statement'
+    },
+    {
+      id: 'analyzed-text1764821474717-8',
+      content: 'What is the solution?\n' +
+        '\n' +
+        'This is a POC to show that it is realitively easy to build a simple Flo app as long as the API endpoints are known.',
+      x: 50,
+      y: 550,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Solution'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-9',
+      from: 'analyzed-analyzedtext17647225266270-0',
+      to: 'analyzed-analyzedtext17647239958891-1'
+    },
+    {
+      id: 'conn-10',
+      from: 'analyzed-analyzedtext17647239958891-1',
+      to: 'analyzed-analyzedtext17648213851353-2'
+    },
+    {
+      id: 'conn-11',
+      from: 'analyzed-analyzedtext17648213851353-2',
+      to: 'analyzed-analyzedtext17648214747174-3'
+    },
+    {
+      id: 'conn-12',
+      from: 'analyzed-text1764722526627-4',
+      to: 'analyzed-text1764723995889-5'
+    },
+    {
+      id: 'conn-13',
+      from: 'analyzed-text1764820962150-6',
+      to: 'analyzed-text1764821385135-7'
+    },
+    {
+      id: 'conn-14',
+      from: 'analyzed-text1764821385135-7',
+      to: 'analyzed-text1764821474717-8'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [
+    {
+      id: 'analyzed-analyzedtext17647225266270-0',
+      content: 'Environment\n' +
+        '\n' +
+        'React frontend with Go backend.\n' +
+        'Runs as a web application and renders to an Android screen. simulates the form factors of android',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Environment'
+    },
+    {
+      id: 'analyzed-analyzedtext17647239958891-1',
+      content: 'Use the Floware APIs to display emails with an AI summary in an Android app.  \n' +
+        '\n' +
+        'To create a web application using the Floware APIs. This proves that anybody can build a Floware application if the APIs were Publically documented',
+      x: 400,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-analyzedtext17648213851353-2',
+      content: 'What is the problem/challenge?\n' +
+        'Building applications for Flo has been closed development since the beginning. But, there might be some benefit from opening this up to other developers to build their own apps: a.) it would get us users quickly b.) we can generate new ideas. c.) we could charge for a developers license',
+      x: 750,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem Statement'
+    },
+    {
+      id: 'analyzed-analyzedtext17648214747174-3',
+      content: 'What is the solution?\n' +
+        '\n' +
+        'This is a POC to show that it is realitively easy to build a simple Flo app as long as the API endpoints are known.',
+      x: 1100,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Solution'
+    },
+    {
+      id: 'analyzed-text1764722526627-4',
+      content: 'Environment\n' +
+        '\n' +
+        'React frontend with Go backend.\n' +
+        'Runs as a web application and renders to an Android screen. simulates the form factors of android',
+      x: 50,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Environment'
+    },
+    {
+      id: 'analyzed-text1764723995889-5',
+      content: 'Use the Floware APIs to display emails with an AI summary in an Android app',
+      x: 400,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-text1764820962150-6',
+      content: 'To create a web application using the Floware APIs. This proves that anybody can build a Floware application if the APIs were Publically documented',
+      x: 750,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-text1764821385135-7',
+      content: 'What is the problem/challenge?\n' +
+        'Building applications for Flo has been closed development since the beginning. But, there might be some benefit from opening this up to other developers to build their own apps: a.) it would get us users quickly b.) we can generate new ideas. c.) we could charge for a developers license',
+      x: 1100,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem Statement'
+    },
+    {
+      id: 'analyzed-text1764821474717-8',
+      content: 'What is the solution?\n' +
+        '\n' +
+        'This is a POC to show that it is realitively easy to build a simple Flo app as long as the API endpoints are known.',
+      x: 50,
+      y: 550,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Solution'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-9',
+      from: 'analyzed-analyzedtext17647225266270-0',
+      to: 'analyzed-analyzedtext17647239958891-1'
+    },
+    {
+      id: 'conn-10',
+      from: 'analyzed-analyzedtext17647239958891-1',
+      to: 'analyzed-analyzedtext17648213851353-2'
+    },
+    {
+      id: 'conn-11',
+      from: 'analyzed-analyzedtext17648213851353-2',
+      to: 'analyzed-analyzedtext17648214747174-3'
+    },
+    {
+      id: 'conn-12',
+      from: 'analyzed-text1764722526627-4',
+      to: 'analyzed-text1764723995889-5'
+    },
+    {
+      id: 'conn-13',
+      from: 'analyzed-text1764820962150-6',
+      to: 'analyzed-text1764821385135-7'
+    },
+    {
+      id: 'conn-14',
+      from: 'analyzed-text1764821385135-7',
+      to: 'analyzed-text1764821474717-8'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+Grid update in workspace-workspace-1765779273496: full-update
+User admin@ubecode.local joining workspace workspace-1765770766940
+Active users in workspace-workspace-1765770766940: 1
+User admin@ubecode.local joining workspace workspace-1765770766940
+Active users in workspace-workspace-1765770766940: 1
+Grid update in workspace-workspace-1765770766940: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765770766940
+Active users in workspace-workspace-1765770766940: 1
+User admin@ubecode.local joining workspace workspace-1765770766940
+Active users in workspace-workspace-1765770766940: 1
+User admin@ubecode.local joining workspace workspace-1765770830257
+Active users in workspace-workspace-1765770830257: 1
+User admin@ubecode.local joining workspace workspace-1765770830257
+Active users in workspace-workspace-1765770830257: 1
+Grid update in workspace-workspace-1765770830257: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765777750912
+Active users in workspace-workspace-1765777750912: 1
+User admin@ubecode.local joining workspace workspace-1765777750912
+Active users in workspace-workspace-1765777750912: 1
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 400,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765777750912
+Active users in workspace-workspace-1765777750912: 1
+User admin@ubecode.local joining workspace workspace-1765777750912
+Active users in workspace-workspace-1765777750912: 1
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: full-update
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765777750912
+Active users in workspace-workspace-1765777750912: 1
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User admin@ubecode.local joining workspace workspace-1765777750912
+Active users in workspace-workspace-1765777750912: 1
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 400,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 399,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 399,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 398,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 398,
+      y: 51,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 398,
+      y: 54,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 402,
+      y: 58,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 414,
+      y: 65,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 445,
+      y: 76,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 492,
+      y: 90,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 541,
+      y: 101,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 593,
+      y: 112,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 638,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 668,
+      y: 123,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 688,
+      y: 125,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 699,
+      y: 125,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 705,
+      y: 125,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 708,
+      y: 125,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 124,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 124,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 123,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 122,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 53,
+      y: 52,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 64,
+      y: 57,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 95,
+      y: 69,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 142,
+      y: 85,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 186,
+      y: 100,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 220,
+      y: 112,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 246,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 265,
+      y: 126,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 277,
+      y: 130,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 282,
+      y: 131,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 284,
+      y: 131,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 285,
+      y: 131,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 285,
+      y: 131,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 284,
+      y: 130,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 283,
+      y: 129,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 280,
+      y: 127,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 278,
+      y: 124,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 275,
+      y: 121,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 271,
+      y: 119,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 267,
+      y: 116,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 263,
+      y: 113,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 259,
+      y: 109,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 255,
+      y: 106,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 251,
+      y: 103,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 248,
+      y: 100,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 246,
+      y: 97,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 244,
+      y: 96,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 242,
+      y: 94,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 240,
+      y: 92,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 237,
+      y: 91,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 234,
+      y: 90,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 231,
+      y: 89,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 229,
+      y: 89,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 227,
+      y: 89,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 226,
+      y: 90,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 225,
+      y: 90,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 225,
+      y: 92,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 225,
+      y: 93,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 225,
+      y: 95,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 225,
+      y: 97,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 225,
+      y: 98,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 225,
+      y: 99,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 226,
+      y: 100,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 227,
+      y: 101,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 229,
+      y: 102,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 230,
+      y: 104,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 232,
+      y: 105,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 234,
+      y: 107,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 236,
+      y: 108,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 238,
+      y: 109,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 239,
+      y: 110,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 240,
+      y: 111,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 241,
+      y: 112,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 241,
+      y: 112,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 242,
+      y: 112,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+Grid update in workspace-workspace-1765777750912: {
+  textBlocks: [
+    {
+      id: 'analyzed-text1764644196854-0',
+      content: 'Vision:  A doggy app to train your dog. Your dog is AI driven and has typical dog characteristics',
+      x: 243,
+      y: 113,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Vision'
+    },
+    {
+      id: 'analyzed-text1764644261071-1',
+      content: 'What is the problem/challenge?\n' +
+        'Kids need to learn how to train their dogs. this app helps',
+      x: 709,
+      y: 120,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-2',
+      from: 'analyzed-text1764644196854-0',
+      to: 'analyzed-text1764644261071-1'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User disconnected: kswGjhZxhiVlVKTeAAAT
+User left workspace-workspace-1765779273496. Remaining users: 0
+User left workspace-workspace-1765770766940. Remaining users: 0
+User left workspace-workspace-1765770830257. Remaining users: 0
+User left workspace-workspace-1765777750912. Remaining users: 0
+User connected: iws2GnNKgMB_Q0ovAAAV
+User disconnected: iws2GnNKgMB_Q0ovAAAV
+User connected: wQZJtOVK9Ku-Ex5HAAAX
+User disconnected: wQZJtOVK9Ku-Ex5HAAAX
+User connected: onT5hd6Am2WX6ZtxAAAZ
+User disconnected: onT5hd6Am2WX6ZtxAAAZ
+User connected: ksuC2Vjyf694wA8TAAAb
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+User admin@ubecode.local joining workspace workspace-1765779273496
+Active users in workspace-workspace-1765779273496: 1
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [
+    {
+      id: 'analyzed-analyzedtext17647225266270-0',
+      content: 'Environment\n' +
+        '\n' +
+        'React frontend with Go backend.\n' +
+        'Runs as a web application and renders to an Android screen. simulates the form factors of android',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Environment'
+    },
+    {
+      id: 'analyzed-analyzedtext17647239958891-1',
+      content: 'Use the Floware APIs to display emails with an AI summary in an Android app.  \n' +
+        '\n' +
+        'To create a web application using the Floware APIs. This proves that anybody can build a Floware application if the APIs were Publically documented',
+      x: 400,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-analyzedtext17648213851353-2',
+      content: 'What is the problem/challenge?\n' +
+        'Building applications for Flo has been closed development since the beginning. But, there might be some benefit from opening this up to other developers to build their own apps: a.) it would get us users quickly b.) we can generate new ideas. c.) we could charge for a developers license',
+      x: 750,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem Statement'
+    },
+    {
+      id: 'analyzed-analyzedtext17648214747174-3',
+      content: 'What is the solution?\n' +
+        '\n' +
+        'This is a POC to show that it is realitively easy to build a simple Flo app as long as the API endpoints are known.',
+      x: 1100,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Solution'
+    },
+    {
+      id: 'analyzed-text1764722526627-4',
+      content: 'Environment\n' +
+        '\n' +
+        'React frontend with Go backend.\n' +
+        'Runs as a web application and renders to an Android screen. simulates the form factors of android',
+      x: 50,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Environment'
+    },
+    {
+      id: 'analyzed-text1764723995889-5',
+      content: 'Use the Floware APIs to display emails with an AI summary in an Android app',
+      x: 400,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-text1764820962150-6',
+      content: 'To create a web application using the Floware APIs. This proves that anybody can build a Floware application if the APIs were Publically documented',
+      x: 750,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-text1764821385135-7',
+      content: 'What is the problem/challenge?\n' +
+        'Building applications for Flo has been closed development since the beginning. But, there might be some benefit from opening this up to other developers to build their own apps: a.) it would get us users quickly b.) we can generate new ideas. c.) we could charge for a developers license',
+      x: 1100,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem Statement'
+    },
+    {
+      id: 'analyzed-text1764821474717-8',
+      content: 'What is the solution?\n' +
+        '\n' +
+        'This is a POC to show that it is realitively easy to build a simple Flo app as long as the API endpoints are known.',
+      x: 50,
+      y: 550,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Solution'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-9',
+      from: 'analyzed-analyzedtext17647225266270-0',
+      to: 'analyzed-analyzedtext17647239958891-1'
+    },
+    {
+      id: 'conn-10',
+      from: 'analyzed-analyzedtext17647239958891-1',
+      to: 'analyzed-analyzedtext17648213851353-2'
+    },
+    {
+      id: 'conn-11',
+      from: 'analyzed-analyzedtext17648213851353-2',
+      to: 'analyzed-analyzedtext17648214747174-3'
+    },
+    {
+      id: 'conn-12',
+      from: 'analyzed-text1764722526627-4',
+      to: 'analyzed-text1764723995889-5'
+    },
+    {
+      id: 'conn-13',
+      from: 'analyzed-text1764820962150-6',
+      to: 'analyzed-text1764821385135-7'
+    },
+    {
+      id: 'conn-14',
+      from: 'analyzed-text1764821385135-7',
+      to: 'analyzed-text1764821474717-8'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User disconnected: ksuC2Vjyf694wA8TAAAb
+User left workspace-workspace-1765779273496. Remaining users: 0
+User connected: WCo1ZAu-0NKnSCc-AAAe
+Grid update in workspace-workspace-1765779273496: {
+  textBlocks: [
+    {
+      id: 'analyzed-analyzedtext17647225266270-0',
+      content: 'Environment\n' +
+        '\n' +
+        'React frontend with Go backend.\n' +
+        'Runs as a web application and renders to an Android screen. simulates the form factors of android',
+      x: 50,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Environment'
+    },
+    {
+      id: 'analyzed-analyzedtext17647239958891-1',
+      content: 'Use the Floware APIs to display emails with an AI summary in an Android app.  \n' +
+        '\n' +
+        'To create a web application using the Floware APIs. This proves that anybody can build a Floware application if the APIs were Publically documented',
+      x: 400,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-analyzedtext17648213851353-2',
+      content: 'What is the problem/challenge?\n' +
+        'Building applications for Flo has been closed development since the beginning. But, there might be some benefit from opening this up to other developers to build their own apps: a.) it would get us users quickly b.) we can generate new ideas. c.) we could charge for a developers license',
+      x: 750,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem Statement'
+    },
+    {
+      id: 'analyzed-analyzedtext17648214747174-3',
+      content: 'What is the solution?\n' +
+        '\n' +
+        'This is a POC to show that it is realitively easy to build a simple Flo app as long as the API endpoints are known.',
+      x: 1100,
+      y: 50,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Solution'
+    },
+    {
+      id: 'analyzed-text1764722526627-4',
+      content: 'Environment\n' +
+        '\n' +
+        'React frontend with Go backend.\n' +
+        'Runs as a web application and renders to an Android screen. simulates the form factors of android',
+      x: 50,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Environment'
+    },
+    {
+      id: 'analyzed-text1764723995889-5',
+      content: 'Use the Floware APIs to display emails with an AI summary in an Android app',
+      x: 400,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-text1764820962150-6',
+      content: 'To create a web application using the Floware APIs. This proves that anybody can build a Floware application if the APIs were Publically documented',
+      x: 750,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Idea'
+    },
+    {
+      id: 'analyzed-text1764821385135-7',
+      content: 'What is the problem/challenge?\n' +
+        'Building applications for Flo has been closed development since the beginning. But, there might be some benefit from opening this up to other developers to build their own apps: a.) it would get us users quickly b.) we can generate new ideas. c.) we could charge for a developers license',
+      x: 1100,
+      y: 300,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Problem Statement'
+    },
+    {
+      id: 'analyzed-text1764821474717-8',
+      content: 'What is the solution?\n' +
+        '\n' +
+        'This is a POC to show that it is realitively easy to build a simple Flo app as long as the API endpoints are known.',
+      x: 50,
+      y: 550,
+      tags: [],
+      width: 300,
+      height: 200,
+      cardName: 'Solution'
+    }
+  ],
+  imageBlocks: [],
+  shapeBlocks: [],
+  connections: [
+    {
+      id: 'conn-9',
+      from: 'analyzed-analyzedtext17647225266270-0',
+      to: 'analyzed-analyzedtext17647239958891-1'
+    },
+    {
+      id: 'conn-10',
+      from: 'analyzed-analyzedtext17647239958891-1',
+      to: 'analyzed-analyzedtext17648213851353-2'
+    },
+    {
+      id: 'conn-11',
+      from: 'analyzed-analyzedtext17648213851353-2',
+      to: 'analyzed-analyzedtext17648214747174-3'
+    },
+    {
+      id: 'conn-12',
+      from: 'analyzed-text1764722526627-4',
+      to: 'analyzed-text1764723995889-5'
+    },
+    {
+      id: 'conn-13',
+      from: 'analyzed-text1764820962150-6',
+      to: 'analyzed-text1764821385135-7'
+    },
+    {
+      id: 'conn-14',
+      from: 'analyzed-text1764821385135-7',
+      to: 'analyzed-text1764821474717-8'
+    }
+  ],
+  zoom: 1,
+  scrollLeft: 0,
+  scrollTop: 0
+}
+User disconnected: WCo1ZAu-0NKnSCc-AAAe
+User connected: 3WLqcldXg3-Yf0QRAAAh

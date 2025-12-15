@@ -3909,7 +3909,21 @@ func (h *Handler) HandleThemeFiles(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Theme files are stored in the conception folder
-	specsPath := filepath.Join(req.WorkspacePath, "conception")
+	// Handle both relative and absolute paths, and Docker volume mounts
+	workspacePath := req.WorkspacePath
+
+	// If path contains "workspaces/", extract the relative part
+	if idx := strings.Index(workspacePath, "workspaces/"); idx != -1 {
+		workspacePath = workspacePath[idx:]
+	}
+
+	// Get current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+	specsPath := filepath.Join(cwd, workspacePath, "conception")
 
 	if _, err := os.Stat(specsPath); os.IsNotExist(err) {
 		w.Header().Set("Content-Type", "application/json")
@@ -3921,7 +3935,7 @@ func (h *Handler) HandleThemeFiles(w http.ResponseWriter, r *http.Request) {
 
 	var themes []FileTheme
 
-	err := filepath.Walk(specsPath, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(specsPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -4078,8 +4092,22 @@ func (h *Handler) HandleSaveTheme(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Handle both relative and absolute paths, and Docker volume mounts
+	filePath := req.Path
+
+	// If path contains "workspaces/", extract the relative part and resolve from cwd
+	if idx := strings.Index(filePath, "workspaces/"); idx != -1 {
+		relativePath := filePath[idx:]
+		cwd, err := os.Getwd()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+			return
+		}
+		filePath = filepath.Join(cwd, relativePath)
+	}
+
 	// Ensure parent directory exists
-	dir := filepath.Dir(req.Path)
+	dir := filepath.Dir(filePath)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		http.Error(w, fmt.Sprintf("failed to create directory: %v", err), http.StatusInternalServerError)
 		return
@@ -4139,7 +4167,7 @@ func (h *Handler) HandleSaveTheme(w http.ResponseWriter, r *http.Request) {
 		content.WriteString(req.Content + "\n")
 	}
 
-	if err := os.WriteFile(req.Path, []byte(content.String()), 0644); err != nil {
+	if err := os.WriteFile(filePath, []byte(content.String()), 0644); err != nil {
 		http.Error(w, fmt.Sprintf("failed to save file: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -4148,6 +4176,7 @@ func (h *Handler) HandleSaveTheme(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"message": "Theme saved successfully",
+		"path":    filePath,
 	})
 }
 
@@ -4169,12 +4198,26 @@ func (h *Handler) HandleDeleteTheme(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := os.Stat(req.Path); os.IsNotExist(err) {
+	// Handle both relative and absolute paths, and Docker volume mounts
+	filePath := req.Path
+
+	// If path contains "workspaces/", extract the relative part and resolve from cwd
+	if idx := strings.Index(filePath, "workspaces/"); idx != -1 {
+		relativePath := filePath[idx:]
+		cwd, err := os.Getwd()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+			return
+		}
+		filePath = filepath.Join(cwd, relativePath)
+	}
+
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		http.Error(w, "file not found", http.StatusNotFound)
 		return
 	}
 
-	if err := os.Remove(req.Path); err != nil {
+	if err := os.Remove(filePath); err != nil {
 		http.Error(w, fmt.Sprintf("failed to delete file: %v", err), http.StatusInternalServerError)
 		return
 	}

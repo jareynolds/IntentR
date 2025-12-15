@@ -3,8 +3,19 @@
 > vite
 
 
-  VITE v7.2.2  ready in 782 ms
+  VITE v7.2.2  ready in 103 ms
 
   ➜  Local:   http://localhost:6175/
-  ➜  Network: http://172.31.42.43:6175/
-  ➜  Network: http://172.18.0.1:6175/
+  ➜  Network: http://10.0.0.237:6175/
+10:35:38 PM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
+10:36:04 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
+10:36:04 PM [vite] (client) hmr update /src/pages/UIStyles.tsx, /src/styles/main.css, /src/index.css
+10:36:04 PM [vite] (client) hmr update /src/context/EnablerContext.tsx, /src/styles/main.css, /src/index.css
+10:36:04 PM [vite] (client) hmr update /src/pages/UIFramework.tsx, /src/styles/main.css, /src/index.css
+10:36:04 PM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+10:36:04 PM [vite] (client) hmr update /src/App.tsx
+10:36:04 PM [vite] (client) hmr invalidate /src/context/EnablerContext.tsx Could not Fast Refresh ("useEnabler" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+10:36:04 PM [vite] (client) hmr update /src/App.tsx, /src/pages/Enablers.tsx
+10:54:54 PM [vite] (client) hmr update /src/pages/Workspaces.tsx, /src/styles/main.css, /src/index.css
+10:57:38 PM [vite] (client) hmr update /src/pages/Workspaces.tsx, /src/styles/main.css, /src/index.css
+11:00:05 PM [vite] (client) hmr update /src/pages/Workspaces.tsx, /src/styles/main.css, /src/index.css

@@ -1,5 +1,5 @@
 {
-  "id": "workspace-1765064122778",
+  "id": "workspace-1765782090798",
   "name": "stickfigures",
   "description": "Imported from workspaces/stickfigures",
   "workspaceType": "new",
@@ -7,7 +7,7 @@
   "ownerId": "admin@ubecode.local",
   "ownerName": "System Administrator",
   "isShared": false,
-  "createdAt": "2025-12-06T23:35:22.778Z",
-  "updatedAt": "2025-12-08T18:08:45.598Z",
+  "createdAt": "2025-12-15T07:01:30.798Z",
+  "updatedAt": "2025-12-15T07:01:30.798Z",
   "version": "1.0"
 }

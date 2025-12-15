@@ -1,0 +1,86 @@
+# UbeCLI Configuration
+# See ENB-759325 for full documentation
+
+llm:
+    default: claude-cli
+    adapters:
+        claude-api:
+            api_key: ""
+            model: claude-sonnet-4-20250514
+            max_tokens: 16384
+            timeout: 2m0s
+            endpoint: https://api.anthropic.com/v1/messages
+            working_dir: ""
+            skip_permissions: false
+            print_mode: false
+            host: ""
+        claude-cli:
+            api_key: ""
+            model: ""
+            max_tokens: 0
+            timeout: 5m0s
+            endpoint: ""
+            working_dir: ""
+            skip_permissions: true
+            print_mode: true
+            host: ""
+        ollama:
+            api_key: ""
+            model: llama3
+            max_tokens: 0
+            timeout: 5m0s
+            endpoint: ""
+            working_dir: ""
+            skip_permissions: false
+            print_mode: false
+            host: http://localhost:11434
+        openai:
+            api_key: ""
+            model: gpt-4-turbo
+            max_tokens: 4096
+            timeout: 2m0s
+            endpoint: https://api.openai.com/v1/chat/completions
+            working_dir: ""
+            skip_permissions: false
+            print_mode: false
+            host: ""
+prework:
+    enabled: true
+    inject_context: true
+    context_files:
+        - CLAUDE.md
+        - CODE_RULES/MAIN_SWDEV_PLAN.md
+    stages:
+        context_load:
+            enabled: true
+        rule_application:
+            enabled: true
+        approval_validation:
+            enabled: true
+        prompt_build:
+            enabled: true
+        format:
+            enabled: true
+    custom_rules:
+        - name: sawai-enforcement
+          always_inject: true
+          condition: ""
+          template: |-
+            You MUST follow the MAIN_SWDEV_PLAN.md for ALL development activities.
+            Check approval status before proceeding with implementation.
+            Never modify approval status yourself.
+          command: ""
+          inject_as: ""
+shell:
+    prompt: 'ube> '
+    history_file: ~/.ubecli_history
+    max_history: 1000
+logging:
+    enabled: true
+    file: ~/.ubecli/logs/audit.log
+    level: info
+    include_prompts: false
+debug:
+    enabled: false
+    show_prework: false
+    dry_run: false

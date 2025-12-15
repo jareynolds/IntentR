@@ -893,7 +893,7 @@ This layout should be used in conjunction with the active UI Styles (colors, typ
       const fileName = 'UI-FRAMEWORK.md';
 
       // Call backend API to save the file (port 4001 is the workspace server)
-      await axios.post(`${SPEC_URL}/save-specification`, {
+      await axios.post(`${SPEC_URL}/api/save-specification`, {
         fileName: fileName,
         content: specification,
         workspacePath: currentWorkspace.projectFolder,

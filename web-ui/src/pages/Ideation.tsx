@@ -810,7 +810,7 @@ export const Ideation: React.FC = () => {
       }
 
       // Send to backend to save files in workspace conception folder
-      const response = await fetch(`${SPEC_URL}/save-specifications`, {
+      const response = await fetch(`${SPEC_URL}/api/save-specifications`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -848,7 +848,7 @@ export const Ideation: React.FC = () => {
   const handleAnalyzeIdeation = async (silent: boolean = false) => {
     try {
       // Read IDEA-*.md files from conception folder
-      const response = await fetch(`${SPEC_URL}/read-specifications`, {
+      const response = await fetch(`${SPEC_URL}/api/read-specifications`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

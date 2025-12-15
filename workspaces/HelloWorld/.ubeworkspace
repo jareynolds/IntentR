@@ -1,5 +1,5 @@
 {
-  "id": "workspace-1765064117844",
+  "id": "workspace-1765770836275",
   "name": "HelloWorld",
   "description": "Imported from workspaces/HelloWorld",
   "workspaceType": "new",
@@ -7,7 +7,7 @@
   "ownerId": "admin@ubecode.local",
   "ownerName": "System Administrator",
   "isShared": false,
-  "createdAt": "2025-12-06T23:35:17.844Z",
-  "updatedAt": "2025-12-06T23:35:17.844Z",
+  "createdAt": "2025-12-15T03:53:56.275Z",
+  "updatedAt": "2025-12-15T03:53:56.275Z",
   "version": "1.0"
 }

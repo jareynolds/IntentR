@@ -150,7 +150,30 @@ This index catalogs all reverse-engineered specifications from the UbeCode appli
 
 ---
 
-## ⚙️ Enablers (27 files)
+### CAP-759314: LLM Request Interception (ModelProxy)
+**File**: [CAP-759314.md](./CAP-759314.md)
+**Component**: ModelProxy / UbeCLI
+**Priority**: High
+**Status**: Implemented ✅
+**Analysis Review**: Not Required
+
+**Purpose**: Generic, LLM-agnostic system for intercepting, transforming, and forwarding LLM requests with automatic context injection and SAWai rule enforcement
+
+**Features**:
+- UbeCLI interactive shell with Claude CLI-like experience
+- Prework pipeline for prompt transformation
+- Automatic injection of CLAUDE.md and MAIN_SWDEV_PLAN.md
+- Pluggable LLM adapter architecture (Claude CLI, Claude API, OpenAI, Ollama)
+- SAWai approval workflow enforcement
+- Configuration via .ubecli.yaml
+
+**Enablers**: 5 enablers (ENB-759321 through ENB-759325)
+
+**Implementation**: Go-based CLI tool with HTTP API
+
+---
+
+## ⚙️ Enablers (32 files)
 
 ### Figma Integration Management Enablers (4 files)
 
@@ -230,6 +253,20 @@ This index catalogs all reverse-engineered specifications from the UbeCode appli
 | ENB-942158 | Interactive Storyboard Canvas | [ENB-942158.md](./ENB-942158.md) | Implemented | High |
 
 **Technology**: React, TypeScript, Vite, React Router, Context API/Redux, CSS
+
+---
+
+### LLM Request Interception (ModelProxy) Enablers (5 files)
+
+| ID | Name | File | Status | Priority |
+|----|------|------|--------|----------|
+| ENB-759321 | UbeCLI Interactive Shell | [ENB-759321.md](./ENB-759321.md) | Implemented | High |
+| ENB-759322 | Prework Pipeline | [ENB-759322.md](./ENB-759322.md) | Implemented | High |
+| ENB-759323 | Context Loader | [ENB-759323.md](./ENB-759323.md) | Implemented | High |
+| ENB-759324 | LLM Adapter Interface | [ENB-759324.md](./ENB-759324.md) | Implemented | High |
+| ENB-759325 | Configuration Management | [ENB-759325.md](./ENB-759325.md) | Implemented | Medium |
+
+**Technology**: Go, YAML, Claude CLI, Claude API, OpenAI API, Ollama
 
 ---
 
@@ -688,6 +725,7 @@ UI Integration
 | CAP-694827 | Capability | Design Artifact Management | [CAP-694827.md](./CAP-694827.md) |
 | CAP-847293 | Capability | UI Designer | [CAP-847293.md](./CAP-847293.md) |
 | CAP-944623 | Capability | Display UI | [CAP-944623.md](./CAP-944623.md) |
+| CAP-759314 | Capability | LLM Request Interception (ModelProxy) | [CAP-759314.md](./CAP-759314.md) |
 | ENB-147825 | Enabler | Health Check System | [ENB-147825.md](./ENB-147825.md) |
 | ENB-173294 | Enabler | React Application Bootstrap | [ENB-173294.md](./ENB-173294.md) |
 | ENB-214759 | Enabler | React Application Bootstrap (Alt) | [ENB-214759.md](./ENB-214759.md) |
@@ -715,6 +753,11 @@ UI Integration
 | ENB-926583 | Enabler | Comment Retrieval Service | [ENB-926583.md](./ENB-926583.md) |
 | ENB-942158 | Enabler | Interactive Storyboard Canvas | [ENB-942158.md](./ENB-942158.md) |
 | ENB-958471 | Enabler | DELM Service Integration | [ENB-958471.md](./ENB-958471.md) |
+| ENB-759321 | Enabler | UbeCLI Interactive Shell | [ENB-759321.md](./ENB-759321.md) |
+| ENB-759322 | Enabler | Prework Pipeline | [ENB-759322.md](./ENB-759322.md) |
+| ENB-759323 | Enabler | Context Loader | [ENB-759323.md](./ENB-759323.md) |
+| ENB-759324 | Enabler | LLM Adapter Interface | [ENB-759324.md](./ENB-759324.md) |
+| ENB-759325 | Enabler | Configuration Management | [ENB-759325.md](./ENB-759325.md) |
 
 ---
 

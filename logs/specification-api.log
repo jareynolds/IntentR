@@ -1,1 +1,110 @@
 Specification API server running on http://localhost:4001
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 21 total files: [
+  'IDEA-analyzedtext17647225266270.md',
+  'IDEA-analyzedtext17647239958891.md',
+  'IDEA-analyzedtext17648213851353.md',
+  'IDEA-analyzedtext17648214747174.md',
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764723995889.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md'
+]
+[read-specifications] Found 9 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
+[read-specifications] Folder not found: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
+[read-specifications] Folder not found: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
+[read-specifications] Folder not found: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
+[read-specifications] Folder not found: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 21 total files: [
+  'IDEA-analyzedtext17647225266270.md',
+  'IDEA-analyzedtext17647239958891.md',
+  'IDEA-analyzedtext17648213851353.md',
+  'IDEA-analyzedtext17648214747174.md',
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764723995889.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md'
+]
+[read-specifications] Found 9 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/specifications
+[read-specifications] Found 101 total files: [
+  '.DS_Store',
+  'CAP-318652.md',
+  'CAP-471395.md',
+  'CAP-582341.md',
+  'CAP-694827.md',
+  'CAP-759314.md',
+  'CAP-847293.md',
+  'CAP-931847.md',
+  'CAP-944623.md',
+  'CATEGORIZATION-SUMMARY.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 1 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/specifications
+[read-specifications] Found 101 total files: [
+  '.DS_Store',
+  'CAP-318652.md',
+  'CAP-471395.md',
+  'CAP-582341.md',
+  'CAP-694827.md',
+  'CAP-759314.md',
+  'CAP-847293.md',
+  'CAP-931847.md',
+  'CAP-944623.md',
+  'CATEGORIZATION-SUMMARY.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 1 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
+[read-specifications] Folder not found: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 21 total files: [
+  'IDEA-analyzedtext17647225266270.md',
+  'IDEA-analyzedtext17647239958891.md',
+  'IDEA-analyzedtext17648213851353.md',
+  'IDEA-analyzedtext17648214747174.md',
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764723995889.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md'
+]
+[read-specifications] Found 9 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/BattleDrones/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/BattleDrones/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/BattleDrones/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/stickfigures/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/stickfigures/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/Doggy/conception
+[read-specifications] Found 12 total files: [
+  '.DS_Store',
+  'IDEA-text1764644196854.md',
+  'IDEA-text1764644261071.md',
+  'MKT-DOGGY-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-COUNT-DOGS.md',
+  'STORY-FEED-THE-DOG.md',
+  'STORY-OPEN-HOUSE-DOOR.md',
+  'STORY-SEE-DOGS.md',
+  'STORY-WALK-DOGS.md'
+]
+[read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images

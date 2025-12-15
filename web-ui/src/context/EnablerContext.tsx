@@ -585,7 +585,7 @@ export const EnablerProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const deleteSpecification = useCallback(async (fileName: string, workspacePath?: string) => {
     try {
-      const response = await fetch(`${SPEC_URL}/delete-specification`, {
+      const response = await fetch(`${SPEC_URL}/api/delete-specification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileName, workspacePath, subfolder: 'definition' }),
@@ -614,7 +614,7 @@ export const EnablerProvider: React.FC<{ children: ReactNode }> = ({ children })
       // Generate updated markdown content from the specification
       const content = generateEnablerMarkdown(spec);
 
-      const response = await fetch(`${SPEC_URL}/save-specification`, {
+      const response = await fetch(`${SPEC_URL}/api/save-specification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

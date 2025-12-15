@@ -1,4 +1,11 @@
-.PHONY: help build test lint clean run-integration run-design run-capability docker-build docker-up docker-down
+.PHONY: help build test lint clean run-integration run-design run-capability docker-build docker-up docker-down ubecli install-ubecli uninstall-ubecli
+
+# UbeCLI version info
+VERSION ?= 1.0.0
+BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+LDFLAGS := -ldflags "-X main.version=$(VERSION) -X main.buildDate=$(BUILD_DATE) -X main.gitCommit=$(GIT_COMMIT)"
+INSTALL_PATH := /usr/local/bin
 
 help: ## Display this help message
 	@echo "Available commands:"
@@ -72,3 +79,35 @@ install-tools: ## Install development tools
 	@echo "Installing development tools..."
 	@go install golang.org/x/tools/cmd/goimports@latest
 	@echo "Tools installed!"
+
+# UbeCLI targets
+ubecli: ## Build ubecli binary with version info
+	@echo "Building ubecli..."
+	@go build $(LDFLAGS) -o cmd/ubecli/ubecli ./cmd/ubecli
+	@echo "Build complete: cmd/ubecli/ubecli"
+	@echo "Version: $(VERSION), Commit: $(GIT_COMMIT), Date: $(BUILD_DATE)"
+
+install-ubecli: ubecli ## Install ubecli to system PATH (requires sudo)
+	@echo "Installing ubecli to $(INSTALL_PATH)..."
+	@if [ -w "$(INSTALL_PATH)" ]; then \
+		cp cmd/ubecli/ubecli $(INSTALL_PATH)/ubecli; \
+	else \
+		echo "Note: $(INSTALL_PATH) requires elevated permissions."; \
+		echo "Run: sudo make install-ubecli"; \
+		sudo cp cmd/ubecli/ubecli $(INSTALL_PATH)/ubecli; \
+	fi
+	@chmod +x $(INSTALL_PATH)/ubecli
+	@echo "Installed! Run 'ubecli -version' to verify."
+
+uninstall-ubecli: ## Remove ubecli from system PATH (requires sudo)
+	@echo "Removing ubecli from $(INSTALL_PATH)..."
+	@if [ -f "$(INSTALL_PATH)/ubecli" ]; then \
+		if [ -w "$(INSTALL_PATH)" ]; then \
+			rm $(INSTALL_PATH)/ubecli; \
+		else \
+			sudo rm $(INSTALL_PATH)/ubecli; \
+		fi; \
+		echo "Uninstalled successfully."; \
+	else \
+		echo "ubecli not found in $(INSTALL_PATH)"; \
+	fi

@@ -71,6 +71,15 @@ export const Workspaces: React.FC = () => {
     scanWorkspaceFolders(); // Scan on initial load
   }, []);
 
+  // Normalize folder path to match how WorkspaceContext creates projectFolder
+  const normalizeFolderPath = (folderPath: string): string => {
+    // Extract folder name from path (e.g., "workspaces/My Project" -> "My Project")
+    const folderName = folderPath.split('/').pop() || folderPath;
+    // Apply same normalization as WorkspaceContext.createWorkspace
+    const safeFolderName = folderName.replace(/[^a-zA-Z0-9-_]/g, '-').replace(/-+/g, '-');
+    return `workspaces/${safeFolderName}`;
+  };
+
   const scanWorkspaceFolders = async () => {
     setIsScanning(true);
     try {
@@ -78,9 +87,21 @@ export const Workspaces: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         // Filter out workspaces that are already in the user's workspace list
-        const existingFolders = new Set(workspaces.map(w => w.projectFolder));
+        // Normalize BOTH sides to handle path differences (e.g., "My Project" vs "My-Project")
+        const existingFolders = new Set(
+          workspaces
+            .map(w => w.projectFolder)
+            .filter((folder): folder is string => Boolean(folder))
+            .map(folder => normalizeFolderPath(folder))
+        );
+        console.log('Existing folders (normalized):', Array.from(existingFolders));
         const discoveredWorkspaces = (data.workspaces || []).filter(
-          (sw: ScannedWorkspace) => !existingFolders.has(sw.folderPath)
+          (sw: ScannedWorkspace) => {
+            const normalizedPath = normalizeFolderPath(sw.folderPath);
+            const isExisting = existingFolders.has(normalizedPath);
+            console.log(`Checking ${sw.folderPath} -> ${normalizedPath}: ${isExisting ? 'FILTERED' : 'KEEP'}`);
+            return !isExisting;
+          }
         );
         setScannedWorkspaces(discoveredWorkspaces);
       }
@@ -110,8 +131,9 @@ export const Workspaces: React.FC = () => {
         'new'
       );
     }
-    // Refresh the scanned workspaces list
-    await scanWorkspaceFolders();
+    // Immediately remove the imported workspace from the scanned list
+    // This avoids stale closure issues with the workspaces state
+    setScannedWorkspaces(prev => prev.filter(sw => sw.folderPath !== scanned.folderPath));
   };
 
   const handleCreate = async () => {

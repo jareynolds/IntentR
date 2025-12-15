@@ -1095,7 +1095,7 @@ export const Storyboard: React.FC = () => {
         // If the card was loaded from a file, delete the file first
         if (hasSourceFile && card?.sourceFileName) {
           try {
-            const response = await fetch(`${SPEC_URL}/delete-specification`, {
+            const response = await fetch(`${SPEC_URL}/api/delete-specification`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
