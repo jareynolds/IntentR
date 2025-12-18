@@ -208,7 +208,7 @@ export const DataCollection: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Data Collection</h1>
-            <p className="text-body text-secondary">
+            <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
               Workspace: <strong>{currentWorkspace.name}</strong>
             </p>
           </div>

@@ -29,3 +29,4 @@ export { DesignApproval } from './DesignApproval';
 export { ImplementationApproval } from './ImplementationApproval';
 export { Testing } from './Testing';
 export { TestingApproval } from './TestingApproval';
+export { StoryMap } from './StoryMap';

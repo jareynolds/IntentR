@@ -173,7 +173,7 @@ export const WorkspaceOverview: React.FC = () => {
       {/* Page Title */}
       <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
         <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Dashboard</h1>
-        <p className="text-body text-secondary">Real-time overview of your project status and metrics.</p>
+        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>Real-time overview of your project status and metrics.</p>
       </div>
 
       {/* Main Dashboard Grid */}

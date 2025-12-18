@@ -84,6 +84,8 @@ services:
     volumes:
       - ./workspaces:/root/workspaces
       - ./AI_Principles:/root/AI_Principles
+      - ./CODE_RULES:/root/CODE_RULES
+      - ./CLAUDE.md:/root/CLAUDE.md
     networks:
       - ubecode-network
     healthcheck:

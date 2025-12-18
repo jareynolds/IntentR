@@ -176,7 +176,7 @@ export const Designs: React.FC = () => {
     return (
       <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
         <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Design Artifacts</h1>
-        <p className="text-body text-secondary" style={{ marginBottom: '24px' }}>
+        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
           Manage design files and assets for {currentWorkspace.name}
         </p>
         <Card>
@@ -205,7 +205,7 @@ export const Designs: React.FC = () => {
     return (
       <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
         <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Design Artifacts</h1>
-        <p className="text-body text-secondary" style={{ marginBottom: '24px' }}>
+        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
           Manage design files and assets for {currentWorkspace.name}
         </p>
         <Card>
@@ -236,7 +236,7 @@ export const Designs: React.FC = () => {
           </h4>
         </div>
         <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Design Artifacts</h1>
-        <p className="text-body text-secondary" style={{ marginBottom: '24px' }}>
+        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
           Manage design files and assets
         </p>
 

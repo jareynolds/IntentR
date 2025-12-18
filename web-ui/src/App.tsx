@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header, Sidebar, ProtectedRoute, ProtectedPage, UIFrameworkProvider, UIFrameworkIndicator } from './components';
-import { Login, GoogleCallback, Dashboard, WorkspaceOverview, Capabilities, Features, Vision, Designs, Integrations, AIChat, Code, Run, Workspaces, Storyboard, Ideation, Analyze, Settings, Admin, System, AIPrinciples, UIFramework, UIStyles, UIDesigner, DataCollection, Enablers, ConceptionApproval, DefinitionApproval, DesignApproval, ImplementationApproval, Testing, TestingApproval } from './pages';
+import { Login, GoogleCallback, Dashboard, WorkspaceOverview, Capabilities, Features, Vision, Designs, Integrations, AIChat, Code, Run, Workspaces, Storyboard, Ideation, Analyze, Settings, Admin, System, AIPrinciples, UIFramework, UIStyles, UIDesigner, DataCollection, Enablers, ConceptionApproval, DefinitionApproval, DesignApproval, ImplementationApproval, Testing, TestingApproval, StoryMap } from './pages';
 import { defaultUIFrameworks, applyUIStyleToDOM } from './pages/UIStyles';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -172,7 +172,7 @@ function AppContent() {
       isPhase: true,
       phaseIcon: '1',
       children: [
-        { path: '/vision', label: 'Vision & Themes' },
+        { path: '/vision', label: 'Product Vision' },
         { path: '/ideation', label: 'Ideation' },
         { path: '/storyboard', label: 'Storyboard' },
         { path: '/conception-approval', label: 'Phase Approval', hasRejection: phaseRejections.conception, isPhaseIncomplete: !phaseApprovals.conception },
@@ -186,6 +186,7 @@ function AppContent() {
       children: [
         { path: '/capabilities', label: 'Capabilities' },
         { path: '/enablers', label: 'Enablers' },
+        { path: '/story-map', label: 'Narrative' },
         { path: '/definition-approval', label: 'Phase Approval', hasRejection: phaseRejections.definition, isPhaseIncomplete: !phaseApprovals.definition },
       ]
     },
@@ -202,27 +203,27 @@ function AppContent() {
         { path: '/design-approval', label: 'Phase Approval', hasRejection: phaseRejections.design, isPhaseIncomplete: !phaseApprovals.design },
       ]
     },
+    // TESTING PHASE
+    {
+      label: 'TESTING',
+      isPhase: true,
+      phaseIcon: '4',
+      children: [
+        { path: '/testing', label: 'Test Scenarios' },
+        { path: '/testing-approval', label: 'Phase Approval', hasRejection: phaseRejections.testing, isPhaseIncomplete: !phaseApprovals.testing },
+      ]
+    },
     // IMPLEMENTATION PHASE
     {
       label: 'IMPLEMENTATION',
       isPhase: true,
-      phaseIcon: '4',
+      phaseIcon: '5',
       children: [
         { path: '/system', label: 'System' },
         { path: '/ai-principles', label: 'AI Principles' },
         { path: '/code', label: 'Code' },
         { path: '/run', label: 'Run' },
         { path: '/implementation-approval', label: 'Phase Approval', hasRejection: phaseRejections.implementation, isPhaseIncomplete: !phaseApprovals.implementation },
-      ]
-    },
-    // TESTING PHASE
-    {
-      label: 'TESTING',
-      isPhase: true,
-      phaseIcon: '5',
-      children: [
-        { path: '/testing', label: 'Test Scenarios' },
-        { path: '/testing-approval', label: 'Phase Approval', hasRejection: phaseRejections.testing, isPhaseIncomplete: !phaseApprovals.testing },
       ]
     },
     { path: '/ai-chat', label: 'AI Assistant', icon: '◉' },
@@ -236,7 +237,7 @@ function AppContent() {
 
   return (
     <div className="app">
-      <Header title="UbeCode" subtitle="Go Further" />
+      <Header title="UbeCode" subtitle="Develop at the speed of Innovation" />
       <div className="app-layout">
         <Sidebar items={sidebarItems} />
         <UIFrameworkIndicator />
@@ -256,6 +257,7 @@ function AppContent() {
             <Route path="/system" element={<ProtectedPage path="/system"><System /></ProtectedPage>} />
             <Route path="/capabilities" element={<ProtectedPage path="/capabilities"><Capabilities /></ProtectedPage>} />
             <Route path="/enablers" element={<ProtectedPage path="/enablers"><Enablers /></ProtectedPage>} />
+            <Route path="/story-map" element={<ProtectedPage path="/story-map"><StoryMap /></ProtectedPage>} />
             <Route path="/features" element={<ProtectedPage path="/features"><Features /></ProtectedPage>} />
             <Route path="/vision" element={<ProtectedPage path="/vision"><Vision /></ProtectedPage>} />
             <Route path="/workspaces" element={<ProtectedPage path="/workspaces"><Workspaces /></ProtectedPage>} />

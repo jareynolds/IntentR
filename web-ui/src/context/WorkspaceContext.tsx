@@ -598,6 +598,22 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
       }
     }
 
+    // Move workspace folder to archived_workspaces instead of permanently deleting
+    if (workspace?.projectFolder) {
+      try {
+        await fetch(`${INTEGRATION_URL}/folders/move-to-deleted`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sourcePath: workspace.projectFolder,
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to move workspace folder to archived_workspaces:', error);
+        // Continue with deletion from state even if folder move fails
+      }
+    }
+
     const updatedWorkspaces = state.workspaces.filter(w => w.id !== id);
     saveWorkspaces(updatedWorkspaces);
 
@@ -620,12 +636,28 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
     });
   };
 
-  const switchWorkspace = (id: string, isShared: boolean = false): void => {
+  const switchWorkspace = async (id: string, isShared: boolean = false): Promise<void> => {
     let workspace = isShared
       ? state.joinedWorkspaces.find(w => w.id === id)
       : state.workspaces.find(w => w.id === id);
 
     const userEmail = user?.email || 'anonymous';
+
+    // Initialize workspace files (copy CLAUDE.md and MAIN_SWDEV_PLAN.md from CODE_RULES if needed)
+    const workspaceToInit = workspace || [...state.workspaces, ...state.joinedWorkspaces].find(w => w.id === id);
+    if (workspaceToInit?.projectFolder) {
+      try {
+        await fetch(`${INTEGRATION_URL}/workspace/init-files`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workspacePath: workspaceToInit.projectFolder,
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to initialize workspace files:', error);
+      }
+    }
 
     // If switching to a joined workspace, reload the latest data from global_shared_workspaces
     if (isShared && workspace) {

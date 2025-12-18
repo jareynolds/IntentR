@@ -258,7 +258,7 @@ export const Workspaces: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-6, 24px)' }}>
         <div>
           <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Workspaces</h1>
-          <p className="text-body text-secondary">Manage your design workspaces and collaborate with others</p>
+          <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>Manage your design workspaces and collaborate with others</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <Button variant="outline" onClick={scanWorkspaceFolders} disabled={isScanning}>

@@ -1,122 +1,154 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { AIPresetIndicator } from '../components/AIPresetIndicator';
 import { UIFrameworkIndicator } from '../components/UIFrameworkIndicator';
-import { INTEGRATION_URL } from '../api/client';
+import { CLAUDE_PROXY_URL } from '../api/client';
 
-interface RunStep {
-  step: number;
-  description: string;
-  command?: string;
-  status: 'pending' | 'running' | 'completed' | 'error';
+interface AppStatus {
+  isRunning: boolean;
+  port?: number;
+  ports?: number[];
+  url?: string;
+  isThisWorkspace: boolean;
+  otherProcess?: string;
+  hasStartScript: boolean;
+  hasStopScript: boolean;
+  error?: string;
+  logs?: string;
 }
 
 export const Run: React.FC = () => {
   const { currentWorkspace } = useWorkspace();
-  const [isRunning, setIsRunning] = useState(false);
-  const [appUrl, setAppUrl] = useState<string | null>(null);
-  const [projectType, setProjectType] = useState<string | null>(null);
+  const [appStatus, setAppStatus] = useState<AppStatus | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const [isStopping, setIsStopping] = useState(false);
+  const [logs, setLogs] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [steps, setSteps] = useState<RunStep[]>([]);
 
-  const handleRunApp = async () => {
-    if (!currentWorkspace?.projectFolder) {
-      setError('No workspace configured');
-      return;
-    }
+  // Check app status on load and when workspace changes
+  const checkStatus = useCallback(async () => {
+    if (!currentWorkspace?.projectFolder) return;
 
-    setIsRunning(true);
-    setAppUrl(null);
+    setIsLoading(true);
     setError(null);
-    setProjectType(null);
-
-    // Initialize steps
-    setSteps([
-      { step: 1, description: 'Detecting project type...', status: 'running' },
-      { step: 2, description: 'Installing dependencies', status: 'pending' },
-      { step: 3, description: 'Starting application', status: 'pending' },
-    ]);
 
     try {
-      const response = await fetch(`${INTEGRATION_URL}/run-app`, {
+      const response = await fetch(`${CLAUDE_PROXY_URL}/check-app-status`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          workspacePath: currentWorkspace.projectFolder,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workspacePath: currentWorkspace.projectFolder }),
+      });
+
+      const data = await response.json();
+      setAppStatus(data);
+
+      if (data.error) {
+        setError(data.error);
+      }
+    } catch (err) {
+      setError(`Failed to check status: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentWorkspace?.projectFolder]);
+
+  useEffect(() => {
+    checkStatus();
+  }, [checkStatus]);
+
+  const handleStart = async () => {
+    if (!currentWorkspace?.projectFolder) return;
+
+    setIsStarting(true);
+    setError(null);
+    setLogs('Starting application...\n');
+
+    try {
+      const response = await fetch(`${CLAUDE_PROXY_URL}/run-app`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workspacePath: currentWorkspace.projectFolder }),
       });
 
       const data = await response.json();
 
+      if (data.logs) {
+        setLogs(prev => prev + data.logs);
+      }
+
       if (data.error) {
         setError(data.error);
-        setSteps(prev => prev.map(s =>
-          s.status === 'running' ? { ...s, status: 'error' } : s
-        ));
-        setIsRunning(false);
+        setLogs(prev => prev + `\nError: ${data.error}`);
       } else {
-        setAppUrl(data.url);
-        setProjectType(data.projectType);
-
-        // Update steps with success
-        setSteps([
-          {
-            step: 1,
-            description: `Detected project type: ${data.projectType}`,
-            status: 'completed'
-          },
-          {
-            step: 2,
-            description: 'Dependencies ready',
-            status: 'completed'
-          },
-          {
-            step: 3,
-            description: 'Application started',
-            command: data.command,
-            status: 'completed'
-          },
-        ]);
+        setLogs(prev => prev + `\nApplication started successfully!`);
+        if (data.url) {
+          setLogs(prev => prev + `\nURL: ${data.url}`);
+        }
+        // Refresh status
+        await checkStatus();
       }
     } catch (err) {
-      setError(`Failed to start application: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      setSteps(prev => prev.map(s =>
-        s.status === 'running' ? { ...s, status: 'error' } : s
-      ));
-      setIsRunning(false);
+      const errMsg = err instanceof Error ? err.message : 'Unknown error';
+      setError(`Failed to start: ${errMsg}`);
+      setLogs(prev => prev + `\nFailed to start: ${errMsg}`);
+    } finally {
+      setIsStarting(false);
     }
   };
 
-  const handleStopApp = async () => {
+  const handleStop = async () => {
     if (!currentWorkspace?.projectFolder) return;
 
+    setIsStopping(true);
+    setError(null);
+    setLogs('Stopping application...\n');
+
     try {
-      const response = await fetch(`${INTEGRATION_URL}/stop-app`, {
+      const response = await fetch(`${CLAUDE_PROXY_URL}/stop-app`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          workspacePath: currentWorkspace.projectFolder,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workspacePath: currentWorkspace.projectFolder }),
       });
 
       const data = await response.json();
 
+      if (data.logs) {
+        setLogs(prev => prev + data.logs);
+      }
+
       if (data.error) {
         setError(data.error);
+        setLogs(prev => prev + `\nError: ${data.error}`);
       } else {
-        setIsRunning(false);
-        setAppUrl(null);
-        setSteps([]);
+        setLogs(prev => prev + `\nApplication stopped successfully!`);
+        // Refresh status
+        await checkStatus();
       }
     } catch (err) {
-      setError(`Failed to stop application: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      const errMsg = err instanceof Error ? err.message : 'Unknown error';
+      setError(`Failed to stop: ${errMsg}`);
+      setLogs(prev => prev + `\nFailed to stop: ${errMsg}`);
+    } finally {
+      setIsStopping(false);
     }
+  };
+
+  const getStatusColor = () => {
+    if (!appStatus) return 'var(--color-secondaryLabel)';
+    if (appStatus.isRunning && appStatus.isThisWorkspace) return 'var(--color-systemGreen)';
+    if (appStatus.isRunning && !appStatus.isThisWorkspace) return 'var(--color-systemOrange)';
+    return 'var(--color-secondaryLabel)';
+  };
+
+  const getStatusText = () => {
+    if (isLoading) return 'Checking status...';
+    if (!appStatus) return 'Unknown';
+    if (appStatus.isRunning && appStatus.isThisWorkspace) return 'Running';
+    if (appStatus.isRunning && !appStatus.isThisWorkspace) return 'Port in use by another process';
+    return 'Not running';
   };
 
   return (
@@ -145,145 +177,188 @@ export const Run: React.FC = () => {
         </p>
       </div>
 
-      {/* Summary Section */}
-      <Card className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-sm text-gray-500">
-              {currentWorkspace?.projectFolder
-                ? `${currentWorkspace.projectFolder}/code`
-                : 'No project folder configured'}
-            </p>
+      {/* Status Detection Card */}
+      <Card style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h3 className="text-title2" style={{ margin: 0 }}>Application Status</h3>
+          <Button variant="secondary" onClick={checkStatus} disabled={isLoading}>
+            {isLoading ? 'Checking...' : 'Refresh'}
+          </Button>
+        </div>
+
+        {/* Status Display */}
+        <div style={{
+          padding: '16px',
+          backgroundColor: 'var(--color-tertiarySystemBackground)',
+          borderRadius: '8px',
+          marginBottom: '16px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+            <div style={{
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              backgroundColor: getStatusColor(),
+            }} />
+            <span className="text-headline" style={{ color: getStatusColor() }}>
+              {getStatusText()}
+            </span>
           </div>
+
+          {appStatus && (
+            <div style={{ display: 'grid', gap: '8px' }}>
+              <div className="text-footnote">
+                <strong>Scripts:</strong>{' '}
+                {appStatus.hasStartScript ? '✓ start.sh' : '✗ start.sh'}{' '}
+                {appStatus.hasStopScript ? '✓ stop.sh' : '✗ stop.sh'}
+              </div>
+
+              {appStatus.ports && appStatus.ports.length > 0 && (
+                <div className="text-footnote">
+                  <strong>Configured Port(s):</strong> {appStatus.ports.join(', ')}
+                </div>
+              )}
+
+              {appStatus.isRunning && !appStatus.isThisWorkspace && appStatus.otherProcess && (
+                <div className="text-footnote" style={{ color: 'var(--color-systemOrange)' }}>
+                  <strong>Warning:</strong> Port is being used by: {appStatus.otherProcess}
+                </div>
+              )}
+
+              {appStatus.url && appStatus.isRunning && appStatus.isThisWorkspace && (
+                <div className="text-footnote">
+                  <strong>URL:</strong>{' '}
+                  <a
+                    href={appStatus.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: 'var(--color-systemBlue)' }}
+                  >
+                    {appStatus.url}
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
-          <h4 className="font-medium mb-2">How it works</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            The Run command will automatically detect your project type (Node.js, Go, Python, etc.),
-            install any necessary dependencies, and start a development server. You'll then be able
-            to access your application in a browser.
-          </p>
-        </div>
-
-        {/* Run/Stop Button */}
-        <div className="flex gap-4">
-          {!isRunning ? (
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {(!appStatus?.isRunning || !appStatus?.isThisWorkspace) && (
             <Button
-              onClick={handleRunApp}
-              disabled={!currentWorkspace?.projectFolder}
-              className="bg-green-600 hover:bg-green-700 px-8"
+              variant="primary"
+              onClick={handleStart}
+              disabled={isStarting || !appStatus?.hasStartScript}
+              style={{ backgroundColor: 'var(--color-systemGreen)' }}
             >
-              ▶ Run Application
+              {isStarting ? 'Starting...' : '▶ Start Application'}
             </Button>
-          ) : (
+          )}
+
+          {appStatus?.isRunning && (
             <Button
-              onClick={handleStopApp}
-              className="bg-red-600 hover:bg-red-700 px-8"
+              variant="primary"
+              onClick={handleStop}
+              disabled={isStopping}
+              style={{ backgroundColor: 'var(--color-systemRed)' }}
             >
-              ■ Stop Application
+              {isStopping ? 'Stopping...' : '■ Stop Application'}
+            </Button>
+          )}
+
+          {appStatus?.url && appStatus?.isRunning && appStatus?.isThisWorkspace && (
+            <Button
+              variant="secondary"
+              onClick={() => window.open(appStatus.url, '_blank')}
+            >
+              Open in Browser
             </Button>
           )}
         </div>
+
+        {!appStatus?.hasStartScript && !isLoading && (
+          <p className="text-footnote" style={{ color: 'var(--color-systemOrange)', marginTop: '12px' }}>
+            No start.sh script found in the code folder. Create a start.sh script to enable running.
+          </p>
+        )}
       </Card>
 
-      {/* Steps Section */}
-      {steps.length > 0 && (
-        <Card className="mb-6">
-          <h3 className="font-semibold mb-4">Execution Steps</h3>
-          <div className="space-y-3">
-            {steps.map((step) => (
-              <div
-                key={step.step}
-                className={`p-3 rounded-lg border ${
-                  step.status === 'completed'
-                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                    : step.status === 'error'
-                    ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-                    : step.status === 'running'
-                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-                    : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className={`text-lg ${
-                    step.status === 'completed' ? 'text-green-500' :
-                    step.status === 'error' ? 'text-red-500' :
-                    step.status === 'running' ? 'text-blue-500' :
-                    'text-gray-400'
-                  }`}>
-                    {step.status === 'completed' ? '✓' :
-                     step.status === 'error' ? '✗' :
-                     step.status === 'running' ? '◌' :
-                     '○'}
-                  </span>
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{step.description}</p>
-                    {step.command && (
-                      <code className="text-xs text-gray-500 dark:text-gray-400 mt-1 block font-mono">
-                        $ {step.command}
-                      </code>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Error Section */}
+      {/* Error Display */}
       {error && (
-        <Card className="mb-6 border-red-500">
-          <h3 className="font-semibold mb-2 text-red-500">Error</h3>
-          <p className="text-red-500 text-sm">{error}</p>
+        <Card style={{ marginBottom: '24px', borderLeft: '4px solid var(--color-systemRed)' }}>
+          <h3 className="text-headline" style={{ color: 'var(--color-systemRed)', marginBottom: '8px' }}>
+            Error
+          </h3>
+          <p className="text-body" style={{ color: 'var(--color-systemRed)' }}>{error}</p>
         </Card>
       )}
 
-      {/* Access Section */}
-      {appUrl && (
-        <Card className="mb-6 border-green-500">
-          <h3 className="font-semibold mb-4 text-green-600 dark:text-green-400">
+      {/* Logs Display */}
+      {logs && (
+        <Card style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <h3 className="text-title2" style={{ margin: 0 }}>Logs</h3>
+            <Button variant="secondary" onClick={() => setLogs('')}>
+              Clear
+            </Button>
+          </div>
+          <pre style={{
+            backgroundColor: 'var(--color-systemBackground)',
+            padding: '16px',
+            borderRadius: '8px',
+            overflow: 'auto',
+            maxHeight: '400px',
+            fontSize: '12px',
+            fontFamily: 'monospace',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            margin: 0,
+            border: '1px solid var(--color-separator)',
+          }}>
+            {logs}
+          </pre>
+        </Card>
+      )}
+
+      {/* Application URL Card (when running) */}
+      {appStatus?.isRunning && appStatus?.isThisWorkspace && appStatus?.url && (
+        <Card style={{ borderLeft: '4px solid var(--color-systemGreen)' }}>
+          <h3 className="text-title2" style={{ color: 'var(--color-systemGreen)', marginBottom: '16px' }}>
             Application Running
           </h3>
 
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                Your {projectType} application is now running. Access it at:
-              </p>
-              <a
-                href={appUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-3 bg-green-100 dark:bg-green-900/30 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
-              >
-                <span className="text-2xl">🌐</span>
-                <span className="font-mono text-lg text-green-700 dark:text-green-300">
-                  {appUrl}
-                </span>
-              </a>
-            </div>
+          <div style={{ marginBottom: '16px' }}>
+            <p className="text-body" style={{ marginBottom: '12px' }}>
+              Your application is running and accessible at:
+            </p>
+            <a
+              href={appStatus.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 20px',
+                backgroundColor: 'var(--color-tertiarySystemBackground)',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                color: 'var(--color-systemBlue)',
+                fontSize: '18px',
+                fontFamily: 'monospace',
+              }}
+            >
+              {appStatus.url}
+            </a>
+          </div>
 
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <h4 className="font-medium text-sm mb-2">Quick Actions</h4>
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => window.open(appUrl, '_blank')}
-                  variant="outline"
-                  className="text-sm"
-                >
-                  Open in Browser
-                </Button>
-                <Button
-                  onClick={() => navigator.clipboard.writeText(appUrl)}
-                  variant="outline"
-                  className="text-sm"
-                >
-                  Copy URL
-                </Button>
-              </div>
-            </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button variant="secondary" onClick={() => window.open(appStatus.url, '_blank')}>
+              Open in Browser
+            </Button>
+            <Button variant="secondary" onClick={() => navigator.clipboard.writeText(appStatus.url || '')}>
+              Copy URL
+            </Button>
           </div>
         </Card>
       )}
@@ -291,7 +366,7 @@ export const Run: React.FC = () => {
       {/* No Workspace Warning */}
       {!currentWorkspace && (
         <Card>
-          <p className="text-gray-500">
+          <p style={{ color: 'var(--color-secondaryLabel)' }}>
             Please select a workspace to run the application.
           </p>
         </Card>

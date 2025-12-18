@@ -144,7 +144,7 @@ func (h *Handler) HandleAIChat(w http.ResponseWriter, r *http.Request) {
 	// Call Claude API
 	claudeReq := ClaudeRequest{
 		Model:     "claude-sonnet-4-20250514",
-		MaxTokens: 4096,
+		MaxTokens: 16384, // Increased for large responses like test scenario generation
 		Messages:  messages,
 	}
 
@@ -476,9 +476,217 @@ type RunAppResponse struct {
 	ProjectType string `json:"projectType,omitempty"`
 	Command     string `json:"command,omitempty"`
 	Error       string `json:"error,omitempty"`
+	Logs        string `json:"logs,omitempty"`
 }
 
-// HandleRunApp handles requests to run the generated application
+// AppStatusResponse represents the status check response
+type AppStatusResponse struct {
+	IsRunning       bool     `json:"isRunning"`
+	Port            int      `json:"port,omitempty"`
+	Ports           []int    `json:"ports,omitempty"`
+	URL             string   `json:"url,omitempty"`
+	IsThisWorkspace bool     `json:"isThisWorkspace"`
+	OtherProcess    string   `json:"otherProcess,omitempty"`
+	HasStartScript  bool     `json:"hasStartScript"`
+	HasStopScript   bool     `json:"hasStopScript"`
+	Error           string   `json:"error,omitempty"`
+	Logs            string   `json:"logs,omitempty"`
+}
+
+// HandleCheckAppStatus checks if the workspace app is running
+func (h *Handler) HandleCheckAppStatus(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req RunAppRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	workspacePath := req.WorkspacePath
+	if workspacePath == "" {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(AppStatusResponse{
+			Error: "No workspace path provided.",
+		})
+		return
+	}
+
+	// Translate host path to container path if running in Docker
+	// Handle both absolute paths (/Users/.../workspaces/X) and relative paths (workspaces/X)
+	if idx := strings.Index(workspacePath, "/workspaces/"); idx != -1 {
+		workspacePath = "/root" + workspacePath[idx:]
+	} else if strings.HasPrefix(workspacePath, "workspaces/") {
+		workspacePath = "/root/" + workspacePath
+	}
+
+	codePath := filepath.Join(workspacePath, "code")
+	startScript := filepath.Join(codePath, "start.sh")
+	stopScript := filepath.Join(codePath, "stop.sh")
+
+	response := AppStatusResponse{
+		HasStartScript: false,
+		HasStopScript:  false,
+		IsRunning:      false,
+	}
+
+	// Check if scripts exist
+	if _, err := os.Stat(startScript); err == nil {
+		response.HasStartScript = true
+	}
+	if _, err := os.Stat(stopScript); err == nil {
+		response.HasStopScript = true
+	}
+
+	// Parse start.sh to find port configuration
+	ports := parsePortsFromStartScript(startScript)
+	response.Ports = ports
+
+	if len(ports) > 0 {
+		response.Port = ports[0]
+		response.URL = fmt.Sprintf("http://localhost:%d", ports[0])
+	}
+
+	// Check if any of the ports are in use
+	for _, port := range ports {
+		if isPortInUse(port) {
+			response.IsRunning = true
+
+			// Check if it's this workspace's process
+			pidFile := filepath.Join(codePath, ".pid")
+			if pidData, err := os.ReadFile(pidFile); err == nil {
+				pid := strings.TrimSpace(string(pidData))
+				// Check if process with this PID is running
+				checkCmd := exec.Command("ps", "-p", pid)
+				if err := checkCmd.Run(); err == nil {
+					response.IsThisWorkspace = true
+				} else {
+					response.IsThisWorkspace = false
+					response.OtherProcess = getProcessOnPort(port)
+				}
+			} else {
+				response.IsThisWorkspace = false
+				response.OtherProcess = getProcessOnPort(port)
+			}
+			break
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// parsePortsFromStartScript extracts port numbers from a start.sh script
+func parsePortsFromStartScript(scriptPath string) []int {
+	var ports []int
+
+	content, err := os.ReadFile(scriptPath)
+	if err != nil {
+		return ports
+	}
+
+	lines := strings.Split(string(content), "\n")
+	for _, line := range lines {
+		// Look for port patterns like "port 3000", "--port 3000", ":3000", "PORT=3000"
+		line = strings.ToLower(line)
+
+		// Skip comments
+		if strings.HasPrefix(strings.TrimSpace(line), "#") {
+			continue
+		}
+
+		// Look for various port patterns
+		patterns := []string{"port ", "--port ", ":port=", "port="}
+		for _, pattern := range patterns {
+			if idx := strings.Index(line, pattern); idx != -1 {
+				portStr := line[idx+len(pattern):]
+				var port int
+				if _, err := fmt.Sscanf(portStr, "%d", &port); err == nil && port > 0 && port < 65536 {
+					// Avoid duplicates
+					found := false
+					for _, p := range ports {
+						if p == port {
+							found = true
+							break
+						}
+					}
+					if !found {
+						ports = append(ports, port)
+					}
+				}
+			}
+		}
+
+		// Also look for lsof -i :PORT pattern
+		if idx := strings.Index(line, "lsof -i :"); idx != -1 {
+			portStr := line[idx+9:]
+			var port int
+			if _, err := fmt.Sscanf(portStr, "%d", &port); err == nil && port > 0 && port < 65536 {
+				found := false
+				for _, p := range ports {
+					if p == port {
+						found = true
+						break
+					}
+				}
+				if !found {
+					ports = append(ports, port)
+				}
+			}
+		}
+	}
+
+	// If no ports found, try to detect from vite.config.js or package.json
+	if len(ports) == 0 {
+		codePath := filepath.Dir(scriptPath)
+		if viteConfig, err := os.ReadFile(filepath.Join(codePath, "vite.config.js")); err == nil {
+			if idx := strings.Index(string(viteConfig), "port:"); idx != -1 {
+				portStr := string(viteConfig)[idx+5:]
+				var port int
+				if _, err := fmt.Sscanf(strings.TrimSpace(portStr), "%d", &port); err == nil && port > 0 {
+					ports = append(ports, port)
+				}
+			}
+		}
+	}
+
+	return ports
+}
+
+// isPortInUse checks if a port is currently in use
+func isPortInUse(port int) bool {
+	cmd := exec.Command("lsof", "-i", fmt.Sprintf(":%d", port))
+	output, err := cmd.Output()
+	return err == nil && len(output) > 0
+}
+
+// getProcessOnPort returns info about what process is using a port
+func getProcessOnPort(port int) string {
+	cmd := exec.Command("lsof", "-i", fmt.Sprintf(":%d", port), "-t")
+	output, err := cmd.Output()
+	if err != nil {
+		return ""
+	}
+
+	pid := strings.TrimSpace(string(output))
+	if pid == "" {
+		return ""
+	}
+
+	// Get process name
+	psCmd := exec.Command("ps", "-p", pid, "-o", "comm=")
+	psOutput, err := psCmd.Output()
+	if err != nil {
+		return fmt.Sprintf("PID %s", pid)
+	}
+
+	return fmt.Sprintf("%s (PID %s)", strings.TrimSpace(string(psOutput)), pid)
+}
+
+// HandleRunApp handles requests to run the generated application using start.sh
 func (h *Handler) HandleRunApp(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -493,6 +701,7 @@ func (h *Handler) HandleRunApp(w http.ResponseWriter, r *http.Request) {
 
 	workspacePath := req.WorkspacePath
 	if workspacePath == "" {
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(RunAppResponse{
 			Error: "No workspace path provided.",
 		})
@@ -505,64 +714,105 @@ func (h *Handler) HandleRunApp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Translate host path to container path if running in Docker
-	// Host: .../ubecode/workspaces/project -> Container: /root/workspaces/project
+	// Handle both absolute paths (/Users/.../workspaces/X) and relative paths (workspaces/X)
 	if idx := strings.Index(workspacePath, "/workspaces/"); idx != -1 {
 		workspacePath = "/root" + workspacePath[idx:]
+	} else if strings.HasPrefix(workspacePath, "workspaces/") {
+		workspacePath = "/root/" + workspacePath
 	}
 
 	codePath := filepath.Join(workspacePath, "code")
+	startScript := filepath.Join(codePath, "start.sh")
 
-	// Log the path for debugging
-	fmt.Printf("[RunApp] Looking for code in: %s\n", codePath)
+	fmt.Printf("[RunApp] Looking for start.sh in: %s\n", codePath)
 
-	// Detect project type and determine run command
-	projectType, cmd, port := detectProjectType(codePath)
-
-	if projectType == "" {
-		json.NewEncoder(w).Encode(RunAppResponse{
-			Error: "Could not detect project type. No package.json, go.mod, or requirements.txt found.",
-		})
-		return
-	}
-
-	// Stop any existing process for this workspace
-	processMutex.Lock()
-	if existingCmd, exists := runningProcesses[workspacePath]; exists {
-		if existingCmd.Process != nil {
-			existingCmd.Process.Kill()
+	// Check if start.sh exists
+	if _, err := os.Stat(startScript); err != nil {
+		// Fall back to legacy behavior if no start.sh
+		projectType, cmd, port := detectProjectType(codePath)
+		if projectType == "" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(RunAppResponse{
+				Error: "No start.sh script found and could not detect project type.",
+			})
+			return
 		}
-		delete(runningProcesses, workspacePath)
-	}
-	processMutex.Unlock()
 
-	// Start the application
-	cmd.Dir = codePath
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+		// Legacy: run detected command
+		processMutex.Lock()
+		if existingCmd, exists := runningProcesses[workspacePath]; exists {
+			if existingCmd.Process != nil {
+				existingCmd.Process.Kill()
+			}
+			delete(runningProcesses, workspacePath)
+		}
+		processMutex.Unlock()
 
-	if err := cmd.Start(); err != nil {
+		cmd.Dir = codePath
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		if err := cmd.Start(); err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(RunAppResponse{
+				Error: fmt.Sprintf("Failed to start application: %v", err),
+			})
+			return
+		}
+
+		processMutex.Lock()
+		runningProcesses[workspacePath] = cmd
+		processMutex.Unlock()
+
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(RunAppResponse{
-			Error: fmt.Sprintf("Failed to start application: %v", err),
+			URL:         fmt.Sprintf("http://localhost:%d", port),
+			ProjectType: projectType,
+			Command:     strings.Join(cmd.Args, " "),
 		})
 		return
 	}
 
-	// Store the process
-	processMutex.Lock()
-	runningProcesses[workspacePath] = cmd
-	processMutex.Unlock()
+	// Execute start.sh script
+	cmd := exec.Command("sh", startScript)
+	cmd.Dir = codePath
 
-	url := fmt.Sprintf("http://localhost:%d", port)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	logs := stdout.String()
+	if stderr.Len() > 0 {
+		logs += "\n" + stderr.String()
+	}
+
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(RunAppResponse{
+			Error: fmt.Sprintf("start.sh failed: %v", err),
+			Logs:  logs,
+		})
+		return
+	}
+
+	// Parse ports from start.sh to get the URL
+	ports := parsePortsFromStartScript(startScript)
+	url := ""
+	if len(ports) > 0 {
+		url = fmt.Sprintf("http://localhost:%d", ports[0])
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(RunAppResponse{
 		URL:         url,
-		ProjectType: projectType,
-		Command:     strings.Join(cmd.Args, " "),
+		ProjectType: "Custom (start.sh)",
+		Command:     "./start.sh",
+		Logs:        logs,
 	})
 }
 
-// HandleStopApp handles requests to stop a running application
+// HandleStopApp handles requests to stop a running application using stop.sh
 func (h *Handler) HandleStopApp(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -577,30 +827,86 @@ func (h *Handler) HandleStopApp(w http.ResponseWriter, r *http.Request) {
 
 	workspacePath := req.WorkspacePath
 	if workspacePath == "" {
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(RunAppResponse{
 			Error: "No workspace path provided.",
 		})
 		return
 	}
 
+	// Translate host path to container path if running in Docker
+	// Handle both absolute paths (/Users/.../workspaces/X) and relative paths (workspaces/X)
+	if idx := strings.Index(workspacePath, "/workspaces/"); idx != -1 {
+		workspacePath = "/root" + workspacePath[idx:]
+	} else if strings.HasPrefix(workspacePath, "workspaces/") {
+		workspacePath = "/root/" + workspacePath
+	}
+
+	codePath := filepath.Join(workspacePath, "code")
+	stopScript := filepath.Join(codePath, "stop.sh")
+
+	// Check if stop.sh exists
+	if _, err := os.Stat(stopScript); err != nil {
+		// Fall back to legacy behavior if no stop.sh
+		processMutex.Lock()
+		cmd, exists := runningProcesses[workspacePath]
+		if exists && cmd.Process != nil {
+			cmd.Process.Kill()
+			delete(runningProcesses, workspacePath)
+		}
+		processMutex.Unlock()
+
+		if !exists {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(RunAppResponse{
+				Error: "No stop.sh script found and no running process tracked.",
+			})
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(RunAppResponse{
+			Logs: "Application stopped (legacy mode - no stop.sh)",
+		})
+		return
+	}
+
+	// Execute stop.sh script
+	cmd := exec.Command("sh", stopScript)
+	cmd.Dir = codePath
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	logs := stdout.String()
+	if stderr.Len() > 0 {
+		logs += "\n" + stderr.String()
+	}
+
+	// Also clean up any tracked processes
 	processMutex.Lock()
-	cmd, exists := runningProcesses[workspacePath]
-	if exists && cmd.Process != nil {
-		cmd.Process.Kill()
+	if existingCmd, exists := runningProcesses[workspacePath]; exists {
+		if existingCmd.Process != nil {
+			existingCmd.Process.Kill()
+		}
 		delete(runningProcesses, workspacePath)
 	}
 	processMutex.Unlock()
 
-	if !exists {
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(RunAppResponse{
-			Error: "No running application found for this workspace.",
+			Error: fmt.Sprintf("stop.sh failed: %v", err),
+			Logs:  logs,
 		})
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
-		"status": "stopped",
+	json.NewEncoder(w).Encode(RunAppResponse{
+		Logs: logs,
 	})
 }
 
@@ -1011,20 +1317,32 @@ func writeCodeFile(codePath, filePath, content string, filesWritten *[]string) {
 	}
 }
 
-// copyAIPolicyPreset copies the AI Policy Preset file to the workspace implementation folder
+// copyAIPolicyPreset copies the AI Policy Preset file to CODE_RULES/ACTIVE_AI_PRINCIPLES.md in the workspace
 func copyAIPolicyPreset(presetNum int, workspacePath string) error {
-	// Source file is in the mounted AI_Principles volume
-	sourceFile := filepath.Join("/root/AI_Principles", fmt.Sprintf("AI-Policy-Preset%d.md", presetNum))
-
-	// Destination is the implementation folder within the workspace
-	implementationPath := filepath.Join(workspacePath, "implementation")
-
-	// Ensure implementation folder exists
-	if err := os.MkdirAll(implementationPath, 0755); err != nil {
-		return fmt.Errorf("failed to create implementation folder %s: %v", implementationPath, err)
+	// Get current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get working directory: %v", err)
 	}
 
-	destFile := filepath.Join(implementationPath, fmt.Sprintf("AI-Policy-Preset%d.md", presetNum))
+	// Source file is in the AI_Principles folder
+	sourceFile := filepath.Join(cwd, "AI_Principles", fmt.Sprintf("AI-Policy-Preset%d.md", presetNum))
+
+	// Fallback to Docker mount path if local file doesn't exist
+	if _, err := os.Stat(sourceFile); os.IsNotExist(err) {
+		sourceFile = filepath.Join("/root/AI_Principles", fmt.Sprintf("AI-Policy-Preset%d.md", presetNum))
+	}
+
+	// Destination is CODE_RULES/ACTIVE_AI_PRINCIPLES.md in the workspace
+	fullWorkspacePath := filepath.Join(cwd, workspacePath)
+	codeRulesPath := filepath.Join(fullWorkspacePath, "CODE_RULES")
+
+	// Ensure workspace CODE_RULES folder exists
+	if err := os.MkdirAll(codeRulesPath, 0755); err != nil {
+		return fmt.Errorf("failed to create workspace CODE_RULES folder %s: %v", codeRulesPath, err)
+	}
+
+	destFile := filepath.Join(codeRulesPath, "ACTIVE_AI_PRINCIPLES.md")
 
 	// Read source file
 	content, err := os.ReadFile(sourceFile)
@@ -1032,7 +1350,7 @@ func copyAIPolicyPreset(presetNum int, workspacePath string) error {
 		return fmt.Errorf("failed to read source file %s: %v", sourceFile, err)
 	}
 
-	// Write to destination
+	// Write to destination (overwrite if exists)
 	if err := os.WriteFile(destFile, content, 0644); err != nil {
 		return fmt.Errorf("failed to write destination file %s: %v", destFile, err)
 	}

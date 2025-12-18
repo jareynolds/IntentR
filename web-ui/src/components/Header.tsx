@@ -20,7 +20,7 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
       borderBottom: '1px solid var(--color-secondary, #3b82f6)',
       backgroundColor: 'var(--color-primary, #1e3a8a)'
     }}>
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px 24px' }}>
+      <div style={{ padding: '16px 30px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img
@@ -31,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
             <div>
               <h1 style={{ color: '#FFFFFF', fontSize: '32px', fontWeight: 600, margin: 0 }}>{title}</h1>
               {subtitle && (
-                <p style={{ fontSize: '12px', color: 'var(--color-accent, #f97316)', margin: 0 }}>{subtitle}</p>
+                <p style={{ fontSize: '12px', color: '#FFFFFF', margin: 0 }}>{subtitle}</p>
               )}
             </div>
           </div>
@@ -89,17 +89,17 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
                 justifyContent: 'center',
                 fontSize: '14px',
                 fontWeight: 500,
-                border: '1px solid var(--color-secondary, #3b82f6)',
-                backgroundColor: 'var(--button-primary-bg, var(--color-secondary, #3b82f6))',
-                color: 'var(--button-primary-color, #FFFFFF)',
+                border: 'none',
+                backgroundColor: '#FFFFFF',
+                color: '#374151',
                 height: '32px',
                 borderRadius: 'var(--button-border-radius, 6px)',
                 padding: '0 12px',
                 cursor: 'pointer',
                 transition: 'background-color 0.2s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--button-primary-hover, var(--color-accent, #f97316))'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--button-primary-bg, var(--color-secondary, #3b82f6))'}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E5E7EB'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
             >
               Logout
             </button>

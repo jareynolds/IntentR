@@ -35,7 +35,7 @@ export const Code: React.FC = () => {
   const [additionalPrompt, setAdditionalPrompt] = useState<string>('');
   const [cliCommand, setCliCommand] = useState<string>(() => {
     const saved = localStorage.getItem('code_generation_cli_command');
-    return saved || `Claude, please follow the AI-Policy-Preset and develop the application from all the specification markdown files that are specified in the specifications folder found in the subfolder ./specifications and place the developed files into a new ./code folder (if it doesn't exist, then create it) and also apply the currently active UI Framework that is active for this workspace.`;
+    return saved || `Claude, please follow the ./CLAUDE.md file (if not already) and ./CODE_RULES/MAIN_SWDEV_PLAN.md and use the ./CODE_RULES/ACTIVE_AI_PRINCIPLES.md and develop the application from all the specification markdown files that are specified in the following order: 1.) first read through all the files in the ./conception folder. 2.) Next read through the markdowns in the ./definition folder. 3.) next read the markdown files in the ./design folder. 4.) Next read the markdowns in the ./implementation folder and place the developed files into a new ./code folder (if it doesn't exist, then create it). Please apply the currently active UI Framework that is active for this workspace found in the ./design/UI_Framework.md file and ./design/UI_Style.md file.`;
   });
   const [logs, setLogs] = useState<LogEntry[]>(() => {
     // Load logs from localStorage on initial render

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Alert, Button } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { INTEGRATION_URL } from '../api/client';
 
 interface ImplementationItem {
   id: string;
@@ -101,14 +102,52 @@ export const ImplementationApproval: React.FC = () => {
     }
   }, [currentWorkspace?.id]);
 
-  const loadImplementationItems = () => {
+  const loadImplementationItems = async () => {
     if (!currentWorkspace?.id) return;
 
     setLoading(true);
     try {
-      // Load saved approvals
-      const stored = localStorage.getItem(`implementation-item-approvals-${currentWorkspace.id}`);
-      const approvals: ItemApprovalStatus = stored ? JSON.parse(stored) : {};
+      let approvals: ItemApprovalStatus = {};
+
+      // Try to load from file first (for shared/imported workspaces)
+      if (currentWorkspace?.projectFolder) {
+        try {
+          const response = await fetch(`${INTEGRATION_URL}/read-file`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filePath: `${currentWorkspace.projectFolder}/approvals/implementation-approvals.json`
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.content) {
+              const fileApprovals = JSON.parse(data.content);
+              approvals = fileApprovals.itemApprovals || {};
+              localStorage.setItem(`implementation-item-approvals-${currentWorkspace.id}`, JSON.stringify(approvals));
+
+              if (fileApprovals.phaseApproved) {
+                setImplementationApproved(true);
+                setApprovalDate(fileApprovals.phaseApprovedDate || null);
+                localStorage.setItem(`implementation-approved-${currentWorkspace.id}`, JSON.stringify({
+                  approved: true,
+                  date: fileApprovals.phaseApprovedDate
+                }));
+              }
+            }
+          }
+        } catch (err) {
+          console.log('No approval file found, checking localStorage');
+        }
+      }
+
+      // Fallback to localStorage if no file data
+      if (Object.keys(approvals).length === 0) {
+        const stored = localStorage.getItem(`implementation-item-approvals-${currentWorkspace.id}`);
+        approvals = stored ? JSON.parse(stored) : {};
+      }
+
       setItemApprovals(approvals);
 
       // Apply saved status to default items
@@ -142,10 +181,65 @@ export const ImplementationApproval: React.FC = () => {
     }
   };
 
-  const saveItemApprovals = (approvals: ItemApprovalStatus) => {
+  const saveItemApprovals = async (approvals: ItemApprovalStatus) => {
     if (!currentWorkspace?.id) return;
     localStorage.setItem(`implementation-item-approvals-${currentWorkspace.id}`, JSON.stringify(approvals));
     setItemApprovals(approvals);
+
+    // Save to file for sharing/import
+    if (currentWorkspace?.projectFolder) {
+      try {
+        const fileContent = JSON.stringify({
+          phase: 'implementation',
+          itemApprovals: approvals,
+          phaseApproved: implementationApproved,
+          phaseApprovedDate: approvalDate,
+          lastUpdated: new Date().toISOString(),
+        }, null, 2);
+
+        await fetch(`${INTEGRATION_URL}/save-specifications`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workspacePath: currentWorkspace.projectFolder,
+            specifications: [{
+              filename: 'approvals/implementation-approvals.json',
+              content: fileContent,
+            }],
+          }),
+        });
+      } catch (err) {
+        console.error('Failed to save approvals to file:', err);
+      }
+    }
+  };
+
+  const savePhaseApprovalToFile = async (approved: boolean, date: string | null) => {
+    if (!currentWorkspace?.projectFolder) return;
+
+    try {
+      const fileContent = JSON.stringify({
+        phase: 'implementation',
+        itemApprovals: itemApprovals,
+        phaseApproved: approved,
+        phaseApprovedDate: date,
+        lastUpdated: new Date().toISOString(),
+      }, null, 2);
+
+      await fetch(`${INTEGRATION_URL}/save-specifications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+          specifications: [{
+            filename: 'approvals/implementation-approvals.json',
+            content: fileContent,
+          }],
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to save phase approval to file:', err);
+    }
   };
 
   const handleChecklistChange = (item: ImplementationItem, checklistId: string, checked: boolean) => {
@@ -226,7 +320,7 @@ export const ImplementationApproval: React.FC = () => {
     );
   };
 
-  const handleApproveImplementation = () => {
+  const handleApproveImplementation = async () => {
     if (!currentWorkspace?.id) return;
 
     const approvalData = {
@@ -236,14 +330,18 @@ export const ImplementationApproval: React.FC = () => {
     localStorage.setItem(`implementation-approved-${currentWorkspace.id}`, JSON.stringify(approvalData));
     setImplementationApproved(true);
     setApprovalDate(approvalData.date);
+
+    await savePhaseApprovalToFile(true, approvalData.date);
   };
 
-  const handleRevokeApproval = () => {
+  const handleRevokeApproval = async () => {
     if (!currentWorkspace?.id) return;
 
     localStorage.removeItem(`implementation-approved-${currentWorkspace.id}`);
     setImplementationApproved(false);
     setApprovalDate(null);
+
+    await savePhaseApprovalToFile(false, null);
   };
 
   const getStatusBadge = (status: string) => {
@@ -420,7 +518,7 @@ export const ImplementationApproval: React.FC = () => {
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
       <div style={{ marginBottom: '24px' }}>
         <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Implementation Phase Approval</h1>
-        <p className="text-body text-secondary">
+        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
           Review and approve all implementation phase items to complete the project.
         </p>
       </div>

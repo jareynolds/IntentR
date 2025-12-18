@@ -66,11 +66,13 @@ export const Testing: React.FC = () => {
   const [enablers, setEnablers] = useState<EnablerWithTests[]>([]);
   const [selectedEnabler, setSelectedEnabler] = useState<EnablerWithTests | null>(null);
   const [testSuite, setTestSuite] = useState<TestSuite | null>(null);
-  const [scenarios, setScenarios] = useState<TestScenario[]>([]);
+  const [allScenarios, setAllScenarios] = useState<TestScenario[]>([]); // All scenarios from files
+  const [scenarios, setScenarios] = useState<TestScenario[]>([]); // Filtered scenarios for selected enabler
   const [selectedScenario, setSelectedScenario] = useState<TestScenario | null>(null);
   const [coverageMetrics, setCoverageMetrics] = useState<CoverageMetrics | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -109,8 +111,12 @@ Scenario: [Scenario Name]
 
   // Load enablers with test information
   const loadEnablers = useCallback(async () => {
-    if (!currentWorkspace?.projectFolder) return;
+    if (!currentWorkspace?.projectFolder) {
+      console.log('loadEnablers: No project folder');
+      return;
+    }
 
+    console.log('loadEnablers: Loading from', currentWorkspace.projectFolder);
     setIsLoading(true);
     setError(null);
 
@@ -122,25 +128,33 @@ Scenario: [Scenario Name]
       });
 
       if (!response.ok) {
-        throw new Error('Failed to load enablers');
+        const errorText = await response.text();
+        console.error('loadEnablers: Failed', errorText);
+        throw new Error(`Failed to load enablers: ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('loadEnablers: Got response', data);
 
       // Transform to EnablerWithTests
-      const enablersWithTests: EnablerWithTests[] = (data.enablers || []).map((e: Record<string, unknown>) => ({
-        id: e.enablerId as string || '',
-        name: e.name as string || 'Unnamed Enabler',
-        filename: e.filename as string || '',
-        path: e.path as string || '',
-        capabilityId: e.capabilityId as string || '',
-        requirementCount: 0, // Would need to parse from file
-        testSuiteId: undefined,
-        scenarioCount: 0,
-        passedCount: 0,
-        failedCount: 0,
-        coverage: 0,
-      }));
+      // Use filename (without .md) as unique ID since enablerId may not be unique
+      const enablersWithTests: EnablerWithTests[] = (data.enablers || []).map((e: Record<string, unknown>) => {
+        const filename = e.filename as string || '';
+        const uniqueId = filename.replace(/\.md$/i, '') || (e.enablerId as string) || '';
+        return {
+          id: uniqueId,
+          name: e.name as string || 'Unnamed Enabler',
+          filename: filename,
+          path: e.path as string || '',
+          capabilityId: e.capabilityId as string || '',
+          requirementCount: 0, // Would need to parse from file
+          testSuiteId: undefined,
+          scenarioCount: 0,
+          passedCount: 0,
+          failedCount: 0,
+          coverage: 0,
+        };
+      });
 
       setEnablers(enablersWithTests);
 
@@ -180,24 +194,378 @@ Scenario: [Scenario Name]
   const handleEnablerSelect = (enabler: EnablerWithTests) => {
     setSelectedEnabler(enabler);
 
+    // Filter scenarios for this enabler from all loaded scenarios
+    const enablerScenarios = allScenarios.filter(s => s.enablerId === enabler.id);
+    setScenarios(enablerScenarios);
+
     // Load or create test suite for this enabler
     const suiteId = `TST-${enabler.id.replace('ENB-', '')}`;
     setTestSuite({
       id: suiteId,
       name: `${enabler.name} Tests`,
       enablerId: enabler.id,
-      scenarios: [],
-      status: 'not_started',
+      scenarios: enablerScenarios,
+      status: enablerScenarios.length > 0 ? 'in_progress' : 'not_started',
       coverage: enabler.coverage,
     });
 
-    // Load scenarios (would come from backend in production)
-    setScenarios([]);
     setSelectedScenario(null);
   };
 
+  // Save scenario to markdown file - throws on error
+  const saveScenarioToFile = async (scenario: TestScenario): Promise<void> => {
+    if (!currentWorkspace?.projectFolder) {
+      throw new Error('No workspace path available');
+    }
+
+    const response = await fetch(`${INTEGRATION_URL}/save-test-scenario`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        workspacePath: currentWorkspace.projectFolder,
+        scenarioId: scenario.id,
+        scenarioName: scenario.name,
+        feature: scenario.feature,
+        enablerId: scenario.enablerId,
+        enablerName: scenario.enablerName,
+        requirementIds: scenario.requirementIds,
+        priority: scenario.priority,
+        status: scenario.status,
+        automation: scenario.automation,
+        tags: scenario.tags,
+        gherkin: scenario.gherkin,
+        lastExecuted: scenario.lastExecuted || '',
+        executionTime: scenario.executionTime || 0,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to save scenario "${scenario.name}": ${errorText}`);
+    }
+  };
+
+  // Delete scenario file
+  const deleteScenarioFile = async (scenarioId: string) => {
+    if (!currentWorkspace?.projectFolder) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${INTEGRATION_URL}/delete-test-scenario`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+          scenarioId: scenarioId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to delete scenario file:', errorText);
+      }
+    } catch (err) {
+      console.error('Error deleting scenario file:', err);
+    }
+  };
+
+  // Load scenarios from files
+  const loadScenariosFromFiles = useCallback(async () => {
+    if (!currentWorkspace?.projectFolder) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${INTEGRATION_URL}/list-test-scenarios`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.scenarios && Array.isArray(data.scenarios)) {
+          // Convert loaded scenarios to the correct format
+          const loadedScenarios: TestScenario[] = data.scenarios.map((s: Record<string, unknown>) => ({
+            id: s.id as string || '',
+            name: s.name as string || '',
+            feature: s.feature as string || '',
+            enablerId: s.enablerId as string || '',
+            enablerName: s.enablerName as string || '',
+            requirementIds: Array.isArray(s.requirementIds) ? s.requirementIds : [],
+            priority: (s.priority as TestScenario['priority']) || 'medium',
+            status: (s.status as TestScenario['status']) || 'draft',
+            automation: (s.automation as TestScenario['automation']) || 'pending',
+            tags: Array.isArray(s.tags) ? s.tags : [],
+            gherkin: s.gherkin as string || '',
+            lastExecuted: s.lastExecuted as string || undefined,
+            executionTime: s.executionTime as number || undefined,
+          }));
+
+          // Store all scenarios
+          setAllScenarios(loadedScenarios);
+
+          // Update enabler counts with loaded scenario data
+          setEnablers(prev => prev.map(enabler => {
+            const enablerScenarios = loadedScenarios.filter(s => s.enablerId === enabler.id);
+            const passedCount = enablerScenarios.filter(s => s.status === 'passed').length;
+            const failedCount = enablerScenarios.filter(s => s.status === 'failed').length;
+            return {
+              ...enabler,
+              scenarioCount: enablerScenarios.length,
+              passedCount,
+              failedCount,
+              coverage: enabler.requirementCount > 0
+                ? Math.round((enablerScenarios.length / enabler.requirementCount) * 100)
+                : 0,
+            };
+          }));
+
+          // If an enabler is already selected, update its scenarios
+          if (selectedEnabler) {
+            const enablerScenarios = loadedScenarios.filter(s => s.enablerId === selectedEnabler.id);
+            setScenarios(enablerScenarios);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error loading scenarios from files:', err);
+    }
+  }, [currentWorkspace?.projectFolder, selectedEnabler]);
+
+  // Load scenarios when workspace changes
+  useEffect(() => {
+    loadScenariosFromFiles();
+  }, [loadScenariosFromFiles]);
+
+  // Analyze enablers and generate test scenarios using AI
+  const handleAnalyzeScenarios = async () => {
+    console.log('handleAnalyzeScenarios called', {
+      projectFolder: currentWorkspace?.projectFolder,
+      enablersCount: enablers.length
+    });
+
+    if (!currentWorkspace?.projectFolder) {
+      setError('No workspace selected. Please select a workspace first.');
+      return;
+    }
+
+    if (enablers.length === 0) {
+      setError('No enablers found in workspace. Please add enabler files to the definition folder first.');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setError(null);
+
+    try {
+      // Get API key from localStorage
+      const apiKey = localStorage.getItem('anthropic_api_key') || '';
+      if (!apiKey) {
+        setError('Anthropic API key not configured. Please set it in settings.');
+        setIsAnalyzing(false);
+        return;
+      }
+
+      // Read enabler files to get their content
+      const enablerContents: { enabler: EnablerWithTests; content: string }[] = [];
+      const readErrors: string[] = [];
+
+      for (const enabler of enablers) {
+        try {
+          if (!enabler.path) {
+            readErrors.push(`Enabler "${enabler.name}" has no file path`);
+            continue;
+          }
+
+          const response = await fetch(`${INTEGRATION_URL}/read-file`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              workspacePath: currentWorkspace.projectFolder,
+              filePath: enabler.path,
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.content) {
+              enablerContents.push({ enabler, content: data.content });
+            } else {
+              readErrors.push(`Enabler "${enabler.name}" file is empty`);
+            }
+          } else {
+            readErrors.push(`Failed to read enabler "${enabler.name}": ${response.statusText}`);
+          }
+        } catch (err) {
+          readErrors.push(`Error reading enabler "${enabler.name}": ${err instanceof Error ? err.message : 'Unknown error'}`);
+        }
+      }
+
+      if (enablerContents.length === 0) {
+        const errorMsg = readErrors.length > 0
+          ? `Could not read any enabler files:\n${readErrors.join('\n')}`
+          : 'Could not read any enabler files. Make sure enabler files exist in the definition folder.';
+        throw new Error(errorMsg);
+      }
+
+      // Process enablers in batches to avoid token limits
+      const BATCH_SIZE = 5;
+      const allParsedScenarios: TestScenario[] = [];
+      const totalBatches = Math.ceil(enablerContents.length / BATCH_SIZE);
+
+      for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+        const batchStart = batchIndex * BATCH_SIZE;
+        const batchEnd = Math.min(batchStart + BATCH_SIZE, enablerContents.length);
+        const batch = enablerContents.slice(batchStart, batchEnd);
+
+        setSuccessMessage(`Processing batch ${batchIndex + 1} of ${totalBatches} (${batch.length} enablers)...`);
+
+        // Build prompt for AI
+        const prompt = `You are a QA engineer expert in BDD/Gherkin test scenarios. Analyze the following enablers and generate comprehensive test scenarios for each one.
+
+For each enabler, generate 2-3 test scenarios in Gherkin format. Each scenario should:
+1. Have a unique scenario ID in format TS-XXXXXX (use random 6 digits)
+2. Link to relevant requirement IDs if mentioned in the enabler (FR-XXXXXX or NFR-XXXXXX)
+3. Follow proper Gherkin syntax with Given/When/Then steps
+4. Cover both happy path and edge cases
+
+IMPORTANT: Return your response in the following JSON format ONLY (no markdown, no explanation):
+{
+  "scenarios": [
+    {
+      "id": "TS-123456",
+      "name": "Scenario name here",
+      "feature": "Feature name",
+      "enablerId": "ENB-XXXXXX",
+      "enablerName": "Enabler name",
+      "requirementIds": ["FR-123456"],
+      "priority": "high",
+      "gherkin": "@TS-123456 @FR-123456\\nScenario: Scenario name\\n  Given precondition\\n  When action\\n  Then expected result"
+    }
+  ]
+}
+
+Here are the enablers to analyze:
+
+${batch.map(({ enabler, content }) => `
+=== ENABLER: ${enabler.name} (${enabler.id}) ===
+${content}
+`).join('\n')}
+
+Generate test scenarios for ALL the enablers above. Remember to return ONLY valid JSON.`;
+
+        // Call AI endpoint
+        const aiResponse = await fetch(`${INTEGRATION_URL}/ai-chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: prompt,
+            workspacePath: currentWorkspace.projectFolder,
+            apiKey: apiKey,
+          }),
+        });
+
+        if (!aiResponse.ok) {
+          const errorText = await aiResponse.text();
+          throw new Error(`AI request failed for batch ${batchIndex + 1}: ${errorText}`);
+        }
+
+        const aiData = await aiResponse.json();
+
+        // Check for error in response body (backend returns errors this way)
+        if (aiData.error) {
+          throw new Error(aiData.error);
+        }
+
+        const aiMessage = aiData.response || aiData.message || '';
+
+        if (!aiMessage) {
+          throw new Error('AI returned empty response. Please check your API key in Settings.');
+        }
+
+        // Parse AI response - try to extract JSON from the response
+        try {
+          // Try to find JSON in the response
+          const jsonMatch = aiMessage.match(/\{[\s\S]*"scenarios"[\s\S]*\}/);
+          if (jsonMatch) {
+            let jsonStr = jsonMatch[0];
+
+            // Try to fix truncated JSON by extracting complete scenario objects
+            try {
+              JSON.parse(jsonStr);
+            } catch {
+              // JSON is truncated, try to salvage complete scenarios
+              console.log('Attempting to salvage truncated JSON response...');
+              const scenarioMatches = jsonStr.match(/\{[^{}]*"id"\s*:\s*"TS-[^"]+[^{}]*"gherkin"\s*:\s*"[^"]*"\s*\}/g);
+              if (scenarioMatches && scenarioMatches.length > 0) {
+                jsonStr = `{"scenarios": [${scenarioMatches.join(',')}]}`;
+              }
+            }
+
+            const parsed = JSON.parse(jsonStr);
+            if (parsed.scenarios && Array.isArray(parsed.scenarios)) {
+              const batchScenarios = parsed.scenarios.map((s: Record<string, unknown>) => ({
+                id: (s.id as string) || `TS-${generateId()}`,
+                name: (s.name as string) || 'Unnamed Scenario',
+                feature: (s.feature as string) || 'Generated Feature',
+                enablerId: (s.enablerId as string) || '',
+                enablerName: (s.enablerName as string) || '',
+                requirementIds: Array.isArray(s.requirementIds) ? s.requirementIds as string[] : [],
+                priority: ((s.priority as string) || 'medium') as TestScenario['priority'],
+                status: 'draft' as TestScenario['status'],
+                automation: 'pending' as TestScenario['automation'],
+                tags: ['ai-generated'],
+                gherkin: (s.gherkin as string) || '',
+              }));
+              allParsedScenarios.push(...batchScenarios);
+            }
+          }
+        } catch (parseErr) {
+          console.error(`Failed to parse AI response for batch ${batchIndex + 1}:`, parseErr);
+          console.log('AI Response was:', aiMessage);
+          // Continue to next batch instead of failing completely
+          console.warn(`Skipping batch ${batchIndex + 1} due to parse error`);
+        }
+      }
+
+      const parsedScenarios = allParsedScenarios;
+
+      if (parsedScenarios.length === 0) {
+        throw new Error('AI did not generate any valid scenarios. Please try again.');
+      }
+
+      // Save each scenario to file
+      let savedCount = 0;
+      for (const scenario of parsedScenarios) {
+        // Find matching enabler to get correct name
+        const matchingEnabler = enablers.find(e => e.id === scenario.enablerId);
+        if (matchingEnabler) {
+          scenario.enablerName = matchingEnabler.name;
+        }
+
+        await saveScenarioToFile(scenario);
+        savedCount++;
+      }
+
+      // Reload scenarios from files
+      await loadScenariosFromFiles();
+
+      setSuccessMessage(`Successfully generated and saved ${savedCount} test scenarios using AI`);
+      setTimeout(() => setSuccessMessage(null), 5000);
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to analyze enablers');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   // Handle scenario form submission
-  const handleScenarioSubmit = (e: React.FormEvent) => {
+  const handleScenarioSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!selectedEnabler || !testSuite) return;
@@ -218,16 +586,25 @@ Scenario: [Scenario Name]
       gherkin: scenarioForm.gherkin.replace('@TS-XXXXXX', `@${scenarioId}`),
     };
 
-    if (editingScenario) {
-      setScenarios(prev => prev.map(s => s.id === editingScenario.id ? newScenario : s));
-      setSuccessMessage('Test scenario updated successfully');
-    } else {
-      setScenarios(prev => [...prev, newScenario]);
-      setSuccessMessage('Test scenario created successfully');
-    }
+    // Save to file first
+    try {
+      await saveScenarioToFile(newScenario);
 
-    resetScenarioForm();
-    setTimeout(() => setSuccessMessage(null), 3000);
+      if (editingScenario) {
+        setScenarios(prev => prev.map(s => s.id === editingScenario.id ? newScenario : s));
+        setAllScenarios(prev => prev.map(s => s.id === editingScenario.id ? newScenario : s));
+        setSuccessMessage('Test scenario updated and saved to file');
+      } else {
+        setScenarios(prev => [...prev, newScenario]);
+        setAllScenarios(prev => [...prev, newScenario]);
+        setSuccessMessage('Test scenario created and saved to file');
+      }
+
+      resetScenarioForm();
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save test scenario');
+    }
   };
 
   // Reset scenario form
@@ -270,35 +647,56 @@ Scenario: [Scenario Name]
     setConfirmDialog({
       isOpen: true,
       title: 'Delete Test Scenario',
-      message: `Are you sure you want to delete "${scenario.name}"? This action cannot be undone.`,
+      message: `Are you sure you want to delete "${scenario.name}"? This will also delete the markdown file. This action cannot be undone.`,
       confirmLabel: 'Delete',
       confirmVariant: 'danger',
-      onConfirm: () => {
+      onConfirm: async () => {
+        // Delete the file first
+        await deleteScenarioFile(scenario.id);
+
         setScenarios(prev => prev.filter(s => s.id !== scenario.id));
+        setAllScenarios(prev => prev.filter(s => s.id !== scenario.id));
         if (selectedScenario?.id === scenario.id) {
           setSelectedScenario(null);
         }
         setConfirmDialog(prev => ({ ...prev, isOpen: false }));
-        setSuccessMessage('Test scenario deleted successfully');
+        setSuccessMessage('Test scenario and file deleted successfully');
         setTimeout(() => setSuccessMessage(null), 3000);
       },
     });
   };
 
   // Run scenario (mock)
-  const handleRunScenario = (scenario: TestScenario) => {
+  const handleRunScenario = async (scenario: TestScenario) => {
     // Simulate test execution
     const results: TestScenario['status'][] = ['passed', 'failed', 'blocked'];
     const randomResult = results[Math.floor(Math.random() * 3)];
+    const executionTime = Math.random() * 5000;
+    const lastExecuted = new Date().toISOString();
 
-    setScenarios(prev => prev.map(s =>
-      s.id === scenario.id
-        ? { ...s, status: randomResult, lastExecuted: new Date().toISOString(), executionTime: Math.random() * 5000 }
-        : s
-    ));
+    const updatedScenario = {
+      ...scenario,
+      status: randomResult,
+      lastExecuted,
+      executionTime,
+    };
 
-    setSuccessMessage(`Test "${scenario.name}" completed with result: ${randomResult.toUpperCase()}`);
-    setTimeout(() => setSuccessMessage(null), 3000);
+    try {
+      // Save updated scenario to file
+      await saveScenarioToFile(updatedScenario);
+
+      setScenarios(prev => prev.map(s =>
+        s.id === scenario.id ? updatedScenario : s
+      ));
+      setAllScenarios(prev => prev.map(s =>
+        s.id === scenario.id ? updatedScenario : s
+      ));
+
+      setSuccessMessage(`Test "${scenario.name}" completed with result: ${randomResult.toUpperCase()}`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save test result');
+    }
   };
 
   // Get status color
@@ -688,6 +1086,19 @@ Scenario: [Scenario Name]
             Create and manage Gherkin test scenarios for your enablers
           </p>
         </div>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <span style={{ fontSize: '12px', color: 'var(--color-grey-600)' }}>
+            {enablers.length} enablers loaded
+          </span>
+          <Button
+            variant="primary"
+            onClick={handleAnalyzeScenarios}
+            disabled={isAnalyzing || enablers.length === 0}
+            title={enablers.length === 0 ? 'No enablers found - add enabler files to the definition folder' : 'Analyze enablers and generate test scenarios'}
+          >
+            {isAnalyzing ? 'Analyzing...' : 'Analyze with AI'}
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -751,7 +1162,7 @@ Scenario: [Scenario Name]
               <div className="enabler-list">
                 {enablers.map(enabler => (
                   <div
-                    key={enabler.id}
+                    key={enabler.filename || enabler.id}
                     className={`enabler-item ${selectedEnabler?.id === enabler.id ? 'selected' : ''}`}
                     onClick={() => handleEnablerSelect(enabler)}
                   >
@@ -926,6 +1337,28 @@ Scenario: [Scenario Name]
         <div className="form-overlay" onClick={(e) => e.target === e.currentTarget && resetScenarioForm()}>
           <div className="form-modal">
             <div className="form-header">
+              {selectedEnabler && (
+                <div style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: 'var(--color-systemBlue)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  marginBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}>
+                  <span style={{
+                    padding: '2px 8px',
+                    backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                    borderRadius: '4px',
+                  }}>
+                    ENABLER
+                  </span>
+                  {selectedEnabler.name}
+                </div>
+              )}
               <h2 className="form-title">
                 {editingScenario ? 'Edit Test Scenario' : 'Create Test Scenario'}
               </h2>

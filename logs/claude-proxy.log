@@ -1,1 +1,6 @@
-./start.sh: line 319: /Users/jamesreynolds/Documents/Development/UbeCode/cmd/claude-proxy/claude-proxy: cannot execute binary file
+2025/12/17 06:56:09 Claude CLI Proxy starting on :9085
+2025/12/17 06:56:09 This service must run on the host machine (not in Docker)
+2025/12/17 06:56:09 It executes Claude CLI commands on behalf of Docker containers
+2025/12/17 06:56:55 Running start.sh in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/code
+2025/12/17 06:57:12 Running stop.sh in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/code
+2025/12/17 06:57:25 Running start.sh in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/code

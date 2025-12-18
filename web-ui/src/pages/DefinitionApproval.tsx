@@ -59,18 +59,104 @@ export const DefinitionApproval: React.FC = () => {
     }
   }, [currentWorkspace?.projectFolder]);
 
-  const loadItemApprovals = () => {
-    if (!currentWorkspace?.id) return;
+  const loadItemApprovals = async () => {
+    if (!currentWorkspace?.id || !currentWorkspace?.projectFolder) return;
+
+    // Try to load from file first (for shared/imported workspaces)
+    try {
+      const response = await fetch(`${INTEGRATION_URL}/read-file`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filePath: `${currentWorkspace.projectFolder}/approvals/definition-approvals.json`
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.content) {
+          const fileApprovals = JSON.parse(data.content);
+          setItemApprovals(fileApprovals.itemApprovals || {});
+          localStorage.setItem(`definition-item-approvals-${currentWorkspace.id}`, JSON.stringify(fileApprovals.itemApprovals || {}));
+
+          if (fileApprovals.phaseApproved) {
+            setDefinitionApproved(true);
+            setApprovalDate(fileApprovals.phaseApprovedDate || null);
+            localStorage.setItem(`definition-approved-${currentWorkspace.id}`, JSON.stringify({
+              approved: true,
+              date: fileApprovals.phaseApprovedDate
+            }));
+          }
+          return;
+        }
+      }
+    } catch (err) {
+      console.log('No approval file found, checking localStorage');
+    }
+
     const stored = localStorage.getItem(`definition-item-approvals-${currentWorkspace.id}`);
     if (stored) {
       setItemApprovals(JSON.parse(stored));
     }
   };
 
-  const saveItemApprovals = (approvals: ItemApprovalStatus) => {
-    if (!currentWorkspace?.id) return;
+  const saveItemApprovals = async (approvals: ItemApprovalStatus) => {
+    if (!currentWorkspace?.id || !currentWorkspace?.projectFolder) return;
+
     localStorage.setItem(`definition-item-approvals-${currentWorkspace.id}`, JSON.stringify(approvals));
     setItemApprovals(approvals);
+
+    try {
+      const fileContent = JSON.stringify({
+        phase: 'definition',
+        itemApprovals: approvals,
+        phaseApproved: definitionApproved,
+        phaseApprovedDate: approvalDate,
+        lastUpdated: new Date().toISOString(),
+      }, null, 2);
+
+      await fetch(`${INTEGRATION_URL}/save-specifications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+          specifications: [{
+            filename: 'approvals/definition-approvals.json',
+            content: fileContent,
+          }],
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to save approvals to file:', err);
+    }
+  };
+
+  const savePhaseApprovalToFile = async (approved: boolean, date: string | null) => {
+    if (!currentWorkspace?.projectFolder) return;
+
+    try {
+      const fileContent = JSON.stringify({
+        phase: 'definition',
+        itemApprovals: itemApprovals,
+        phaseApproved: approved,
+        phaseApprovedDate: date,
+        lastUpdated: new Date().toISOString(),
+      }, null, 2);
+
+      await fetch(`${INTEGRATION_URL}/save-specifications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+          specifications: [{
+            filename: 'approvals/definition-approvals.json',
+            content: fileContent,
+          }],
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to save phase approval to file:', err);
+    }
   };
 
   const loadDefinitionItems = async () => {
@@ -269,7 +355,7 @@ export const DefinitionApproval: React.FC = () => {
     );
   };
 
-  const handleApproveDefinition = () => {
+  const handleApproveDefinition = async () => {
     if (!currentWorkspace?.id) return;
 
     const approvalData = {
@@ -279,14 +365,18 @@ export const DefinitionApproval: React.FC = () => {
     localStorage.setItem(`definition-approved-${currentWorkspace.id}`, JSON.stringify(approvalData));
     setDefinitionApproved(true);
     setApprovalDate(approvalData.date);
+
+    await savePhaseApprovalToFile(true, approvalData.date);
   };
 
-  const handleRevokeApproval = () => {
+  const handleRevokeApproval = async () => {
     if (!currentWorkspace?.id) return;
 
     localStorage.removeItem(`definition-approved-${currentWorkspace.id}`);
     setDefinitionApproved(false);
     setApprovalDate(null);
+
+    await savePhaseApprovalToFile(false, null);
   };
 
   const getStatusBadge = (status: string) => {
@@ -542,7 +632,7 @@ export const DefinitionApproval: React.FC = () => {
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
       <div style={{ marginBottom: '24px' }}>
         <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Definition Phase Approval</h1>
-        <p className="text-body text-secondary">
+        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
           Review and approve all definition phase items before proceeding to Design.
         </p>
       </div>

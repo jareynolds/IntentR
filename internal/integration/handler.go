@@ -439,193 +439,63 @@ func (h *Handler) HandleAnalyzeSpecifications(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if req.AnthropicKey == "" {
-		http.Error(w, "anthropic_key is required", http.StatusBadRequest)
-		return
-	}
+	// Note: AnthropicKey is optional now - we parse relationships directly from markdown
+	// if req.AnthropicKey == "" {
+	// 	http.Error(w, "anthropic_key is required", http.StatusBadRequest)
+	// 	return
+	// }
 
-	// Pre-process files to deterministically create capabilities and enablers
-	// based on filename prefixes (CAP*, ENB*)
-	var preCapabilities []CapabilitySpec
-	var preEnablers []EnablerSpec
-	capCounter := 1
-	enbCounter := 1
+	// Parse files to extract capabilities and enablers with their relationships
+	var capabilities []CapabilitySpec
+	var enablers []EnablerSpec
 
 	for _, file := range req.Files {
 		upperFilename := strings.ToUpper(file.Filename)
+		lowerFilename := strings.ToLower(file.Filename)
 
-		// Extract name from first heading or filename
-		displayName := strings.TrimSuffix(file.Filename, ".md")
-		lines := strings.Split(file.Content, "\n")
-		for _, line := range lines {
-			if strings.HasPrefix(line, "# ") {
-				displayName = strings.TrimPrefix(line, "# ")
-				displayName = strings.TrimSpace(displayName)
-				break
-			}
-		}
-
-		// Extract status from content
-		status := "Planned"
-		for _, line := range lines {
-			lowerLine := strings.ToLower(line)
-			if strings.Contains(lowerLine, "status") {
-				if strings.Contains(lowerLine, "implemented") || strings.Contains(lowerLine, "complete") {
-					status = "Implemented"
-				} else if strings.Contains(lowerLine, "progress") {
-					status = "In Progress"
-				}
-				break
-			}
-		}
-
-		// Check if capability file (matches: CAP*, capability*, capabilities*)
-		isCapability := strings.HasPrefix(upperFilename, "CAP") ||
+		// Check if capability file
+		// Matches: CAP-*.md, *-capability.md, capability*.md, capabilities*.md
+		isCapability := strings.HasPrefix(upperFilename, "CAP-") ||
+			strings.HasSuffix(lowerFilename, "-capability.md") ||
 			strings.HasPrefix(upperFilename, "CAPABILITY") ||
 			strings.HasPrefix(upperFilename, "CAPABILITIES")
 
-		// Check if enabler file (matches: ENB*, enabler*)
-		isEnabler := strings.HasPrefix(upperFilename, "ENB") ||
+		// Check if enabler file
+		// Matches: ENB-*.md, *-enabler.md, enabler*.md
+		isEnabler := strings.HasPrefix(upperFilename, "ENB-") ||
+			strings.HasSuffix(lowerFilename, "-enabler.md") ||
 			strings.HasPrefix(upperFilename, "ENABLER")
 
 		if isCapability {
-			capID := fmt.Sprintf("CAP-%03d", capCounter)
-			capCounter++
-			preCapabilities = append(preCapabilities, CapabilitySpec{
-				ID:                   capID,
-				Name:                 displayName,
-				Status:               status,
-				Type:                 "Capability",
-				Enablers:             []string{},
-				UpstreamDependencies: []string{},
-				DownstreamImpacts:    []string{},
-			})
-			fmt.Printf("[Analyze] Pre-created capability from %s: %s\n", file.Filename, displayName)
+			cap := parseCapabilityFromContent(file.Filename, file.Content)
+			capabilities = append(capabilities, cap)
+			fmt.Printf("[Analyze] Parsed capability from %s: ID=%s, Name=%s\n", file.Filename, cap.ID, cap.Name)
 		} else if isEnabler {
-			enbID := fmt.Sprintf("ENB-%03d", enbCounter)
-			enbCounter++
-			preEnablers = append(preEnablers, EnablerSpec{
-				ID:           enbID,
-				Name:         displayName,
-				CapabilityID: "", // Will be determined by AI
-				Status:       status,
-				Type:         "Enabler",
-			})
-			fmt.Printf("[Analyze] Pre-created enabler from %s: %s\n", file.Filename, displayName)
+			enb := parseEnablerFromContent(file.Filename, file.Content)
+			enablers = append(enablers, enb)
+			fmt.Printf("[Analyze] Parsed enabler from %s: ID=%s, Name=%s, CapabilityID=%s\n", file.Filename, enb.ID, enb.Name, enb.CapabilityID)
 		}
 	}
 
-	fmt.Printf("[Analyze] Pre-created %d capabilities and %d enablers from filenames\n", len(preCapabilities), len(preEnablers))
+	fmt.Printf("[Analyze] Parsed %d capabilities and %d enablers from files\n", len(capabilities), len(enablers))
 
-	// If we have pre-created items, use AI only for relationships
-	// Otherwise, fall back to full AI analysis
-	if len(preCapabilities) > 0 || len(preEnablers) > 0 {
-		// Build a simpler prompt just for relationships
-		var filesContent strings.Builder
-		filesContent.WriteString("Analyze these specification files and determine relationships between capabilities and enablers.\n\n")
-
-		filesContent.WriteString("EXISTING CAPABILITIES:\n")
-		for _, cap := range preCapabilities {
-			filesContent.WriteString(fmt.Sprintf("- %s: %s\n", cap.ID, cap.Name))
-		}
-		filesContent.WriteString("\nEXISTING ENABLERS:\n")
-		for _, enb := range preEnablers {
-			filesContent.WriteString(fmt.Sprintf("- %s: %s\n", enb.ID, enb.Name))
-		}
-		filesContent.WriteString("\nFILE CONTENTS:\n\n")
-
-		for _, file := range req.Files {
-			filesContent.WriteString(fmt.Sprintf("=== File: %s ===\n", file.Filename))
-			filesContent.WriteString(file.Content)
-			filesContent.WriteString("\n\n")
-		}
-
-		filesContent.WriteString("\nAnalyze the content and return a JSON object with relationships:\n")
-		filesContent.WriteString(`{
-  "relationships": {
-    "capabilityDependencies": [
-      {"from": "CAP-001", "to": "CAP-002"}
-    ],
-    "enablerAssignments": [
-      {"enablerId": "ENB-001", "capabilityId": "CAP-001"}
-    ]
-  }
-}
-
-Rules:
-1. capabilityDependencies: List which capabilities depend on other capabilities (from depends on to)
-2. enablerAssignments: Assign each enabler to its parent capability based on content
-3. Look for mentions of dependencies, relationships, or parent capabilities in the content
-
-Return ONLY the JSON object.`)
-
-		// Create Anthropic client and call API for relationships
-		client := NewAnthropicClient(req.AnthropicKey)
-		response, err := client.SendMessage(r.Context(), filesContent.String())
-		if err != nil {
-			// If AI fails, return pre-created items without relationships
-			fmt.Printf("[Analyze] AI relationship analysis failed: %v, returning pre-created items\n", err)
-			result := AnalyzeSpecificationsResponse{
-				Capabilities: preCapabilities,
-				Enablers:     preEnablers,
-			}
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
-			return
-		}
-
-		// Parse relationships from AI response
-		jsonStart := strings.Index(response, "{")
-		jsonEnd := strings.LastIndex(response, "}")
-		if jsonStart != -1 && jsonEnd != -1 && jsonEnd > jsonStart {
-			jsonStr := response[jsonStart : jsonEnd+1]
-			var relResult struct {
-				Relationships struct {
-					CapabilityDependencies []struct {
-						From string `json:"from"`
-						To   string `json:"to"`
-					} `json:"capabilityDependencies"`
-					EnablerAssignments []struct {
-						EnablerID    string `json:"enablerId"`
-						CapabilityID string `json:"capabilityId"`
-					} `json:"enablerAssignments"`
-				} `json:"relationships"`
-			}
-
-			if err := json.Unmarshal([]byte(jsonStr), &relResult); err == nil {
-				// Apply dependencies to capabilities
-				for _, dep := range relResult.Relationships.CapabilityDependencies {
-					for i := range preCapabilities {
-						if preCapabilities[i].ID == dep.From {
-							preCapabilities[i].DownstreamImpacts = append(preCapabilities[i].DownstreamImpacts, dep.To)
-						}
-						if preCapabilities[i].ID == dep.To {
-							preCapabilities[i].UpstreamDependencies = append(preCapabilities[i].UpstreamDependencies, dep.From)
-						}
-					}
-				}
-
-				// Apply enabler assignments
-				for _, assign := range relResult.Relationships.EnablerAssignments {
-					for i := range preEnablers {
-						if preEnablers[i].ID == assign.EnablerID {
-							preEnablers[i].CapabilityID = assign.CapabilityID
-							// Also add to capability's enablers list
-							for j := range preCapabilities {
-								if preCapabilities[j].ID == assign.CapabilityID {
-									preCapabilities[j].Enablers = append(preCapabilities[j].Enablers, assign.EnablerID)
-								}
-							}
-						}
-					}
+	// Build enabler-to-capability relationships
+	for i := range enablers {
+		if enablers[i].CapabilityID != "" {
+			// Add enabler to capability's enablers list
+			for j := range capabilities {
+				if capabilities[j].ID == enablers[i].CapabilityID {
+					capabilities[j].Enablers = append(capabilities[j].Enablers, enablers[i].ID)
 				}
 			}
 		}
+	}
 
-		// Return pre-created items with relationships
+	// If we found capabilities/enablers, return them
+	if len(capabilities) > 0 || len(enablers) > 0 {
 		result := AnalyzeSpecificationsResponse{
-			Capabilities: preCapabilities,
-			Enablers:     preEnablers,
+			Capabilities: capabilities,
+			Enablers:     enablers,
 		}
 
 		fmt.Printf("[Analyze] Final result: %d capabilities, %d enablers\n", len(result.Capabilities), len(result.Enablers))
@@ -1491,6 +1361,282 @@ func (h *Handler) HandleEnsureWorkspaceStructure(w http.ResponseWriter, r *http.
 	json.NewEncoder(w).Encode(response)
 }
 
+// MoveToDeletedRequest represents request for moving workspace folder to deleted
+type MoveToDeletedRequest struct {
+	SourcePath string `json:"sourcePath"`
+}
+
+// MoveToDeletedResponse represents the response for the move operation
+type MoveToDeletedResponse struct {
+	Success     bool   `json:"success"`
+	SourcePath  string `json:"sourcePath"`
+	DestPath    string `json:"destPath"`
+	Message     string `json:"message,omitempty"`
+}
+
+// HandleMoveToDeleted handles POST /folders/move-to-deleted
+// Moves a workspace folder to archived_workspaces instead of permanently deleting
+func (h *Handler) HandleMoveToDeleted(w http.ResponseWriter, r *http.Request) {
+	var req MoveToDeletedRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.SourcePath == "" {
+		http.Error(w, "sourcePath is required", http.StatusBadRequest)
+		return
+	}
+
+	// Get current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Handle both relative and absolute paths
+	sourcePath := req.SourcePath
+	if idx := strings.Index(sourcePath, "workspaces/"); idx != -1 {
+		sourcePath = sourcePath[idx:]
+	}
+
+	// Build full source path
+	fullSourcePath := filepath.Join(cwd, sourcePath)
+
+	// Check if source exists
+	if _, err := os.Stat(fullSourcePath); os.IsNotExist(err) {
+		// Source doesn't exist, nothing to move
+		response := MoveToDeletedResponse{
+			Success:    true,
+			SourcePath: sourcePath,
+			Message:    "Source folder does not exist, nothing to move",
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	// Create archived_workspaces folder if it doesn't exist
+	archivedFolder := filepath.Join(cwd, "archived_workspaces")
+	if err := os.MkdirAll(archivedFolder, 0755); err != nil {
+		http.Error(w, fmt.Sprintf("failed to create archived_workspaces folder: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Get the folder name from source path
+	folderName := filepath.Base(fullSourcePath)
+
+	// Create unique destination name to avoid conflicts (append timestamp if exists)
+	destPath := filepath.Join(archivedFolder, folderName)
+	if _, err := os.Stat(destPath); !os.IsNotExist(err) {
+		// Destination exists, append timestamp
+		timestamp := time.Now().Format("20060102-150405")
+		destPath = filepath.Join(archivedFolder, fmt.Sprintf("%s-%s", folderName, timestamp))
+	}
+
+	// Move the folder
+	if err := os.Rename(fullSourcePath, destPath); err != nil {
+		http.Error(w, fmt.Sprintf("failed to move folder: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Build relative dest path for response
+	relDestPath := strings.TrimPrefix(destPath, cwd)
+	relDestPath = strings.TrimPrefix(relDestPath, string(os.PathSeparator))
+
+	response := MoveToDeletedResponse{
+		Success:    true,
+		SourcePath: sourcePath,
+		DestPath:   relDestPath,
+		Message:    "Workspace folder moved to archived_workspaces",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// InitWorkspaceRequest represents request for initializing workspace with CODE_RULES files
+type InitWorkspaceRequest struct {
+	WorkspacePath string `json:"workspacePath"`
+}
+
+// InitWorkspaceResponse represents the response for workspace initialization
+type InitWorkspaceResponse struct {
+	Success      bool     `json:"success"`
+	FilesCopied  []string `json:"filesCopied"`
+	FilesExisted []string `json:"filesExisted"`
+	Message      string   `json:"message,omitempty"`
+}
+
+// HandleInitWorkspaceFiles handles POST /workspace/init-files
+// Copies CLAUDE.md from root to workspace root, and MAIN_SWDEV_PLAN.md from CODE_RULES to workspace/CODE_RULES
+func (h *Handler) HandleInitWorkspaceFiles(w http.ResponseWriter, r *http.Request) {
+	var req InitWorkspaceRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.WorkspacePath == "" {
+		http.Error(w, "workspacePath is required", http.StatusBadRequest)
+		return
+	}
+
+	// Get current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Build workspace path
+	workspacePath := filepath.Join(cwd, req.WorkspacePath)
+	workspaceCodeRulesPath := filepath.Join(workspacePath, "CODE_RULES")
+
+	// Ensure workspace and CODE_RULES directories exist
+	if err := os.MkdirAll(workspaceCodeRulesPath, 0755); err != nil {
+		http.Error(w, fmt.Sprintf("failed to create workspace CODE_RULES directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	var filesCopied []string
+	var filesExisted []string
+
+	// File 1: Copy CLAUDE.md from root to workspace root
+	claudeSrc := filepath.Join(cwd, "CLAUDE.md")
+	claudeDest := filepath.Join(workspacePath, "CLAUDE.md")
+	if _, err := os.Stat(claudeDest); os.IsNotExist(err) {
+		if _, err := os.Stat(claudeSrc); err == nil {
+			content, err := os.ReadFile(claudeSrc)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("failed to read CLAUDE.md: %v", err), http.StatusInternalServerError)
+				return
+			}
+			if err := os.WriteFile(claudeDest, content, 0644); err != nil {
+				http.Error(w, fmt.Sprintf("failed to write CLAUDE.md: %v", err), http.StatusInternalServerError)
+				return
+			}
+			filesCopied = append(filesCopied, "CLAUDE.md")
+		}
+	} else {
+		filesExisted = append(filesExisted, "CLAUDE.md")
+	}
+
+	// File 2: Copy MAIN_SWDEV_PLAN.md from CODE_RULES to workspace/CODE_RULES
+	planSrc := filepath.Join(cwd, "CODE_RULES", "MAIN_SWDEV_PLAN.md")
+	planDest := filepath.Join(workspaceCodeRulesPath, "MAIN_SWDEV_PLAN.md")
+	if _, err := os.Stat(planDest); os.IsNotExist(err) {
+		if _, err := os.Stat(planSrc); err == nil {
+			content, err := os.ReadFile(planSrc)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("failed to read MAIN_SWDEV_PLAN.md: %v", err), http.StatusInternalServerError)
+				return
+			}
+			if err := os.WriteFile(planDest, content, 0644); err != nil {
+				http.Error(w, fmt.Sprintf("failed to write MAIN_SWDEV_PLAN.md: %v", err), http.StatusInternalServerError)
+				return
+			}
+			filesCopied = append(filesCopied, "CODE_RULES/MAIN_SWDEV_PLAN.md")
+		}
+	} else {
+		filesExisted = append(filesExisted, "CODE_RULES/MAIN_SWDEV_PLAN.md")
+	}
+
+	response := InitWorkspaceResponse{
+		Success:      true,
+		FilesCopied:  filesCopied,
+		FilesExisted: filesExisted,
+		Message:      fmt.Sprintf("Workspace initialized: %d files copied, %d files already existed", len(filesCopied), len(filesExisted)),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// SetActiveAIPrinciplesRequest represents request for setting active AI principles
+type SetActiveAIPrinciplesRequest struct {
+	WorkspacePath string `json:"workspacePath"`
+	PresetLevel   int    `json:"presetLevel"` // 1-5
+}
+
+// SetActiveAIPrinciplesResponse represents the response
+type SetActiveAIPrinciplesResponse struct {
+	Success    bool   `json:"success"`
+	PresetFile string `json:"presetFile"`
+	Message    string `json:"message,omitempty"`
+}
+
+// HandleSetActiveAIPrinciples handles POST /workspace/set-ai-principles
+// Copies the selected AI-Policy-Preset(n).md to CODE_RULES/ACTIVE_AI_PRINCIPLES.md in the workspace
+func (h *Handler) HandleSetActiveAIPrinciples(w http.ResponseWriter, r *http.Request) {
+	var req SetActiveAIPrinciplesRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.WorkspacePath == "" {
+		http.Error(w, "workspacePath is required", http.StatusBadRequest)
+		return
+	}
+
+	if req.PresetLevel < 1 || req.PresetLevel > 5 {
+		http.Error(w, "presetLevel must be between 1 and 5", http.StatusBadRequest)
+		return
+	}
+
+	// Get current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Build paths
+	aiPrinciplesPath := filepath.Join(cwd, "AI_Principles")
+	workspacePath := filepath.Join(cwd, req.WorkspacePath)
+	workspaceCodeRulesPath := filepath.Join(workspacePath, "CODE_RULES")
+
+	presetFileName := fmt.Sprintf("AI-Policy-Preset%d.md", req.PresetLevel)
+	srcPath := filepath.Join(aiPrinciplesPath, presetFileName)
+	destPath := filepath.Join(workspaceCodeRulesPath, "ACTIVE_AI_PRINCIPLES.md")
+
+	// Check if source file exists
+	if _, err := os.Stat(srcPath); os.IsNotExist(err) {
+		http.Error(w, fmt.Sprintf("preset file %s not found", presetFileName), http.StatusNotFound)
+		return
+	}
+
+	// Read source file
+	content, err := os.ReadFile(srcPath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to read %s: %v", presetFileName, err), http.StatusInternalServerError)
+		return
+	}
+
+	// Ensure workspace CODE_RULES directory exists
+	if err := os.MkdirAll(workspaceCodeRulesPath, 0755); err != nil {
+		http.Error(w, fmt.Sprintf("failed to create workspace CODE_RULES directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Write to destination (overwrite if exists)
+	if err := os.WriteFile(destPath, content, 0644); err != nil {
+		http.Error(w, fmt.Sprintf("failed to write CODE_RULES/ACTIVE_AI_PRINCIPLES.md: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	response := SetActiveAIPrinciplesResponse{
+		Success:    true,
+		PresetFile: presetFileName,
+		Message:    fmt.Sprintf("Active AI Principles set to %s in CODE_RULES folder", presetFileName),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 // CapabilityFilesRequest represents the request body for fetching capability files
 type CapabilityFilesRequest struct {
 	WorkspacePath string `json:"workspacePath"`
@@ -1847,11 +1993,216 @@ func parseMarkdownEnabler(filename, path, content string) FileEnabler {
 
 // SaveCapabilityRequest represents the request to save a capability file
 type SaveCapabilityRequest struct {
-	Path        string `json:"path"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Status      string `json:"status"`
-	Content     string `json:"content"`
+	Path               string `json:"path"`
+	Name               string `json:"name"`
+	Description        string `json:"description"`
+	Status             string `json:"status"`
+	Content            string `json:"content"`
+	StoryboardReference string `json:"storyboardReference"`
+}
+
+// UpdateCapabilityStoryboardRequest represents the request to update a capability's storyboard reference
+type UpdateCapabilityStoryboardRequest struct {
+	Path               string `json:"path"`
+	StoryboardReference string `json:"storyboardReference"`
+}
+
+// HandleUpdateCapabilityStoryboard handles POST /update-capability-storyboard
+func (h *Handler) HandleUpdateCapabilityStoryboard(w http.ResponseWriter, r *http.Request) {
+	var req UpdateCapabilityStoryboardRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Path == "" {
+		http.Error(w, "path is required", http.StatusBadRequest)
+		return
+	}
+
+	// Handle path translation for Docker environments
+	filePath := req.Path
+	if idx := strings.Index(filePath, "workspaces/"); idx != -1 {
+		relativePath := filePath[idx:]
+		cwd, err := os.Getwd()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+			return
+		}
+		filePath = filepath.Join(cwd, relativePath)
+	}
+
+	// Read existing file content
+	existingContent, err := os.ReadFile(filePath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to read file: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	content := string(existingContent)
+	lines := strings.Split(content, "\n")
+	var newLines []string
+	storyboardFieldFound := false
+	inMetadata := false
+
+	for i, line := range lines {
+		// Check if we're in the metadata section
+		if strings.HasPrefix(line, "## Metadata") {
+			inMetadata = true
+		} else if strings.HasPrefix(line, "## ") && !strings.HasPrefix(line, "## Metadata") {
+			// If we're leaving metadata and haven't found storyboard field, add it before this section
+			if inMetadata && !storyboardFieldFound {
+				newLines = append(newLines, fmt.Sprintf("- **Storyboard Reference**: %s", req.StoryboardReference))
+				storyboardFieldFound = true
+			}
+			inMetadata = false
+		}
+
+		// Check for existing Storyboard Reference field
+		if strings.Contains(line, "**Storyboard Reference**") || strings.Contains(line, "**Storyboard**:") {
+			// Replace the storyboard reference line
+			newLines = append(newLines, fmt.Sprintf("- **Storyboard Reference**: %s", req.StoryboardReference))
+			storyboardFieldFound = true
+		} else {
+			newLines = append(newLines, line)
+		}
+
+		// If we reach the end of metadata and haven't added the field, add it before the next section
+		if inMetadata && i < len(lines)-1 && strings.HasPrefix(lines[i+1], "## ") && !storyboardFieldFound {
+			newLines = append(newLines, fmt.Sprintf("- **Storyboard Reference**: %s", req.StoryboardReference))
+			storyboardFieldFound = true
+		}
+	}
+
+	// If we still haven't added the storyboard reference, add it after the Metadata header
+	if !storyboardFieldFound {
+		// Find metadata section and add after it
+		for i, line := range newLines {
+			if strings.HasPrefix(line, "## Metadata") {
+				// Find the end of metadata items (lines starting with "- **")
+				insertIdx := i + 1
+				for j := i + 1; j < len(newLines); j++ {
+					if strings.HasPrefix(newLines[j], "- **") {
+						insertIdx = j + 1
+					} else if strings.HasPrefix(newLines[j], "## ") {
+						break
+					}
+				}
+				// Insert the storyboard reference
+				newContent := append(newLines[:insertIdx], append([]string{fmt.Sprintf("- **Storyboard Reference**: %s", req.StoryboardReference)}, newLines[insertIdx:]...)...)
+				newLines = newContent
+				storyboardFieldFound = true
+				break
+			}
+		}
+	}
+
+	// Write updated content back to file
+	newContent := strings.Join(newLines, "\n")
+	if err := os.WriteFile(filePath, []byte(newContent), 0644); err != nil {
+		http.Error(w, fmt.Sprintf("failed to write file: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success":            true,
+		"message":            "Capability storyboard reference updated successfully",
+		"storyboardReference": req.StoryboardReference,
+	})
+}
+
+// UpdateEnablerCapabilityRequest represents the request to update an enabler's capability reference
+type UpdateEnablerCapabilityRequest struct {
+	Path         string `json:"path"`
+	CapabilityId string `json:"capabilityId"`
+	CapabilityName string `json:"capabilityName"`
+}
+
+// HandleUpdateEnablerCapability handles POST /update-enabler-capability
+func (h *Handler) HandleUpdateEnablerCapability(w http.ResponseWriter, r *http.Request) {
+	var req UpdateEnablerCapabilityRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Path == "" {
+		http.Error(w, "path is required", http.StatusBadRequest)
+		return
+	}
+
+	// Handle path translation for Docker environments
+	filePath := req.Path
+	if idx := strings.Index(filePath, "workspaces/"); idx != -1 {
+		relativePath := filePath[idx:]
+		cwd, err := os.Getwd()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+			return
+		}
+		filePath = filepath.Join(cwd, relativePath)
+	}
+
+	// Read existing file content
+	existingContent, err := os.ReadFile(filePath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to read file: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	content := string(existingContent)
+	lines := strings.Split(content, "\n")
+	var newLines []string
+	capabilityFieldFound := false
+	inMetadata := false
+
+	capabilityValue := fmt.Sprintf("%s (%s)", req.CapabilityName, req.CapabilityId)
+
+	for i, line := range lines {
+		// Check if we're in the metadata section
+		if strings.HasPrefix(line, "## Metadata") {
+			inMetadata = true
+		} else if strings.HasPrefix(line, "## ") && !strings.HasPrefix(line, "## Metadata") {
+			// Exiting metadata section - if we haven't found the field, add it before this line
+			if inMetadata && !capabilityFieldFound {
+				newLines = append(newLines, fmt.Sprintf("- **Capability**: %s", capabilityValue))
+				capabilityFieldFound = true
+			}
+			inMetadata = false
+		}
+
+		// Check for existing Capability field (case-insensitive)
+		lineLower := strings.ToLower(line)
+		if inMetadata && (strings.HasPrefix(lineLower, "- **capability**:") || strings.HasPrefix(lineLower, "- **capability:**")) {
+			// Replace existing Capability field
+			newLines = append(newLines, fmt.Sprintf("- **Capability**: %s", capabilityValue))
+			capabilityFieldFound = true
+			continue
+		}
+
+		newLines = append(newLines, line)
+
+		// If we're at the end of the file and still in metadata and haven't added the field
+		if i == len(lines)-1 && inMetadata && !capabilityFieldFound {
+			newLines = append(newLines, fmt.Sprintf("- **Capability**: %s", capabilityValue))
+			capabilityFieldFound = true
+		}
+	}
+
+	// Write updated content back to file
+	newContent := strings.Join(newLines, "\n")
+	if err := os.WriteFile(filePath, []byte(newContent), 0644); err != nil {
+		http.Error(w, fmt.Sprintf("failed to write file: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success":      true,
+		"message":      "Enabler capability reference updated successfully",
+		"capabilityId": req.CapabilityId,
+	})
 }
 
 // HandleSaveCapability handles POST /save-capability
@@ -1877,6 +2228,10 @@ func (h *Handler) HandleSaveCapability(w http.ResponseWriter, r *http.Request) {
 
 	if req.Description != "" {
 		content.WriteString(fmt.Sprintf("**Description:** %s\n\n", req.Description))
+	}
+
+	if req.StoryboardReference != "" {
+		content.WriteString(fmt.Sprintf("**Storyboard Reference:** %s\n\n", req.StoryboardReference))
 	}
 
 	// Append any additional content, but strip existing Status and Description lines
@@ -1919,14 +2274,28 @@ func (h *Handler) HandleDeleteCapability(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	// Handle path translation for Docker environments
+	filePath := req.Path
+
+	// If path contains "workspaces/", extract the relative part and resolve from cwd
+	if idx := strings.Index(filePath, "workspaces/"); idx != -1 {
+		relativePath := filePath[idx:]
+		cwd, err := os.Getwd()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+			return
+		}
+		filePath = filepath.Join(cwd, relativePath)
+	}
+
 	// Verify file exists
-	if _, err := os.Stat(req.Path); os.IsNotExist(err) {
-		http.Error(w, "file not found", http.StatusNotFound)
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		http.Error(w, fmt.Sprintf("file not found: %s", filePath), http.StatusNotFound)
 		return
 	}
 
-	// Delete the file
-	if err := os.Remove(req.Path); err != nil {
+	// Delete the markdown file
+	if err := os.Remove(filePath); err != nil {
 		http.Error(w, fmt.Sprintf("failed to delete file: %v", err), http.StatusInternalServerError)
 		return
 	}
@@ -1934,8 +2303,488 @@ func (h *Handler) HandleDeleteCapability(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
-		"message": "Capability deleted successfully",
+		"message": "Capability file deleted successfully",
+		"path":    filePath,
 	})
+}
+
+// DeleteEnablerRequest represents the request to delete an enabler file
+type DeleteEnablerRequest struct {
+	Path string `json:"path"`
+}
+
+// HandleDeleteEnabler handles POST /delete-enabler
+func (h *Handler) HandleDeleteEnabler(w http.ResponseWriter, r *http.Request) {
+	var req DeleteEnablerRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Path == "" {
+		http.Error(w, "path is required", http.StatusBadRequest)
+		return
+	}
+
+	// Handle path translation for Docker environments
+	filePath := req.Path
+
+	// If path contains "workspaces/", extract the relative part and resolve from cwd
+	if idx := strings.Index(filePath, "workspaces/"); idx != -1 {
+		relativePath := filePath[idx:]
+		cwd, err := os.Getwd()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+			return
+		}
+		filePath = filepath.Join(cwd, relativePath)
+	}
+
+	// Verify file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		http.Error(w, fmt.Sprintf("file not found: %s", filePath), http.StatusNotFound)
+		return
+	}
+
+	// Delete the markdown file
+	if err := os.Remove(filePath); err != nil {
+		http.Error(w, fmt.Sprintf("failed to delete file: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Enabler file deleted successfully",
+		"path":    filePath,
+	})
+}
+
+// ReadFileRequest represents the request to read a file
+type ReadFileRequest struct {
+	WorkspacePath string `json:"workspacePath"`
+	FilePath      string `json:"filePath"`
+}
+
+// HandleReadFile handles POST /read-file
+func (h *Handler) HandleReadFile(w http.ResponseWriter, r *http.Request) {
+	var req ReadFileRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	filePath := req.FilePath
+
+	// If filePath is relative or contains workspaces/, resolve it
+	if !filepath.IsAbs(filePath) {
+		// Try to resolve from workspace path
+		if req.WorkspacePath != "" {
+			workspacePath := req.WorkspacePath
+			if idx := strings.Index(workspacePath, "workspaces/"); idx != -1 {
+				relativePath := workspacePath[idx:]
+				cwd, err := os.Getwd()
+				if err != nil {
+					http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+					return
+				}
+				workspacePath = filepath.Join(cwd, relativePath)
+			}
+			filePath = filepath.Join(workspacePath, filePath)
+		}
+	} else if idx := strings.Index(filePath, "workspaces/"); idx != -1 {
+		// Handle path translation for Docker environments
+		relativePath := filePath[idx:]
+		cwd, err := os.Getwd()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+			return
+		}
+		filePath = filepath.Join(cwd, relativePath)
+	}
+
+	// Read the file
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			http.Error(w, "file not found", http.StatusNotFound)
+		} else {
+			http.Error(w, fmt.Sprintf("failed to read file: %v", err), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"content": string(content),
+		"path":    filePath,
+	})
+}
+
+// SaveTestScenarioRequest represents the request to save a test scenario
+type SaveTestScenarioRequest struct {
+	WorkspacePath   string   `json:"workspacePath"`
+	ScenarioID      string   `json:"scenarioId"`
+	ScenarioName    string   `json:"scenarioName"`
+	Feature         string   `json:"feature"`
+	EnablerID       string   `json:"enablerId"`
+	EnablerName     string   `json:"enablerName"`
+	RequirementIDs  []string `json:"requirementIds"`
+	Priority        string   `json:"priority"`
+	Status          string   `json:"status"`
+	Automation      string   `json:"automation"`
+	Tags            []string `json:"tags"`
+	Gherkin         string   `json:"gherkin"`
+	LastExecuted    string   `json:"lastExecuted,omitempty"`
+	ExecutionTime   float64  `json:"executionTime,omitempty"`
+}
+
+// HandleSaveTestScenario handles POST /save-test-scenario
+func (h *Handler) HandleSaveTestScenario(w http.ResponseWriter, r *http.Request) {
+	var req SaveTestScenarioRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.WorkspacePath == "" {
+		http.Error(w, "workspacePath is required", http.StatusBadRequest)
+		return
+	}
+
+	if req.ScenarioID == "" {
+		http.Error(w, "scenarioId is required", http.StatusBadRequest)
+		return
+	}
+
+	// Handle path translation for Docker environments
+	workspacePath := req.WorkspacePath
+
+	// If path contains "workspaces/", extract the relative part and resolve from cwd
+	if idx := strings.Index(workspacePath, "workspaces/"); idx != -1 {
+		relativePath := workspacePath[idx:]
+		cwd, err := os.Getwd()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+			return
+		}
+		workspacePath = filepath.Join(cwd, relativePath)
+	}
+
+	// Create test folder if it doesn't exist
+	testFolder := filepath.Join(workspacePath, "test")
+	if err := os.MkdirAll(testFolder, 0755); err != nil {
+		http.Error(w, fmt.Sprintf("failed to create test folder: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Generate filename from scenario ID
+	filename := fmt.Sprintf("%s.md", req.ScenarioID)
+	filePath := filepath.Join(testFolder, filename)
+
+	// Build markdown content
+	var content strings.Builder
+	content.WriteString(fmt.Sprintf("# %s\n\n", req.ScenarioName))
+
+	// Metadata section
+	content.WriteString("## Metadata\n\n")
+	content.WriteString(fmt.Sprintf("- **ID**: %s\n", req.ScenarioID))
+	content.WriteString(fmt.Sprintf("- **Type**: Test Scenario\n"))
+	content.WriteString(fmt.Sprintf("- **Enabler ID**: %s\n", req.EnablerID))
+	content.WriteString(fmt.Sprintf("- **Enabler Name**: %s\n", req.EnablerName))
+	content.WriteString(fmt.Sprintf("- **Feature**: %s\n", req.Feature))
+	content.WriteString(fmt.Sprintf("- **Priority**: %s\n", req.Priority))
+	content.WriteString(fmt.Sprintf("- **Status**: %s\n", req.Status))
+	content.WriteString(fmt.Sprintf("- **Automation**: %s\n", req.Automation))
+
+	// Requirements
+	if len(req.RequirementIDs) > 0 {
+		content.WriteString(fmt.Sprintf("- **Requirement IDs**: %s\n", strings.Join(req.RequirementIDs, ", ")))
+	}
+
+	// Tags
+	if len(req.Tags) > 0 {
+		content.WriteString(fmt.Sprintf("- **Tags**: %s\n", strings.Join(req.Tags, ", ")))
+	}
+
+	// Execution info
+	if req.LastExecuted != "" {
+		content.WriteString(fmt.Sprintf("- **Last Executed**: %s\n", req.LastExecuted))
+	}
+	if req.ExecutionTime > 0 {
+		content.WriteString(fmt.Sprintf("- **Execution Time**: %.2fms\n", req.ExecutionTime))
+	}
+
+	content.WriteString("\n")
+
+	// Gherkin section
+	content.WriteString("## Gherkin Scenario\n\n")
+	content.WriteString("```gherkin\n")
+	content.WriteString(req.Gherkin)
+	content.WriteString("\n```\n")
+
+	// Write the file
+	if err := os.WriteFile(filePath, []byte(content.String()), 0644); err != nil {
+		http.Error(w, fmt.Sprintf("failed to write test scenario file: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success":  true,
+		"message":  "Test scenario saved successfully",
+		"path":     filePath,
+		"filename": filename,
+	})
+}
+
+// DeleteTestScenarioRequest represents the request to delete a test scenario
+type DeleteTestScenarioRequest struct {
+	WorkspacePath string `json:"workspacePath"`
+	ScenarioID    string `json:"scenarioId"`
+}
+
+// HandleDeleteTestScenario handles POST /delete-test-scenario
+func (h *Handler) HandleDeleteTestScenario(w http.ResponseWriter, r *http.Request) {
+	var req DeleteTestScenarioRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.WorkspacePath == "" {
+		http.Error(w, "workspacePath is required", http.StatusBadRequest)
+		return
+	}
+
+	if req.ScenarioID == "" {
+		http.Error(w, "scenarioId is required", http.StatusBadRequest)
+		return
+	}
+
+	// Handle path translation for Docker environments
+	workspacePath := req.WorkspacePath
+
+	// If path contains "workspaces/", extract the relative part and resolve from cwd
+	if idx := strings.Index(workspacePath, "workspaces/"); idx != -1 {
+		relativePath := workspacePath[idx:]
+		cwd, err := os.Getwd()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+			return
+		}
+		workspacePath = filepath.Join(cwd, relativePath)
+	}
+
+	// Build the file path
+	testFolder := filepath.Join(workspacePath, "test")
+	filename := fmt.Sprintf("%s.md", req.ScenarioID)
+	filePath := filepath.Join(testFolder, filename)
+
+	// Verify file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		// File doesn't exist, return success anyway (idempotent delete)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": true,
+			"message": "Test scenario file not found (may have been already deleted)",
+			"path":    filePath,
+		})
+		return
+	}
+
+	// Delete the markdown file
+	if err := os.Remove(filePath); err != nil {
+		http.Error(w, fmt.Sprintf("failed to delete file: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Test scenario deleted successfully",
+		"path":    filePath,
+	})
+}
+
+// ListTestScenariosRequest represents the request to list test scenarios
+type ListTestScenariosRequest struct {
+	WorkspacePath string `json:"workspacePath"`
+}
+
+// HandleListTestScenarios handles POST /list-test-scenarios
+func (h *Handler) HandleListTestScenarios(w http.ResponseWriter, r *http.Request) {
+	var req ListTestScenariosRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.WorkspacePath == "" {
+		http.Error(w, "workspacePath is required", http.StatusBadRequest)
+		return
+	}
+
+	// Handle path translation for Docker environments
+	workspacePath := req.WorkspacePath
+
+	// If path contains "workspaces/", extract the relative part and resolve from cwd
+	if idx := strings.Index(workspacePath, "workspaces/"); idx != -1 {
+		relativePath := workspacePath[idx:]
+		cwd, err := os.Getwd()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+			return
+		}
+		workspacePath = filepath.Join(cwd, relativePath)
+	}
+
+	// Build the test folder path
+	testFolder := filepath.Join(workspacePath, "test")
+
+	// Check if test folder exists
+	if _, err := os.Stat(testFolder); os.IsNotExist(err) {
+		// Return empty list if folder doesn't exist
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"scenarios": []interface{}{},
+		})
+		return
+	}
+
+	// Read all .md files from the test folder
+	files, err := os.ReadDir(testFolder)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to read test folder: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	var scenarios []map[string]interface{}
+	for _, file := range files {
+		if file.IsDir() || !strings.HasSuffix(file.Name(), ".md") {
+			continue
+		}
+
+		filePath := filepath.Join(testFolder, file.Name())
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			continue // Skip files we can't read
+		}
+
+		// Parse the markdown file to extract scenario data
+		scenario := parseTestScenarioFromContent(file.Name(), string(content))
+		scenario["path"] = filePath
+		scenario["filename"] = file.Name()
+		scenarios = append(scenarios, scenario)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"scenarios": scenarios,
+	})
+}
+
+// parseTestScenarioFromContent extracts test scenario information from markdown content
+func parseTestScenarioFromContent(filename, content string) map[string]interface{} {
+	scenario := make(map[string]interface{})
+
+	// Extract name from first # heading
+	lines := strings.Split(content, "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "# ") {
+			scenario["name"] = strings.TrimPrefix(line, "# ")
+			scenario["name"] = strings.TrimSpace(scenario["name"].(string))
+			break
+		}
+	}
+
+	// If no heading found, use filename
+	if scenario["name"] == nil || scenario["name"] == "" {
+		baseName := strings.TrimSuffix(filename, ".md")
+		scenario["name"] = baseName
+	}
+
+	// Extract metadata fields using regex
+	idPattern := regexp.MustCompile(`\*\*ID\*\*:\s*(.+)`)
+	enablerIDPattern := regexp.MustCompile(`\*\*Enabler ID\*\*:\s*(.+)`)
+	enablerNamePattern := regexp.MustCompile(`\*\*Enabler Name\*\*:\s*(.+)`)
+	featurePattern := regexp.MustCompile(`\*\*Feature\*\*:\s*(.+)`)
+	priorityPattern := regexp.MustCompile(`\*\*Priority\*\*:\s*(.+)`)
+	statusPattern := regexp.MustCompile(`\*\*Status\*\*:\s*(.+)`)
+	automationPattern := regexp.MustCompile(`\*\*Automation\*\*:\s*(.+)`)
+	requirementIDsPattern := regexp.MustCompile(`\*\*Requirement IDs\*\*:\s*(.+)`)
+	tagsPattern := regexp.MustCompile(`\*\*Tags\*\*:\s*(.+)`)
+	lastExecutedPattern := regexp.MustCompile(`\*\*Last Executed\*\*:\s*(.+)`)
+	executionTimePattern := regexp.MustCompile(`\*\*Execution Time\*\*:\s*(.+)`)
+
+	if match := idPattern.FindStringSubmatch(content); len(match) > 1 {
+		scenario["id"] = strings.TrimSpace(match[1])
+	} else {
+		// Try to extract ID from filename
+		scenario["id"] = strings.TrimSuffix(filename, ".md")
+	}
+
+	if match := enablerIDPattern.FindStringSubmatch(content); len(match) > 1 {
+		scenario["enablerId"] = strings.TrimSpace(match[1])
+	}
+
+	if match := enablerNamePattern.FindStringSubmatch(content); len(match) > 1 {
+		scenario["enablerName"] = strings.TrimSpace(match[1])
+	}
+
+	if match := featurePattern.FindStringSubmatch(content); len(match) > 1 {
+		scenario["feature"] = strings.TrimSpace(match[1])
+	}
+
+	if match := priorityPattern.FindStringSubmatch(content); len(match) > 1 {
+		scenario["priority"] = strings.TrimSpace(match[1])
+	}
+
+	if match := statusPattern.FindStringSubmatch(content); len(match) > 1 {
+		scenario["status"] = strings.TrimSpace(match[1])
+	}
+
+	if match := automationPattern.FindStringSubmatch(content); len(match) > 1 {
+		scenario["automation"] = strings.TrimSpace(match[1])
+	}
+
+	if match := requirementIDsPattern.FindStringSubmatch(content); len(match) > 1 {
+		reqIds := strings.Split(strings.TrimSpace(match[1]), ",")
+		var trimmedIds []string
+		for _, id := range reqIds {
+			trimmedIds = append(trimmedIds, strings.TrimSpace(id))
+		}
+		scenario["requirementIds"] = trimmedIds
+	}
+
+	if match := tagsPattern.FindStringSubmatch(content); len(match) > 1 {
+		tags := strings.Split(strings.TrimSpace(match[1]), ",")
+		var trimmedTags []string
+		for _, tag := range tags {
+			trimmedTags = append(trimmedTags, strings.TrimSpace(tag))
+		}
+		scenario["tags"] = trimmedTags
+	}
+
+	if match := lastExecutedPattern.FindStringSubmatch(content); len(match) > 1 {
+		scenario["lastExecuted"] = strings.TrimSpace(match[1])
+	}
+
+	if match := executionTimePattern.FindStringSubmatch(content); len(match) > 1 {
+		timeStr := strings.TrimSuffix(strings.TrimSpace(match[1]), "ms")
+		if t, err := strconv.ParseFloat(timeStr, 64); err == nil {
+			scenario["executionTime"] = t
+		}
+	}
+
+	// Extract Gherkin content
+	gherkinPattern := regexp.MustCompile("(?s)```gherkin\\s*(.+?)```")
+	if match := gherkinPattern.FindStringSubmatch(content); len(match) > 1 {
+		scenario["gherkin"] = strings.TrimSpace(match[1])
+	}
+
+	return scenario
 }
 
 // splitMultiCapabilityFile splits a file with multiple capabilities into separate files
@@ -2010,9 +2859,11 @@ func parseMarkdownCapabilities(filename, path, content string) []FileCapability 
 	}
 
 	// Determine which heading level to split on
-	// If there's only one # heading but multiple ## headings, split on ##
-	// Otherwise split on #
-	splitOnH2 := (h1Count <= 1 && h2Count > 1)
+	// If there's exactly 1 # heading with ## subsections, this is a standard SAWai
+	// capability document (# Title, ## Metadata, ## Business Context, etc.) - treat as single capability
+	// If there are multiple # headings, split on # (multiple capabilities in one file)
+	// If there are NO # headings but multiple ## headings, split on ## (legacy format)
+	splitOnH2 := (h1Count == 0 && h2Count > 1)
 
 	var capabilityBlocks []struct {
 		name    string
@@ -2160,6 +3011,23 @@ func parseSingleCapability(filename, path, content, name string) FileCapability 
 			continue
 		}
 
+		// Look for Storyboard Reference field
+		if strings.HasPrefix(trimmedLineLower, "**storyboard reference:**") || strings.HasPrefix(trimmedLineLower, "**storyboard reference**:") ||
+			strings.HasPrefix(trimmedLineLower, "storyboard reference:") ||
+			strings.HasPrefix(trimmedLineLower, "- **storyboard reference**:") || strings.HasPrefix(trimmedLineLower, "- **storyboard reference:**") {
+			storyRef := trimmedLine
+			storyRef = strings.TrimPrefix(storyRef, "- ")
+			// Remove all possible storyboard reference prefixes
+			for _, prefix := range []string{"**Storyboard Reference:**", "**storyboard reference:**", "**Storyboard Reference**:", "**storyboard reference**:", "Storyboard Reference:", "storyboard reference:"} {
+				if strings.HasPrefix(storyRef, prefix) {
+					storyRef = strings.TrimPrefix(storyRef, prefix)
+					break
+				}
+			}
+			cap.Fields["Storyboard Reference"] = strings.TrimSpace(storyRef)
+			continue
+		}
+
 		// Add line to current section content
 		if currentSection != "" {
 			sectionContent = append(sectionContent, line)
@@ -2205,6 +3073,15 @@ func stripMetadataFromContent(content string) string {
 		if strings.HasPrefix(trimmedLineLower, "**description:**") ||
 			strings.HasPrefix(trimmedLineLower, "**description**:") ||
 			strings.HasPrefix(trimmedLineLower, "description:") {
+			continue
+		}
+
+		// Skip storyboard reference lines
+		if strings.HasPrefix(trimmedLineLower, "**storyboard reference:**") ||
+			strings.HasPrefix(trimmedLineLower, "**storyboard reference**:") ||
+			strings.HasPrefix(trimmedLineLower, "storyboard reference:") ||
+			strings.HasPrefix(trimmedLineLower, "- **storyboard reference**:") ||
+			strings.HasPrefix(trimmedLineLower, "- **storyboard reference:**") {
 			continue
 		}
 
@@ -3102,31 +3979,21 @@ func (h *Handler) HandleActivateAIPreset(w http.ResponseWriter, r *http.Request)
 	})
 }
 
-// AnalyzeCapabilitiesRequest represents the request for analyzing capabilities
-type AnalyzeCapabilitiesRequest struct {
-	Files                []SpecificationFile `json:"files"`
-	AnthropicKey         string              `json:"anthropic_key"`
-	ExistingCapabilities []string            `json:"existingCapabilities"`
-}
-
-// CapabilitySuggestion represents a suggested capability
-type CapabilitySuggestion struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Type        string `json:"type"` // capability, feature, or enabler
-	Rationale   string `json:"rationale"`
-}
-
-// HandleAnalyzeCapabilities handles POST /analyze-capabilities
-func (h *Handler) HandleAnalyzeCapabilities(w http.ResponseWriter, r *http.Request) {
-	var req AnalyzeCapabilitiesRequest
+// HandleAnalyzeConception handles POST /analyze-conception
+// Reads conception files and generates capability proposals using Capability-Driven Architecture Map
+func (h *Handler) HandleAnalyzeConception(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		WorkspacePath        string   `json:"workspacePath"`
+		AnthropicKey         string   `json:"anthropic_key"`
+		ExistingCapabilities []string `json:"existingCapabilities"`
+	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	if len(req.Files) == 0 {
-		http.Error(w, "files are required", http.StatusBadRequest)
+	if req.WorkspacePath == "" {
+		http.Error(w, "workspacePath is required", http.StatusBadRequest)
 		return
 	}
 
@@ -3135,51 +4002,141 @@ func (h *Handler) HandleAnalyzeCapabilities(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Combine all file contents
-	var allContent strings.Builder
-	allContent.WriteString("# Existing Specification Files\n\n")
-	for _, file := range req.Files {
-		allContent.WriteString(fmt.Sprintf("## File: %s\n\n%s\n\n---\n\n", file.Filename, file.Content))
+	// Get current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+		return
 	}
 
-	// Add existing capabilities
+	// Build path to conception folder
+	conceptionPath := filepath.Join(cwd, req.WorkspacePath, "conception")
+
+	// Check if conception folder exists
+	if _, err := os.Stat(conceptionPath); os.IsNotExist(err) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"suggestions": []interface{}{},
+			"message":     "No conception folder found. Please create ideas, vision, and storyboard content first.",
+		})
+		return
+	}
+
+	// Read all markdown files from conception folder
+	entries, err := os.ReadDir(conceptionPath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to read conception folder: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	var allContent strings.Builder
+	allContent.WriteString("# Conception Phase Documents\n\n")
+	allContent.WriteString("These documents represent the ideation, vision, and value propositions for the system.\n\n")
+
+	fileCount := 0
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		fileName := entry.Name()
+		if !strings.HasSuffix(strings.ToLower(fileName), ".md") {
+			continue
+		}
+
+		filePath := filepath.Join(conceptionPath, fileName)
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			continue
+		}
+
+		// Categorize the file type
+		var fileType string
+		switch {
+		case strings.HasPrefix(fileName, "VIS-"):
+			fileType = "Vision Statement"
+		case strings.HasPrefix(fileName, "STRAT-"):
+			fileType = "Strategic Theme"
+		case strings.HasPrefix(fileName, "MKT-"):
+			fileType = "Market Context"
+		case strings.HasPrefix(fileName, "STORY-"):
+			fileType = "User Story/Storyboard"
+		case strings.HasPrefix(fileName, "IDEA-"):
+			fileType = "Ideation Card"
+		case strings.Contains(fileName, "INDEX"):
+			fileType = "Index/Overview"
+		default:
+			fileType = "Conception Document"
+		}
+
+		allContent.WriteString(fmt.Sprintf("## %s: %s\n\n%s\n\n---\n\n", fileType, fileName, string(content)))
+		fileCount++
+	}
+
+	if fileCount == 0 {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"suggestions": []interface{}{},
+			"message":     "No markdown files found in conception folder. Please create ideas, vision, and storyboard content first.",
+		})
+		return
+	}
+
+	// Add existing capabilities to avoid duplicates
 	if len(req.ExistingCapabilities) > 0 {
-		allContent.WriteString("# Existing Capabilities\n\n")
+		allContent.WriteString("# Existing Capabilities (Do NOT suggest these)\n\n")
 		for _, cap := range req.ExistingCapabilities {
 			allContent.WriteString(fmt.Sprintf("- %s\n", cap))
 		}
 		allContent.WriteString("\n")
 	}
 
-	// Create prompt for Claude
-	prompt := fmt.Sprintf(`Analyze the following specification files and suggest new capabilities, features, or enablers that should be added based on the content.
+	// Create Capability-Driven Architecture Map prompt
+	prompt := fmt.Sprintf(`You are a software architect using the Capability-Driven Architecture Map methodology to decompose abstract software ideas into concrete capabilities.
+
+A Capability-Driven Architecture Map visualizes WHAT the system must be able to do (capabilities) before focusing on HOW it is built. It creates a clear lineage from:
+  idea → value → capability → enabler → module → component
+
+Your task is to analyze the conception phase documents below and propose capabilities based on the ideas, visions, stories, and themes described.
 
 %s
 
-Based on your analysis, suggest 3-5 new items that are NOT already in the existing capabilities list. For each suggestion, provide:
-1. A clear name
-2. A description of what it does
-3. The type (capability, feature, or enabler)
-4. A rationale for why it should be added
+Based on your analysis of these conception documents, propose 3-7 NEW capabilities that:
+1. Represent distinct business functions the system must perform
+2. Are user-centric and meaningful to end users or business stakeholders
+3. Are largely self-contained with clear boundaries
+4. Are at the right level of granularity (not too broad like "entire application", not too narrow like "single function")
+5. Follow common capability patterns like: User Management, Data Management, Integration, Reporting, Communication, Security, Configuration
 
-Return your response as a JSON array with this exact format:
+For each capability, provide:
+1. A clear, business-focused name (noun-based, e.g., "User Authentication", "Report Generation")
+2. A comprehensive description of what business value it delivers
+3. The rationale explaining how it derives from the conception documents
+4. Key success metrics that would indicate the capability is working
+
+Return your response as a JSON object with this exact format:
 {
   "suggestions": [
     {
-      "name": "Example Name",
-      "description": "What this capability/feature/enabler does",
+      "name": "Capability Name",
+      "description": "Detailed description of what this capability enables users to do and what business value it provides",
       "type": "capability",
-      "rationale": "Why this should be added based on the specifications"
+      "rationale": "How this capability was derived from the conception documents - reference specific ideas, stories, or themes",
+      "successMetrics": ["Metric 1", "Metric 2"]
     }
-  ]
+  ],
+  "analysis": {
+    "totalConceptionDocuments": %d,
+    "keyThemes": ["theme1", "theme2"],
+    "coverageNotes": "Brief notes on how well the proposed capabilities cover the conception documents"
+  }
 }
 
-Only return the JSON, no other text.`, allContent.String())
+Only return the JSON, no other text.`, allContent.String(), fileCount)
 
 	// Call Claude API
 	requestBody := map[string]interface{}{
 		"model":      "claude-sonnet-4-20250514",
-		"max_tokens": 4096,
+		"max_tokens": 8192,
 		"messages": []map[string]string{
 			{
 				"role":    "user",
@@ -3204,7 +4161,7 @@ Only return the JSON, no other text.`, allContent.String())
 	httpReq.Header.Set("x-api-key", req.AnthropicKey)
 	httpReq.Header.Set("anthropic-version", "2023-06-01")
 
-	client := &http.Client{Timeout: 60 * time.Second}
+	client := &http.Client{Timeout: 120 * time.Second}
 	resp, err := client.Do(httpReq)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to call Claude API: %v", err), http.StatusInternalServerError)
@@ -3247,17 +4204,239 @@ Only return the JSON, no other text.`, allContent.String())
 
 	jsonStr := responseText[jsonStart : jsonEnd+1]
 
-	var result struct {
-		Suggestions []CapabilitySuggestion `json:"suggestions"`
-	}
+	// Return the raw JSON response
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(jsonStr))
+}
 
-	if err := json.Unmarshal([]byte(jsonStr), &result); err != nil {
-		http.Error(w, fmt.Sprintf("failed to parse suggestions: %v", err), http.StatusInternalServerError)
+// HandleAnalyzeCapabilities handles POST /analyze-capabilities
+// Reads capability files and generates enabler proposals using AI analysis
+func (h *Handler) HandleAnalyzeCapabilities(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		WorkspacePath     string   `json:"workspacePath"`
+		AnthropicKey      string   `json:"anthropic_key"`
+		ExistingEnablers  []string `json:"existingEnablers"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
+	if req.WorkspacePath == "" {
+		http.Error(w, "workspacePath is required", http.StatusBadRequest)
+		return
+	}
+
+	if req.AnthropicKey == "" {
+		http.Error(w, "anthropic_key is required", http.StatusBadRequest)
+		return
+	}
+
+	// Get current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Build path to definition folder where CAP-*.md files are stored
+	definitionPath := filepath.Join(cwd, req.WorkspacePath, "definition")
+
+	// Check if definition folder exists
+	if _, err := os.Stat(definitionPath); os.IsNotExist(err) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"suggestions": []interface{}{},
+			"message":     "No definition folder found. Please create capabilities first using the Capabilities page.",
+		})
+		return
+	}
+
+	// Read all CAP-*.md files from definition folder
+	entries, err := os.ReadDir(definitionPath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to read definition folder: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	var allContent strings.Builder
+	allContent.WriteString("# Capability Documents\n\n")
+	allContent.WriteString("These documents represent the capabilities defined for the system. Analyze them to propose enablers.\n\n")
+
+	fileCount := 0
+	var capabilityNames []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		fileName := entry.Name()
+		// Only process CAP-*.md files (capability files)
+		if !strings.HasPrefix(strings.ToUpper(fileName), "CAP") || !strings.HasSuffix(strings.ToLower(fileName), ".md") {
+			continue
+		}
+
+		filePath := filepath.Join(definitionPath, fileName)
+		content, err := os.ReadFile(filePath)
+		if err != nil {
+			continue
+		}
+
+		// Extract capability name from content
+		lines := strings.Split(string(content), "\n")
+		capName := fileName
+		for _, line := range lines {
+			if strings.HasPrefix(line, "# ") {
+				capName = strings.TrimPrefix(line, "# ")
+				break
+			}
+		}
+		capabilityNames = append(capabilityNames, capName)
+
+		allContent.WriteString(fmt.Sprintf("---\n## Capability: %s (File: %s)\n\n", capName, fileName))
+		allContent.WriteString(string(content))
+		allContent.WriteString("\n\n")
+		fileCount++
+	}
+
+	if fileCount == 0 {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"suggestions": []interface{}{},
+			"message":     "No capability files (CAP-*.md) found in the definition folder. Please create capabilities first.",
+		})
+		return
+	}
+
+	// Build the prompt for Claude
+	existingEnablersList := "None"
+	if len(req.ExistingEnablers) > 0 {
+		existingEnablersList = strings.Join(req.ExistingEnablers, ", ")
+	}
+
+	prompt := fmt.Sprintf(`You are an expert software architect using the SAWai (Scaled Agile With AI) methodology.
+
+Analyze the following capability documents and propose enablers for each capability.
+
+**Enabler Definition (SAWai):**
+- Enablers are technical implementations that realize capabilities through specific functionality
+- Each enabler should map to actual code components, services, or modules
+- Enablers contain functional and non-functional requirements with testable acceptance criteria
+
+**Your Task:**
+1. Analyze each capability document to understand its business purpose and requirements
+2. For each capability, propose 1-3 enablers that would implement it
+3. Each enabler should be:
+   - Technical in focus (describes HOW, not WHY)
+   - Implementation-ready with enough detail for development
+   - Testable with clear inputs/outputs
+   - Mapped to specific technical components
+
+**CAPABILITY DOCUMENTS:**
+%s
+
+**EXISTING ENABLERS TO AVOID DUPLICATING:**
+%s
+
+**RESPONSE FORMAT (JSON only, no markdown):**
+{
+  "suggestions": [
+    {
+      "name": "Enabler Name (use verb phrases like 'Handle Authentication', 'Process Payments')",
+      "purpose": "One paragraph describing what this enabler does technically",
+      "capabilityName": "Name of the parent capability this enabler belongs to",
+      "capabilityId": "Filename of the capability (e.g., CAP-USER-MGMT-1.md)",
+      "rationale": "Why this enabler is needed to realize the capability",
+      "requirements": ["Suggested functional requirement 1", "Suggested functional requirement 2", "Suggested functional requirement 3"]
+    }
+  ],
+  "analysis": {
+    "totalCapabilities": %d,
+    "analyzedCapabilities": %s,
+    "coverageNotes": "Brief notes on coverage and any gaps identified"
+  }
+}
+
+Provide ONLY valid JSON in your response, no additional text or markdown formatting.`,
+		allContent.String(),
+		existingEnablersList,
+		fileCount,
+		fmt.Sprintf(`["%s"]`, strings.Join(capabilityNames, `", "`)),
+	)
+
+	// Call Claude API
+	requestBody := map[string]interface{}{
+		"model":      "claude-sonnet-4-20250514",
+		"max_tokens": 4096,
+		"messages": []map[string]string{
+			{
+				"role":    "user",
+				"content": prompt,
+			},
+		},
+	}
+
+	jsonBody, err := json.Marshal(requestBody)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to marshal request: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	httpReq, err := http.NewRequest("POST", "https://api.anthropic.com/v1/messages", strings.NewReader(string(jsonBody)))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to create request: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("x-api-key", req.AnthropicKey)
+	httpReq.Header.Set("anthropic-version", "2023-06-01")
+
+	client := &http.Client{Timeout: 120 * time.Second}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to call Claude API: %v", err), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		http.Error(w, fmt.Sprintf("Claude API error: %s", string(body)), resp.StatusCode)
+		return
+	}
+
+	var claudeResp struct {
+		Content []struct {
+			Text string `json:"text"`
+		} `json:"content"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&claudeResp); err != nil {
+		http.Error(w, fmt.Sprintf("failed to decode Claude response: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	if len(claudeResp.Content) == 0 {
+		http.Error(w, "empty response from Claude", http.StatusInternalServerError)
+		return
+	}
+
+	// Parse the JSON response from Claude
+	responseText := claudeResp.Content[0].Text
+
+	// Extract JSON from response (in case there's extra text)
+	jsonStart := strings.Index(responseText, "{")
+	jsonEnd := strings.LastIndex(responseText, "}")
+	if jsonStart == -1 || jsonEnd == -1 {
+		http.Error(w, "invalid JSON in Claude response", http.StatusInternalServerError)
+		return
+	}
+
+	jsonStr := responseText[jsonStart : jsonEnd+1]
+
+	// Return the raw JSON response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	w.Write([]byte(jsonStr))
 }
 
 // HandleSaveSpecifications handles POST /save-specifications
@@ -4698,4 +5877,231 @@ func (h *Handler) HandleGetWorkspaceConfig(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(config)
+}
+
+// parseCapabilityFromContent extracts capability information from markdown content
+func parseCapabilityFromContent(filename, content string) CapabilitySpec {
+	cap := CapabilitySpec{
+		Type:                 "Capability",
+		Status:               "Planned",
+		Enablers:             []string{},
+		UpstreamDependencies: []string{},
+		DownstreamImpacts:    []string{},
+	}
+
+	lines := strings.Split(content, "\n")
+
+	// Extract name from first # heading
+	for _, line := range lines {
+		if strings.HasPrefix(line, "# ") {
+			cap.Name = strings.TrimPrefix(line, "# ")
+			cap.Name = strings.TrimSpace(cap.Name)
+			break
+		}
+	}
+
+	// If no heading found, use filename
+	if cap.Name == "" {
+		baseName := strings.TrimSuffix(filename, ".md")
+		cap.Name = strings.ReplaceAll(baseName, "-", " ")
+		cap.Name = strings.ReplaceAll(cap.Name, "_", " ")
+	}
+
+	// Extract metadata fields using regex
+	idPattern := regexp.MustCompile(`\*\*ID\*\*:\s*(CAP-\d+)`)
+	statusPattern := regexp.MustCompile(`\*\*Status\*\*:\s*(.+)`)
+	namePattern := regexp.MustCompile(`\*\*Name\*\*:\s*(.+)`)
+
+	if match := idPattern.FindStringSubmatch(content); len(match) > 1 {
+		cap.ID = strings.TrimSpace(match[1])
+	}
+
+	if match := statusPattern.FindStringSubmatch(content); len(match) > 1 {
+		cap.Status = strings.TrimSpace(match[1])
+	}
+
+	if match := namePattern.FindStringSubmatch(content); len(match) > 1 {
+		cap.Name = strings.TrimSpace(match[1])
+	}
+
+	// If no ID found, generate from filename
+	if cap.ID == "" {
+		// Extract numeric part from filename like "123456-capability.md" or "CAP-123456.md"
+		numPattern := regexp.MustCompile(`(\d{4,})`)
+		if match := numPattern.FindStringSubmatch(filename); len(match) > 1 {
+			cap.ID = "CAP-" + match[1]
+		} else {
+			// Fallback: generate a hash-based ID
+			cap.ID = fmt.Sprintf("CAP-%06d", hashString(filename)%1000000)
+		}
+	}
+
+	// Parse enablers table
+	// Look for ## Enablers section and parse the table
+	inEnablersSection := false
+	inTable := false
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+
+		if strings.HasPrefix(trimmedLine, "## Enablers") {
+			inEnablersSection = true
+			continue
+		}
+
+		if inEnablersSection && strings.HasPrefix(trimmedLine, "##") && !strings.HasPrefix(trimmedLine, "## Enablers") {
+			inEnablersSection = false
+			continue
+		}
+
+		if inEnablersSection && strings.HasPrefix(trimmedLine, "|") {
+			inTable = true
+			// Skip header and separator rows
+			if strings.Contains(trimmedLine, "---") || strings.Contains(strings.ToLower(trimmedLine), "| id") {
+				continue
+			}
+
+			// Parse table row for enabler IDs
+			parts := strings.Split(trimmedLine, "|")
+			for _, part := range parts {
+				part = strings.TrimSpace(part)
+				if strings.HasPrefix(part, "ENB-") {
+					cap.Enablers = append(cap.Enablers, part)
+				}
+			}
+		} else if inTable && !strings.HasPrefix(trimmedLine, "|") {
+			inTable = false
+		}
+	}
+
+	// Parse upstream dependencies table
+	inUpstreamSection := false
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+
+		if strings.Contains(trimmedLine, "Internal Upstream Dependency") || strings.Contains(trimmedLine, "Upstream Dependencies") {
+			inUpstreamSection = true
+			continue
+		}
+
+		if inUpstreamSection && strings.HasPrefix(trimmedLine, "###") && !strings.Contains(trimmedLine, "Upstream") {
+			inUpstreamSection = false
+			continue
+		}
+
+		if inUpstreamSection && strings.HasPrefix(trimmedLine, "|") {
+			// Skip header and separator rows
+			if strings.Contains(trimmedLine, "---") || strings.Contains(strings.ToLower(trimmedLine), "capability id") {
+				continue
+			}
+
+			// Parse table row for capability IDs
+			capIDPattern := regexp.MustCompile(`CAP-\d+`)
+			matches := capIDPattern.FindAllString(trimmedLine, -1)
+			cap.UpstreamDependencies = append(cap.UpstreamDependencies, matches...)
+		}
+	}
+
+	// Parse downstream impacts table
+	inDownstreamSection := false
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+
+		if strings.Contains(trimmedLine, "Internal Downstream Impact") || strings.Contains(trimmedLine, "Downstream Impacts") {
+			inDownstreamSection = true
+			continue
+		}
+
+		if inDownstreamSection && strings.HasPrefix(trimmedLine, "###") && !strings.Contains(trimmedLine, "Downstream") {
+			inDownstreamSection = false
+			continue
+		}
+
+		if inDownstreamSection && strings.HasPrefix(trimmedLine, "|") {
+			// Skip header and separator rows
+			if strings.Contains(trimmedLine, "---") || strings.Contains(strings.ToLower(trimmedLine), "capability id") {
+				continue
+			}
+
+			// Parse table row for capability IDs
+			capIDPattern := regexp.MustCompile(`CAP-\d+`)
+			matches := capIDPattern.FindAllString(trimmedLine, -1)
+			cap.DownstreamImpacts = append(cap.DownstreamImpacts, matches...)
+		}
+	}
+
+	return cap
+}
+
+// parseEnablerFromContent extracts enabler information from markdown content
+func parseEnablerFromContent(filename, content string) EnablerSpec {
+	enb := EnablerSpec{
+		Type:   "Enabler",
+		Status: "Planned",
+	}
+
+	lines := strings.Split(content, "\n")
+
+	// Extract name from first # heading
+	for _, line := range lines {
+		if strings.HasPrefix(line, "# ") {
+			enb.Name = strings.TrimPrefix(line, "# ")
+			enb.Name = strings.TrimSpace(enb.Name)
+			break
+		}
+	}
+
+	// If no heading found, use filename
+	if enb.Name == "" {
+		baseName := strings.TrimSuffix(filename, ".md")
+		enb.Name = strings.ReplaceAll(baseName, "-", " ")
+		enb.Name = strings.ReplaceAll(enb.Name, "_", " ")
+	}
+
+	// Extract metadata fields using regex
+	idPattern := regexp.MustCompile(`\*\*ID\*\*:\s*(ENB-\d+)`)
+	capIDPattern := regexp.MustCompile(`\*\*Capability ID\*\*:\s*(CAP-\d+)`)
+	statusPattern := regexp.MustCompile(`\*\*Status\*\*:\s*(.+)`)
+	namePattern := regexp.MustCompile(`\*\*Name\*\*:\s*(.+)`)
+
+	if match := idPattern.FindStringSubmatch(content); len(match) > 1 {
+		enb.ID = strings.TrimSpace(match[1])
+	}
+
+	if match := capIDPattern.FindStringSubmatch(content); len(match) > 1 {
+		enb.CapabilityID = strings.TrimSpace(match[1])
+	}
+
+	if match := statusPattern.FindStringSubmatch(content); len(match) > 1 {
+		enb.Status = strings.TrimSpace(match[1])
+	}
+
+	if match := namePattern.FindStringSubmatch(content); len(match) > 1 {
+		enb.Name = strings.TrimSpace(match[1])
+	}
+
+	// If no ID found, generate from filename
+	if enb.ID == "" {
+		// Extract numeric part from filename like "654321-enabler.md" or "ENB-654321.md"
+		numPattern := regexp.MustCompile(`(\d{4,})`)
+		if match := numPattern.FindStringSubmatch(filename); len(match) > 1 {
+			enb.ID = "ENB-" + match[1]
+		} else {
+			// Fallback: generate a hash-based ID
+			enb.ID = fmt.Sprintf("ENB-%06d", hashString(filename)%1000000)
+		}
+	}
+
+	return enb
+}
+
+// hashString creates a simple hash for generating fallback IDs
+func hashString(s string) int {
+	h := 0
+	for _, c := range s {
+		h = 31*h + int(c)
+	}
+	if h < 0 {
+		h = -h
+	}
+	return h
 }

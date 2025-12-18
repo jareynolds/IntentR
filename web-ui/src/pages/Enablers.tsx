@@ -122,6 +122,23 @@ export const Enablers: React.FC = () => {
   // Drag and drop state
   const [draggedSpecIndex, setDraggedSpecIndex] = useState<number | null>(null);
 
+  // Proposed enablers from AI analysis
+  const [proposedEnablers, setProposedEnablers] = useState<Array<{
+    name: string;
+    purpose: string;
+    capabilityName: string;
+    capabilityId: string;
+    rationale: string;
+    requirements?: string[];
+  }>>([]);
+  const [showProposedEnablers, setShowProposedEnablers] = useState(false);
+  const [isAnalyzingCapabilities, setIsAnalyzingCapabilities] = useState(false);
+  const [analysisInfo, setAnalysisInfo] = useState<{
+    totalCapabilities?: number;
+    analyzedCapabilities?: string[];
+    coverageNotes?: string;
+  } | null>(null);
+
   // Inline requirement for enabler form
   interface InlineRequirement {
     id: string;
@@ -289,10 +306,10 @@ export const Enablers: React.FC = () => {
   };
 
   // Load enablers from workspace's definition folder (ENB-*.md files)
-  const loadFileEnablers = async () => {
+  const loadFileEnablers = async (): Promise<FileEnabler[]> => {
     if (!currentWorkspace?.projectFolder) {
       setFileEnablers([]);
-      return;
+      return [];
     }
 
     setLoadingFileEnablers(true);
@@ -324,10 +341,13 @@ export const Enablers: React.FC = () => {
             enablerId: enb.enablerId || enb.filename.replace(/\.md$/, ''),
           }));
         setFileEnablers(enbs);
+        return enbs;
       }
+      return [];
     } catch (err) {
       console.error('Failed to load enablers from workspace:', err);
       setFileEnablers([]);
+      return [];
     } finally {
       setLoadingFileEnablers(false);
     }
@@ -386,8 +406,8 @@ export const Enablers: React.FC = () => {
 
     setShowEnablerForm(true);
 
-    // Trigger AI capability suggestion
-    if (enabler.name) {
+    // Trigger AI capability suggestion only if no capability ID exists
+    if (!enabler.capabilityId && enabler.name && capabilities.length > 0) {
       suggestBestCapability(enabler.name, enabler.purpose || '');
     }
   };
@@ -500,9 +520,41 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
     }
   };
 
-  // Confirm the AI-suggested capability
-  const confirmCapabilitySuggestion = () => {
+  // Confirm the AI-suggested capability and save it
+  const confirmCapabilitySuggestion = async () => {
     setCapabilityNeedsConfirmation(false);
+
+    // Save the capability reference to the file immediately
+    if (editingFileEnabler && suggestedCapabilityId) {
+      const capability = capabilities.find(c => c.capabilityId === suggestedCapabilityId);
+      const capabilityName = capability?.name || suggestedCapabilityId;
+
+      try {
+        await fetch(`${INTEGRATION_URL}/update-enabler-capability`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            path: editingFileEnabler.path,
+            capabilityId: suggestedCapabilityId,
+            capabilityName: capabilityName,
+          }),
+        });
+        // Refresh the enablers list to get updated data
+        const refreshedEnablers = await loadFileEnablers();
+
+        // Update editingFileEnabler with the refreshed data
+        const refreshedEnabler = refreshedEnablers.find(
+          (e) => e.path === editingFileEnabler.path
+        );
+        if (refreshedEnabler) {
+          setEditingFileEnabler(refreshedEnabler);
+          // Also update the form capability ID with the new value
+          setFormCapabilityId(refreshedEnabler.capabilityId || suggestedCapabilityId);
+        }
+      } catch (err) {
+        console.error('Failed to save capability reference:', err);
+      }
+    }
   };
 
   const handleEditEnabler = (enabler: Enabler) => {
@@ -759,9 +811,165 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
     }
   };
 
-  // Analyze specifications handler - uses context for persistence
+  // Analyze capabilities to propose enablers
   const handleAnalyzeSpecifications = async () => {
-    await loadSpecifications();
+    if (!currentWorkspace?.projectFolder) {
+      alert('Please set a project folder for this workspace first.');
+      return;
+    }
+
+    // Get API key
+    const anthropicKey = localStorage.getItem('anthropic_api_key') || '';
+    if (!anthropicKey) {
+      alert('Please add your Anthropic API key in the Settings page.');
+      return;
+    }
+
+    setIsAnalyzingCapabilities(true);
+    setProposedEnablers([]);
+    setAnalysisInfo(null);
+
+    try {
+      // Call backend to analyze capabilities and propose enablers
+      const response = await fetch(`${INTEGRATION_URL}/analyze-capabilities`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+          anthropic_key: anthropicKey,
+          existingEnablers: fileEnablers.map(e => e.name),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to analyze capabilities');
+      }
+
+      const result = await response.json();
+
+      // Check for message (no files found)
+      if (result.message && (!result.suggestions || result.suggestions.length === 0)) {
+        alert(result.message);
+        return;
+      }
+
+      if (result.suggestions && result.suggestions.length > 0) {
+        setProposedEnablers(result.suggestions);
+        setShowProposedEnablers(true);
+
+        // Store analysis info if available
+        if (result.analysis) {
+          setAnalysisInfo(result.analysis);
+        }
+      } else {
+        alert('Analysis complete. No new enablers suggested - your capabilities may already be well covered by existing enablers.');
+      }
+    } catch (err) {
+      console.error('Failed to analyze capabilities:', err);
+      alert(`Failed to analyze: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setIsAnalyzingCapabilities(false);
+    }
+  };
+
+  // Accept a proposed enabler and save as markdown file
+  const handleAcceptProposedEnabler = async (enabler: typeof proposedEnablers[0]) => {
+    if (!currentWorkspace?.projectFolder) return;
+
+    // Generate filename: ENB-NAME-(n).md
+    const safeName = enabler.name
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    const sequenceNum = fileEnablers.length + proposedEnablers.indexOf(enabler) + 1;
+    const fileName = `ENB-${safeName}-${sequenceNum}.md`;
+
+    // Generate markdown content following SAWai Enabler template
+    let markdown = `# ${enabler.name}\n\n`;
+    markdown += `## Metadata\n`;
+    markdown += `- **Name**: ${enabler.name}\n`;
+    markdown += `- **Type**: Enabler\n`;
+    markdown += `- **Capability**: ${enabler.capabilityName}\n`;
+    markdown += `- **Status**: Ready for Analysis\n`;
+    markdown += `- **Approval**: Pending\n`;
+    markdown += `- **Priority**: Medium\n`;
+    markdown += `- **Analysis Review**: Required\n`;
+    markdown += `- **Generated**: ${new Date().toLocaleString()}\n`;
+    markdown += `- **Source**: Capability Analysis\n\n`;
+    markdown += `## Technical Context\n\n`;
+    markdown += `### Purpose\n`;
+    markdown += `${enabler.purpose}\n\n`;
+    markdown += `### Rationale\n`;
+    markdown += `${enabler.rationale}\n\n`;
+    markdown += `## Functional Requirements\n`;
+    markdown += `| ID | Name | Requirement | Status | Priority | Approval |\n`;
+    markdown += `|----|------|-------------|--------|----------|----------|\n`;
+    if (enabler.requirements && enabler.requirements.length > 0) {
+      enabler.requirements.forEach((req, idx) => {
+        markdown += `| FR-${String(idx + 1).padStart(6, '0')} | Requirement ${idx + 1} | ${req} | Ready for Design | Medium | Pending |\n`;
+      });
+    } else {
+      markdown += `| | _To be defined_ | | | | |\n`;
+    }
+    markdown += `\n`;
+    markdown += `## Non-Functional Requirements\n`;
+    markdown += `| ID | Name | Requirement | Type | Status | Priority | Approval |\n`;
+    markdown += `|----|------|-------------|------|--------|----------|----------|\n`;
+    markdown += `| | _To be defined_ | | | | | |\n\n`;
+    markdown += `## Technical Specifications (Template)\n\n`;
+    markdown += `### API Technical Specifications\n`;
+    markdown += `| API Type | Operation | Endpoint | Description | Request | Response |\n`;
+    markdown += `|----------|-----------|----------|-------------|---------|----------|\n`;
+    markdown += `| | | | | | |\n\n`;
+    markdown += `## Acceptance Scenarios (Gherkin)\n\n`;
+    markdown += `\`\`\`gherkin\n`;
+    markdown += `Feature: ${enabler.name}\n`;
+    markdown += `  As a user\n`;
+    markdown += `  I want to ${enabler.purpose.toLowerCase()}\n`;
+    markdown += `  So that I can achieve the capability goals\n\n`;
+    markdown += `  Scenario: Basic functionality\n`;
+    markdown += `    Given the system is ready\n`;
+    markdown += `    When the user performs the action\n`;
+    markdown += `    Then the expected result should occur\n`;
+    markdown += `\`\`\`\n`;
+
+    try {
+      const response = await fetch(`${INTEGRATION_URL}/save-specifications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+          files: [{ fileName, content: markdown }],
+          subfolder: 'definition'
+        }),
+      });
+
+      if (response.ok) {
+        // Remove from proposed enablers
+        setProposedEnablers(prev => prev.filter(e => e.name !== enabler.name));
+        // Refresh file enablers
+        await loadFileEnablers();
+        alert(`✅ Created definition/${fileName}`);
+      } else {
+        throw new Error('Failed to save enabler file');
+      }
+    } catch (err) {
+      alert(`Failed to create enabler: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  // Accept all proposed enablers
+  const handleAcceptAllProposedEnablers = async () => {
+    for (const enabler of proposedEnablers) {
+      await handleAcceptProposedEnabler(enabler);
+    }
+    setShowProposedEnablers(false);
   };
 
   // Delete specification handler
@@ -1742,16 +1950,16 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
       <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
         <div>
           <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Enabler Management</h1>
-          <p className="text-body text-secondary">
+          <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
             Manage enablers, requirements, and acceptance criteria for your capabilities.
           </p>
         </div>
         <Button
           variant="secondary"
           onClick={handleAnalyzeSpecifications}
-          disabled={isAnalyzing}
+          disabled={isAnalyzingCapabilities}
         >
-          {isAnalyzing ? 'Analyzing...' : 'Analyze Specifications'}
+          {isAnalyzingCapabilities ? 'Analyzing...' : 'Analyze'}
         </Button>
       </div>
 
@@ -1777,6 +1985,112 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
         <strong>Enablers:</strong> Technical implementations that realize capabilities through specific functionality.
         Each enabler contains functional and non-functional requirements with testable acceptance criteria.
       </Alert>
+
+      {/* Proposed Enablers Section */}
+      {showProposedEnablers && proposedEnablers.length > 0 && (
+        <div style={{ marginBottom: '32px' }}>
+          <Card style={{ borderLeft: '4px solid var(--color-systemGreen)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
+              <div>
+                <h2 className="text-title1" style={{ marginBottom: '8px' }}>Proposed Enablers</h2>
+                <p className="text-body text-secondary">
+                  Based on analysis of your capability documents
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Button variant="primary" onClick={handleAcceptAllProposedEnablers}>
+                  Accept All ({proposedEnablers.length})
+                </Button>
+                <Button variant="secondary" onClick={() => setShowProposedEnablers(false)}>
+                  Dismiss
+                </Button>
+              </div>
+            </div>
+
+            {/* Analysis Info */}
+            {analysisInfo && (
+              <div style={{
+                padding: '12px 16px',
+                marginBottom: '16px',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(76, 217, 100, 0.08)',
+                border: '1px solid rgba(76, 217, 100, 0.2)',
+              }}>
+                <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                  {analysisInfo.totalCapabilities && (
+                    <span className="text-footnote">
+                      <strong>Capabilities Analyzed:</strong> {analysisInfo.totalCapabilities}
+                    </span>
+                  )}
+                  {analysisInfo.analyzedCapabilities && analysisInfo.analyzedCapabilities.length > 0 && (
+                    <span className="text-footnote">
+                      <strong>From:</strong> {analysisInfo.analyzedCapabilities.join(', ')}
+                    </span>
+                  )}
+                </div>
+                {analysisInfo.coverageNotes && (
+                  <p className="text-footnote text-secondary">{analysisInfo.coverageNotes}</p>
+                )}
+              </div>
+            )}
+
+            {/* Proposed Enabler Cards */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+              gap: '16px',
+            }}>
+              {proposedEnablers.map((enabler, index) => (
+                <Card key={index} style={{
+                  border: '1px solid var(--color-separator)',
+                  backgroundColor: 'var(--color-secondarySystemBackground)',
+                }}>
+                  <div style={{ marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
+                      <h3 className="text-headline">{enabler.name}</h3>
+                      <span style={{
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        fontWeight: 500,
+                        backgroundColor: 'rgba(76, 217, 100, 0.1)',
+                        color: 'var(--color-systemGreen)',
+                      }}>
+                        Enabler
+                      </span>
+                    </div>
+                    <p className="text-footnote text-secondary" style={{ marginBottom: '8px' }}>
+                      <strong>For Capability:</strong> {enabler.capabilityName}
+                    </p>
+                    <p className="text-subheadline" style={{ marginBottom: '8px' }}>{enabler.purpose}</p>
+                    <p className="text-footnote text-secondary">{enabler.rationale}</p>
+                    {enabler.requirements && enabler.requirements.length > 0 && (
+                      <div style={{ marginTop: '8px' }}>
+                        <p className="text-footnote" style={{ fontWeight: 500, marginBottom: '4px' }}>Suggested Requirements:</p>
+                        <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                          {enabler.requirements.slice(0, 3).map((req, idx) => (
+                            <li key={idx} className="text-footnote text-secondary">{req}</li>
+                          ))}
+                          {enabler.requirements.length > 3 && (
+                            <li className="text-footnote text-secondary">...and {enabler.requirements.length - 3} more</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    variant="primary"
+                    onClick={() => handleAcceptProposedEnabler(enabler)}
+                    style={{ width: '100%' }}
+                  >
+                    Accept & Create
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Specification Files from ./specifications folder */}
       {specifications.length > 0 && (

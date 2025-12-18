@@ -23,6 +23,7 @@ const PROXY_PATHS = {
   spec: '/api/spec',
   workspace: '/api/workspace',
   collaboration: '', // WebSocket handled separately
+  claudeProxy: '/api/claude-proxy', // Host-side service for executing scripts
 };
 
 // Direct URLs for development mode
@@ -34,6 +35,7 @@ const DIRECT_URLS = {
   spec: import.meta.env.VITE_SPECIFICATION_API_URL || 'http://localhost:4001',
   workspace: import.meta.env.VITE_SHARED_WORKSPACE_URL || 'http://localhost:4002',
   collaboration: import.meta.env.VITE_COLLABORATION_SERVER_URL || 'http://localhost:9084',
+  claudeProxy: import.meta.env.VITE_CLAUDE_PROXY_URL || 'http://localhost:9085',
 };
 
 // Base URLs - automatically selects based on mode
@@ -47,6 +49,7 @@ export const AUTH_URL = BASE_URLS.auth;
 export const SPEC_URL = BASE_URLS.spec;
 export const WORKSPACE_URL = BASE_URLS.workspace;
 export const COLLABORATION_URL = BASE_URLS.collaboration;
+export const CLAUDE_PROXY_URL = BASE_URLS.claudeProxy;
 
 // Create axios instances for each service
 const createClient = (baseURL: string): AxiosInstance => {

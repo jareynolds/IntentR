@@ -170,6 +170,156 @@ export const Ideation: React.FC = () => {
   // Track which workspace we've auto-loaded for
   const loadedForWorkspaceId = useRef<string | null>(null);
 
+  // Track if initial load is complete (to enable auto-save)
+  const initialLoadComplete = useRef(false);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Helper to get file ID from any block ID
+  const getFileIdFromBlockId = (id: string): string => {
+    const analyzedImgMatch = id.match(/^analyzed-img-([a-zA-Z0-9]+)-\d+$/);
+    const analyzedMatch = id.match(/^analyzed-([a-zA-Z0-9]+)-\d+$/);
+    if (analyzedImgMatch) return analyzedImgMatch[1];
+    if (analyzedMatch) return analyzedMatch[1];
+    return id.replace(/-/g, '');
+  };
+
+  // Auto-save function - saves a single card to its markdown file
+  const saveCardToFile = async (
+    block: TextBlock | ShapeBlock,
+    type: 'text' | 'shape',
+    allConnections: Connection[],
+    allTextBlocks: TextBlock[],
+    allImageBlocks: ImageBlock[],
+    allShapeBlocks: ShapeBlock[]
+  ) => {
+    if (!currentWorkspace?.projectFolder) return;
+
+    // Extract the ORIGINAL file ID, stripping any "analyzed-" or "analyzed-img-" prefix
+    // This ensures we update the original file instead of creating duplicates
+    const fileId = getFileIdFromBlockId(block.id);
+    const fileName = `IDEA-${fileId}.md`;
+
+    // Find connections for this block
+    const outgoingConnections = allConnections.filter(c => c.from === block.id);
+    const incomingConnections = allConnections.filter(c => c.to === block.id);
+
+    let content = '';
+    if (type === 'text') {
+      const textBlock = block as TextBlock;
+      content = `# ${textBlock.cardName || 'Ideation Card'}\n\n`;
+      content += `## Metadata\n`;
+      content += `- **ID**: IDEA-${fileId}\n`;
+      content += `- **Type**: Ideation Card\n`;
+      content += `- **Created**: ${new Date().toISOString().split('T')[0]}\n`;
+      content += `- **Workspace**: ${currentWorkspace?.name || 'Unknown'}\n`;
+      if (textBlock.tags && textBlock.tags.length > 0) {
+        content += `- **Tags**: ${textBlock.tags.join(', ')}\n`;
+      }
+      content += `- **Position**: (${Math.round(textBlock.x)}, ${Math.round(textBlock.y)})\n`;
+      content += `- **Size**: ${Math.round(textBlock.width)} × ${Math.round(textBlock.height)}\n`;
+      content += `\n## Description\n${textBlock.content || 'No description provided.'}\n`;
+    } else {
+      const shapeBlock = block as ShapeBlock;
+      content = `# Shape: ${shapeBlock.type}\n\n`;
+      content += `## Metadata\n`;
+      content += `- **ID**: IDEA-${fileId}\n`;
+      content += `- **Type**: Shape (${shapeBlock.type})\n`;
+      content += `- **Created**: ${new Date().toISOString().split('T')[0]}\n`;
+      content += `- **Workspace**: ${currentWorkspace?.name || 'Unknown'}\n`;
+      if (shapeBlock.tags && shapeBlock.tags.length > 0) {
+        content += `- **Tags**: ${shapeBlock.tags.join(', ')}\n`;
+      }
+      content += `\n## Properties\n`;
+      content += `- **Shape Type**: ${shapeBlock.type}\n`;
+      content += `- **Position**: (${Math.round(shapeBlock.x)}, ${Math.round(shapeBlock.y)})\n`;
+      content += `- **Size**: ${Math.round(shapeBlock.width)} × ${Math.round(shapeBlock.height)}\n`;
+      content += `- **Fill Color**: ${shapeBlock.fillColor}\n`;
+      content += `- **Stroke Color**: ${shapeBlock.strokeColor}\n`;
+      content += `- **Stroke Width**: ${shapeBlock.strokeWidth}px\n`;
+    }
+
+    // Add connections section
+    if (outgoingConnections.length > 0 || incomingConnections.length > 0) {
+      content += `\n## Connections\n`;
+
+      if (outgoingConnections.length > 0) {
+        content += `### Connected To\n`;
+        outgoingConnections.forEach(conn => {
+          const targetBlock = allTextBlocks.find(b => b.id === conn.to) ||
+                              allImageBlocks.find(b => b.id === conn.to) ||
+                              allShapeBlocks.find(b => b.id === conn.to);
+          const targetName = targetBlock ? (('cardName' in targetBlock && targetBlock.cardName) || conn.to.substring(0, 8)) : conn.to.substring(0, 8);
+          const targetId = getFileIdFromBlockId(conn.to);
+          content += `- ${targetName} [ID: ${targetId}]\n`;
+        });
+        content += `\n`;
+      }
+
+      if (incomingConnections.length > 0) {
+        content += `### Connected From\n`;
+        incomingConnections.forEach(conn => {
+          const sourceBlock = allTextBlocks.find(b => b.id === conn.from) ||
+                              allImageBlocks.find(b => b.id === conn.from) ||
+                              allShapeBlocks.find(b => b.id === conn.from);
+          const sourceName = sourceBlock ? (('cardName' in sourceBlock && sourceBlock.cardName) || conn.from.substring(0, 8)) : conn.from.substring(0, 8);
+          const sourceId = getFileIdFromBlockId(conn.from);
+          content += `- ${sourceName} [ID: ${sourceId}]\n`;
+        });
+        content += `\n`;
+      }
+    }
+
+    try {
+      await fetch(`${SPEC_URL}/api/save-specifications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          files: [{ fileName, content }],
+          workspacePath: currentWorkspace.projectFolder,
+          subfolder: 'conception'
+        }),
+      });
+      console.log(`[Auto-save] Saved ${fileName}`);
+    } catch (err) {
+      console.warn(`[Auto-save] Failed to save ${fileName}:`, err);
+    }
+  };
+
+  // Auto-save all cards when they change (debounced)
+  useEffect(() => {
+    // Don't auto-save during initial load
+    if (!initialLoadComplete.current) return;
+    if (!currentWorkspace?.projectFolder) return;
+
+    // Clear any pending auto-save
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+
+    // Debounce auto-save by 1 second
+    autoSaveTimeoutRef.current = setTimeout(async () => {
+      console.log('[Auto-save] Saving all cards with connections...');
+
+      // Save all text blocks with their connections
+      for (const block of textBlocks) {
+        await saveCardToFile(block, 'text', connections, textBlocks, imageBlocks, shapeBlocks);
+      }
+
+      // Save all shape blocks with their connections
+      for (const block of shapeBlocks) {
+        await saveCardToFile(block, 'shape', connections, textBlocks, imageBlocks, shapeBlocks);
+      }
+
+      console.log(`[Auto-save] Saved ${textBlocks.length} text cards, ${shapeBlocks.length} shapes, with ${connections.length} connections`);
+    }, 1000);
+
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [textBlocks, shapeBlocks, connections, imageBlocks, currentWorkspace?.projectFolder]);
+
   // Load ideation data from workspace
   useEffect(() => {
     if (currentWorkspace?.ideation) {
@@ -205,20 +355,21 @@ export const Ideation: React.FC = () => {
   useEffect(() => {
     if (currentWorkspace?.projectFolder && currentWorkspace?.id) {
       // Only auto-load if we haven't already loaded for this workspace
-      // AND if there's no existing ideation data
       if (loadedForWorkspaceId.current !== currentWorkspace.id) {
         loadedForWorkspaceId.current = currentWorkspace.id;
+        initialLoadComplete.current = false; // Disable auto-save during load
 
-        // Only auto-load if workspace has no ideation data
-        if (!currentWorkspace.ideation ||
-            ((!currentWorkspace.ideation.textBlocks || currentWorkspace.ideation.textBlocks.length === 0) &&
-             (!currentWorkspace.ideation.imageBlocks || currentWorkspace.ideation.imageBlocks.length === 0))) {
-          // Small delay to ensure workspace state is loaded first
+        // Auto-load from markdown files - duplicate prevention is handled in handleAnalyzeIdeation
+        setTimeout(async () => {
+          console.log('[Ideation] Auto-loading from markdown files...');
+          await handleAnalyzeIdeation(true); // Silent mode - don't show alerts
+
+          // Enable auto-save after initial load completes
           setTimeout(() => {
-            console.log('[Ideation] Auto-loading from markdown files...');
-            handleAnalyzeIdeation(true); // Silent mode - don't show alerts
+            initialLoadComplete.current = true;
+            console.log('[Ideation] Initial load complete, auto-save enabled');
           }, 500);
-        }
+        }, 500);
       }
     }
   }, [currentWorkspace?.projectFolder, currentWorkspace?.id]);
@@ -948,6 +1099,10 @@ export const Ideation: React.FC = () => {
           const titleMatch = content.match(/# (.+)/);
           const descMatch = content.match(/## Description\n(.+?)(?=\n##|\n\n##|$)/s);
 
+          // Parse saved position and size from metadata
+          const posMatch = content.match(/- \*\*Position\*\*: \((-?\d+), (-?\d+)\)/);
+          const sizeMatch = content.match(/- \*\*Size\*\*: (\d+) × (\d+)/);
+
           // Parse shapes inside the card
           const cardShapes: CardShape[] = [];
           const cardShapesSection = content.match(/## Card Shapes\n([\s\S]*?)(?=\n##|$)/);
@@ -982,11 +1137,11 @@ export const Ideation: React.FC = () => {
           newTextBlocks.push({
             id: fullId,
             content: descMatch ? descMatch[1].trim() : '',
-            x: xOffset,
-            y: yOffset,
+            x: posMatch ? parseInt(posMatch[1]) : xOffset,
+            y: posMatch ? parseInt(posMatch[2]) : yOffset,
             tags: parseTags(content),
-            width: 300,
-            height: 200,
+            width: sizeMatch ? parseInt(sizeMatch[1]) : 300,
+            height: sizeMatch ? parseInt(sizeMatch[2]) : 200,
             cardName: titleMatch ? titleMatch[1].trim() : 'Ideation Card',
             shapes: cardShapes.length > 0 ? cardShapes : undefined
           });
@@ -1091,15 +1246,69 @@ export const Ideation: React.FC = () => {
         }
       }
 
-      // Update state with new blocks and connections
-      console.log(`[Ideation] Setting state with ${newConnections.length} new connections:`, newConnections);
-      setTextBlocks([...textBlocks, ...newTextBlocks]);
-      setImageBlocks([...imageBlocks, ...newImageBlocks]);
-      setShapeBlocks([...shapeBlocks, ...newShapeBlocks]);
-      setConnections([...connections, ...newConnections]);
+      // Update state with blocks from files
+      // File versions have correct positions, so they should replace any existing blocks with the same file ID
 
-      const totalLoaded = newTextBlocks.length + newImageBlocks.length + newShapeBlocks.length;
-      alert(`Loaded ${totalLoaded} items from specifications folder:\n- ${newTextBlocks.length} text cards\n- ${newImageBlocks.length} images\n- ${newShapeBlocks.length} shapes\n- ${newConnections.length} connections\n\nFrom: ${result.path}`);
+      // Helper to extract file ID from block ID
+      const getFileId = (id: string): string => {
+        const imgMatch = id.match(/^analyzed-img-([a-zA-Z0-9]+)-\d+$/);
+        const match = id.match(/^analyzed-([a-zA-Z0-9]+)-\d+$/);
+        return imgMatch ? imgMatch[1] : match ? match[1] : id.replace(/-/g, '');
+      };
+
+      // Create maps of file ID -> new block from files (these have correct positions)
+      const newTextBlockMap = new Map(newTextBlocks.map(b => [getFileId(b.id), b]));
+      const newImageBlockMap = new Map(newImageBlocks.map(b => [getFileId(b.id), b]));
+      const newShapeBlockMap = new Map(newShapeBlocks.map(b => [getFileId(b.id), b]));
+
+      // Track which file IDs we've seen from existing blocks
+      const seenTextFileIds = new Set<string>();
+      const seenImageFileIds = new Set<string>();
+      const seenShapeFileIds = new Set<string>();
+
+      // Update existing blocks with file versions (to get correct positions), or keep as-is if no file version
+      const updatedTextBlocks = textBlocks.map(b => {
+        const fileId = getFileId(b.id);
+        seenTextFileIds.add(fileId);
+        const fileVersion = newTextBlockMap.get(fileId);
+        // If file version exists, use it but preserve the original ID
+        return fileVersion ? { ...fileVersion, id: b.id } : b;
+      });
+      const updatedImageBlocks = imageBlocks.map(b => {
+        const fileId = getFileId(b.id);
+        seenImageFileIds.add(fileId);
+        const fileVersion = newImageBlockMap.get(fileId);
+        return fileVersion ? { ...fileVersion, id: b.id } : b;
+      });
+      const updatedShapeBlocks = shapeBlocks.map(b => {
+        const fileId = getFileId(b.id);
+        seenShapeFileIds.add(fileId);
+        const fileVersion = newShapeBlockMap.get(fileId);
+        return fileVersion ? { ...fileVersion, id: b.id } : b;
+      });
+
+      // Add any new blocks from files that weren't in existing state
+      const brandNewTextBlocks = newTextBlocks.filter(b => !seenTextFileIds.has(getFileId(b.id)));
+      const brandNewImageBlocks = newImageBlocks.filter(b => !seenImageFileIds.has(getFileId(b.id)));
+      const brandNewShapeBlocks = newShapeBlocks.filter(b => !seenShapeFileIds.has(getFileId(b.id)));
+
+      console.log(`[Ideation] Setting state with ${newConnections.length} new connections:`, newConnections);
+      console.log(`[Ideation] Updated existing: ${updatedTextBlocks.length} text, ${updatedImageBlocks.length} images, ${updatedShapeBlocks.length} shapes`);
+      console.log(`[Ideation] Brand new: ${brandNewTextBlocks.length} text, ${brandNewImageBlocks.length} images, ${brandNewShapeBlocks.length} shapes`);
+
+      setTextBlocks([...updatedTextBlocks, ...brandNewTextBlocks]);
+      setImageBlocks([...updatedImageBlocks, ...brandNewImageBlocks]);
+      setShapeBlocks([...updatedShapeBlocks, ...brandNewShapeBlocks]);
+
+      // Update connections
+      if (brandNewTextBlocks.length > 0 || brandNewImageBlocks.length > 0 || brandNewShapeBlocks.length > 0) {
+        setConnections([...connections, ...newConnections]);
+      }
+
+      const totalLoaded = brandNewTextBlocks.length + brandNewImageBlocks.length + brandNewShapeBlocks.length;
+      if (!silent && totalLoaded > 0) {
+        alert(`Loaded ${totalLoaded} new items from specifications folder:\n- ${brandNewTextBlocks.length} text cards\n- ${brandNewImageBlocks.length} images\n- ${brandNewShapeBlocks.length} shapes\n- ${newConnections.length} connections\n\nFrom: ${result.path}`);
+      }
 
     } catch (err) {
       console.error('Analysis error:', err);
@@ -1772,8 +1981,89 @@ export const Ideation: React.FC = () => {
     }
   };
 
-  const handleDeleteItem = (id: string, type: BlockType) => {
+  const handleDeleteItem = async (id: string, type: BlockType) => {
     if (confirm('Delete this item?')) {
+      // Extract the original file ID from the block ID
+      // Imported blocks have format: "analyzed-{originalId}-{counter}" or "analyzed-img-{originalId}-{counter}"
+      // Original blocks have format: "uuid-with-hyphens"
+      let fileId: string;
+
+      // Check if this is an imported block
+      const analyzedImgMatch = id.match(/^analyzed-img-([a-zA-Z0-9]+)-\d+$/);
+      const analyzedMatch = id.match(/^analyzed-([a-zA-Z0-9]+)-\d+$/);
+
+      if (analyzedImgMatch) {
+        // Imported image block: extract the original ID (already hyphen-free)
+        fileId = analyzedImgMatch[1];
+      } else if (analyzedMatch) {
+        // Imported text/shape block: extract the original ID (already hyphen-free)
+        fileId = analyzedMatch[1];
+      } else {
+        // Original block: remove hyphens from UUID
+        fileId = id.replace(/-/g, '');
+      }
+
+      let fileName = `IDEA-${fileId}.md`;
+
+      // For image blocks, determine the correct extension
+      if (type === 'image') {
+        const imageBlock = imageBlocks.find(b => b.id === id);
+        if (imageBlock?.imageUrl) {
+          let extension = 'png';
+          if (imageBlock.imageUrl.startsWith('data:image/jpeg') || imageBlock.imageUrl.startsWith('data:image/jpg')) {
+            extension = 'jpg';
+          } else if (imageBlock.imageUrl.startsWith('data:image/gif')) {
+            extension = 'gif';
+          } else if (imageBlock.imageUrl.startsWith('data:image/webp')) {
+            extension = 'webp';
+          } else if (imageBlock.imageUrl.startsWith('data:image/svg')) {
+            extension = 'svg';
+          }
+          fileName = `IDEA-${fileId}.${extension}`;
+        }
+      }
+
+      // Try to delete the corresponding markdown file from the conception folder
+      if (currentWorkspace?.projectFolder) {
+        try {
+          const response = await fetch(`${SPEC_URL}/api/delete-specification`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fileName,
+              workspacePath: currentWorkspace.projectFolder,
+              subfolder: 'conception'
+            }),
+          });
+
+          const result = await response.json();
+          if (result.success) {
+            console.log(`[Delete] Deleted file: ${fileName}`);
+          } else if (response.status !== 404) {
+            // Only log non-404 errors (file not existing is okay)
+            console.warn(`[Delete] Could not delete file: ${result.error}`);
+          }
+
+          // For image blocks, also try to delete the companion metadata JSON file
+          if (type === 'image') {
+            const metadataFileName = `IDEA-${fileId}.json`;
+            await fetch(`${SPEC_URL}/api/delete-specification`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                fileName: metadataFileName,
+                workspacePath: currentWorkspace.projectFolder,
+                subfolder: 'conception'
+              }),
+            }).catch(() => {}); // Silently ignore if metadata file doesn't exist
+          }
+        } catch (err) {
+          console.warn('[Delete] Could not delete specification file:', err);
+          // Continue with UI deletion even if file deletion fails
+        }
+      }
+
+      // Remove from UI state
       if (type === 'text') {
         setTextBlocks(textBlocks.filter(b => b.id !== id));
       } else if (type === 'image') {
@@ -1814,8 +2104,8 @@ export const Ideation: React.FC = () => {
   if (!currentWorkspace) {
     return (
       <div style={{ padding: '24px' }}>
-        <h1 className="text-large-title">Ideation Canvas</h1>
-        <p className="text-body text-secondary">Please select a workspace to start ideating.</p>
+        <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Ideation Canvas</h1>
+        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>Please select a workspace to start ideating.</p>
       </div>
     );
   }
@@ -1839,11 +2129,10 @@ export const Ideation: React.FC = () => {
       <div className="ideation-container">
         {/* Header */}
         <div className="ideation-header">
-          <div className="ideation-title-section">
-            <h1 className="ideation-title">Ideation Canvas</h1>
-            <p className="ideation-subtitle">Freeform whiteboard for your ideas</p>
-          </div>
-          <div className="ideation-controls">
+          <div style={{ width: '100%' }}>
+            <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Ideation Canvas</h1>
+            <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>Freeform whiteboard for your ideas</p>
+            <div className="ideation-controls">
             <Button variant="primary" onClick={handleAddTextBlock}>
               ⊞ Add Card
             </Button>
@@ -1868,14 +2157,12 @@ export const Ideation: React.FC = () => {
             <Button variant="secondary" onClick={handleExportToMarkdown}>
               📤 Export to Markdown
             </Button>
-            <Button variant="secondary" onClick={handleAnalyzeIdeation}>
-              🔍 Analyze
-            </Button>
             {connecting && (
               <Button variant="outline" onClick={() => setConnecting(null)}>
                 ✕ Cancel Connection
               </Button>
             )}
+            </div>
           </div>
         </div>
 
@@ -2939,31 +3226,10 @@ export const Ideation: React.FC = () => {
 
         .ideation-header {
           display: flex;
-          justify-content: space-between;
-          align-items: center;
+          flex-direction: column;
           padding: var(--spacing-6, 24px);
           background: var(--color-systemBackground);
           border-bottom: 1px solid var(--color-systemGray5);
-        }
-
-        .ideation-title-section {
-          display: flex;
-          flex-direction: column;
-          gap: var(--spacing-1, 4px);
-        }
-
-        .ideation-title {
-          font-size: 28px;
-          font-weight: 700;
-          color: var(--color-label);
-          margin: 0;
-        }
-
-        .ideation-subtitle {
-          font-size: 15px;
-          font-weight: 400;
-          color: var(--color-secondaryLabel);
-          margin: 0;
         }
 
         .ideation-controls {

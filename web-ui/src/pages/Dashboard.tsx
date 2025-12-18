@@ -218,7 +218,7 @@ export const Dashboard: React.FC = () => {
       {/* Page Header */}
       <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
         <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Dashboard</h1>
-        <p className="text-body text-secondary">Overview of all your workspaces and projects.</p>
+        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>Overview of all your workspaces and projects.</p>
       </div>
 
       {/* Aggregate Metrics */}

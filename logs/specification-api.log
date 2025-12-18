@@ -13,14 +13,6 @@ Specification API server running on http://localhost:4001
   'MKT-MARKET-CONTEXT-3.md'
 ]
 [read-specifications] Found 9 IDEA-*.md files and 0 IDEA-* images
-[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
-[read-specifications] Folder not found: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
-[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
-[read-specifications] Folder not found: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
-[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
-[read-specifications] Folder not found: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
-[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
-[read-specifications] Folder not found: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
 [read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
 [read-specifications] Found 21 total files: [
   'IDEA-analyzedtext17647225266270.md',
@@ -35,36 +27,6 @@ Specification API server running on http://localhost:4001
   'MKT-MARKET-CONTEXT-3.md'
 ]
 [read-specifications] Found 9 IDEA-*.md files and 0 IDEA-* images
-[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/specifications
-[read-specifications] Found 101 total files: [
-  '.DS_Store',
-  'CAP-318652.md',
-  'CAP-471395.md',
-  'CAP-582341.md',
-  'CAP-694827.md',
-  'CAP-759314.md',
-  'CAP-847293.md',
-  'CAP-931847.md',
-  'CAP-944623.md',
-  'CATEGORIZATION-SUMMARY.md'
-]
-[read-specifications] Found 1 IDEA-*.md files and 1 IDEA-* images
-[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/specifications
-[read-specifications] Found 101 total files: [
-  '.DS_Store',
-  'CAP-318652.md',
-  'CAP-471395.md',
-  'CAP-582341.md',
-  'CAP-694827.md',
-  'CAP-759314.md',
-  'CAP-847293.md',
-  'CAP-931847.md',
-  'CAP-944623.md',
-  'CATEGORIZATION-SUMMARY.md'
-]
-[read-specifications] Found 1 IDEA-*.md files and 1 IDEA-* images
-[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
-[read-specifications] Folder not found: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/React-openFlo/conception
 [read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
 [read-specifications] Found 21 total files: [
   'IDEA-analyzedtext17647225266270.md',
@@ -79,21 +41,484 @@ Specification API server running on http://localhost:4001
   'MKT-MARKET-CONTEXT-3.md'
 ]
 [read-specifications] Found 9 IDEA-*.md files and 0 IDEA-* images
-[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/BattleDrones/conception
-[read-specifications] Found 0 total files: []
-[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
-[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/BattleDrones/conception
-[read-specifications] Found 0 total files: []
-[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
-[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/BattleDrones/conception
-[read-specifications] Found 0 total files: []
-[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
-[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/stickfigures/conception
-[read-specifications] Found 0 total files: []
-[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
-[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/stickfigures/conception
-[read-specifications] Found 0 total files: []
-[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 20 total files: [
+  'IDEA-analyzedtext17647225266270.md',
+  'IDEA-analyzedtext17648209621501.md',
+  'IDEA-analyzedtext17648213851352.md',
+  'IDEA-analyzedtext17648214747173.md',
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md'
+]
+[read-specifications] Found 8 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/openFlo-web/conception
+[read-specifications] Found 16 total files: [
+  'IDEA-text1764722526627.md',
+  'IDEA-text1764820962150.md',
+  'IDEA-text1764821385135.md',
+  'IDEA-text1764821474717.md',
+  'MKT-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-DISPLAY-LATEST-100-EMAILS-IN-VIEW.md',
+  'STORY-FETCH-LATEST-100-EMAILS.md',
+  'STORY-LOGIN-PAGE.md',
+  'STORY-LOGIN-SUCCESS.md'
+]
+[read-specifications] Found 4 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Folder not found: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
 [read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/Doggy/conception
 [read-specifications] Found 12 total files: [
   '.DS_Store',
@@ -106,5 +531,520 @@ Specification API server running on http://localhost:4001
   'STORY-OPEN-HOUSE-DOOR.md',
   'STORY-SEE-DOGS.md',
   'STORY-WALK-DOGS.md'
+]
+[read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/Doggy/conception
+[read-specifications] Found 12 total files: [
+  '.DS_Store',
+  'IDEA-text1764644196854.md',
+  'IDEA-text1764644261071.md',
+  'MKT-DOGGY-MARKET-CONTEXT-3.md',
+  'SBSUP-INDEX-1.md',
+  'STORY-COUNT-DOGS.md',
+  'STORY-FEED-THE-DOG.md',
+  'STORY-OPEN-HOUSE-DOOR.md',
+  'STORY-SEE-DOGS.md',
+  'STORY-WALK-DOGS.md'
+]
+[read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 1 total files: [
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 2 total files: [
+  'IDEA-text1765929805207.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 8 total files: [
+  'IDEA-text1765929805207.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 8 total files: [
+  'IDEA-text1765929805207.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 8 total files: [
+  'IDEA-text1765929805207.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 8 total files: [
+  'IDEA-text1765929805207.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 8 total files: [
+  'IDEA-text1765929805207.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'VIS-A-SIMPLE-HELLO-WORLD-AS-A-WEATHER-APP-USING-PUBLIC-REST-APIS-1.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 11 total files: [
+  'IDEA-text1765929805207.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-START-APP.md',
+  'STORYBOARD-INDEX.md',
+  'STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2.md',
+  'STRAT-LEVERAGE-AI-CAPABILITIES-3.md'
+]
+[read-specifications] Found 1 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 15 total files: [
+  'IDEA-text1765929805207.md',
+  'IDEA-text1765940662209.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-PROMPT-RESULTS.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PROVIDE-PROMPT-FIELD.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md'
+]
+[read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 15 total files: [
+  'IDEA-text1765929805207.md',
+  'IDEA-text1765940662209.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-PROMPT-RESULTS.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PROVIDE-PROMPT-FIELD.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md'
+]
+[read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 15 total files: [
+  'IDEA-text1765929805207.md',
+  'IDEA-text1765940662209.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-PROMPT-RESULTS.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PROVIDE-PROMPT-FIELD.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md'
+]
+[read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 15 total files: [
+  'IDEA-text1765929805207.md',
+  'IDEA-text1765940662209.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-PROMPT-RESULTS.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PROVIDE-PROMPT-FIELD.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md'
+]
+[read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/SecureChat/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/SecureChat/conception
+[read-specifications] Found 0 total files: []
+[read-specifications] Found 0 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 15 total files: [
+  'IDEA-text1765929805207.md',
+  'IDEA-text1765940662209.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-PROMPT-RESULTS.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PROVIDE-PROMPT-FIELD.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md'
+]
+[read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 15 total files: [
+  'IDEA-text1765929805207.md',
+  'IDEA-text1765940662209.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-PROMPT-RESULTS.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PROVIDE-PROMPT-FIELD.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md'
+]
+[read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 15 total files: [
+  'IDEA-text1765929805207.md',
+  'IDEA-text1765940662209.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-PROMPT-RESULTS.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PROVIDE-PROMPT-FIELD.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md'
+]
+[read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 15 total files: [
+  'IDEA-text1765929805207.md',
+  'IDEA-text1765940662209.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-PROMPT-RESULTS.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PROVIDE-PROMPT-FIELD.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md'
+]
+[read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 15 total files: [
+  'IDEA-text1765929805207.md',
+  'IDEA-text1765940662209.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-PROMPT-RESULTS.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PROVIDE-PROMPT-FIELD.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md'
+]
+[read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images
+[read-specifications] Looking for files in: /Users/jamesreynolds/Documents/Development/UbeCode/workspaces/HelloWorld/conception
+[read-specifications] Found 15 total files: [
+  'IDEA-text1765929805207.md',
+  'IDEA-text1765940662209.md',
+  'MKT-DISCOVER-WHAT-THE-APPETITE-IS-FOR-WEATHER-PROMPTING-4.md',
+  'STORY-DISPLAY-PROMPT-RESULTS.md',
+  'STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md',
+  'STORY-ENVIRONMENT.md',
+  'STORY-PROVIDE-PROMPT-FIELD.md',
+  'STORY-PULL-WEATHER-DATA.md',
+  'STORY-READ-DEFAULT-LOCATION.md',
+  'STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md'
 ]
 [read-specifications] Found 2 IDEA-*.md files and 0 IDEA-* images

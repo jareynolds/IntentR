@@ -548,9 +548,9 @@ export const Vision: React.FC = () => {
       <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
-            <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Vision & Strategic Themes</h1>
+            <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Product vision and business strategy</h1>
             <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
-              Define the strategic direction and key business objectives for your portfolio
+              Strategic Intent / Product Thesis (Why this exists, success criteria)
             </p>
           </div>
           <Button variant="primary" onClick={handleCreateTheme}>
@@ -696,7 +696,7 @@ export const Vision: React.FC = () => {
                   )}
                 </div>
 
-                {/* Theme Cards grouped by type */}
+                {/* Cascading Theme Cards Layout */}
                 {filteredThemes.length === 0 ? (
                   <Card>
                     <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -706,282 +706,212 @@ export const Vision: React.FC = () => {
                     </div>
                   </Card>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    {/* Vision Statements First */}
-                    {groupedThemes['vision'].length > 0 && (
-                      <div>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          marginBottom: '16px',
-                          padding: '12px 16px',
-                          backgroundColor: 'rgba(175, 82, 222, 0.1)',
-                          borderRadius: '8px',
-                        }}>
-                          <span style={{ fontSize: '20px' }}>0</span>
-                          <h3 className="text-title2" style={{ margin: 0, color: 'var(--color-systemPurple)' }}>
-                            Vision Statements
-                          </h3>
-                          <span style={{
-                            padding: '2px 8px',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            borderRadius: '12px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                            color: 'var(--color-systemPurple)',
-                          }}>
-                            {groupedThemes['vision'].length}
-                          </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {/* Vision Cards - Top Level (no indent) */}
+                    {groupedThemes['vision'].map((theme, index) => (
+                      <Card
+                        key={`vision-${index}`}
+                        style={{
+                          borderLeft: '4px solid var(--color-systemPurple)',
+                          cursor: 'pointer',
+                        }}
+                        onClick={() => setSelectedTheme(theme)}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                          <div style={{ flex: 1 }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '4px 12px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              borderRadius: '20px',
+                              backgroundColor: 'rgba(175, 82, 222, 0.15)',
+                              color: 'var(--color-systemPurple)',
+                              marginBottom: '8px',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px',
+                            }}>
+                              Vision
+                            </span>
+                            <h3 className="text-headline" style={{ marginBottom: '8px', color: 'var(--color-label)' }}>
+                              {theme.name}
+                            </h3>
+                            {theme.description && (
+                              <p className="text-body text-secondary" style={{ margin: 0 }}>
+                                {theme.description.substring(0, 200)}{theme.description.length > 200 ? '...' : ''}
+                              </p>
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setSelectedTheme(theme); }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: 'var(--color-systemBlue)',
+                                fontSize: '14px',
+                                padding: '4px 8px',
+                              }}
+                            >
+                              View
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDeleteTheme(theme); }}
+                              disabled={deletingTheme}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: 'var(--color-systemRed)',
+                                fontSize: '14px',
+                                padding: '4px 8px',
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                          {groupedThemes['vision'].map((theme, index) => (
-                            <Card key={index} style={{ borderLeft: '4px solid var(--color-systemPurple)' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                                <div style={{ flex: 1 }}>
-                                  <h3
-                                    className="text-headline"
-                                    style={{ marginBottom: '8px', cursor: 'pointer', color: 'var(--color-systemBlue)' }}
-                                    onClick={() => setSelectedTheme(theme)}
-                                  >
-                                    {theme.name}
-                                  </h3>
-                                  {theme.description && (
-                                    <p className="text-body" style={{ marginBottom: '8px' }}>
-                                      {theme.description.substring(0, 200)}{theme.description.length > 200 ? '...' : ''}
-                                    </p>
-                                  )}
-                                  <p className="text-footnote text-secondary">
-                                    {theme.filename}
-                                  </p>
-                                </div>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                  <button
-                                    onClick={() => setSelectedTheme(theme)}
-                                    style={{
-                                      background: 'none',
-                                      border: 'none',
-                                      cursor: 'pointer',
-                                      color: 'var(--color-systemBlue)',
-                                      fontSize: '14px',
-                                      padding: '4px 8px',
-                                    }}
-                                  >
-                                    View
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteTheme(theme)}
-                                    disabled={deletingTheme}
-                                    style={{
-                                      background: 'none',
-                                      border: 'none',
-                                      cursor: 'pointer',
-                                      color: 'var(--color-systemRed)',
-                                      fontSize: '14px',
-                                      padding: '4px 8px',
-                                    }}
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                              </div>
-                            </Card>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      </Card>
+                    ))}
 
-                    {/* Strategic Themes */}
-                    {groupedThemes['strategic-theme'].length > 0 && (
-                      <div>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          marginBottom: '16px',
-                          padding: '12px 16px',
-                          backgroundColor: 'rgba(0, 122, 255, 0.1)',
-                          borderRadius: '8px',
-                        }}>
-                          <span style={{ fontSize: '20px' }}>&gt;</span>
-                          <h3 className="text-title2" style={{ margin: 0, color: 'var(--color-systemBlue)' }}>
-                            Strategic Themes
-                          </h3>
-                          <span style={{
-                            padding: '2px 8px',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            borderRadius: '12px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                            color: 'var(--color-systemBlue)',
-                          }}>
-                            {groupedThemes['strategic-theme'].length}
-                          </span>
+                    {/* Strategic Theme Cards - Indented 50px */}
+                    {groupedThemes['strategic-theme'].map((theme, index) => (
+                      <Card
+                        key={`strategic-${index}`}
+                        style={{
+                          marginLeft: '50px',
+                          borderLeft: '4px solid var(--color-systemBlue)',
+                          cursor: 'pointer',
+                        }}
+                        onClick={() => setSelectedTheme(theme)}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                          <div style={{ flex: 1 }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '4px 12px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              borderRadius: '20px',
+                              backgroundColor: 'rgba(0, 122, 255, 0.15)',
+                              color: 'var(--color-systemBlue)',
+                              marginBottom: '8px',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px',
+                            }}>
+                              Strategic Theme
+                            </span>
+                            <h3 className="text-headline" style={{ marginBottom: '8px', color: 'var(--color-label)' }}>
+                              {theme.name}
+                            </h3>
+                            {theme.description && (
+                              <p className="text-body text-secondary" style={{ margin: 0 }}>
+                                {theme.description.substring(0, 200)}{theme.description.length > 200 ? '...' : ''}
+                              </p>
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setSelectedTheme(theme); }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: 'var(--color-systemBlue)',
+                                fontSize: '14px',
+                                padding: '4px 8px',
+                              }}
+                            >
+                              View
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDeleteTheme(theme); }}
+                              disabled={deletingTheme}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: 'var(--color-systemRed)',
+                                fontSize: '14px',
+                                padding: '4px 8px',
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: '16px' }}>
-                          {groupedThemes['strategic-theme'].map((theme, index) => {
-                            const typeColors = getTypeColor(theme.themeType || 'strategic-theme');
-                            return (
-                              <Card key={index}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                                  <div style={{ flex: 1 }}>
-                                    <h3
-                                      className="text-headline"
-                                      style={{ marginBottom: '8px', cursor: 'pointer', color: 'var(--color-systemBlue)' }}
-                                      onClick={() => setSelectedTheme(theme)}
-                                    >
-                                      {theme.name}
-                                    </h3>
-                                    <span style={{
-                                      display: 'inline-block',
-                                      padding: '4px 12px',
-                                      fontSize: '12px',
-                                      fontWeight: 600,
-                                      borderRadius: '20px',
-                                      backgroundColor: typeColors.bg,
-                                      color: typeColors.color,
-                                      marginBottom: '8px'
-                                    }}>
-                                      {formatType(theme.themeType || 'strategic-theme')}
-                                    </span>
-                                    {theme.description && (
-                                      <p className="text-footnote text-secondary">
-                                        {theme.description.substring(0, 100)}{theme.description.length > 100 ? '...' : ''}
-                                      </p>
-                                    )}
-                                  </div>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                    <button
-                                      onClick={() => setSelectedTheme(theme)}
-                                      style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        color: 'var(--color-systemBlue)',
-                                        fontSize: '14px',
-                                        padding: '4px 8px',
-                                      }}
-                                    >
-                                      View
-                                    </button>
-                                    <button
-                                      onClick={() => handleDeleteTheme(theme)}
-                                      disabled={deletingTheme}
-                                      style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        color: 'var(--color-systemRed)',
-                                        fontSize: '14px',
-                                        padding: '4px 8px',
-                                      }}
-                                    >
-                                      Delete
-                                    </button>
-                                  </div>
-                                </div>
-                              </Card>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
+                      </Card>
+                    ))}
 
-                    {/* Market Context */}
-                    {groupedThemes['market-context'].length > 0 && (
-                      <div>
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          marginBottom: '16px',
-                          padding: '12px 16px',
-                          backgroundColor: 'rgba(76, 217, 100, 0.1)',
-                          borderRadius: '8px',
-                        }}>
-                          <span style={{ fontSize: '20px' }}>#</span>
-                          <h3 className="text-title2" style={{ margin: 0, color: 'var(--color-systemGreen)' }}>
-                            Market Context
-                          </h3>
-                          <span style={{
-                            padding: '2px 8px',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            borderRadius: '12px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                            color: 'var(--color-systemGreen)',
-                          }}>
-                            {groupedThemes['market-context'].length}
-                          </span>
+                    {/* Market Context Cards - Indented 100px */}
+                    {groupedThemes['market-context'].map((theme, index) => (
+                      <Card
+                        key={`market-${index}`}
+                        style={{
+                          marginLeft: '100px',
+                          borderLeft: '4px solid var(--color-systemGreen)',
+                          cursor: 'pointer',
+                        }}
+                        onClick={() => setSelectedTheme(theme)}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                          <div style={{ flex: 1 }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '4px 12px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              borderRadius: '20px',
+                              backgroundColor: 'rgba(76, 217, 100, 0.15)',
+                              color: 'var(--color-systemGreen)',
+                              marginBottom: '8px',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px',
+                            }}>
+                              Market Context
+                            </span>
+                            <h3 className="text-headline" style={{ marginBottom: '8px', color: 'var(--color-label)' }}>
+                              {theme.name}
+                            </h3>
+                            {theme.description && (
+                              <p className="text-body text-secondary" style={{ margin: 0 }}>
+                                {theme.description.substring(0, 200)}{theme.description.length > 200 ? '...' : ''}
+                              </p>
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setSelectedTheme(theme); }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: 'var(--color-systemBlue)',
+                                fontSize: '14px',
+                                padding: '4px 8px',
+                              }}
+                            >
+                              View
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDeleteTheme(theme); }}
+                              disabled={deletingTheme}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: 'var(--color-systemRed)',
+                                fontSize: '14px',
+                                padding: '4px 8px',
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: '16px' }}>
-                          {groupedThemes['market-context'].map((theme, index) => {
-                            const typeColors = getTypeColor(theme.themeType || 'market-context');
-                            return (
-                              <Card key={index}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                                  <div style={{ flex: 1 }}>
-                                    <h3
-                                      className="text-headline"
-                                      style={{ marginBottom: '8px', cursor: 'pointer', color: 'var(--color-systemBlue)' }}
-                                      onClick={() => setSelectedTheme(theme)}
-                                    >
-                                      {theme.name}
-                                    </h3>
-                                    <span style={{
-                                      display: 'inline-block',
-                                      padding: '4px 12px',
-                                      fontSize: '12px',
-                                      fontWeight: 600,
-                                      borderRadius: '20px',
-                                      backgroundColor: typeColors.bg,
-                                      color: typeColors.color,
-                                      marginBottom: '8px'
-                                    }}>
-                                      {formatType(theme.themeType || 'market-context')}
-                                    </span>
-                                    {theme.description && (
-                                      <p className="text-footnote text-secondary">
-                                        {theme.description.substring(0, 100)}{theme.description.length > 100 ? '...' : ''}
-                                      </p>
-                                    )}
-                                  </div>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                    <button
-                                      onClick={() => setSelectedTheme(theme)}
-                                      style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        color: 'var(--color-systemBlue)',
-                                        fontSize: '14px',
-                                        padding: '4px 8px',
-                                      }}
-                                    >
-                                      View
-                                    </button>
-                                    <button
-                                      onClick={() => handleDeleteTheme(theme)}
-                                      disabled={deletingTheme}
-                                      style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        color: 'var(--color-systemRed)',
-                                        fontSize: '14px',
-                                        padding: '4px 8px',
-                                      }}
-                                    >
-                                      Delete
-                                    </button>
-                                  </div>
-                                </div>
-                              </Card>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
+                      </Card>
+                    ))}
                   </div>
                 )}
               </>

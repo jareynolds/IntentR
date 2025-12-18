@@ -78,10 +78,31 @@ export const Storyboard: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const [isAutoLoading, setIsAutoLoading] = useState(false);
+  const [showAutoLoadingIndicator, setShowAutoLoadingIndicator] = useState(false);
   // Removed hasAutoLoaded ref - now using loadedForWorkspaceId instead (defined near auto-load effect)
 
   // Track loaded file hashes to detect changes
   const [loadedFileHashes, setLoadedFileHashes] = useState<Record<string, string>>({});
+
+  // Auto-save refs
+  const initialLoadComplete = useRef(false);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Delay showing the auto-loading indicator to prevent brief flashes
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (isAutoLoading) {
+      // Only show loading indicator if loading takes more than 300ms
+      timeoutId = setTimeout(() => {
+        setShowAutoLoadingIndicator(true);
+      }, 300);
+    } else {
+      setShowAutoLoadingIndicator(false);
+    }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isAutoLoading]);
 
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -106,6 +127,209 @@ export const Storyboard: React.FC = () => {
     }
     setConfirmDialog(prev => ({ ...prev, isOpen: false }));
   };
+
+  // Helper function to get status label
+  const getStatusLabel = (status: StoryCard['status']): string => {
+    switch (status) {
+      case 'completed': return 'Completed';
+      case 'in-progress': return 'In Progress';
+      case 'pending': return 'Pending';
+      default: return 'Pending';
+    }
+  };
+
+  // Auto-save function - saves all cards and connections to ideation folder
+  const autoSaveToIdeation = async (cardsToSave: StoryCard[], connectionsToSave: Connection[]) => {
+    if (!currentWorkspace?.projectFolder) return;
+    if (cardsToSave.length === 0) return;
+
+    const workspaceName = currentWorkspace?.name || 'Untitled Workspace';
+
+    // Helper function to generate safe file names
+    const generateFileName = (cardTitle: string) => {
+      const titleSlug = cardTitle.toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return `STORY-${titleSlug}.md`;
+    };
+
+    // Create array to hold all file objects
+    const files: Array<{ fileName: string; content: string }> = [];
+
+    // Generate individual markdown files for each card
+    cardsToSave.forEach((card, index) => {
+      const fileName = generateFileName(card.title);
+
+      let markdown = `# ${card.title}\n\n`;
+
+      // Metadata section - includes grid position for restoration
+      markdown += `## Metadata\n`;
+      markdown += `- **Type**: Story Card\n`;
+      markdown += `- **Storyboard**: ${workspaceName}\n`;
+      markdown += `- **Card ID**: ${card.id}\n`;
+      markdown += `- **Status**: ${getStatusLabel(card.status)}\n`;
+      markdown += `- **Grid Position X**: ${Math.round(card.x)}\n`;
+      markdown += `- **Grid Position Y**: ${Math.round(card.y)}\n`;
+      markdown += `- **Generated**: ${new Date().toLocaleString()}\n`;
+      markdown += `- **File**: ${fileName}\n\n`;
+
+      // Description
+      markdown += `## Description\n`;
+      if (card.description) {
+        markdown += `${card.description}\n\n`;
+      } else {
+        markdown += `_No description provided._\n\n`;
+      }
+
+      // Visual Reference
+      if (card.imageUrl) {
+        markdown += `## Visual Reference\n`;
+        markdown += `This story card includes a visual reference (80x80px image).\n\n`;
+      }
+
+      // Find dependencies (outgoing connections - what this card flows to)
+      const outgoingConnections = connectionsToSave.filter(c => c.from === card.id);
+      const incomingConnections = connectionsToSave.filter(c => c.to === card.id);
+
+      // Dependencies section
+      markdown += `## Dependencies\n\n`;
+
+      // Upstream dependencies (incoming connections)
+      if (incomingConnections.length > 0) {
+        markdown += `### Upstream Dependencies\n`;
+        markdown += `This story card depends on the following cards being completed first:\n\n`;
+        markdown += `| Card Title | Card ID | Connection ID | File Reference |\n`;
+        markdown += `|------------|---------|---------------|----------------|\n`;
+        incomingConnections.forEach(conn => {
+          const sourceCard = cardsToSave.find(c => c.id === conn.from);
+          if (sourceCard) {
+            const sourceFileName = generateFileName(sourceCard.title);
+            markdown += `| ${sourceCard.title} | ${sourceCard.id} | ${conn.id} | [${sourceFileName}](./${sourceFileName}) |\n`;
+          }
+        });
+        markdown += '\n';
+      } else {
+        markdown += `### Upstream Dependencies\n`;
+        markdown += `_No upstream dependencies - this is a starting point in the flow._\n\n`;
+      }
+
+      // Downstream dependencies (outgoing connections)
+      if (outgoingConnections.length > 0) {
+        markdown += `### Downstream Impact\n`;
+        markdown += `Completing this story card enables the following cards:\n\n`;
+        markdown += `| Card Title | Card ID | Connection ID | File Reference |\n`;
+        markdown += `|------------|---------|---------------|----------------|\n`;
+        outgoingConnections.forEach(conn => {
+          const targetCard = cardsToSave.find(c => c.id === conn.to);
+          if (targetCard) {
+            const targetFileName = generateFileName(targetCard.title);
+            markdown += `| ${targetCard.title} | ${targetCard.id} | ${conn.id} | [${targetFileName}](./${targetFileName}) |\n`;
+          }
+        });
+        markdown += '\n';
+      } else {
+        markdown += `### Downstream Impact\n`;
+        markdown += `_No downstream dependencies - this is an end point in the flow._\n\n`;
+      }
+
+      files.push({ fileName, content: markdown });
+    });
+
+    // Also create an index file that lists all cards
+    const indexFileName = `STORYBOARD-INDEX.md`;
+    let indexMarkdown = `# Storyboard Index: ${workspaceName}\n\n`;
+    indexMarkdown += `## Metadata\n`;
+    indexMarkdown += `- **Workspace**: ${workspaceName}\n`;
+    indexMarkdown += `- **Generated**: ${new Date().toLocaleString()}\n`;
+    indexMarkdown += `- **Total Cards**: ${cardsToSave.length}\n`;
+    indexMarkdown += `- **Total Connections**: ${connectionsToSave.length}\n\n`;
+
+    // Complete flow diagram
+    indexMarkdown += `## Complete Flow Diagram\n\n`;
+    indexMarkdown += '```mermaid\n';
+    indexMarkdown += 'flowchart TD\n';
+    cardsToSave.forEach(card => {
+      const nodeId = card.id.replace(/-/g, '');
+      const statusEmoji = card.status === 'completed' ? '✓' : card.status === 'in-progress' ? '⟳' : '○';
+      indexMarkdown += `    ${nodeId}["${statusEmoji} ${card.title}"]\n`;
+    });
+    connectionsToSave.forEach(conn => {
+      const fromId = conn.from.replace(/-/g, '');
+      const toId = conn.to.replace(/-/g, '');
+      indexMarkdown += `    ${fromId} --> ${toId}\n`;
+    });
+    indexMarkdown += '```\n\n';
+
+    // Card index with positions
+    indexMarkdown += `## Story Cards\n\n`;
+    indexMarkdown += `| # | Title | Status | X | Y | File | Dependencies |\n`;
+    indexMarkdown += `|---|-------|--------|---|---|------|-------------|\n`;
+    cardsToSave.forEach((card, index) => {
+      const fileName = generateFileName(card.title);
+      const depCount = connectionsToSave.filter(c => c.from === card.id || c.to === card.id).length;
+      indexMarkdown += `| ${index + 1} | [${card.title}](./${fileName}) | ${getStatusLabel(card.status)} | ${Math.round(card.x)} | ${Math.round(card.y)} | ${fileName} | ${depCount} |\n`;
+    });
+    indexMarkdown += '\n';
+
+    // Connections data (machine-readable for restoration)
+    indexMarkdown += `## Connections Data\n\n`;
+    indexMarkdown += `| Connection ID | From Card ID | To Card ID |\n`;
+    indexMarkdown += `|---------------|--------------|------------|\n`;
+    connectionsToSave.forEach(conn => {
+      indexMarkdown += `| ${conn.id} | ${conn.from} | ${conn.to} |\n`;
+    });
+    indexMarkdown += '\n';
+
+    // Card positions data (machine-readable for restoration)
+    indexMarkdown += `## Card Positions Data\n\n`;
+    indexMarkdown += `| Card ID | Title | X | Y | Status |\n`;
+    indexMarkdown += `|---------|-------|---|---|--------|\n`;
+    cardsToSave.forEach(card => {
+      indexMarkdown += `| ${card.id} | ${card.title} | ${Math.round(card.x)} | ${Math.round(card.y)} | ${card.status} |\n`;
+    });
+
+    files.push({ fileName: indexFileName, content: indexMarkdown });
+
+    // Save all files to ideation folder
+    try {
+      await fetch(`${INTEGRATION_URL}/save-specifications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+          files,
+          subfolder: 'conception'
+        }),
+      });
+      console.log(`[Auto-save] Saved ${files.length} files to conception folder`);
+    } catch (error) {
+      console.warn('[Auto-save] Failed to save storyboard:', error);
+    }
+  };
+
+  // Auto-save storyboard when cards or connections change (debounced)
+  useEffect(() => {
+    // Don't auto-save during initial load
+    if (!initialLoadComplete.current) return;
+    if (!currentWorkspace?.projectFolder) return;
+
+    // Clear any pending auto-save
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+
+    // Debounce auto-save by 1 second
+    autoSaveTimeoutRef.current = setTimeout(async () => {
+      console.log('[Auto-save] Saving storyboard to conception folder...');
+      await autoSaveToIdeation(cards, connections);
+    }, 1000);
+
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [cards, connections, currentWorkspace?.projectFolder]);
 
   // Callback ref to detect when wrapper is mounted
   const setWrapperRef = (element: HTMLDivElement | null) => {
@@ -150,10 +374,20 @@ export const Storyboard: React.FC = () => {
           }
         }, 100);
       }
+      // Enable auto-save after initial load completes
+      setTimeout(() => {
+        initialLoadComplete.current = true;
+        console.log('[Storyboard] Initial load complete, auto-save enabled');
+      }, 500);
     } else {
       // Start with blank storyboard for new workspaces
       setCards([]);
       setConnections([]);
+      // Enable auto-save for new workspaces too
+      setTimeout(() => {
+        initialLoadComplete.current = true;
+        console.log('[Storyboard] New workspace, auto-save enabled');
+      }, 500);
     }
   }, [currentWorkspace?.id]);
 
@@ -1147,284 +1381,6 @@ export const Storyboard: React.FC = () => {
     }
   };
 
-  const getStatusLabel = (status: StoryCard['status']) => {
-    switch (status) {
-      case 'completed': return 'Completed';
-      case 'in-progress': return 'In Progress';
-      case 'pending': return 'Pending';
-      default: return 'Pending';
-    }
-  };
-
-  const handleExportToMarkdown = async () => {
-    if (cards.length === 0) {
-      alert('No cards to export');
-      return;
-    }
-
-    const workspaceName = currentWorkspace?.name || 'Untitled Workspace';
-
-    // Helper function to generate safe file names
-    // Format: STORY-CARD-NAME.md (e.g., "feed your dogs" -> "STORY-FEED-YOUR-DOGS.md")
-    const generateFileName = (cardTitle: string) => {
-      const titleSlug = cardTitle.toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
-      return `STORY-${titleSlug}.md`;
-    };
-
-    // Create array to hold all file objects
-    const files: Array<{ fileName: string; content: string }> = [];
-
-    // Generate individual markdown files for each card
-    cards.forEach((card, index) => {
-      const fileName = generateFileName(card.title);
-
-      let markdown = `# ${card.title}\n\n`;
-
-      // Metadata section - includes grid position for restoration
-      markdown += `## Metadata\n`;
-      markdown += `- **Type**: Story Card\n`;
-      markdown += `- **Storyboard**: ${workspaceName}\n`;
-      markdown += `- **Card ID**: ${card.id}\n`;
-      markdown += `- **Status**: ${getStatusLabel(card.status)}\n`;
-      markdown += `- **Grid Position X**: ${Math.round(card.x)}\n`;
-      markdown += `- **Grid Position Y**: ${Math.round(card.y)}\n`;
-      markdown += `- **Generated**: ${new Date().toLocaleString()}\n`;
-      markdown += `- **File**: ${fileName}\n\n`;
-
-      // Description
-      markdown += `## Description\n`;
-      if (card.description) {
-        markdown += `${card.description}\n\n`;
-      } else {
-        markdown += `_No description provided._\n\n`;
-      }
-
-      // Visual Reference
-      if (card.imageUrl) {
-        markdown += `## Visual Reference\n`;
-        markdown += `This story card includes a visual reference (80x80px image).\n\n`;
-      }
-
-      // Find dependencies (outgoing connections - what this card flows to)
-      const outgoingConnections = connections.filter(c => c.from === card.id);
-      const incomingConnections = connections.filter(c => c.to === card.id);
-
-      // Dependencies section
-      markdown += `## Dependencies\n\n`;
-
-      // Upstream dependencies (incoming connections)
-      if (incomingConnections.length > 0) {
-        markdown += `### Upstream Dependencies\n`;
-        markdown += `This story card depends on the following cards being completed first:\n\n`;
-        markdown += `| Card Title | Card ID | Connection ID | File Reference |\n`;
-        markdown += `|------------|---------|---------------|----------------|\n`;
-        incomingConnections.forEach(conn => {
-          const sourceCardIndex = cards.findIndex(c => c.id === conn.from);
-          const sourceCard = cards[sourceCardIndex];
-          if (sourceCard) {
-            const sourceFileName = generateFileName(sourceCard.title);
-            markdown += `| ${sourceCard.title} | ${sourceCard.id} | ${conn.id} | [${sourceFileName}](./${sourceFileName}) |\n`;
-          }
-        });
-        markdown += '\n';
-      } else {
-        markdown += `### Upstream Dependencies\n`;
-        markdown += `_No upstream dependencies - this is a starting point in the flow._\n\n`;
-      }
-
-      // Downstream dependencies (outgoing connections)
-      if (outgoingConnections.length > 0) {
-        markdown += `### Downstream Impact\n`;
-        markdown += `Completing this story card enables the following cards:\n\n`;
-        markdown += `| Card Title | Card ID | Connection ID | File Reference |\n`;
-        markdown += `|------------|---------|---------------|----------------|\n`;
-        outgoingConnections.forEach(conn => {
-          const targetCardIndex = cards.findIndex(c => c.id === conn.to);
-          const targetCard = cards[targetCardIndex];
-          if (targetCard) {
-            const targetFileName = generateFileName(targetCard.title);
-            markdown += `| ${targetCard.title} | ${targetCard.id} | ${conn.id} | [${targetFileName}](./${targetFileName}) |\n`;
-          }
-        });
-        markdown += '\n';
-      } else {
-        markdown += `### Downstream Impact\n`;
-        markdown += `_No downstream dependencies - this is an end point in the flow._\n\n`;
-      }
-
-      // Flow visualization for this card
-      markdown += `## Flow Visualization\n\n`;
-      markdown += '```mermaid\n';
-      markdown += 'flowchart TD\n';
-
-      // Add incoming cards
-      incomingConnections.forEach(conn => {
-        const sourceCard = cards.find(c => c.id === conn.from);
-        if (sourceCard) {
-          const sourceNodeId = sourceCard.id.replace(/-/g, '');
-          markdown += `    ${sourceNodeId}["${sourceCard.title}"]\n`;
-        }
-      });
-
-      // Add current card with highlighting
-      const currentNodeId = card.id.replace(/-/g, '');
-      const statusEmoji = card.status === 'completed' ? '✓' : card.status === 'in-progress' ? '⟳' : '○';
-      markdown += `    ${currentNodeId}["${statusEmoji} ${card.title}"]:::current\n`;
-
-      // Add outgoing cards
-      outgoingConnections.forEach(conn => {
-        const targetCard = cards.find(c => c.id === conn.to);
-        if (targetCard) {
-          const targetNodeId = targetCard.id.replace(/-/g, '');
-          markdown += `    ${targetNodeId}["${targetCard.title}"]\n`;
-        }
-      });
-
-      // Add connections
-      incomingConnections.forEach(conn => {
-        const sourceNodeId = conn.from.replace(/-/g, '');
-        markdown += `    ${sourceNodeId} --> ${currentNodeId}\n`;
-      });
-
-      outgoingConnections.forEach(conn => {
-        const targetNodeId = conn.to.replace(/-/g, '');
-        markdown += `    ${currentNodeId} --> ${targetNodeId}\n`;
-      });
-
-      // Add styling
-      markdown += `    classDef current fill:#e3f2fd,stroke:#1976d2,stroke-width:3px\n`;
-      markdown += '```\n\n';
-
-      // Implementation notes
-      markdown += `## Implementation Notes\n`;
-      markdown += `- This is story card ${index + 1} of ${cards.length} in the storyboard\n`;
-      markdown += `- Current status: ${getStatusLabel(card.status)}\n`;
-      markdown += `- Dependencies must be completed before implementing this card\n`;
-      markdown += `- Downstream cards are blocked until this card is completed\n\n`;
-
-      // Success criteria
-      markdown += `## Success Criteria\n`;
-      markdown += `_Define the acceptance criteria for this story card:_\n\n`;
-      markdown += `- [ ] TODO: Add specific success criteria\n`;
-      markdown += `- [ ] TODO: Add user acceptance criteria\n`;
-      markdown += `- [ ] TODO: Add technical acceptance criteria\n\n`;
-
-      files.push({ fileName, content: markdown });
-    });
-
-    // Also create an index file that lists all cards (supporting file, not a story card)
-    const indexFileName = `SBSUP-INDEX-1.md`;
-    let indexMarkdown = `# Storyboard Index: ${workspaceName}\n\n`;
-    indexMarkdown += `## Metadata\n`;
-    indexMarkdown += `- **Workspace**: ${workspaceName}\n`;
-    indexMarkdown += `- **Generated**: ${new Date().toLocaleString()}\n`;
-    indexMarkdown += `- **Total Cards**: ${cards.length}\n`;
-    indexMarkdown += `- **Total Connections**: ${connections.length}\n\n`;
-
-    indexMarkdown += `## Overview\n`;
-    indexMarkdown += `This storyboard contains ${cards.length} story cards describing the user flow and interactions.\n\n`;
-
-    // Complete flow diagram
-    indexMarkdown += `## Complete Flow Diagram\n\n`;
-    indexMarkdown += '```mermaid\n';
-    indexMarkdown += 'flowchart TD\n';
-    cards.forEach(card => {
-      const nodeId = card.id.replace(/-/g, '');
-      const statusEmoji = card.status === 'completed' ? '✓' : card.status === 'in-progress' ? '⟳' : '○';
-      indexMarkdown += `    ${nodeId}["${statusEmoji} ${card.title}"]\n`;
-    });
-    connections.forEach(conn => {
-      const fromId = conn.from.replace(/-/g, '');
-      const toId = conn.to.replace(/-/g, '');
-      indexMarkdown += `    ${fromId} --> ${toId}\n`;
-    });
-    indexMarkdown += '```\n\n';
-
-    // Card index with positions
-    indexMarkdown += `## Story Cards\n\n`;
-    indexMarkdown += `| # | Title | Status | X | Y | File | Dependencies |\n`;
-    indexMarkdown += `|---|-------|--------|---|---|------|-------------|\n`;
-    cards.forEach((card, index) => {
-      const fileName = generateFileName(card.title);
-      const depCount = connections.filter(c => c.from === card.id || c.to === card.id).length;
-      indexMarkdown += `| ${index + 1} | [${card.title}](./${fileName}) | ${getStatusLabel(card.status)} | ${Math.round(card.x)} | ${Math.round(card.y)} | ${fileName} | ${depCount} |\n`;
-    });
-    indexMarkdown += '\n';
-
-    // Connections data (machine-readable for restoration)
-    indexMarkdown += `## Connections Data\n\n`;
-    indexMarkdown += `This section contains connection data for restoring the storyboard layout.\n\n`;
-    indexMarkdown += `| Connection ID | From Card ID | To Card ID |\n`;
-    indexMarkdown += `|---------------|--------------|------------|\n`;
-    connections.forEach(conn => {
-      indexMarkdown += `| ${conn.id} | ${conn.from} | ${conn.to} |\n`;
-    });
-    indexMarkdown += '\n';
-
-    // Card positions data (machine-readable for restoration)
-    indexMarkdown += `## Card Positions Data\n\n`;
-    indexMarkdown += `This section contains card position data for restoring the storyboard layout.\n\n`;
-    indexMarkdown += `| Card ID | Title | X | Y | Status |\n`;
-    indexMarkdown += `|---------|-------|---|---|--------|\n`;
-    cards.forEach(card => {
-      indexMarkdown += `| ${card.id} | ${card.title} | ${Math.round(card.x)} | ${Math.round(card.y)} | ${card.status} |\n`;
-    });
-    indexMarkdown += '\n';
-
-    // Statistics
-    indexMarkdown += `## Statistics\n`;
-    indexMarkdown += `- **Total Cards**: ${cards.length}\n`;
-    indexMarkdown += `- **Completed**: ${cards.filter(c => c.status === 'completed').length}\n`;
-    indexMarkdown += `- **In Progress**: ${cards.filter(c => c.status === 'in-progress').length}\n`;
-    indexMarkdown += `- **Pending**: ${cards.filter(c => c.status === 'pending').length}\n`;
-    indexMarkdown += `- **Flow Complexity**: ${connections.length} connections\n\n`;
-
-    files.push({ fileName: indexFileName, content: indexMarkdown });
-
-    // Save all files
-    try {
-      if (!currentWorkspace?.projectFolder) {
-        throw new Error('Workspace project folder not configured');
-      }
-
-      const response = await fetch(`${INTEGRATION_URL}/save-specifications`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          workspacePath: currentWorkspace.projectFolder,
-          files,
-          subfolder: 'conception'
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        alert(`✅ Storyboard exported successfully!\n\n${data.message}\n\nFiles saved to conception/\n\nIndex file: ${indexFileName}`);
-      } else {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Server responded with error');
-      }
-    } catch (error) {
-      // Fallback: download as ZIP or individual files
-      console.warn('API not available, downloading files instead:', error);
-
-      // Download each file individually
-      files.forEach(file => {
-        const blob = new Blob([file.content], { type: 'text/markdown' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = file.fileName;
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-
-      alert(`⬇️ Downloaded ${files.length} markdown files\n\nNote: Server API not available. Files downloaded to your browser's download folder.\nEnsure workspace has a project folder configured.`);
-    }
-  };
-
   return (
     <div className="storyboard-page" style={{ padding: '16px' }}>
       <AIPresetIndicator />
@@ -1445,7 +1401,7 @@ export const Storyboard: React.FC = () => {
       <div className="storyboard-header">
         <div>
           <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Storyboard Canvas</h1>
-          <p className="text-body text-secondary">
+          <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
             Drag cards to arrange, click connect to link
           </p>
         </div>
@@ -1460,9 +1416,6 @@ export const Storyboard: React.FC = () => {
               {isAnalyzing ? '🔄 Analyzing...' : '🤖 Analyze & Generate'}
             </Button>
           )}
-          <Button variant="secondary" onClick={handleExportToMarkdown}>
-            📄 Export to Markdown
-          </Button>
           <Button variant="primary" onClick={handleAddCard}>
             + Add Card
           </Button>
@@ -1477,8 +1430,8 @@ export const Storyboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Auto-loading indicator */}
-      {isAutoLoading && (
+      {/* Auto-loading indicator - only shown after 300ms delay to prevent flash */}
+      {showAutoLoadingIndicator && (
         <div style={{
           padding: '12px',
           marginBottom: '16px',

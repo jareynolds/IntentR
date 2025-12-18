@@ -19,7 +19,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/${SERV
 FROM alpine:latest
 
 # Install runtime dependencies for running generated code
-RUN apk --no-cache add ca-certificates nodejs npm python3 go
+RUN apk --no-cache add ca-certificates nodejs npm python3 go lsof
 
 WORKDIR /root/
 

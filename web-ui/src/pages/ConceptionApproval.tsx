@@ -61,18 +61,109 @@ export const ConceptionApproval: React.FC = () => {
     }
   }, [currentWorkspace?.projectFolder]);
 
-  const loadItemApprovals = () => {
-    if (!currentWorkspace?.id) return;
+  const loadItemApprovals = async () => {
+    if (!currentWorkspace?.id || !currentWorkspace?.projectFolder) return;
+
+    // Try to load from file first (for shared/imported workspaces)
+    try {
+      const response = await fetch(`${INTEGRATION_URL}/read-file`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filePath: `${currentWorkspace.projectFolder}/approvals/conception-approvals.json`
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.content) {
+          const fileApprovals = JSON.parse(data.content);
+          setItemApprovals(fileApprovals.itemApprovals || {});
+          // Also update localStorage as cache
+          localStorage.setItem(`conception-item-approvals-${currentWorkspace.id}`, JSON.stringify(fileApprovals.itemApprovals || {}));
+
+          // Load phase approval status
+          if (fileApprovals.phaseApproved) {
+            setConceptionApproved(true);
+            setApprovalDate(fileApprovals.phaseApprovedDate || null);
+            localStorage.setItem(`conception-approved-${currentWorkspace.id}`, JSON.stringify({
+              approved: true,
+              date: fileApprovals.phaseApprovedDate
+            }));
+          }
+          return;
+        }
+      }
+    } catch (err) {
+      console.log('No approval file found, checking localStorage');
+    }
+
+    // Fallback to localStorage
     const stored = localStorage.getItem(`conception-item-approvals-${currentWorkspace.id}`);
     if (stored) {
       setItemApprovals(JSON.parse(stored));
     }
   };
 
-  const saveItemApprovals = (approvals: ItemApprovalStatus) => {
-    if (!currentWorkspace?.id) return;
+  const saveItemApprovals = async (approvals: ItemApprovalStatus) => {
+    if (!currentWorkspace?.id || !currentWorkspace?.projectFolder) return;
+
+    // Update state and localStorage immediately
     localStorage.setItem(`conception-item-approvals-${currentWorkspace.id}`, JSON.stringify(approvals));
     setItemApprovals(approvals);
+
+    // Save to file for sharing/import
+    try {
+      const fileContent = JSON.stringify({
+        phase: 'conception',
+        itemApprovals: approvals,
+        phaseApproved: conceptionApproved,
+        phaseApprovedDate: approvalDate,
+        lastUpdated: new Date().toISOString(),
+      }, null, 2);
+
+      await fetch(`${INTEGRATION_URL}/save-specifications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+          specifications: [{
+            filename: 'approvals/conception-approvals.json',
+            content: fileContent,
+          }],
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to save approvals to file:', err);
+    }
+  };
+
+  const savePhaseApprovalToFile = async (approved: boolean, date: string | null) => {
+    if (!currentWorkspace?.projectFolder) return;
+
+    try {
+      const fileContent = JSON.stringify({
+        phase: 'conception',
+        itemApprovals: itemApprovals,
+        phaseApproved: approved,
+        phaseApprovedDate: date,
+        lastUpdated: new Date().toISOString(),
+      }, null, 2);
+
+      await fetch(`${INTEGRATION_URL}/save-specifications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+          specifications: [{
+            filename: 'approvals/conception-approvals.json',
+            content: fileContent,
+          }],
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to save phase approval to file:', err);
+    }
   };
 
   const loadConceptionItems = async () => {
@@ -314,7 +405,7 @@ export const ConceptionApproval: React.FC = () => {
     );
   };
 
-  const handleApproveConception = () => {
+  const handleApproveConception = async () => {
     if (!currentWorkspace?.id) return;
 
     const approvalData = {
@@ -324,14 +415,20 @@ export const ConceptionApproval: React.FC = () => {
     localStorage.setItem(`conception-approved-${currentWorkspace.id}`, JSON.stringify(approvalData));
     setConceptionApproved(true);
     setApprovalDate(approvalData.date);
+
+    // Save to file
+    await savePhaseApprovalToFile(true, approvalData.date);
   };
 
-  const handleRevokeApproval = () => {
+  const handleRevokeApproval = async () => {
     if (!currentWorkspace?.id) return;
 
     localStorage.removeItem(`conception-approved-${currentWorkspace.id}`);
     setConceptionApproved(false);
     setApprovalDate(null);
+
+    // Save to file
+    await savePhaseApprovalToFile(false, null);
   };
 
   const getStatusBadge = (status: string) => {
@@ -582,7 +679,7 @@ export const ConceptionApproval: React.FC = () => {
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
       <div style={{ marginBottom: '24px' }}>
         <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Conception Phase Approval</h1>
-        <p className="text-body text-secondary">
+        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
           Review and approve all conception phase items before proceeding to Definition.
         </p>
       </div>
@@ -687,7 +784,7 @@ export const ConceptionApproval: React.FC = () => {
             To get started, create items in each section:
           </p>
           <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
-            <li><strong>Vision & Themes:</strong> Go to the Vision page to define your project vision, strategic themes, and market context</li>
+            <li><strong>Product Vision:</strong> Go to the Vision page to define your project vision, strategic themes, and market context</li>
             <li><strong>Ideation:</strong> Go to the Ideation Canvas to capture ideas, problems, and solutions</li>
             <li><strong>Storyboard:</strong> Go to the Storyboard page to map out user stories and flows</li>
           </ul>
@@ -718,7 +815,7 @@ export const ConceptionApproval: React.FC = () => {
       ) : (
         <>
           {/* Section Cards */}
-          {renderSectionCard('Vision & Themes', phaseStatus.vision, '/vision', '🎯')}
+          {renderSectionCard('Product Vision', phaseStatus.vision, '/vision', '🎯')}
           {renderSectionCard('Ideation', phaseStatus.ideation, '/ideation', '💡')}
           {renderSectionCard('Storyboard', phaseStatus.storyboard, '/storyboard', '📋')}
         </>

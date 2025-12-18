@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Alert, Button } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { INTEGRATION_URL } from '../api/client';
 
 interface TestingItem {
   id: string;
@@ -103,10 +104,68 @@ export const TestingApproval: React.FC = () => {
     }
   }, [currentWorkspace?.id]);
 
-  const loadTestingItems = () => {
+  const loadTestingItems = async () => {
+    if (!currentWorkspace?.id || !currentWorkspace?.projectFolder) {
+      setTestingItems(defaultTestingItems);
+      return;
+    }
+
     setLoading(true);
     try {
-      // Load from localStorage
+      // Try to load from file first (for shared/imported workspaces)
+      try {
+        const response = await fetch(`${INTEGRATION_URL}/read-file`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filePath: `${currentWorkspace.projectFolder}/approvals/testing-approvals.json`
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.content) {
+            const fileData = JSON.parse(data.content);
+            const items = fileData.items || defaultTestingItems;
+            setTestingItems(items);
+
+            // Build item approvals from saved data
+            const approvals: ItemApprovalStatus = {};
+            items.forEach((item: TestingItem) => {
+              if (item.status === 'approved' || item.status === 'rejected') {
+                approvals[item.id] = {
+                  status: item.status,
+                  comment: item.rejectionComment,
+                  reviewedAt: item.reviewedAt,
+                  checklistItems: item.checklistItems,
+                };
+              }
+            });
+            setItemApprovals(approvals);
+
+            // Check if all items are approved
+            const allApproved = items.every((item: TestingItem) => item.status === 'approved');
+            setTestingApproved(allApproved);
+            if (allApproved) {
+              const latestApproval = items.reduce((latest: string, item: TestingItem) => {
+                if (item.reviewedAt && item.reviewedAt > latest) return item.reviewedAt;
+                return latest;
+              }, '');
+              setApprovalDate(latestApproval);
+            }
+
+            // Update localStorage with file data
+            const storageKey = `phaseApprovals_${currentWorkspace.id}_testing`;
+            localStorage.setItem(storageKey, JSON.stringify(items));
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.log('No approval file found, checking localStorage');
+      }
+
+      // Fallback to localStorage
       const storageKey = `phaseApprovals_${currentWorkspace?.id}_testing`;
       const savedData = localStorage.getItem(storageKey);
 
@@ -149,10 +208,44 @@ export const TestingApproval: React.FC = () => {
     }
   };
 
-  const saveTestingItems = (items: TestingItem[]) => {
-    if (currentWorkspace?.id) {
-      const storageKey = `phaseApprovals_${currentWorkspace.id}_testing`;
-      localStorage.setItem(storageKey, JSON.stringify(items));
+  const saveTestingItems = async (items: TestingItem[]) => {
+    if (!currentWorkspace?.id) return;
+
+    // Save to localStorage immediately
+    const storageKey = `phaseApprovals_${currentWorkspace.id}_testing`;
+    localStorage.setItem(storageKey, JSON.stringify(items));
+
+    // Save to file for sharing/import
+    if (currentWorkspace.projectFolder) {
+      try {
+        const allApproved = items.every(item => item.status === 'approved');
+        const latestApproval = items.reduce((latest: string, item: TestingItem) => {
+          if (item.reviewedAt && item.reviewedAt > latest) return item.reviewedAt;
+          return latest;
+        }, '');
+
+        const fileContent = JSON.stringify({
+          phase: 'testing',
+          items: items,
+          phaseApproved: allApproved,
+          phaseApprovedDate: allApproved ? latestApproval : null,
+          lastUpdated: new Date().toISOString(),
+        }, null, 2);
+
+        await fetch(`${INTEGRATION_URL}/save-specifications`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workspacePath: currentWorkspace.projectFolder,
+            specifications: [{
+              filename: 'approvals/testing-approvals.json',
+              content: fileContent,
+            }],
+          }),
+        });
+      } catch (err) {
+        console.error('Failed to save testing approvals to file:', err);
+      }
     }
   };
 

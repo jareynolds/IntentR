@@ -23,6 +23,27 @@ interface FileCapability {
   fields: Record<string, string>;
 }
 
+interface FileEnabler {
+  filename: string;
+  path: string;
+  name: string;
+  purpose: string;
+  status: string;
+  owner: string;
+  priority: string;
+  capabilityId: string;
+  enablerId: string;
+  fields: Record<string, string>;
+}
+
+// Interface for storyboard cards from conception folder
+interface StoryboardCard {
+  id: string;
+  filename: string;
+  title: string;
+  description: string;
+}
+
 export const Capabilities: React.FC = () => {
   const { currentWorkspace } = useWorkspace();
   const { pendingCount } = useApproval();
@@ -34,14 +55,17 @@ export const Capabilities: React.FC = () => {
   const [selectedCapability, setSelectedCapability] = useState<CapabilityWithDetails | undefined>();
   const [detailsView, setDetailsView] = useState<CapabilityWithDetails | null>(null);
   const [fileCapabilities, setFileCapabilities] = useState<FileCapability[]>([]);
+  const [fileEnablers, setFileEnablers] = useState<FileEnabler[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
   const [selectedFileCapability, setSelectedFileCapability] = useState<FileCapability | null>(null);
+  const [expandedCapabilities, setExpandedCapabilities] = useState<Set<string>>(new Set());
   const [isEditingFileCapability, setIsEditingFileCapability] = useState(false);
   const [editFormData, setEditFormData] = useState({
     name: '',
     description: '',
     status: '',
     content: '',
+    storyboardReference: '',
   });
   const [savingCapability, setSavingCapability] = useState(false);
   const [deletingCapability, setDeletingCapability] = useState(false);
@@ -51,11 +75,23 @@ export const Capabilities: React.FC = () => {
     description: string;
     type: 'capability' | 'feature' | 'enabler';
     rationale: string;
+    successMetrics?: string[];
   }>>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [analysisInfo, setAnalysisInfo] = useState<{
+    totalConceptionDocuments?: number;
+    keyThemes?: string[];
+    coverageNotes?: string;
+  } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+  const [storyboardCards, setStoryboardCards] = useState<StoryboardCard[]>([]);
+
+  // AI-suggested storyboard state
+  const [suggestedStoryboard, setSuggestedStoryboard] = useState<string | null>(null);
+  const [isStoryboardSuggesting, setIsStoryboardSuggesting] = useState(false);
+  const [storyboardNeedsConfirmation, setStoryboardNeedsConfirmation] = useState(false);
 
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -81,11 +117,16 @@ export const Capabilities: React.FC = () => {
     // Reset to blank when workspace changes
     setCapabilities([]);
     setFileCapabilities([]);
+    setFileEnablers([]);
+    setStoryboardCards([]);
+    setExpandedCapabilities(new Set());
     setError(null);
     setLoading(false);
-    // Load file-based capabilities when workspace changes
+    // Load file-based capabilities, enablers, and storyboard cards when workspace changes
     if (currentWorkspace?.projectFolder) {
       fetchFileCapabilities();
+      fetchFileEnablers();
+      fetchStoryboardCards();
     }
   }, [currentWorkspace?.id, currentWorkspace?.projectFolder]);
 
@@ -110,8 +151,8 @@ export const Capabilities: React.FC = () => {
     }
   }, [fileCapabilities, searchParams, selectedFileCapability, setSearchParams]);
 
-  const fetchFileCapabilities = async () => {
-    if (!currentWorkspace?.projectFolder) return;
+  const fetchFileCapabilities = async (): Promise<FileCapability[]> => {
+    if (!currentWorkspace?.projectFolder) return [];
 
     setLoadingFiles(true);
     try {
@@ -128,22 +169,233 @@ export const Capabilities: React.FC = () => {
       const data = await response.json();
       if (data.capabilities) {
         setFileCapabilities(data.capabilities);
+        return data.capabilities;
       }
+      return [];
     } catch (err) {
       console.error('Failed to fetch capability files:', err);
+      return [];
     } finally {
       setLoadingFiles(false);
     }
   };
 
+  const fetchFileEnablers = async () => {
+    if (!currentWorkspace?.projectFolder) return;
+
+    try {
+      const response = await fetch(`${INTEGRATION_URL}/enabler-files`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.enablers) {
+        setFileEnablers(data.enablers);
+      }
+    } catch (err) {
+      console.error('Failed to fetch enabler files:', err);
+    }
+  };
+
+  // Fetch storyboard cards from the conception folder
+  const fetchStoryboardCards = async () => {
+    if (!currentWorkspace?.projectFolder) return;
+
+    try {
+      const response = await fetch(`${INTEGRATION_URL}/story-files`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.stories) {
+        const cards: StoryboardCard[] = data.stories.map((story: { id: string; filename: string; title: string; description: string }) => ({
+          id: story.id || story.filename,
+          filename: story.filename,
+          title: story.title || story.filename,
+          description: story.description || '',
+        }));
+        setStoryboardCards(cards);
+      }
+    } catch (err) {
+      console.error('Failed to fetch storyboard cards:', err);
+    }
+  };
+
+  // AI-powered storyboard matching
+  const suggestBestStoryboard = async (capabilityName: string, capabilityDescription: string) => {
+    if (storyboardCards.length === 0 || !currentWorkspace?.projectFolder) return;
+
+    setIsStoryboardSuggesting(true);
+    setStoryboardNeedsConfirmation(false);
+
+    try {
+      // Build a prompt for Claude to match the capability to the best storyboard card
+      const storyboardList = storyboardCards.map(card =>
+        `- "${card.title}"${card.description ? `: ${card.description}` : ''}`
+      ).join('\n');
+
+      const prompt = `Given a capability with the following details:
+Name: ${capabilityName}
+Description: ${capabilityDescription || 'Not specified'}
+
+And the following available storyboard cards:
+${storyboardList}
+
+Which storyboard card title is the BEST match for this capability?
+Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and nothing else. If no good match exists, respond with "NONE".`;
+
+      const response = await fetch(`${INTEGRATION_URL}/ai-chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: prompt,
+          workspacePath: currentWorkspace.projectFolder,
+          apiKey: localStorage.getItem('anthropic_api_key') || '',
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Check for error in response
+        if (data.error) {
+          console.error('AI chat error:', data.error);
+          return;
+        }
+
+        const suggestedTitle = data.response?.trim().replace(/^["']|["']$/g, ''); // Remove quotes if present
+
+        // Validate the suggested title exists in our storyboard cards
+        if (suggestedTitle && suggestedTitle !== 'NONE') {
+          const matchingCard = storyboardCards.find(c =>
+            c.title.toLowerCase() === suggestedTitle.toLowerCase()
+          );
+
+          if (matchingCard) {
+            setSuggestedStoryboard(matchingCard.title);
+            setEditFormData(prev => ({ ...prev, storyboardReference: matchingCard.title }));
+            setStoryboardNeedsConfirmation(true);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to get AI storyboard suggestion:', err);
+    } finally {
+      setIsStoryboardSuggesting(false);
+    }
+  };
+
+  // Confirm the AI-suggested storyboard and save it
+  const confirmStoryboardSuggestion = async () => {
+    setStoryboardNeedsConfirmation(false);
+
+    // Save the storyboard reference to the file immediately
+    if (selectedFileCapability && suggestedStoryboard) {
+      try {
+        await fetch(`${INTEGRATION_URL}/update-capability-storyboard`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            path: selectedFileCapability.path,
+            storyboardReference: suggestedStoryboard,
+          }),
+        });
+        // Refresh the capabilities list to get updated data
+        const refreshedCapabilities = await fetchFileCapabilities();
+
+        // Update selectedFileCapability with the refreshed data
+        const refreshedCap = refreshedCapabilities.find(
+          (c) => c.path === selectedFileCapability.path
+        );
+        if (refreshedCap) {
+          setSelectedFileCapability(refreshedCap);
+          // Also update the edit form data with the new storyboard reference
+          setEditFormData(prev => ({
+            ...prev,
+            storyboardReference: refreshedCap.fields?.['Storyboard Reference'] || suggestedStoryboard,
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to save storyboard reference:', err);
+      }
+    }
+  };
+
+  // Get enablers for a specific capability by matching capabilityId or filename patterns
+  const getEnablersForCapability = (capability: FileCapability): FileEnabler[] => {
+    // Extract capability ID from fields or filename (e.g., CAP-123456)
+    const capId = capability.fields?.['ID'] || '';
+    const capIdMatch = capId.match(/CAP-\d+/)?.[0] || '';
+
+    // Also try to extract from filename
+    const filenameMatch = capability.filename.match(/(\d+)/)?.[1] || '';
+
+    return fileEnablers.filter(enabler => {
+      // Match by capability ID field
+      if (capIdMatch && enabler.capabilityId?.includes(capIdMatch)) {
+        return true;
+      }
+      // Match by numeric ID in filename
+      if (filenameMatch && enabler.capabilityId?.includes(filenameMatch)) {
+        return true;
+      }
+      // Match by capability name reference
+      if (enabler.capabilityId?.toLowerCase().includes(capability.name?.toLowerCase())) {
+        return true;
+      }
+      return false;
+    });
+  };
+
+  // Toggle capability expansion
+  const toggleCapabilityExpansion = (capabilityPath: string) => {
+    setExpandedCapabilities(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(capabilityPath)) {
+        newSet.delete(capabilityPath);
+      } else {
+        newSet.add(capabilityPath);
+      }
+      return newSet;
+    });
+  };
+
   const handleEditFileCapability = (cap: FileCapability) => {
+    // Get storyboard reference from fields
+    const storyboardRef = cap.fields?.['Storyboard Reference'] || '';
+
+    // Reset AI suggestion state
+    setSuggestedStoryboard(null);
+    setStoryboardNeedsConfirmation(false);
+    setIsStoryboardSuggesting(false);
+
     setEditFormData({
       name: cap.name,
       description: cap.description,
       status: cap.status,
       content: cap.content,
+      storyboardReference: storyboardRef,
     });
     setIsEditingFileCapability(true);
+
+    // Trigger AI storyboard suggestion if no storyboard reference exists
+    if (!storyboardRef && storyboardCards.length > 0) {
+      suggestBestStoryboard(cap.name, cap.description || '');
+    }
   };
 
   const handleSaveFileCapability = async () => {
@@ -162,6 +414,7 @@ export const Capabilities: React.FC = () => {
           description: editFormData.description,
           status: editFormData.status,
           content: editFormData.content,
+          storyboardReference: editFormData.storyboardReference,
         }),
       });
 
@@ -183,12 +436,19 @@ export const Capabilities: React.FC = () => {
 
   const handleCancelEdit = () => {
     setIsEditingFileCapability(false);
+    // Reset AI suggestion state
+    setSuggestedStoryboard(null);
+    setStoryboardNeedsConfirmation(false);
+    setIsStoryboardSuggesting(false);
+
     if (selectedFileCapability) {
+      const storyboardRef = selectedFileCapability.fields?.['Storyboard Reference'] || '';
       setEditFormData({
         name: selectedFileCapability.name,
         description: selectedFileCapability.description,
         status: selectedFileCapability.status,
         content: selectedFileCapability.content,
+        storyboardReference: storyboardRef,
       });
     }
   };
@@ -229,6 +489,34 @@ export const Capabilities: React.FC = () => {
     }
   };
 
+  const handleDeleteFileEnabler = async (enabler: FileEnabler) => {
+    if (!confirm(`Are you sure you want to delete enabler "${enabler.name || enabler.filename}"? This cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${INTEGRATION_URL}/delete-enabler`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          path: enabler.path,
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh the enablers list
+        await fetchFileEnablers();
+      } else {
+        const errorData = await response.text();
+        setError(`Failed to delete enabler: ${errorData}`);
+      }
+    } catch (err) {
+      setError(`Failed to delete enabler: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
   const handleAnalyzeSpecifications = async () => {
     if (!currentWorkspace?.projectFolder) {
       alert('Please set a project folder for this workspace first.');
@@ -237,24 +525,9 @@ export const Capabilities: React.FC = () => {
 
     setIsAnalyzing(true);
     setSuggestions([]);
+    setAnalysisInfo(null);
 
     try {
-      // First, get the list of specification files
-      const listUrl = `${INTEGRATION_URL}/specifications/list?workspace=${encodeURIComponent(currentWorkspace.projectFolder)}`;
-      const listResponse = await fetch(listUrl);
-
-      if (!listResponse.ok) {
-        throw new Error('Failed to list specifications');
-      }
-
-      const { files } = await listResponse.json();
-
-      if (!files || files.length === 0) {
-        alert('No specification files found in the workspace. Please add some specifications first.');
-        setIsAnalyzing(false);
-        return;
-      }
-
       // Get API key
       const anthropicKey = localStorage.getItem('anthropic_api_key') || '';
       if (!anthropicKey) {
@@ -263,14 +536,14 @@ export const Capabilities: React.FC = () => {
         return;
       }
 
-      // Analyze with Claude to suggest capabilities
-      const response = await fetch(`${INTEGRATION_URL}/analyze-capabilities`, {
+      // Analyze conception folder files using Capability-Driven Architecture Map
+      const response = await fetch(`${INTEGRATION_URL}/analyze-conception`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          files,
+          workspacePath: currentWorkspace.projectFolder,
           anthropic_key: anthropicKey,
           existingCapabilities: fileCapabilities.map(c => c.name),
         }),
@@ -278,18 +551,31 @@ export const Capabilities: React.FC = () => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(errorText || 'Failed to analyze specifications');
+        throw new Error(errorText || 'Failed to analyze conception files');
       }
 
       const result = await response.json();
+
+      // Check for message (no files found)
+      if (result.message && (!result.suggestions || result.suggestions.length === 0)) {
+        alert(result.message);
+        setIsAnalyzing(false);
+        return;
+      }
+
       if (result.suggestions && result.suggestions.length > 0) {
         setSuggestions(result.suggestions);
         setShowSuggestions(true);
+
+        // Store analysis info if available
+        if (result.analysis) {
+          setAnalysisInfo(result.analysis);
+        }
       } else {
-        alert('Analysis complete. No new capabilities suggested - your specifications are well covered!');
+        alert('Analysis complete. No new capabilities suggested - your conception documents may already be well covered by existing capabilities.');
       }
     } catch (err) {
-      console.error('Failed to analyze specifications:', err);
+      console.error('Failed to analyze conception files:', err);
       alert(`Failed to analyze: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setIsAnalyzing(false);
@@ -310,18 +596,46 @@ export const Capabilities: React.FC = () => {
     const sequenceNum = fileCapabilities.length + suggestions.indexOf(suggestion) + 1;
     const fileName = `${prefix}-${safeName}-${sequenceNum}.md`;
 
-    // Generate markdown content
+    // Generate markdown content following SAWai Capability template
     let markdown = `# ${suggestion.name}\n\n`;
     markdown += `## Metadata\n`;
-    markdown += `- **Type**: ${suggestion.type.charAt(0).toUpperCase() + suggestion.type.slice(1)}\n`;
-    markdown += `- **Status**: Planned\n`;
-    markdown += `- **Generated**: ${new Date().toLocaleString()}\n\n`;
-    markdown += `## Description\n`;
+    markdown += `- **Name**: ${suggestion.name}\n`;
+    markdown += `- **Type**: Capability\n`;
+    markdown += `- **Status**: Ready for Analysis\n`;
+    markdown += `- **Approval**: Pending\n`;
+    markdown += `- **Priority**: Medium\n`;
+    markdown += `- **Analysis Review**: Required\n`;
+    markdown += `- **Generated**: ${new Date().toLocaleString()}\n`;
+    markdown += `- **Source**: Capability-Driven Architecture Map Analysis\n\n`;
+    markdown += `## Business Context\n\n`;
+    markdown += `### Problem Statement\n`;
     markdown += `${suggestion.description}\n\n`;
-    markdown += `## Rationale\n`;
+    markdown += `### Value Proposition\n`;
     markdown += `${suggestion.rationale}\n\n`;
-    markdown += `## Implementation Notes\n`;
-    markdown += `_Add implementation details here._\n\n`;
+    markdown += `### Success Metrics\n`;
+    if (suggestion.successMetrics && suggestion.successMetrics.length > 0) {
+      suggestion.successMetrics.forEach(metric => {
+        markdown += `- ${metric}\n`;
+      });
+    } else {
+      markdown += `- TODO: Define success metrics\n`;
+    }
+    markdown += `\n`;
+    markdown += `## User Perspective\n\n`;
+    markdown += `### Primary Persona\n`;
+    markdown += `_Define the primary user who benefits from this capability._\n\n`;
+    markdown += `### User Scenarios\n`;
+    markdown += `1. _Add user scenario 1_\n`;
+    markdown += `2. _Add user scenario 2_\n\n`;
+    markdown += `## Boundaries\n\n`;
+    markdown += `### In Scope\n`;
+    markdown += `- _Define what IS included_\n\n`;
+    markdown += `### Out of Scope\n`;
+    markdown += `- _Define what is NOT included_\n\n`;
+    markdown += `## Enablers\n`;
+    markdown += `| ID | Name | Purpose | State |\n`;
+    markdown += `|----|------|---------|-------|\n`;
+    markdown += `| | _To be defined_ | | |\n\n`;
     markdown += `## Acceptance Criteria\n`;
     markdown += `- [ ] TODO: Define acceptance criteria\n`;
 
@@ -1001,89 +1315,256 @@ export const Capabilities: React.FC = () => {
                             </div>
                           </div>
 
-                          {/* Capability Cards */}
+                          {/* Capability Cards with Accordion Enablers */}
                           {!isCollapsed && (
-                            <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 'var(--spacing-4, 16px)' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                               {caps.map((fileCap) => {
-                  const statusColors = getStatusColor(fileCap.status || 'planned');
-                  return (
-                    <Card key={fileCap.path || fileCap.filename}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                        <div style={{ flex: 1 }}>
-                          <h3
-                            className="text-headline"
-                            style={{
-                              marginBottom: '8px',
-                              cursor: 'pointer',
-                              color: 'var(--color-systemBlue)',
-                            }}
-                            onClick={() => setSelectedFileCapability(fileCap)}
-                          >
-                            {fileCap.name || fileCap.filename}
-                          </h3>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            {fileCap.status && (
-                              <span style={{
-                                display: 'inline-block',
-                                padding: '4px 12px',
-                                fontSize: '12px',
-                                fontWeight: 600,
-                                borderRadius: '20px',
-                                backgroundColor: statusColors.bg,
-                                color: statusColors.color,
-                                width: 'fit-content'
-                              }}>
-                                {formatStatus(fileCap.status)}
-                              </span>
-                            )}
-                            <p className="text-footnote text-secondary">
-                              <strong>File:</strong> {fileCap.filename}
-                            </p>
-                            {fileCap.description && (
-                              <p className="text-footnote text-secondary">
-                                {fileCap.description}
-                              </p>
-                            )}
-                            {/* Display additional fields from markdown */}
-                            {Object.entries(fileCap.fields || {}).slice(0, 3).map(([key, value]) => (
-                              <p key={key} className="text-footnote text-secondary">
-                                <strong>{key}:</strong> {String(value).substring(0, 100)}{String(value).length > 100 ? '...' : ''}
-                              </p>
-                            ))}
-                          </div>
-                        </div>
-                        <div style={{ marginLeft: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          <button
-                            onClick={() => setSelectedFileCapability(fileCap)}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              cursor: 'pointer',
-                              color: 'var(--color-systemBlue)',
-                              fontSize: '14px',
-                              padding: '4px 8px',
-                            }}
-                          >
-                            View
-                          </button>
-                          <button
-                            onClick={() => handleDeleteFileCapability(fileCap)}
-                            disabled={deletingCapability}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              cursor: deletingCapability ? 'wait' : 'pointer',
-                              color: 'var(--color-systemRed)',
-                              fontSize: '14px',
-                              padding: '4px 8px',
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </Card>
-                  );
+                                const capStatusColors = getStatusColor(fileCap.status || 'planned');
+                                const enablersForCap = getEnablersForCapability(fileCap);
+                                const isExpanded = expandedCapabilities.has(fileCap.path);
+                                const hasEnablers = enablersForCap.length > 0;
+
+                                return (
+                                  <Card
+                                    key={fileCap.path || fileCap.filename}
+                                    style={{
+                                      border: isExpanded ? '2px solid var(--color-systemBlue)' : undefined,
+                                      transition: 'all 0.2s ease',
+                                    }}
+                                  >
+                                    {/* Capability Header Row */}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                      <div style={{ flex: 1 }}>
+                                        {/* Title row */}
+                                        <h3
+                                          className="text-headline"
+                                          style={{
+                                            margin: 0,
+                                            marginBottom: '8px',
+                                            cursor: 'pointer',
+                                            color: 'var(--color-systemBlue)',
+                                          }}
+                                          onClick={() => setSelectedFileCapability(fileCap)}
+                                        >
+                                          {fileCap.name || fileCap.filename}
+                                        </h3>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                          {fileCap.status && (
+                                            <span style={{
+                                              display: 'inline-block',
+                                              padding: '4px 12px',
+                                              fontSize: '12px',
+                                              fontWeight: 600,
+                                              borderRadius: '20px',
+                                              backgroundColor: capStatusColors.bg,
+                                              color: capStatusColors.color,
+                                              width: 'fit-content'
+                                            }}>
+                                              {formatStatus(fileCap.status)}
+                                            </span>
+                                          )}
+                                          <p className="text-footnote text-secondary">
+                                            <strong>File:</strong> {fileCap.filename}
+                                          </p>
+                                          {fileCap.description && (
+                                            <p className="text-footnote text-secondary">
+                                              {fileCap.description}
+                                            </p>
+                                          )}
+                                          {/* Display additional fields from markdown */}
+                                          {Object.entries(fileCap.fields || {}).slice(0, 3).map(([key, value]) => (
+                                            <p key={key} className="text-footnote text-secondary">
+                                              <strong>{key}:</strong> {String(value).substring(0, 100)}{String(value).length > 100 ? '...' : ''}
+                                            </p>
+                                          ))}
+                                        </div>
+                                      </div>
+                                      <div style={{ marginLeft: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <button
+                                          onClick={() => setSelectedFileCapability(fileCap)}
+                                          style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            color: 'var(--color-systemBlue)',
+                                            fontSize: '14px',
+                                            padding: '4px 8px',
+                                          }}
+                                        >
+                                          View
+                                        </button>
+                                        <button
+                                          onClick={() => handleDeleteFileCapability(fileCap)}
+                                          disabled={deletingCapability}
+                                          style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: deletingCapability ? 'wait' : 'pointer',
+                                            color: 'var(--color-systemRed)',
+                                            fontSize: '14px',
+                                            padding: '4px 8px',
+                                          }}
+                                        >
+                                          Delete
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    {/* Expand/Collapse Enablers Button - Below capability content */}
+                                    {hasEnablers && (
+                                      <button
+                                        onClick={() => toggleCapabilityExpansion(fileCap.path)}
+                                        style={{
+                                          width: '100%',
+                                          marginTop: '16px',
+                                          padding: '10px 16px',
+                                          backgroundColor: isExpanded
+                                            ? 'rgba(0, 122, 255, 0.1)'
+                                            : 'var(--color-tertiarySystemBackground)',
+                                          border: '1px solid var(--color-separator)',
+                                          borderRadius: '8px',
+                                          cursor: 'pointer',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          gap: '8px',
+                                          transition: 'all 0.2s ease',
+                                        }}
+                                      >
+                                        <span style={{
+                                          fontSize: '14px',
+                                          color: 'var(--color-systemBlue)',
+                                        }}>
+                                          {isExpanded ? '▲' : '▼'}
+                                        </span>
+                                        <span style={{
+                                          fontSize: '13px',
+                                          fontWeight: 600,
+                                          color: 'var(--color-systemBlue)',
+                                        }}>
+                                          {isExpanded ? 'Hide' : 'Show'} {enablersForCap.length} Enabler{enablersForCap.length !== 1 ? 's' : ''}
+                                        </span>
+                                      </button>
+                                    )}
+
+                                    {/* Nested Enablers (shown when expanded) */}
+                                    {isExpanded && hasEnablers && (
+                                      <div style={{
+                                        marginTop: '16px',
+                                        paddingTop: '16px',
+                                        borderTop: '1px solid var(--color-separator)',
+                                      }}>
+                                        <h4 className="text-subheadline" style={{
+                                          marginBottom: '12px',
+                                          color: 'var(--color-secondaryLabel)',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '8px',
+                                        }}>
+                                          <span style={{ fontSize: '14px' }}>🔧</span>
+                                          Enablers
+                                        </h4>
+                                        <div style={{
+                                          display: 'flex',
+                                          flexDirection: 'column',
+                                          gap: '12px',
+                                          paddingLeft: '12px',
+                                          borderLeft: '3px solid var(--color-systemBlue)',
+                                        }}>
+                                          {enablersForCap.map((enabler) => {
+                                            const enbStatusColors = getStatusColor(enabler.status || 'planned');
+                                            return (
+                                              <div
+                                                key={enabler.path || enabler.filename}
+                                                style={{
+                                                  padding: '12px 16px',
+                                                  borderRadius: '8px',
+                                                  backgroundColor: 'var(--color-tertiarySystemBackground)',
+                                                  border: '1px solid var(--color-separator)',
+                                                }}
+                                              >
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                                  <div style={{ flex: 1 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                                                      <span style={{
+                                                        padding: '2px 6px',
+                                                        fontSize: '10px',
+                                                        fontWeight: 600,
+                                                        borderRadius: '4px',
+                                                        backgroundColor: 'rgba(255, 149, 0, 0.15)',
+                                                        color: 'var(--color-systemOrange)',
+                                                        textTransform: 'uppercase',
+                                                      }}>
+                                                        ENB
+                                                      </span>
+                                                      <h5 className="text-subheadline" style={{
+                                                        margin: 0,
+                                                        fontWeight: 600,
+                                                        color: 'var(--color-label)',
+                                                      }}>
+                                                        {enabler.name || enabler.filename}
+                                                      </h5>
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                                      {enabler.status && (
+                                                        <span style={{
+                                                          padding: '2px 8px',
+                                                          fontSize: '11px',
+                                                          fontWeight: 500,
+                                                          borderRadius: '12px',
+                                                          backgroundColor: enbStatusColors.bg,
+                                                          color: enbStatusColors.color,
+                                                        }}>
+                                                          {formatStatus(enabler.status)}
+                                                        </span>
+                                                      )}
+                                                      {enabler.priority && (
+                                                        <span className="text-caption2" style={{ color: 'var(--color-tertiaryLabel)' }}>
+                                                          Priority: {enabler.priority}
+                                                        </span>
+                                                      )}
+                                                    </div>
+                                                    {enabler.purpose && (
+                                                      <p className="text-caption1 text-secondary" style={{
+                                                        marginTop: '8px',
+                                                        marginBottom: 0,
+                                                        lineHeight: '1.4',
+                                                      }}>
+                                                        {enabler.purpose.substring(0, 150)}{enabler.purpose.length > 150 ? '...' : ''}
+                                                      </p>
+                                                    )}
+                                                  </div>
+                                                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                                                    <span className="text-caption2" style={{
+                                                      color: 'var(--color-tertiaryLabel)',
+                                                      whiteSpace: 'nowrap',
+                                                    }}>
+                                                      {enabler.filename}
+                                                    </span>
+                                                    <button
+                                                      onClick={() => handleDeleteFileEnabler(enabler)}
+                                                      style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        color: 'var(--color-systemRed)',
+                                                        fontSize: '12px',
+                                                        padding: '2px 6px',
+                                                      }}
+                                                    >
+                                                      Delete
+                                                    </button>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </Card>
+                                );
                               })}
                             </div>
                           )}
@@ -1184,6 +1665,72 @@ export const Capabilities: React.FC = () => {
                   </div>
 
                   <div style={{ marginBottom: '16px' }}>
+                    <label className="text-subheadline" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      Storyboard Reference
+                      {isStoryboardSuggesting && (
+                        <span style={{ fontSize: '12px', color: 'var(--color-systemBlue)', fontWeight: 'normal' }}>
+                          (AI analyzing...)
+                        </span>
+                      )}
+                      {storyboardNeedsConfirmation && !isStoryboardSuggesting && (
+                        <span style={{ fontSize: '12px', color: 'var(--color-systemGreen)', fontWeight: 'normal' }}>
+                          (AI suggested)
+                        </span>
+                      )}
+                    </label>
+                    <select
+                      value={editFormData.storyboardReference}
+                      onChange={(e) => {
+                        setEditFormData({ ...editFormData, storyboardReference: e.target.value });
+                        // If user manually changes, clear the confirmation requirement
+                        if (e.target.value !== suggestedStoryboard) {
+                          setStoryboardNeedsConfirmation(false);
+                        }
+                      }}
+                      className="input"
+                      disabled={isStoryboardSuggesting}
+                      style={{
+                        width: '100%',
+                        borderColor: storyboardNeedsConfirmation ? 'var(--color-systemGreen)' : undefined,
+                        borderWidth: storyboardNeedsConfirmation ? '2px' : undefined,
+                        boxShadow: storyboardNeedsConfirmation ? '0 0 0 1px var(--color-systemGreen)' : undefined,
+                      }}
+                    >
+                      <option value="">{isStoryboardSuggesting ? 'AI analyzing...' : 'Select a Storyboard Card'}</option>
+                      {storyboardCards.map((card) => (
+                        <option key={card.id} value={card.title}>
+                          {card.title}
+                        </option>
+                      ))}
+                    </select>
+                    {storyboardNeedsConfirmation && !isStoryboardSuggesting && (
+                      <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--color-systemGreen)', fontStyle: 'italic' }}>
+                          Please confirm AI suggestion
+                        </span>
+                        <button
+                          type="button"
+                          onClick={confirmStoryboardSuggestion}
+                          style={{
+                            padding: '4px 12px',
+                            fontSize: '12px',
+                            backgroundColor: 'var(--color-systemGreen)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-footnote text-secondary" style={{ marginTop: '4px' }}>
+                      Select the storyboard card this capability relates to ({storyboardCards.length} cards available)
+                    </p>
+                  </div>
+
+                  <div style={{ marginBottom: '16px' }}>
                     <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Additional Content</label>
                     <textarea
                       value={editFormData.content}
@@ -1249,35 +1796,58 @@ export const Capabilities: React.FC = () => {
           </div>
         )}
 
-        {/* Suggestions Modal */}
+        {/* Proposed Capabilities Section */}
         {showSuggestions && suggestions.length > 0 && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1000,
-            padding: '20px',
-          }}>
-            <Card style={{ maxWidth: '800px', maxHeight: '80vh', overflow: 'auto', width: '100%' }}>
+          <div style={{ marginBottom: '32px' }}>
+            <Card style={{ borderLeft: '4px solid var(--color-systemBlue)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
                 <div>
-                  <h2 className="text-title1">Suggested Capabilities</h2>
-                  <p className="text-body text-secondary" style={{ marginTop: '8px' }}>
-                    Based on your specifications, here are suggested capabilities you might want to add:
+                  <h2 className="text-title1" style={{ marginBottom: '8px' }}>Proposed Capabilities</h2>
+                  <p className="text-body text-secondary">
+                    Based on Capability-Driven Architecture Map analysis of your conception documents
                   </p>
                 </div>
-                <Button variant="secondary" onClick={() => setShowSuggestions(false)}>
-                  Close
-                </Button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <Button variant="primary" onClick={handleAcceptAllSuggestions}>
+                    Accept All ({suggestions.length})
+                  </Button>
+                  <Button variant="secondary" onClick={() => setShowSuggestions(false)}>
+                    Dismiss
+                  </Button>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px' }}>
+              {/* Analysis Info */}
+              {analysisInfo && (
+                <div style={{
+                  padding: '12px 16px',
+                  marginBottom: '16px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(0, 122, 255, 0.08)',
+                  border: '1px solid rgba(0, 122, 255, 0.2)',
+                }}>
+                  <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                    {analysisInfo.totalConceptionDocuments && (
+                      <span className="text-footnote">
+                        <strong>Documents Analyzed:</strong> {analysisInfo.totalConceptionDocuments}
+                      </span>
+                    )}
+                    {analysisInfo.keyThemes && analysisInfo.keyThemes.length > 0 && (
+                      <span className="text-footnote">
+                        <strong>Key Themes:</strong> {analysisInfo.keyThemes.join(', ')}
+                      </span>
+                    )}
+                  </div>
+                  {analysisInfo.coverageNotes && (
+                    <p className="text-footnote text-secondary" style={{ margin: 0 }}>
+                      {analysisInfo.coverageNotes}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Proposed Capability Cards */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {suggestions.map((suggestion, index) => (
                   <div
                     key={index}
@@ -1288,44 +1858,54 @@ export const Capabilities: React.FC = () => {
                       backgroundColor: 'var(--color-secondarySystemBackground)',
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
-                      <div>
-                        <h3 className="text-headline" style={{ marginBottom: '4px' }}>{suggestion.name}</h3>
-                        <span style={{
-                          display: 'inline-block',
-                          padding: '2px 8px',
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          borderRadius: '12px',
-                          backgroundColor: suggestion.type === 'capability' ? 'rgba(0, 122, 255, 0.1)' :
-                                          suggestion.type === 'feature' ? 'rgba(76, 217, 100, 0.1)' :
-                                          'rgba(255, 204, 0, 0.1)',
-                          color: suggestion.type === 'capability' ? 'var(--color-systemBlue)' :
-                                 suggestion.type === 'feature' ? 'var(--color-systemGreen)' :
-                                 'var(--color-systemYellow)',
-                        }}>
-                          {suggestion.type.charAt(0).toUpperCase() + suggestion.type.slice(1)}
-                        </span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '4px 12px',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            borderRadius: '20px',
+                            backgroundColor: 'rgba(0, 122, 255, 0.15)',
+                            color: 'var(--color-systemBlue)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px',
+                          }}>
+                            Capability
+                          </span>
+                          <h3 className="text-headline" style={{ margin: 0 }}>{suggestion.name}</h3>
+                        </div>
+                        <p className="text-body" style={{ marginBottom: '12px' }}>{suggestion.description}</p>
+
+                        <div style={{ marginBottom: '8px' }}>
+                          <p className="text-footnote" style={{ marginBottom: '4px' }}>
+                            <strong>Rationale:</strong>
+                          </p>
+                          <p className="text-footnote text-secondary" style={{ margin: 0 }}>
+                            {suggestion.rationale}
+                          </p>
+                        </div>
+
+                        {suggestion.successMetrics && suggestion.successMetrics.length > 0 && (
+                          <div>
+                            <p className="text-footnote" style={{ marginBottom: '4px' }}>
+                              <strong>Success Metrics:</strong>
+                            </p>
+                            <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                              {suggestion.successMetrics.map((metric, i) => (
+                                <li key={i} className="text-footnote text-secondary">{metric}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                       <Button variant="primary" onClick={() => handleAcceptSuggestion(suggestion)}>
-                        Accept
+                        Accept & Create
                       </Button>
                     </div>
-                    <p className="text-body" style={{ marginBottom: '8px' }}>{suggestion.description}</p>
-                    <p className="text-footnote text-secondary">
-                      <strong>Rationale:</strong> {suggestion.rationale}
-                    </p>
                   </div>
                 ))}
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                <Button variant="secondary" onClick={() => setShowSuggestions(false)}>
-                  Cancel
-                </Button>
-                <Button variant="primary" onClick={handleAcceptAllSuggestions}>
-                  Accept All ({suggestions.length})
-                </Button>
               </div>
             </Card>
           </div>

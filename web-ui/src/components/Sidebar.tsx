@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useRoleAccess } from '../context/RoleAccessContext';
 import { useApproval } from '../context/ApprovalContext';
@@ -45,8 +45,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
     pendingApprovalCount = 0;
   }
 
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['SPECIFICATION', 'DEFINITION', 'DESIGN', 'EXECUTION', 'Workspaces']));
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Initialize expanded items from localStorage or use defaults
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('sidebar_expanded_items');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return new Set(parsed);
+      } catch (e) {
+        // If parsing fails, use defaults
+      }
+    }
+    return new Set(['SPECIFICATION', 'DEFINITION', 'DESIGN', 'EXECUTION', 'Workspaces']);
+  });
+
+  // Initialize collapsed state from localStorage
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebar_collapsed');
+    return saved === 'true';
+  });
+
+  // Persist expanded items to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('sidebar_expanded_items', JSON.stringify(Array.from(expandedItems)));
+  }, [expandedItems]);
+
+  // Persist collapsed state to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('sidebar_collapsed', String(isCollapsed));
+  }, [isCollapsed]);
 
   // Filter items based on role permissions
   const visibleItems = useMemo(() => {

@@ -18,8 +18,86 @@ This document is the **single source of truth** for all software development act
 
 ---
 
+## AI Governance Principles
+
+**IMPORTANT**: AI governance and enforcement rules are defined in the `CODE_RULES/ACTIVE_AI_PRINCIPLES.md` file in this workspace. This separation allows different workspaces to operate under different enforcement levels while sharing the same development methodology.
+
+### AI Policy Presets
+
+There are 5 levels of AI governance enforcement, selectable via the AI Principles page:
+
+| Level | Name | Use Case |
+|-------|------|----------|
+| **1** | Awareness (Advisory) | Early development, prototyping, learning environments |
+| **2** | Guided Recommendations (Suggested) | Development environments, feature development, iterative work |
+| **3** | Enforced with Warnings (Controlled) | Production environments, regulated industries, quality-critical systems |
+| **4** | Strict Enforcement (Mandatory) | Mission-critical systems, compliance-heavy environments, safety systems |
+| **5** | Zero-Tolerance Termination (Absolute) | Safety-critical systems, financial systems, healthcare, nuclear, aerospace |
+
+### How It Works
+
+1. When a workspace is activated:
+   - `CLAUDE.md` is copied from the project root to `{workspace}/CLAUDE.md`
+   - `MAIN_SWDEV_PLAN.md` is copied from `CODE_RULES/` to `{workspace}/CODE_RULES/MAIN_SWDEV_PLAN.md`
+2. When you select an AI Policy level in the AI Principles page, the corresponding preset is copied to `{workspace}/CODE_RULES/ACTIVE_AI_PRINCIPLES.md`
+3. AI agents reference `CODE_RULES/ACTIVE_AI_PRINCIPLES.md` for governance rules specific to that workspace
+
+### Reference
+
+@CODE_RULES/ACTIVE_AI_PRINCIPLES.md
+
+---
+
+<!-- ========== AI CODE EDITING STANDARDS - ADDED 2024-12-16 ========== -->
+<!-- This section can be tweaked. Search for "AI CODE EDITING STANDARDS" to find it. -->
+
+## AI Code Editing Standards
+
+**PURPOSE**: Prevent careless AI mistakes during code editing. These rules are MANDATORY for all AI agents.
+
+### Pre-Edit Verification (MANDATORY)
+
+Before making ANY code edit, AI agents MUST:
+
+| Step | Action | Violation Response |
+|------|--------|-------------------|
+| 1 | **Search for existing names** - Use Grep/search to find actual function, variable, and component names before referencing them. NEVER guess or assume names exist. | STOP - Search first |
+| 2 | **Read the target file section** - Read the specific area being modified to understand current structure and context. | STOP - Read first |
+| 3 | **Confirm requirements** - Restate what the user asked for before editing to ensure understanding. | STOP - Clarify first |
+
+### Post-Edit Verification (MANDATORY)
+
+After making ANY code edit, AI agents MUST:
+
+| Step | Action | Violation Response |
+|------|--------|-------------------|
+| 1 | **Verify render/execution order** - For UI ordering changes, confirm actual line numbers match intended order. For logic changes, verify execution flow. | Undo and redo correctly |
+| 2 | **Check for duplicates** - Search for duplicate sections, functions, or variables that may have been accidentally created. | Remove duplicates immediately |
+| 3 | **Validate all references** - Ensure any function, variable, or component being called/referenced actually exists in the codebase. | Fix references before proceeding |
+
+### Single Fix Principle
+
+- **Analyze FULLY before editing** - Understand the complete problem before making any changes
+- **One complete fix** - Make ONE complete, correct fix rather than multiple partial attempts
+- **Ask when uncertain** - If unsure about requirements or approach, ASK before editing rather than guessing
+- **No assumptions** - Never assume a function name, variable name, or file structure exists without verifying
+
+### Violation Consequences
+
+| Violation | Consequence |
+|-----------|-------------|
+| Making edits without pre-verification | IMMEDIATE STOP - Restart with proper verification |
+| Multiple failed fix attempts (>1) for same issue | IMMEDIATE STOP - Full analysis required before next attempt |
+| Using non-existent function/variable names | IMMEDIATE STOP - Search codebase and correct |
+| Incorrect UI/logic ordering after edit | IMMEDIATE STOP - Verify line numbers and fix |
+
+<!-- ========== END AI CODE EDITING STANDARDS ========== -->
+
+---
+
 ## Table of Contents
 
+0. [AI Code Editing Standards](#ai-code-editing-standards) ← **NEW: Prevents careless AI mistakes**
 1. [Core Principles](#core-principles)
 2. [SAWai Hierarchy](#sawai-hierarchy)
 3. [Development Lifecycle](#development-lifecycle)

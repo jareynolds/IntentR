@@ -1,13 +1,16 @@
 {
-  "id": "workspace-1765770836275",
-  "name": "HelloWorld",
+  "id": "workspace-1765770831790",
+  "name": "HelloWeatherWorld",
   "description": "Imported from workspaces/HelloWorld",
   "workspaceType": "new",
   "projectFolder": "workspaces/HelloWorld",
+  "activeAIPreset": 3,
+  "selectedUIFramework": "darkblue",
+  "selectedUILayout": "dashboard-admin",
   "ownerId": "admin@ubecode.local",
   "ownerName": "System Administrator",
   "isShared": false,
-  "createdAt": "2025-12-15T03:53:56.275Z",
-  "updatedAt": "2025-12-15T03:53:56.275Z",
+  "createdAt": "2025-12-15T03:53:51.790Z",
+  "updatedAt": "2025-12-18T06:41:22.643Z",
   "version": "1.0"
 }

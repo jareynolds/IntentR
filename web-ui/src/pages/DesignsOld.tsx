@@ -130,7 +130,7 @@ export const Designs: React.FC = () => {
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
       <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
         <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Design Artifacts</h1>
-        <p className="text-body text-secondary" style={{ marginBottom: '24px' }}>
+        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
           {currentWorkspace
             ? `Manage design files and assets for ${currentWorkspace.name}`
             : 'Select a workspace to manage design files'}
