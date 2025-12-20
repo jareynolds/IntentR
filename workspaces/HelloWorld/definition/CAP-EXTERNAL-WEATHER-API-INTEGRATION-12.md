@@ -1,6 +1,6 @@
 # External Weather API Integration
 
-**Status:** Planned
+**Status:** Implemented
 
 **Storyboard Reference:** pull weather data
 

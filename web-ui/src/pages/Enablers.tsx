@@ -13,6 +13,8 @@ interface FileCapability {
   description: string;
   status: string;
   capabilityId: string;
+  storyboardReference?: string;
+  flowOrder?: number; // Order based on storyboard position
 }
 
 // File-based enabler from workspace definition folder
@@ -133,6 +135,11 @@ export const Enablers: React.FC = () => {
   }>>([]);
   const [showProposedEnablers, setShowProposedEnablers] = useState(false);
   const [isAnalyzingCapabilities, setIsAnalyzingCapabilities] = useState(false);
+
+  // Multi-select mode state
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedEnablerIds, setSelectedEnablerIds] = useState<Set<string>>(new Set());
+
   const [analysisInfo, setAnalysisInfo] = useState<{
     totalCapabilities?: number;
     analyzedCapabilities?: string[];
@@ -158,6 +165,7 @@ export const Enablers: React.FC = () => {
     purpose: '',
     owner: '',
     priority: 'medium',
+    status: 'In Draft',
   });
 
   // Inline requirements for enabler creation
@@ -264,6 +272,7 @@ export const Enablers: React.FC = () => {
   }, [fileEnablers, searchParams, editingFileEnabler, setSearchParams]);
 
   // Load capabilities from workspace's definition folder (CAP-*.md files)
+  // Sorted by storyboard flow order (matching the Narrative/StoryMap page logic)
   const loadCapabilities = async () => {
     if (!currentWorkspace?.projectFolder) {
       setCapabilities([]);
@@ -284,17 +293,51 @@ export const Enablers: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
+
+        // Get storyboard canvas data for ordering (same approach as Narrative/StoryMap page)
+        const storyboardData = currentWorkspace?.storyboard;
+
+        // Create a position map from the storyboard canvas cards (matching StoryMap logic)
+        const positionMap = new Map<string, number>();
+        if (storyboardData?.cards && storyboardData.cards.length > 0) {
+          // Sort cards by Y position and assign flow order
+          const sortedCards = [...storyboardData.cards].sort((a, b) => (a.y || 0) - (b.y || 0));
+          sortedCards.forEach((card: { id: string; title: string; y?: number }, index: number) => {
+            positionMap.set(card.id, index);
+            positionMap.set(card.title.toLowerCase(), index);
+          });
+        }
+
         // Filter to only include CAP-*.md files and map to FileCapability interface
         const caps: FileCapability[] = (data.capabilities || [])
           .filter((cap: any) => cap.filename?.startsWith('CAP-'))
-          .map((cap: any) => ({
-            filename: cap.filename,
-            path: cap.path,
-            name: cap.name || cap.filename.replace(/\.md$/, ''),
-            description: cap.description || '',
-            status: cap.status || '',
-            capabilityId: cap.fields?.['ID'] || cap.filename.replace(/\.md$/, ''),
-          }));
+          .map((cap: any) => {
+            const storyboardRef = cap.fields?.['Storyboard Reference'] || '';
+            // Get flow order from storyboard position
+            const flowOrder = storyboardRef
+              ? (positionMap.get(storyboardRef.toLowerCase()) ?? Infinity)
+              : Infinity;
+
+            return {
+              filename: cap.filename,
+              path: cap.path,
+              name: cap.name || cap.filename.replace(/\.md$/, ''),
+              description: cap.description || '',
+              status: cap.status || '',
+              capabilityId: cap.fields?.['ID'] || cap.filename.replace(/\.md$/, ''),
+              storyboardReference: storyboardRef,
+              flowOrder: flowOrder,
+            };
+          });
+
+        // Sort capabilities by storyboard flow order, then by name
+        caps.sort((a, b) => {
+          const orderA = a.flowOrder ?? Infinity;
+          const orderB = b.flowOrder ?? Infinity;
+          if (orderA !== orderB) return orderA - orderB;
+          return (a.name || '').localeCompare(b.name || '');
+        });
+
         setCapabilities(caps);
       }
     } catch (err) {
@@ -566,8 +609,79 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
       purpose: enabler.purpose || '',
       owner: enabler.owner || '',
       priority: enabler.priority,
+      status: enabler.status || 'In Draft',
     });
     setShowEnablerForm(true);
+  };
+
+  // Multi-select mode handlers
+  const toggleEnablerSelection = (enablerId: string) => {
+    setSelectedEnablerIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(enablerId)) {
+        newSet.delete(enablerId);
+      } else {
+        newSet.add(enablerId);
+      }
+      return newSet;
+    });
+  };
+
+  const exitSelectMode = () => {
+    setIsSelectMode(false);
+    setSelectedEnablerIds(new Set());
+  };
+
+  const handleBulkStatusChange = async (newStatus: string) => {
+    if (!currentWorkspace?.projectFolder || selectedEnablerIds.size === 0) return;
+
+    try {
+      // Update each selected enabler's status in their markdown files
+      for (const enablerId of selectedEnablerIds) {
+        const enabler = fileEnablers.find(e => e.enablerId === enablerId);
+        if (!enabler || !enabler.filename) continue;
+
+        // Fetch the current file content - include definition/ subfolder in path
+        const filePath = `definition/${enabler.filename}`;
+        const response = await fetch(`http://localhost:4001/specifications/${encodeURIComponent(currentWorkspace.projectFolder)}/${encodeURIComponent(filePath)}`);
+        if (!response.ok) {
+          console.error(`Failed to fetch ${filePath}: ${response.status}`);
+          continue;
+        }
+
+        const data = await response.json();
+        let content = data.content;
+
+        // Update the status in the markdown content
+        // Match "- **Status**: <value>" pattern
+        const statusRegex = /^- \*\*Status\*\*:\s*.+$/m;
+        if (statusRegex.test(content)) {
+          content = content.replace(statusRegex, `- **Status**: ${newStatus}`);
+        } else {
+          console.warn(`No status field found in ${enabler.filename}`);
+          continue;
+        }
+
+        // Save the updated content
+        const saveResponse = await fetch(`http://localhost:4001/specifications/${encodeURIComponent(currentWorkspace.projectFolder)}/${encodeURIComponent(filePath)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content }),
+        });
+
+        if (!saveResponse.ok) {
+          console.error(`Failed to save ${filePath}: ${saveResponse.status}`);
+        }
+      }
+
+      // Reload file enablers to reflect changes
+      await loadFileEnablers();
+
+      // Exit select mode after successful update
+      exitSelectMode();
+    } catch (err) {
+      console.error('Failed to bulk update enabler status:', err);
+    }
   };
 
   const handleSaveEnabler = async () => {
@@ -603,7 +717,7 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
       markdown += `- **Capability**: ${capabilityName} (${formCapabilityId})\n`;
       markdown += `- **Owner**: ${enablerFormData.owner || 'Not specified'}\n`;
       markdown += `- **Priority**: ${enablerFormData.priority || 'medium'}\n`;
-      markdown += `- **Status**: planned\n`;
+      markdown += `- **Status**: ${enablerFormData.status || 'In Draft'}\n`;
       markdown += `- **Created**: ${new Date().toLocaleString()}\n\n`;
 
       if (enablerFormData.purpose) {
@@ -1354,18 +1468,41 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
             />
           </div>
 
-          <div>
-            <label className="text-subheadline">Priority</label>
-            <select
-              className="input"
-              value={enablerFormData.priority}
-              onChange={(e) => setEnablerFormData({ ...enablerFormData, priority: e.target.value as any })}
-              style={{ width: '100%', marginTop: '4px' }}
-            >
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div>
+              <label className="text-subheadline">Priority</label>
+              <select
+                className="input"
+                value={enablerFormData.priority}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, priority: e.target.value as any })}
+                style={{ width: '100%', marginTop: '4px' }}
+              >
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-subheadline">Status</label>
+              <select
+                className="input"
+                value={enablerFormData.status || 'In Draft'}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, status: e.target.value })}
+                style={{ width: '100%', marginTop: '4px' }}
+              >
+                <option value="In Draft">In Draft</option>
+                <option value="Ready for Analysis">Ready for Analysis</option>
+                <option value="In Analysis">In Analysis</option>
+                <option value="Ready for Design">Ready for Design</option>
+                <option value="In Design">In Design</option>
+                <option value="Ready for Implementation">Ready for Implementation</option>
+                <option value="In Implementation">In Implementation</option>
+                <option value="Implemented">Implemented</option>
+                <option value="Ready for Refactor">Ready for Refactor</option>
+                <option value="Ready for Retirement">Ready for Retirement</option>
+              </select>
+            </div>
           </div>
 
           {/* Requirements Section */}
@@ -2322,18 +2459,96 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
               : fileEnablers;
             return (
               <>
-                <h3 className="text-title2" style={{ marginBottom: '16px' }}>
-                  {selectedCapabilityId ? (
-                    <>
-                      Enablers ({filteredEnablers.length})
-                      <span className="text-footnote text-secondary" style={{ fontWeight: 'normal', marginLeft: '8px' }}>
-                        for {capabilities.find(c => c.capabilityId === selectedCapabilityId)?.name || selectedCapabilityId}
-                      </span>
-                    </>
-                  ) : (
-                    <>All Enablers ({fileEnablers.length})</>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <h3 className="text-title2">
+                    {selectedCapabilityId ? (
+                      <>
+                        Enablers ({filteredEnablers.length})
+                        <span className="text-footnote text-secondary" style={{ fontWeight: 'normal', marginLeft: '8px' }}>
+                          for {capabilities.find(c => c.capabilityId === selectedCapabilityId)?.name || selectedCapabilityId}
+                        </span>
+                      </>
+                    ) : (
+                      <>All Enablers ({fileEnablers.length})</>
+                    )}
+                  </h3>
+                  {filteredEnablers.length > 0 && (
+                    <button
+                      onClick={() => isSelectMode ? exitSelectMode() : setIsSelectMode(true)}
+                      style={{
+                        background: isSelectMode ? 'var(--color-systemBlue)' : 'none',
+                        border: isSelectMode ? 'none' : '1px solid var(--color-separator)',
+                        borderRadius: '6px',
+                        padding: '6px 12px',
+                        fontSize: '13px',
+                        color: isSelectMode ? 'white' : 'var(--color-systemBlue)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {isSelectMode ? 'Done' : 'Select'}
+                    </button>
                   )}
-                </h3>
+                </div>
+
+                {/* Selection Action Bar */}
+                {isSelectMode && selectedEnablerIds.size > 0 && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px',
+                    marginBottom: '16px',
+                    backgroundColor: 'var(--color-systemBlue)10',
+                    borderRadius: '8px',
+                    border: '1px solid var(--color-systemBlue)40',
+                  }}>
+                    <span className="text-subheadline" style={{ color: 'var(--color-systemBlue)' }}>
+                      {selectedEnablerIds.size} selected
+                    </span>
+                    <select
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          handleBulkStatusChange(e.target.value);
+                          e.target.value = '';
+                        }
+                      }}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--color-separator)',
+                        backgroundColor: 'var(--color-secondarySystemBackground)',
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                      }}
+                      defaultValue=""
+                    >
+                      <option value="" disabled>Change Status...</option>
+                      <option value="In Draft">In Draft</option>
+                      <option value="Ready for Analysis">Ready for Analysis</option>
+                      <option value="In Analysis">In Analysis</option>
+                      <option value="Ready for Design">Ready for Design</option>
+                      <option value="In Design">In Design</option>
+                      <option value="Ready for Implementation">Ready for Implementation</option>
+                      <option value="In Implementation">In Implementation</option>
+                      <option value="Implemented">Implemented</option>
+                      <option value="Ready for Refactor">Ready for Refactor</option>
+                      <option value="Ready for Retirement">Ready for Retirement</option>
+                    </select>
+                    <button
+                      onClick={() => setSelectedEnablerIds(new Set())}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--color-secondaryLabel)',
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        marginLeft: 'auto',
+                      }}
+                    >
+                      Clear Selection
+                    </button>
+                  </div>
+                )}
                 {loadingFileEnablers ? (
                   <p className="text-body text-secondary">Loading enablers...</p>
                 ) : filteredEnablers.length === 0 ? (
@@ -2346,8 +2561,24 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
                   </Card>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                      {filteredEnablers.map((enabler) => (
-                        <Card key={enabler.enablerId}>
+                      {filteredEnablers.map((enabler) => {
+                        const isSelected = selectedEnablerIds.has(enabler.enablerId);
+                        return (
+                        <Card
+                          key={enabler.enablerId}
+                          onClick={() => {
+                            if (isSelectMode) {
+                              toggleEnablerSelection(enabler.enablerId);
+                            } else {
+                              handleEditFileEnabler(enabler);
+                            }
+                          }}
+                          style={{
+                            cursor: 'pointer',
+                            border: isSelected ? '2px solid var(--color-systemBlue)' : undefined,
+                            backgroundColor: isSelected ? 'var(--color-systemBlue)08' : undefined,
+                          }}
+                        >
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                             <div style={{ flex: 1 }}>
                               <h4 className="text-headline" style={{ marginBottom: '8px' }}>{enabler.name}</h4>
@@ -2382,7 +2613,7 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
                             </div>
                             <div style={{ display: 'flex', gap: '8px' }}>
                               <button
-                                onClick={() => handleEditFileEnabler(enabler)}
+                                onClick={(e) => { e.stopPropagation(); handleEditFileEnabler(enabler); }}
                                 style={{
                                   background: 'none',
                                   border: 'none',
@@ -2395,7 +2626,7 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
                                 Edit
                               </button>
                               <button
-                                onClick={() => handleDeleteFileEnabler(enabler)}
+                                onClick={(e) => { e.stopPropagation(); handleDeleteFileEnabler(enabler); }}
                                 style={{
                                   background: 'none',
                                   border: 'none',
@@ -2410,7 +2641,8 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
                             </div>
                           </div>
                         </Card>
-                      ))}
+                      );
+                      })}
                     </div>
                   )}
                 </>

@@ -2,12 +2,12 @@
 
 ## Metadata
 - **Type**: Story Card
-- **Storyboard**: HelloWeatherWorld
+- **Storyboard**: HelloWorldWeather
 - **Card ID**: card-1765937081415
 - **Status**: Completed
-- **Grid Position X**: 121
-- **Grid Position Y**: 362
-- **Generated**: 12/16/2025, 7:46:24 PM
+- **Grid Position X**: 128
+- **Grid Position Y**: 305
+- **Generated**: 12/19/2025, 11:47:27 AM
 - **File**: STORY-START-APP.md
 
 ## Description

@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -1644,13 +1645,14 @@ type CapabilityFilesRequest struct {
 
 // FileCapability represents a capability parsed from a markdown file
 type FileCapability struct {
-	Filename    string            `json:"filename"`
-	Path        string            `json:"path"`
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
-	Status      string            `json:"status"`
-	Content     string            `json:"content"`
-	Fields      map[string]string `json:"fields"`
+	Filename     string            `json:"filename"`
+	Path         string            `json:"path"`
+	Name         string            `json:"name"`
+	CapabilityID string            `json:"capabilityId"`
+	Description  string            `json:"description"`
+	Status       string            `json:"status"`
+	Content      string            `json:"content"`
+	Fields       map[string]string `json:"fields"`
 }
 
 // HandleCapabilityFiles handles POST /capability-files
@@ -1693,9 +1695,12 @@ func (h *Handler) HandleCapabilityFiles(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Find capability files matching patterns: capability*, CAP*, capabilities*
+	// Find capability files matching patterns:
+	// - Files starting with: capability*, CAP*, capabilities*
+	// - Files containing: -capability (for numeric ID format like 112001-capability.md)
 	var capabilities []FileCapability
-	patterns := []string{"capability", "CAP", "capabilities"}
+	prefixPatterns := []string{"capability", "CAP", "capabilities"}
+	containsPatterns := []string{"-capability", "-CAPABILITY"}
 
 	err = filepath.Walk(specsPath, func(path string, info os.FileInfo, walkErr error) error {
 		if walkErr != nil {
@@ -1710,10 +1715,22 @@ func (h *Handler) HandleCapabilityFiles(w http.ResponseWriter, r *http.Request) 
 		filename := info.Name()
 		filenameUpper := strings.ToUpper(filename)
 		matched := false
-		for _, pattern := range patterns {
+
+		// Check prefix patterns (starts with)
+		for _, pattern := range prefixPatterns {
 			if strings.HasPrefix(filenameUpper, strings.ToUpper(pattern)) {
 				matched = true
 				break
+			}
+		}
+
+		// Check contains patterns (for numeric ID format like 112001-capability.md)
+		if !matched {
+			for _, pattern := range containsPatterns {
+				if strings.Contains(filenameUpper, strings.ToUpper(pattern)) {
+					matched = true
+					break
+				}
 			}
 		}
 
@@ -1790,6 +1807,18 @@ type FileEnabler struct {
 	Fields       map[string]string `json:"fields"`
 }
 
+// FileTestScenario represents a test scenario file
+type FileTestScenario struct {
+	Filename   string            `json:"filename"`
+	Path       string            `json:"path"`
+	Name       string            `json:"name"`
+	ScenarioID string            `json:"scenarioId"`
+	EnablerID  string            `json:"enablerId"`
+	Status     string            `json:"status"`
+	Priority   string            `json:"priority"`
+	Fields     map[string]string `json:"fields"`
+}
+
 // HandleEnablerFiles handles POST /enabler-files
 func (h *Handler) HandleEnablerFiles(w http.ResponseWriter, r *http.Request) {
 	var req CapabilityFilesRequest // Reuse the same request struct
@@ -1829,9 +1858,12 @@ func (h *Handler) HandleEnablerFiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Find enabler files matching patterns: ENB-*, enabler*
+	// Find enabler files matching patterns:
+	// - Files starting with: ENB-*, enabler*
+	// - Files containing: -enabler (for numeric ID format like 112106-enabler.md)
 	var enablers []FileEnabler
-	patterns := []string{"ENB-", "enabler"}
+	prefixPatterns := []string{"ENB-", "enabler"}
+	containsPatterns := []string{"-enabler", "-ENABLER"}
 
 	err = filepath.Walk(specsPath, func(path string, info os.FileInfo, walkErr error) error {
 		if walkErr != nil {
@@ -1846,10 +1878,22 @@ func (h *Handler) HandleEnablerFiles(w http.ResponseWriter, r *http.Request) {
 		filename := info.Name()
 		filenameUpper := strings.ToUpper(filename)
 		matched := false
-		for _, pattern := range patterns {
+
+		// Check prefix patterns (starts with)
+		for _, pattern := range prefixPatterns {
 			if strings.HasPrefix(filenameUpper, strings.ToUpper(pattern)) {
 				matched = true
 				break
+			}
+		}
+
+		// Check contains patterns (for numeric ID format like 112106-enabler.md)
+		if !matched {
+			for _, pattern := range containsPatterns {
+				if strings.Contains(filenameUpper, strings.ToUpper(pattern)) {
+					matched = true
+					break
+				}
 			}
 		}
 
@@ -1884,6 +1928,204 @@ func (h *Handler) HandleEnablerFiles(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"enablers": enablers,
 	})
+}
+
+// HandleTestScenarioFiles handles POST /test-scenario-files
+func (h *Handler) HandleTestScenarioFiles(w http.ResponseWriter, r *http.Request) {
+	var req CapabilityFilesRequest // Reuse the same request struct
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.WorkspacePath == "" {
+		http.Error(w, "workspacePath is required", http.StatusBadRequest)
+		return
+	}
+
+	// Test scenario files are stored in the test folder
+	workspacePath := req.WorkspacePath
+
+	// If path contains "workspaces/", extract the relative part
+	if idx := strings.Index(workspacePath, "workspaces/"); idx != -1 {
+		workspacePath = workspacePath[idx:]
+	}
+
+	// Get current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+	testPath := filepath.Join(cwd, workspacePath, "test")
+
+	// Check if test folder exists
+	if _, err := os.Stat(testPath); os.IsNotExist(err) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"testScenarios": []FileTestScenario{},
+		})
+		return
+	}
+
+	// Find test scenario files matching patterns: TS-*, *-test.md
+	var testScenarios []FileTestScenario
+	prefixPatterns := []string{"TS-", "test"}
+	containsPatterns := []string{"-test", "-TEST"}
+
+	err = filepath.Walk(testPath, func(path string, info os.FileInfo, walkErr error) error {
+		if walkErr != nil {
+			return nil // Skip errors
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		// Check if file matches any pattern (case-insensitive)
+		filename := info.Name()
+		filenameUpper := strings.ToUpper(filename)
+		matched := false
+
+		// Check prefix patterns (starts with)
+		for _, pattern := range prefixPatterns {
+			if strings.HasPrefix(filenameUpper, strings.ToUpper(pattern)) {
+				matched = true
+				break
+			}
+		}
+
+		// Check contains patterns
+		if !matched {
+			for _, pattern := range containsPatterns {
+				if strings.Contains(filenameUpper, strings.ToUpper(pattern)) {
+					matched = true
+					break
+				}
+			}
+		}
+
+		if !matched {
+			return nil
+		}
+
+		// Only process markdown files
+		if !strings.HasSuffix(strings.ToLower(filename), ".md") {
+			return nil
+		}
+
+		// Read file content
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return nil // Skip files we can't read
+		}
+
+		// Parse the markdown to extract test scenario fields
+		scenario := parseMarkdownTestScenario(filename, path, string(content))
+		testScenarios = append(testScenarios, scenario)
+
+		return nil
+	})
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to scan test folder: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"testScenarios": testScenarios,
+	})
+}
+
+// parseMarkdownTestScenario parses a markdown file to extract test scenario information
+func parseMarkdownTestScenario(filename, path, content string) FileTestScenario {
+	scenario := FileTestScenario{
+		Filename: filename,
+		Path:     path,
+		Fields:   make(map[string]string),
+	}
+
+	lines := strings.Split(content, "\n")
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+
+		// Extract title from first # heading
+		if strings.HasPrefix(trimmedLine, "# ") && scenario.Name == "" {
+			scenario.Name = strings.TrimPrefix(trimmedLine, "# ")
+			continue
+		}
+
+		// Parse ID field
+		if strings.Contains(trimmedLine, "**ID**:") || strings.Contains(trimmedLine, "**Scenario ID**:") {
+			idPattern := regexp.MustCompile(`TS-\d+`)
+			if match := idPattern.FindString(trimmedLine); match != "" {
+				scenario.ScenarioID = match
+				scenario.Fields["ID"] = match
+			}
+			continue
+		}
+
+		// Parse Enabler ID field - extract full value after colon (supports both ENB-123456 and ENB-TEXT-NAME-123 formats)
+		if strings.Contains(trimmedLine, "**Enabler ID**:") || strings.Contains(trimmedLine, "**Enabler**:") {
+			enablerId := trimmedLine
+			enablerId = strings.TrimPrefix(enablerId, "- ")
+			if idx := strings.Index(enablerId, "**Enabler ID**:"); idx != -1 {
+				enablerId = enablerId[idx+len("**Enabler ID**:"):]
+			} else if idx := strings.Index(enablerId, "**Enabler**:"); idx != -1 {
+				enablerId = enablerId[idx+len("**Enabler**:"):]
+			}
+			enablerId = strings.TrimSpace(enablerId)
+			if enablerId != "" {
+				scenario.EnablerID = enablerId
+				scenario.Fields["EnablerID"] = enablerId
+			}
+			continue
+		}
+
+		// Parse Status field
+		if strings.Contains(trimmedLine, "**Status**:") {
+			status := trimmedLine
+			status = strings.TrimPrefix(status, "- ")
+			if idx := strings.Index(status, "**Status**:"); idx != -1 {
+				status = status[idx+len("**Status**:"):]
+			}
+			scenario.Status = strings.TrimSpace(status)
+			scenario.Fields["Status"] = scenario.Status
+			continue
+		}
+
+		// Parse Priority field
+		if strings.Contains(trimmedLine, "**Priority**:") {
+			priority := trimmedLine
+			priority = strings.TrimPrefix(priority, "- ")
+			if idx := strings.Index(priority, "**Priority**:"); idx != -1 {
+				priority = priority[idx+len("**Priority**:"):]
+			}
+			scenario.Priority = strings.TrimSpace(priority)
+			scenario.Fields["Priority"] = scenario.Priority
+			continue
+		}
+	}
+
+	// If no ID found, generate from filename
+	if scenario.ScenarioID == "" {
+		numPattern := regexp.MustCompile(`(\d{4,})`)
+		if match := numPattern.FindStringSubmatch(filename); len(match) > 1 {
+			scenario.ScenarioID = "TS-" + match[1]
+		} else {
+			scenario.ScenarioID = fmt.Sprintf("TS-%06d", hashString(filename)%1000000)
+		}
+	}
+
+	// If no name found, use filename
+	if scenario.Name == "" {
+		baseName := strings.TrimSuffix(filename, ".md")
+		scenario.Name = strings.ReplaceAll(baseName, "-", " ")
+		scenario.Name = strings.ReplaceAll(scenario.Name, "_", " ")
+	}
+
+	return scenario
 }
 
 // parseMarkdownEnabler parses a markdown file to extract enabler information
@@ -1967,6 +2209,18 @@ func parseMarkdownEnabler(filename, path, content string) FileEnabler {
 			enabler.Fields["Capability"] = cap
 			continue
 		}
+
+		// Also parse **Capability ID**: CAP-XXXXXX format
+		if strings.HasPrefix(trimmedLine, "**Capability ID**:") || strings.HasPrefix(trimmedLine, "- **Capability ID**:") ||
+			strings.HasPrefix(trimmedLine, "**Capability ID:**") || strings.HasPrefix(trimmedLine, "- **Capability ID:**") {
+			capId := trimmedLine
+			capId = strings.TrimPrefix(capId, "- ")
+			capId = strings.TrimPrefix(capId, "**Capability ID**:")
+			capId = strings.TrimPrefix(capId, "**Capability ID:**")
+			enabler.CapabilityID = strings.TrimSpace(capId)
+			enabler.Fields["Capability ID"] = enabler.CapabilityID
+			continue
+		}
 	}
 
 	// Extract purpose from ## Purpose section
@@ -1980,12 +2234,13 @@ func parseMarkdownEnabler(filename, path, content string) FileEnabler {
 		enabler.Purpose = strings.TrimSpace(afterPurpose[:nextSectionIdx])
 	}
 
-	// If no enabler ID found, extract from filename
-	if enabler.EnablerID == "" && strings.HasPrefix(strings.ToUpper(filename), "ENB-") {
-		parts := strings.SplitN(filename, "-", 3)
-		if len(parts) >= 2 {
-			enabler.EnablerID = "ENB-" + parts[1]
-		}
+	// Always use filename as source of truth for enabler ID if filename starts with ENB-
+	// This handles cases where metadata ID is truncated (e.g., ENB-MANAGE instead of ENB-MANAGE-REACT-COMPONENT-NAVIGATION-FLOW-18)
+	if strings.HasPrefix(strings.ToUpper(filename), "ENB-") {
+		// Extract full ID from filename by removing .md extension
+		fullIdFromFilename := strings.TrimSuffix(filename, ".md")
+		enabler.EnablerID = fullIdFromFilename
+		enabler.Fields["ID"] = fullIdFromFilename
 	}
 
 	return enabler
@@ -3045,6 +3300,15 @@ func parseSingleCapability(filename, path, content, name string) FileCapability 
 	// Default name from filename if not found
 	if cap.Name == "" {
 		cap.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
+	}
+
+	// Always use filename as source of truth for capability ID if filename starts with CAP-
+	// This handles cases where metadata ID is missing or truncated
+	if strings.HasPrefix(strings.ToUpper(filename), "CAP-") {
+		// Extract full ID from filename by removing .md extension
+		fullIdFromFilename := strings.TrimSuffix(filename, ".md")
+		cap.CapabilityID = fullIdFromFilename
+		cap.Fields["ID"] = fullIdFromFilename
 	}
 
 	return cap
@@ -4511,7 +4775,10 @@ func (h *Handler) HandleSaveSpecifications(w http.ResponseWriter, r *http.Reques
 
 // DeleteSpecificationRequest represents a request to delete a specification file
 type DeleteSpecificationRequest struct {
-	Path string `json:"path"`
+	Path          string `json:"path"`          // Legacy: full path
+	WorkspacePath string `json:"workspacePath"` // New: workspace path
+	FileName      string `json:"fileName"`      // New: file name
+	Subfolder     string `json:"subfolder"`     // New: subfolder (e.g., "definition")
 }
 
 // HandleDeleteSpecification handles POST /delete-specification
@@ -4522,14 +4789,25 @@ func (h *Handler) HandleDeleteSpecification(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if req.Path == "" {
-		http.Error(w, "path is required", http.StatusBadRequest)
+	var filePath string
+
+	// Support both old format (path) and new format (workspacePath + fileName + subfolder)
+	if req.WorkspacePath != "" && req.FileName != "" {
+		// New format: construct path from components
+		if req.Subfolder != "" {
+			filePath = filepath.Join(req.WorkspacePath, req.Subfolder, req.FileName)
+		} else {
+			filePath = filepath.Join(req.WorkspacePath, req.FileName)
+		}
+	} else if req.Path != "" {
+		// Legacy format: use path directly
+		filePath = req.Path
+	} else {
+		http.Error(w, "path or (workspacePath + fileName) is required", http.StatusBadRequest)
 		return
 	}
 
 	// Handle path translation for Docker environments
-	filePath := req.Path
-
 	// If path contains "workspaces/", extract the relative part
 	if idx := strings.Index(filePath, "workspaces/"); idx != -1 {
 		filePath = filePath[idx:]
@@ -4545,9 +4823,12 @@ func (h *Handler) HandleDeleteSpecification(w http.ResponseWriter, r *http.Reque
 	// Construct absolute path
 	absolutePath := filepath.Join(cwd, filePath)
 
+	// Log the delete operation
+	log.Printf("[DeleteSpecification] Attempting to delete: %s", absolutePath)
+
 	// Verify the file exists
 	if _, err := os.Stat(absolutePath); os.IsNotExist(err) {
-		http.Error(w, "file not found", http.StatusNotFound)
+		http.Error(w, fmt.Sprintf("file not found: %s", absolutePath), http.StatusNotFound)
 		return
 	}
 
@@ -4557,10 +4838,13 @@ func (h *Handler) HandleDeleteSpecification(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	log.Printf("[DeleteSpecification] Successfully deleted: %s", absolutePath)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"message": "File deleted successfully",
+		"path":    absolutePath,
 	})
 }
 

@@ -63,6 +63,7 @@ export const Storyboard: React.FC = () => {
   const [connecting, setConnecting] = useState<string | null>(null);
   const [selectedConnection, setSelectedConnection] = useState<string | null>(null);
   const [draggingEndpoint, setDraggingEndpoint] = useState<{ connectionId: string; endpoint: 'from' | 'to' } | null>(null);
+  const [endpointDragPos, setEndpointDragPos] = useState<{ x: number; y: number } | null>(null); // For animated line preview
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -1102,11 +1103,14 @@ export const Storyboard: React.FC = () => {
       ));
     }
 
-    // Handle endpoint dragging
+    // Handle endpoint dragging - track mouse position for animated line preview
     if (draggingEndpoint && canvas && wrapper) {
       const rect = canvas.getBoundingClientRect();
       const mouseX = (e.clientX - rect.left + wrapper.scrollLeft) / zoom;
       const mouseY = (e.clientY - rect.top + wrapper.scrollTop) / zoom;
+
+      // Update the drag position for animated line preview (scaled to SVG coordinates)
+      setEndpointDragPos({ x: mouseX * zoom, y: mouseY * zoom });
 
       // Find which card the mouse is over
       const cardWidth = 330;
@@ -1159,6 +1163,7 @@ export const Storyboard: React.FC = () => {
       }
 
       setDraggingEndpoint(null);
+      setEndpointDragPos(null);
     }
 
     setDraggingCard(null);
@@ -1177,6 +1182,7 @@ export const Storyboard: React.FC = () => {
       // Deselect any selected items when clicking on canvas background
       setSelectedCard(null);
       setSelectedConnection(null);
+      setConnecting(null);
 
       // Start panning with left click on background (or middle mouse, or shift+click)
       if (e.button === 0 || e.button === 1 || (e.button === 0 && e.shiftKey)) {
@@ -1620,14 +1626,12 @@ export const Storyboard: React.FC = () => {
                 {/* Endpoint handles when selected */}
                 {isSelected && (
                   <>
-                    {/* From endpoint handle */}
+                    {/* From endpoint - larger invisible hit area + visible circle */}
                     <circle
                       cx={from.x}
                       cy={from.y}
-                      r={8 * zoom}
-                      fill="white"
-                      stroke="var(--color-systemOrange)"
-                      strokeWidth={2}
+                      r={20 * zoom}
+                      fill="transparent"
                       style={{
                         pointerEvents: 'all',
                         cursor: draggingEndpoint?.connectionId === connectionId && draggingEndpoint?.endpoint === 'from' ? 'grabbing' : 'grab'
@@ -1638,14 +1642,21 @@ export const Storyboard: React.FC = () => {
                         setDraggingEndpoint({ connectionId: connectionId, endpoint: 'from' });
                       }}
                     />
-                    {/* To endpoint handle */}
+                    <circle
+                      cx={from.x}
+                      cy={from.y}
+                      r={12 * zoom}
+                      fill="white"
+                      stroke="var(--color-systemOrange)"
+                      strokeWidth={3}
+                      style={{ pointerEvents: 'none' }}
+                    />
+                    {/* To endpoint - larger invisible hit area + visible circle */}
                     <circle
                       cx={to.x}
                       cy={to.y}
-                      r={8 * zoom}
-                      fill="white"
-                      stroke="var(--color-systemOrange)"
-                      strokeWidth={2}
+                      r={20 * zoom}
+                      fill="transparent"
                       style={{
                         pointerEvents: 'all',
                         cursor: draggingEndpoint?.connectionId === connectionId && draggingEndpoint?.endpoint === 'to' ? 'grabbing' : 'grab'
@@ -1655,6 +1666,15 @@ export const Storyboard: React.FC = () => {
                         e.preventDefault();
                         setDraggingEndpoint({ connectionId: connectionId, endpoint: 'to' });
                       }}
+                    />
+                    <circle
+                      cx={to.x}
+                      cy={to.y}
+                      r={12 * zoom}
+                      fill="white"
+                      stroke="var(--color-systemOrange)"
+                      strokeWidth={3}
+                      style={{ pointerEvents: 'none' }}
                     />
                     {/* Delete button in the middle of the line */}
                     <g
@@ -1722,7 +1742,45 @@ export const Storyboard: React.FC = () => {
             >
               <polygon points="0 0, 10 3, 0 6" fill="var(--color-systemOrange)" />
             </marker>
+            <marker
+              id="arrowhead-drag-preview"
+              markerWidth="10"
+              markerHeight="10"
+              refX="9"
+              refY="3"
+              orient="auto"
+            >
+              <polygon points="0 0, 10 3, 0 6" fill="var(--color-systemOrange)" />
+            </marker>
           </defs>
+          {/* Animated line preview when dragging endpoint */}
+          {draggingEndpoint && endpointDragPos && (() => {
+            const conn = connections.find(c => {
+              const connId = c.id || `${c.from}-${c.to}`;
+              return connId === draggingEndpoint.connectionId;
+            });
+            if (!conn) return null;
+
+            const { from, to } = getConnectionPoints(conn.from, conn.to);
+            // If dragging 'from', line goes from cursor to 'to' endpoint
+            // If dragging 'to', line goes from 'from' endpoint to cursor
+            const startPoint = draggingEndpoint.endpoint === 'from' ? endpointDragPos : from;
+            const endPoint = draggingEndpoint.endpoint === 'to' ? endpointDragPos : to;
+
+            return (
+              <line
+                x1={startPoint.x}
+                y1={startPoint.y}
+                x2={endPoint.x}
+                y2={endPoint.y}
+                stroke="var(--color-systemOrange)"
+                strokeWidth={3}
+                strokeDasharray="8,4"
+                style={{ pointerEvents: 'none' }}
+                markerEnd="url(#arrowhead-drag-preview)"
+              />
+            );
+          })()}
         </svg>
 
             {/* Story Cards */}

@@ -9,6 +9,7 @@ interface StoryCard {
   title: string;
   description: string;
   status: string;
+  path: string;
 }
 
 interface CapabilityCard {
@@ -27,6 +28,7 @@ interface EnablerCard {
   status: string;
   capabilityId: string;
   enablerId: string;
+  path: string;
 }
 
 interface MapNode {
@@ -42,6 +44,7 @@ interface MapNode {
 }
 
 interface Connection {
+  id: string;
   from: string;
   to: string;
   type: 'storyboard-storyboard' | 'storyboard-capability' | 'capability-enabler';
@@ -67,6 +70,11 @@ export const StoryMap: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<MapNode | null>(null);
   const [zoom, setZoom] = useState(1);
+  const [selectedConnection, setSelectedConnection] = useState<string | null>(null);
+  const [draggingEndpoint, setDraggingEndpoint] = useState<{ connectionId: string; endpoint: 'from' | 'to' } | null>(null);
+  const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [connecting, setConnecting] = useState<string | null>(null); // Node ID we're drawing a connection from
+  const [connectingMousePos, setConnectingMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 }); // Mouse position for connection preview
 
   // Get all node IDs that are connected to the selected node (including the selected node itself)
   const getConnectedNodeIds = (nodeId: string): Set<string> => {
@@ -121,11 +129,12 @@ export const StoryMap: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.stories && data.stories.length > 0) {
-          let cards: StoryCard[] = data.stories.map((story: { id: string; filename: string; title: string; description: string; status?: string }) => ({
+          let cards: StoryCard[] = data.stories.map((story: { id: string; filename: string; title: string; description: string; status?: string; path?: string }) => ({
             id: story.id || story.filename,
             title: story.title || story.filename,
             description: story.description || '',
             status: story.status || 'pending',
+            path: story.path || '',
           }));
 
           // If storyboard context has cards with Y positions, use them to sort
@@ -166,6 +175,7 @@ export const StoryMap: React.FC = () => {
         title: card.title,
         description: card.description || '',
         status: card.status || 'pending',
+        path: '', // Workspace context cards don't have file paths
       }));
       setStoryCards(cards);
     }
@@ -219,6 +229,7 @@ export const StoryMap: React.FC = () => {
           status: enb.status as string || 'draft',
           capabilityId: enb.capabilityId as string || '',
           enablerId: enb.enablerId as string || '',
+          path: enb.path as string || '',
         }));
         setEnablers(enbs);
       }
@@ -449,6 +460,7 @@ Only include capabilities that have a clear relationship to a storyboard. If a c
         // Add connection from previous storyboard card to this one (horizontal flow)
         if (previousStoryNode) {
           newConnections.push({
+            id: `conn-${previousStoryNode.id}-${node.id}`,
             from: previousStoryNode.id,
             to: node.id,
             type: 'storyboard-storyboard',
@@ -528,6 +540,7 @@ Only include capabilities that have a clear relationship to a storyboard. If a c
 
           // Add upward connection to storyboard
           newConnections.push({
+            id: `conn-${node.id}-${storyNode.id}`,
             from: node.id,
             to: storyNode.id,
             type: 'storyboard-capability',
@@ -622,6 +635,7 @@ Only include capabilities that have a clear relationship to a storyboard. If a c
 
           // Add upward connection to capability
           newConnections.push({
+            id: `conn-${node.id}-${capNode.id}`,
             from: node.id,
             to: capNode.id,
             type: 'capability-enabler',
@@ -655,99 +669,456 @@ Only include capabilities that have a clear relationship to a storyboard. If a c
     buildGraph();
   }, [storyCards, capabilities, enablers, CARD_HEIGHT, CARD_WIDTH, HORIZONTAL_GAP, LAYER_GAP, LAYER_PADDING]);
 
-  // Draw connections on canvas
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  // Helper function to get connection path coordinates
+  const getConnectionCoords = (conn: Connection) => {
+    const fromNode = nodes.find(n => n.id === conn.from);
+    const toNode = nodes.find(n => n.id === conn.to);
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!fromNode || !toNode) return null;
 
-    // Set canvas size
-    const maxX = Math.max(...nodes.map(n => n.x + n.width), 800);
-    const maxY = Math.max(...nodes.map(n => n.y + n.height), 600);
-    canvas.width = maxX + 100;
-    canvas.height = maxY + 100;
+    let fromX: number, fromY: number, toX: number, toY: number;
 
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (conn.type === 'storyboard-storyboard') {
+      // Horizontal connection (left to right flow)
+      fromX = fromNode.x + fromNode.width;
+      fromY = fromNode.y + fromNode.height / 2;
+      toX = toNode.x;
+      toY = toNode.y + toNode.height / 2;
+    } else {
+      // Vertical upward connections
+      fromX = fromNode.x + fromNode.width / 2;
+      fromY = fromNode.y; // Top of the lower node
+      toX = toNode.x + toNode.width / 2;
+      toY = toNode.y + toNode.height; // Bottom of the upper node
+    }
 
-    // Draw connections
-    connections.forEach(conn => {
+    return { fromX, fromY, toX, toY };
+  };
+
+  // Generate SVG path for a connection
+  const getConnectionPath = (conn: Connection) => {
+    const coords = getConnectionCoords(conn);
+    if (!coords) return '';
+
+    const { fromX, fromY, toX, toY } = coords;
+
+    if (conn.type === 'storyboard-storyboard') {
+      // Straight horizontal line
+      return `M ${fromX} ${fromY} L ${toX} ${toY}`;
+    } else {
+      // Bezier curve going upward
+      const controlY = (fromY + toY) / 2;
+      return `M ${fromX} ${fromY} C ${fromX} ${controlY}, ${toX} ${controlY}, ${toX} ${toY}`;
+    }
+  };
+
+  // Get stroke color for a connection
+  const getConnectionColor = (conn: Connection, isHighlighted: boolean) => {
+    const grayColor = '#d1d5db';
+    if (!isHighlighted) return grayColor;
+
+    if (conn.type === 'storyboard-storyboard') return '#764ba2';
+    if (conn.type === 'storyboard-capability') return '#3b82f6';
+    return '#22c55e';
+  };
+
+  // Handle connection click
+  const handleConnectionClick = (e: React.MouseEvent, connId: string) => {
+    e.stopPropagation();
+    setSelectedConnection(selectedConnection === connId ? null : connId);
+    setSelectedNode(null);
+  };
+
+  // Handle endpoint drag start
+  const handleEndpointMouseDown = (e: React.MouseEvent, connectionId: string, endpoint: 'from' | 'to') => {
+    e.stopPropagation();
+    e.preventDefault();
+    setDraggingEndpoint({ connectionId, endpoint });
+  };
+
+  // Handle mouse move for dragging and connection drawing
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const x = (e.clientX - rect.left + container.scrollLeft) / zoom - 160; // Account for layer labels margin
+    const y = (e.clientY - rect.top + container.scrollTop) / zoom;
+
+    // Update position for endpoint dragging
+    if (draggingEndpoint) {
+      setMousePosition({ x, y });
+    }
+
+    // Update position for connection drawing
+    if (connecting) {
+      setConnectingMousePos({ x, y });
+    }
+  };
+
+  // Handle mouse up for dropping endpoint
+  const handleCanvasMouseUp = async (e: React.MouseEvent) => {
+    if (!draggingEndpoint) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const x = (e.clientX - rect.left + container.scrollLeft) / zoom - 160;
+    const y = (e.clientY - rect.top + container.scrollTop) / zoom;
+
+    // Find node at drop position
+    const targetNode = nodes.find(node =>
+      x >= node.x && x <= node.x + node.width &&
+      y >= node.y && y <= node.y + node.height
+    );
+
+    if (targetNode) {
+      const conn = connections.find(c => c.id === draggingEndpoint.connectionId);
+      if (conn) {
+        // Don't allow connecting to self
+        const otherEndpoint = draggingEndpoint.endpoint === 'from' ? conn.to : conn.from;
+        if (targetNode.id !== otherEndpoint) {
+          // Update connection
+          const updatedConnections = connections.map(c => {
+            if (c.id === draggingEndpoint.connectionId) {
+              if (draggingEndpoint.endpoint === 'from') {
+                return { ...c, from: targetNode.id, id: `conn-${targetNode.id}-${c.to}` };
+              } else {
+                return { ...c, to: targetNode.id, id: `conn-${c.from}-${targetNode.id}` };
+              }
+            }
+            return c;
+          });
+          setConnections(updatedConnections);
+
+          // Persist the change
+          await persistConnectionChange(conn, targetNode.id, draggingEndpoint.endpoint);
+        }
+      }
+    }
+
+    setDraggingEndpoint(null);
+    setSelectedConnection(null);
+  };
+
+  // Persist connection change to backend
+  const persistConnectionChange = async (conn: Connection, newTargetId: string, endpoint: 'from' | 'to') => {
+    if (!currentWorkspace?.projectFolder) return;
+
+    try {
+      // Determine what type of connection this is and update the appropriate file
       const fromNode = nodes.find(n => n.id === conn.from);
       const toNode = nodes.find(n => n.id === conn.to);
+      const targetNode = nodes.find(n => n.id === newTargetId);
 
-      if (!fromNode || !toNode) return;
+      if (!fromNode || !toNode || !targetNode) return;
 
-      // Check if this connection should be highlighted
-      const isHighlighted = isConnectionHighlighted(conn);
-      const grayColor = '#d1d5db'; // Gray color for non-highlighted connections
+      // Handle storyboard-capability connections
+      // The 'from' is the capability, 'to' is the storyboard
+      if (conn.type === 'storyboard-capability') {
+        if (endpoint === 'to') {
+          // Dragging the storyboard endpoint - update capability's storyboard reference
+          const capId = fromNode.id.replace('cap-', '');
+          const capability = capabilities.find(c => c.id === capId);
 
-      let fromX: number, fromY: number, toX: number, toY: number;
+          if (capability?.path && targetNode.type === 'storyboard') {
+            await fetch(`${INTEGRATION_URL}/update-capability-storyboard`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                path: capability.path,
+                storyboardReference: targetNode.name,
+              }),
+            });
+            // Reload capabilities to reflect the change
+            await loadCapabilities();
+          }
+        } else if (endpoint === 'from') {
+          // Dragging the capability endpoint - reassign which capability points to this storyboard
+          // This means updating the new capability's storyboard reference
+          const newCapId = targetNode.id.replace('cap-', '');
+          const newCapability = capabilities.find(c => c.id === newCapId);
 
-      // For storyboard-to-storyboard connections (horizontal flow in top layer)
-      if (conn.type === 'storyboard-storyboard') {
-        // Draw horizontal connection (left to right flow)
-        fromX = fromNode.x + fromNode.width;
-        fromY = fromNode.y + fromNode.height / 2;
-        toX = toNode.x;
-        toY = toNode.y + toNode.height / 2;
-
-        ctx.strokeStyle = isHighlighted ? '#764ba2' : grayColor; // Purple or gray
-        ctx.setLineDash([]);
-        ctx.lineWidth = isHighlighted ? 3 : 1;
-
-        // Draw horizontal line
-        ctx.beginPath();
-        ctx.moveTo(fromX, fromY);
-        ctx.lineTo(toX, toY);
-        ctx.stroke();
-
-        // Draw arrow at end (pointing right)
-        const arrowSize = isHighlighted ? 10 : 6;
-        ctx.beginPath();
-        ctx.moveTo(toX, toY);
-        ctx.lineTo(toX - arrowSize, toY - arrowSize / 2);
-        ctx.moveTo(toX, toY);
-        ctx.lineTo(toX - arrowSize, toY + arrowSize / 2);
-        ctx.stroke();
-      } else {
-        // Vertical upward connections (capability→storyboard, enabler→capability)
-        // From is the lower node, To is the upper node
-        fromX = fromNode.x + fromNode.width / 2;
-        fromY = fromNode.y; // Top of the lower node
-        toX = toNode.x + toNode.width / 2;
-        toY = toNode.y + toNode.height; // Bottom of the upper node
-
-        // Set line style based on connection type
-        if (conn.type === 'storyboard-capability') {
-          ctx.strokeStyle = isHighlighted ? '#3b82f6' : grayColor; // Blue or gray
-          ctx.setLineDash([]);
-        } else {
-          ctx.strokeStyle = isHighlighted ? '#22c55e' : grayColor; // Green or gray
-          ctx.setLineDash(isHighlighted ? [5, 3] : [3, 2]);
+          if (newCapability?.path && toNode.type === 'storyboard') {
+            await fetch(`${INTEGRATION_URL}/update-capability-storyboard`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                path: newCapability.path,
+                storyboardReference: toNode.name,
+              }),
+            });
+            // Reload capabilities to reflect the change
+            await loadCapabilities();
+          }
         }
-        ctx.lineWidth = isHighlighted ? 2 : 1;
-
-        // Draw bezier curve going upward
-        ctx.beginPath();
-        ctx.moveTo(fromX, fromY);
-        const controlY = (fromY + toY) / 2;
-        ctx.bezierCurveTo(fromX, controlY, toX, controlY, toX, toY);
-        ctx.stroke();
-
-        // Draw arrow at end (pointing up)
-        const arrowSize = isHighlighted ? 8 : 5;
-        ctx.setLineDash([]);
-        ctx.beginPath();
-        ctx.moveTo(toX, toY);
-        ctx.lineTo(toX - arrowSize / 2, toY + arrowSize);
-        ctx.moveTo(toX, toY);
-        ctx.lineTo(toX + arrowSize / 2, toY + arrowSize);
-        ctx.stroke();
       }
-    });
-  }, [nodes, connections, selectedNode, isConnectionHighlighted]);
+
+      // Handle capability-enabler connections
+      // The 'from' is the enabler, 'to' is the capability
+      if (conn.type === 'capability-enabler') {
+        if (endpoint === 'to') {
+          // Dragging the capability endpoint - update enabler's capability reference
+          const enbId = fromNode.id.replace('enb-', '');
+          const enabler = enablers.find(e => e.id === enbId);
+          const newCap = capabilities.find(c => `cap-${c.id}` === newTargetId);
+
+          if (enabler?.path && newCap) {
+            await fetch(`${INTEGRATION_URL}/update-enabler-capability`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                path: enabler.path,
+                capabilityId: newCap.capabilityId,
+                capabilityName: newCap.name,
+              }),
+            });
+            // Reload enablers to reflect the change
+            await loadEnablers();
+          }
+        } else if (endpoint === 'from') {
+          // Dragging the enabler endpoint - reassign which enabler points to this capability
+          const newEnbId = targetNode.id.replace('enb-', '');
+          const newEnabler = enablers.find(e => e.id === newEnbId);
+          const cap = capabilities.find(c => `cap-${c.id}` === conn.to);
+
+          if (newEnabler?.path && cap) {
+            await fetch(`${INTEGRATION_URL}/update-enabler-capability`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                path: newEnabler.path,
+                capabilityId: cap.capabilityId,
+                capabilityName: cap.name,
+              }),
+            });
+            // Reload enablers to reflect the change
+            await loadEnablers();
+          }
+        }
+      }
+
+      // Handle storyboard-storyboard connections (order change)
+      // Note: This requires updating the storyboard order in the workspace context
+      if (conn.type === 'storyboard-storyboard') {
+        // Storyboard order changes are more complex as they affect the narrative flow
+        // For now, show a message that the change was made visually but order persistence
+        // would require updating the workspace storyboard data
+        console.log('Storyboard order changed visually. Full persistence requires workspace update.');
+      }
+
+      setSuccessMessage('Connection updated successfully');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      console.error('Failed to persist connection change:', err);
+      setError('Failed to save connection change');
+    }
+  };
+
+  // Check if a node has any connections
+  const nodeHasConnections = (nodeId: string): boolean => {
+    return connections.some(conn => conn.from === nodeId || conn.to === nodeId);
+  };
+
+  // Get the file path for a node
+  const getNodeFilePath = (node: MapNode): string | null => {
+    if (node.type === 'storyboard') {
+      const storyId = node.id.replace('story-', '');
+      const story = storyCards.find(s => s.id === storyId);
+      return story?.path || null;
+    } else if (node.type === 'capability') {
+      const capId = node.id.replace('cap-', '');
+      const cap = capabilities.find(c => c.id === capId);
+      return cap?.path || null;
+    } else if (node.type === 'enabler') {
+      const enbId = node.id.replace('enb-', '');
+      const enb = enablers.find(e => e.id === enbId);
+      return enb?.path || null;
+    }
+    return null;
+  };
+
+  // Handle node deletion
+  const handleDeleteNode = async (node: MapNode) => {
+    if (!currentWorkspace?.projectFolder) return;
+
+    // Check if node has connections
+    if (nodeHasConnections(node.id)) {
+      setError('Cannot delete: This item has connections. Remove connections first.');
+      return;
+    }
+
+    // Get file path
+    const filePath = getNodeFilePath(node);
+    if (!filePath) {
+      setError('Cannot delete: File path not found.');
+      return;
+    }
+
+    // Confirm deletion
+    if (!window.confirm(`Are you sure you want to delete "${node.name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      let endpoint = '';
+      if (node.type === 'storyboard') {
+        endpoint = '/delete-specification';
+      } else if (node.type === 'capability') {
+        endpoint = '/delete-capability';
+      } else if (node.type === 'enabler') {
+        endpoint = '/delete-enabler';
+      }
+
+      const response = await fetch(`${INTEGRATION_URL}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: filePath }),
+      });
+
+      if (response.ok) {
+        setSuccessMessage(`${node.type.charAt(0).toUpperCase() + node.type.slice(1)} deleted successfully`);
+        setTimeout(() => setSuccessMessage(null), 3000);
+        setSelectedNode(null);
+
+        // Reload data based on what was deleted
+        if (node.type === 'storyboard') {
+          await loadStoryCards();
+        } else if (node.type === 'capability') {
+          await loadCapabilities();
+        } else if (node.type === 'enabler') {
+          await loadEnablers();
+        }
+      } else {
+        const errorText = await response.text();
+        setError(`Failed to delete: ${errorText}`);
+      }
+    } catch (err) {
+      console.error('Failed to delete node:', err);
+      setError('Failed to delete item');
+    }
+  };
+
+  // Start drawing a connection from a node
+  const handleStartConnection = (nodeId: string) => {
+    setConnecting(nodeId);
+    setSelectedNode(null);
+    setSelectedConnection(null);
+  };
+
+  // Determine connection type based on node types
+  const determineConnectionType = (fromNode: MapNode, toNode: MapNode): Connection['type'] => {
+    if (fromNode.type === 'storyboard' && toNode.type === 'storyboard') {
+      return 'storyboard-storyboard';
+    }
+    if ((fromNode.type === 'storyboard' && toNode.type === 'capability') ||
+        (fromNode.type === 'capability' && toNode.type === 'storyboard')) {
+      return 'storyboard-capability';
+    }
+    return 'capability-enabler';
+  };
+
+  // Complete a connection to a target node
+  const handleCompleteConnection = async (targetNodeId: string) => {
+    if (!connecting || connecting === targetNodeId) {
+      setConnecting(null);
+      return;
+    }
+
+    // Check if connection already exists
+    const connectionExists = connections.some(
+      c => (c.from === connecting && c.to === targetNodeId) ||
+           (c.from === targetNodeId && c.to === connecting)
+    );
+
+    if (connectionExists) {
+      setError('Connection already exists between these nodes');
+      setTimeout(() => setError(null), 3000);
+      setConnecting(null);
+      return;
+    }
+
+    const fromNode = nodes.find(n => n.id === connecting);
+    const toNode = nodes.find(n => n.id === targetNodeId);
+
+    if (!fromNode || !toNode) {
+      setConnecting(null);
+      return;
+    }
+
+    // Create new connection
+    const connectionType = determineConnectionType(fromNode, toNode);
+    const newConnection: Connection = {
+      id: `conn-${connecting}-${targetNodeId}`,
+      from: connecting,
+      to: targetNodeId,
+      type: connectionType,
+    };
+
+    setConnections(prev => [...prev, newConnection]);
+    setConnecting(null);
+
+    // Persist the connection based on type
+    try {
+      if (connectionType === 'storyboard-capability') {
+        // Update capability's storyboard reference
+        const capNode = fromNode.type === 'capability' ? fromNode : toNode;
+        const storyNode = fromNode.type === 'storyboard' ? fromNode : toNode;
+        const capId = capNode.id.replace('cap-', '');
+        const capability = capabilities.find(c => c.id === capId);
+
+        if (capability?.path) {
+          await fetch(`${INTEGRATION_URL}/update-capability-storyboard`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              path: capability.path,
+              storyboardReference: storyNode.name,
+            }),
+          });
+          await loadCapabilities();
+        }
+      } else if (connectionType === 'capability-enabler') {
+        // Update enabler's capability reference
+        const enbNode = fromNode.type === 'enabler' ? fromNode : toNode;
+        const capNode = fromNode.type === 'capability' ? fromNode : toNode;
+        const enbId = enbNode.id.replace('enb-', '');
+        const capId = capNode.id.replace('cap-', '');
+        const enabler = enablers.find(e => e.id === enbId);
+        const capability = capabilities.find(c => c.id === capId);
+
+        if (enabler?.path && capability) {
+          await fetch(`${INTEGRATION_URL}/update-enabler-capability`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              path: enabler.path,
+              capabilityId: capability.capabilityId,
+              capabilityName: capability.name,
+            }),
+          });
+          await loadEnablers();
+        }
+      }
+
+      setSuccessMessage('Connection created successfully');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      console.error('Failed to persist connection:', err);
+      setError('Connection created but failed to persist to file');
+    }
+  };
+
+  // Get the center coordinates of a node for drawing connection preview
+  const getNodeCenter = (nodeId: string): { x: number; y: number } | null => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return null;
+    return {
+      x: node.x + node.width / 2,
+      y: node.y + node.height / 2,
+    };
+  };
 
   // Get card style based on type
   const getCardStyle = (type: 'storyboard' | 'capability' | 'enabler') => {
@@ -1203,7 +1574,22 @@ Only include capabilities that have a clear relationship to a storyboard. If a c
         </div>
       </div>
 
-      <div className="map-container" ref={containerRef}>
+      <div
+        className="map-container"
+        ref={containerRef}
+        onMouseMove={handleCanvasMouseMove}
+        onMouseUp={handleCanvasMouseUp}
+        onMouseLeave={() => {
+          if (draggingEndpoint) {
+            setDraggingEndpoint(null);
+          }
+        }}
+        onClick={() => {
+          setSelectedConnection(null);
+          setSelectedNode(null);
+          setConnecting(null);
+        }}
+      >
         {isLoading ? (
           <div className="empty-state">
             <div className="empty-state-icon">...</div>
@@ -1246,15 +1632,200 @@ Only include capabilities that have a clear relationship to a storyboard. If a c
                 marginLeft: 160, // Space for layer labels
               }}
             >
-              <canvas ref={canvasRef} className="map-canvas" />
+              {/* SVG for connections */}
+              <svg
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  pointerEvents: 'none',
+                  overflow: 'visible',
+                }}
+              >
+                <defs>
+                  <marker id="arrowhead-purple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#764ba2" />
+                  </marker>
+                  <marker id="arrowhead-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#3b82f6" />
+                  </marker>
+                  <marker id="arrowhead-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#22c55e" />
+                  </marker>
+                  <marker id="arrowhead-gray" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto">
+                    <polygon points="0 0, 6 2, 0 4" fill="#d1d5db" />
+                  </marker>
+                  <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#f97316" />
+                  </marker>
+                </defs>
+                {connections.map(conn => {
+                  const coords = getConnectionCoords(conn);
+                  if (!coords) return null;
+
+                  const isHighlighted = isConnectionHighlighted(conn);
+                  const isSelected = selectedConnection === conn.id;
+                  const color = isSelected ? '#f97316' : getConnectionColor(conn, isHighlighted);
+                  const strokeWidth = isSelected ? 4 : (isHighlighted ? (conn.type === 'storyboard-storyboard' ? 3 : 2) : 1);
+                  const dashArray = conn.type === 'capability-enabler' && !isSelected ? (isHighlighted ? '5,3' : '3,2') : undefined;
+
+                  const markerEnd = isSelected ? 'url(#arrowhead-orange)' :
+                    conn.type === 'storyboard-storyboard' ? (isHighlighted ? 'url(#arrowhead-purple)' : 'url(#arrowhead-gray)') :
+                    conn.type === 'storyboard-capability' ? (isHighlighted ? 'url(#arrowhead-blue)' : 'url(#arrowhead-gray)') :
+                    (isHighlighted ? 'url(#arrowhead-green)' : 'url(#arrowhead-gray)');
+
+                  return (
+                    <g key={conn.id}>
+                      {/* Invisible wider path for easier clicking */}
+                      <path
+                        d={getConnectionPath(conn)}
+                        fill="none"
+                        stroke="transparent"
+                        strokeWidth={20}
+                        style={{ pointerEvents: 'stroke', cursor: 'pointer' }}
+                        onClick={(e) => handleConnectionClick(e, conn.id)}
+                      />
+                      {/* Visible path */}
+                      <path
+                        d={getConnectionPath(conn)}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth={strokeWidth}
+                        strokeDasharray={dashArray}
+                        markerEnd={markerEnd}
+                        style={{ pointerEvents: 'none' }}
+                      />
+                      {/* Draggable endpoints when selected */}
+                      {isSelected && (
+                        <>
+                          {/* From endpoint - larger invisible hit area + visible circle */}
+                          <circle
+                            cx={draggingEndpoint?.connectionId === conn.id && draggingEndpoint?.endpoint === 'from' ? mousePosition.x : coords.fromX}
+                            cy={draggingEndpoint?.connectionId === conn.id && draggingEndpoint?.endpoint === 'from' ? mousePosition.y : coords.fromY}
+                            r={20}
+                            fill="transparent"
+                            style={{ pointerEvents: 'all', cursor: 'grab' }}
+                            onMouseDown={(e) => handleEndpointMouseDown(e, conn.id, 'from')}
+                          />
+                          <circle
+                            cx={draggingEndpoint?.connectionId === conn.id && draggingEndpoint?.endpoint === 'from' ? mousePosition.x : coords.fromX}
+                            cy={draggingEndpoint?.connectionId === conn.id && draggingEndpoint?.endpoint === 'from' ? mousePosition.y : coords.fromY}
+                            r={12}
+                            fill="#f97316"
+                            stroke="white"
+                            strokeWidth={3}
+                            style={{ pointerEvents: 'none' }}
+                          />
+                          {/* To endpoint - larger invisible hit area + visible circle */}
+                          <circle
+                            cx={draggingEndpoint?.connectionId === conn.id && draggingEndpoint?.endpoint === 'to' ? mousePosition.x : coords.toX}
+                            cy={draggingEndpoint?.connectionId === conn.id && draggingEndpoint?.endpoint === 'to' ? mousePosition.y : coords.toY}
+                            r={20}
+                            fill="transparent"
+                            style={{ pointerEvents: 'all', cursor: 'grab' }}
+                            onMouseDown={(e) => handleEndpointMouseDown(e, conn.id, 'to')}
+                          />
+                          <circle
+                            cx={draggingEndpoint?.connectionId === conn.id && draggingEndpoint?.endpoint === 'to' ? mousePosition.x : coords.toX}
+                            cy={draggingEndpoint?.connectionId === conn.id && draggingEndpoint?.endpoint === 'to' ? mousePosition.y : coords.toY}
+                            r={12}
+                            fill="#f97316"
+                            stroke="white"
+                            strokeWidth={3}
+                            style={{ pointerEvents: 'none' }}
+                          />
+                          {/* Delete button (red X) in the middle of the connection */}
+                          {(() => {
+                            const midX = (coords.fromX + coords.toX) / 2;
+                            const midY = (coords.fromY + coords.toY) / 2;
+                            return (
+                              <g
+                                transform={`translate(${midX}, ${midY})`}
+                                style={{ pointerEvents: 'all', cursor: 'pointer' }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Delete this connection
+                                  setConnections(prev => prev.filter(c => c.id !== conn.id));
+                                  setSelectedConnection(null);
+                                }}
+                              >
+                                {/* Background circle */}
+                                <circle
+                                  r={14}
+                                  fill="#dc2626"
+                                  stroke="white"
+                                  strokeWidth={2}
+                                />
+                                {/* X icon */}
+                                <line
+                                  x1={-5}
+                                  y1={-5}
+                                  x2={5}
+                                  y2={5}
+                                  stroke="white"
+                                  strokeWidth={3}
+                                  strokeLinecap="round"
+                                />
+                                <line
+                                  x1={5}
+                                  y1={-5}
+                                  x2={-5}
+                                  y2={5}
+                                  stroke="white"
+                                  strokeWidth={3}
+                                  strokeLinecap="round"
+                                />
+                              </g>
+                            );
+                          })()}
+                          {/* Dragging line preview */}
+                          {draggingEndpoint?.connectionId === conn.id && (
+                            <line
+                              x1={draggingEndpoint.endpoint === 'from' ? mousePosition.x : coords.fromX}
+                              y1={draggingEndpoint.endpoint === 'from' ? mousePosition.y : coords.fromY}
+                              x2={draggingEndpoint.endpoint === 'to' ? mousePosition.x : coords.toX}
+                              y2={draggingEndpoint.endpoint === 'to' ? mousePosition.y : coords.toY}
+                              stroke="#f97316"
+                              strokeWidth={2}
+                              strokeDasharray="5,5"
+                              style={{ pointerEvents: 'none' }}
+                            />
+                          )}
+                        </>
+                      )}
+                    </g>
+                  );
+                })}
+                {/* Connection preview line while drawing */}
+                {connecting && (() => {
+                  const sourceCenter = getNodeCenter(connecting);
+                  if (!sourceCenter) return null;
+                  return (
+                    <line
+                      x1={sourceCenter.x}
+                      y1={sourceCenter.y}
+                      x2={connectingMousePos.x}
+                      y2={connectingMousePos.y}
+                      stroke="#f97316"
+                      strokeWidth={3}
+                      strokeDasharray="8,4"
+                      style={{ pointerEvents: 'none' }}
+                      markerEnd="url(#arrowhead-orange)"
+                    />
+                  );
+                })()}
+              </svg>
 
               {nodes.map(node => {
                 const highlighted = isNodeHighlighted(node.id);
                 const isSelected = selectedNode?.id === node.id;
+                const isConnectingSource = connecting === node.id;
                 return (
                 <div
                   key={node.id}
-                  className={`map-card ${isSelected ? 'selected' : ''} ${!highlighted ? 'dimmed' : ''}`}
+                  className={`map-card ${isSelected ? 'selected' : ''} ${!highlighted ? 'dimmed' : ''} ${isConnectingSource ? 'connecting-source' : ''}`}
                   style={{
                     ...getCardStyle(node.type),
                     left: node.x,
@@ -1263,21 +1834,64 @@ Only include capabilities that have a clear relationship to a storyboard. If a c
                     filter: highlighted ? 'none' : 'grayscale(70%)',
                     transform: isSelected ? 'scale(1.05)' : 'scale(1)',
                     zIndex: isSelected ? 10 : highlighted ? 5 : 1,
-                    boxShadow: isSelected ? '0 4px 12px rgba(0,0,0,0.3)' : '0 2px 4px rgba(0,0,0,0.1)',
+                    boxShadow: isSelected ? '0 4px 12px rgba(0,0,0,0.3)' : isConnectingSource ? '0 0 0 3px #f97316, 0 4px 12px rgba(249,115,22,0.4)' : '0 2px 4px rgba(0,0,0,0.1)',
                   }}
-                  onClick={() => setSelectedNode(selectedNode?.id === node.id ? null : node)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // If we're drawing a connection, complete it to this node
+                    if (connecting && connecting !== node.id) {
+                      handleCompleteConnection(node.id);
+                      return;
+                    }
+                    // If clicking on the connecting source, cancel connection drawing
+                    if (connecting === node.id) {
+                      setConnecting(null);
+                      return;
+                    }
+                    setSelectedNode(selectedNode?.id === node.id ? null : node);
+                    setSelectedConnection(null);
+                  }}
                 >
                   <div className="card-header">
                     <span className="card-type-icon">{getTypeIcon(node.type)}</span>
                     <span className="card-type-label">{node.type}</span>
                   </div>
                   <div className="card-name">{node.name}</div>
-                  <span
-                    className="card-status"
-                    style={{ backgroundColor: getStatusColor(node.status) }}
-                  >
-                    {node.status}
-                  </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                    <span
+                      className="card-status"
+                      style={{ backgroundColor: getStatusColor(node.status) }}
+                    >
+                      {node.status}
+                    </span>
+                    {/* Connect button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (connecting === node.id) {
+                          setConnecting(null);
+                        } else {
+                          handleStartConnection(node.id);
+                        }
+                      }}
+                      style={{
+                        padding: '2px 6px',
+                        fontSize: '9px',
+                        fontWeight: 600,
+                        borderRadius: '4px',
+                        border: 'none',
+                        background: connecting === node.id ? '#f97316' : 'rgba(255,255,255,0.3)',
+                        color: 'white',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '2px',
+                      }}
+                      title={connecting === node.id ? 'Cancel connection' : 'Draw connection'}
+                    >
+                      {connecting === node.id ? '×' : '⤴'} {connecting === node.id ? 'Cancel' : 'Connect'}
+                    </button>
+                  </div>
                 </div>
               );
               })}
@@ -1311,6 +1925,32 @@ Only include capabilities that have a clear relationship to a storyboard. If a c
               Connected to: {nodes.find(n => n.id === selectedNode.parentId)?.name || 'Unknown'}
             </p>
           )}
+          {/* Delete button - only enabled if no connections */}
+          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--color-grey-200)' }}>
+            {nodeHasConnections(selectedNode.id) ? (
+              <p style={{ fontSize: 11, color: 'var(--color-grey-500)', fontStyle: 'italic' }}>
+                Cannot delete: Has connections
+              </p>
+            ) : getNodeFilePath(selectedNode) ? (
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={() => handleDeleteNode(selectedNode)}
+                style={{
+                  width: '100%',
+                  backgroundColor: '#fee2e2',
+                  color: '#dc2626',
+                  border: '1px solid #fecaca'
+                }}
+              >
+                Delete {selectedNode.type}
+              </Button>
+            ) : (
+              <p style={{ fontSize: 11, color: 'var(--color-grey-500)', fontStyle: 'italic' }}>
+                Cannot delete: No file path
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>

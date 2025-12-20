@@ -3,7 +3,7 @@
 ## Metadata
 - **ID**: ENB-MANAGE
 - **Type**: Enabler
-- **Capability**: User Experience Orchestration (CAP-USER-EXPERIENCE-ORCHESTRATION-11)
+- **Capability**: Application Lifecycle Management (CAP-APPLICATION-LIFECYCLE-MANAGEMENT-4)
 - **Owner**: Not specified
 - **Priority**: Medium
 - **Status**: planned

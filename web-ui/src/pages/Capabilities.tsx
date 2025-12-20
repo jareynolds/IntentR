@@ -42,6 +42,9 @@ interface StoryboardCard {
   filename: string;
   title: string;
   description: string;
+  positionX: number;
+  positionY: number;
+  flowOrder: number; // Computed order based on position
 }
 
 export const Capabilities: React.FC = () => {
@@ -204,6 +207,7 @@ export const Capabilities: React.FC = () => {
   };
 
   // Fetch storyboard cards from the conception folder
+  // Uses the same logic as the Narrative/StoryMap page for sorting
   const fetchStoryboardCards = async () => {
     if (!currentWorkspace?.projectFolder) return;
 
@@ -220,13 +224,57 @@ export const Capabilities: React.FC = () => {
 
       const data = await response.json();
       if (data.stories) {
-        const cards: StoryboardCard[] = data.stories.map((story: { id: string; filename: string; title: string; description: string }) => ({
-          id: story.id || story.filename,
-          filename: story.filename,
-          title: story.title || story.filename,
-          description: story.description || '',
-        }));
-        setStoryboardCards(cards);
+        // Get storyboard canvas data for positioning (same approach as Narrative/StoryMap page)
+        const storyboardData = currentWorkspace?.storyboard;
+
+        // Create a position map from the storyboard canvas cards (matching StoryMap logic)
+        const positionMap = new Map<string, number>();
+        if (storyboardData?.cards && storyboardData.cards.length > 0) {
+          storyboardData.cards.forEach((card: { id: string; title: string; y?: number }) => {
+            // Match by ID or title (lowercase for case-insensitive matching)
+            positionMap.set(card.id, card.y || 0);
+            positionMap.set(card.title.toLowerCase(), card.y || 0);
+          });
+        }
+
+        // Create cards with position info
+        const cardsWithPosition: StoryboardCard[] = data.stories.map((story: {
+          id: string;
+          filename: string;
+          title: string;
+          description: string;
+          fields?: Record<string, string>;
+        }) => {
+          // Get Y position from storyboard canvas (matching by id or title)
+          // This matches the Narrative/StoryMap page approach
+          const posY = positionMap.get(story.id) ??
+                       positionMap.get(story.title?.toLowerCase()) ??
+                       positionMap.get((story.title || story.filename).toLowerCase()) ??
+                       Infinity;
+
+          return {
+            id: story.id || story.filename,
+            filename: story.filename,
+            title: story.title || story.filename,
+            description: story.description || '',
+            positionX: 0, // Not used for sorting
+            positionY: posY,
+            flowOrder: 0, // Will be computed after sorting
+          };
+        });
+
+        // Sort by Y position from storyboard canvas (top to bottom)
+        // This matches the Narrative/StoryMap page logic exactly
+        cardsWithPosition.sort((a, b) => {
+          return (a.positionY || 0) - (b.positionY || 0);
+        });
+
+        // Assign flow order after sorting
+        cardsWithPosition.forEach((card, index) => {
+          card.flowOrder = index;
+        });
+
+        setStoryboardCards(cardsWithPosition);
       }
     } catch (err) {
       console.error('Failed to fetch storyboard cards:', err);
@@ -396,6 +444,12 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
     if (!storyboardRef && storyboardCards.length > 0) {
       suggestBestStoryboard(cap.name, cap.description || '');
     }
+  };
+
+  // Open capability directly in edit mode
+  const handleOpenCapabilityInEditMode = (cap: FileCapability) => {
+    setSelectedFileCapability(cap);
+    handleEditFileCapability(cap);
   };
 
   const handleSaveFileCapability = async () => {
@@ -789,7 +843,31 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
     });
   };
 
-  // Group capabilities by status
+  // Get the flow order for a capability based on its storyboard reference
+  const getCapabilityFlowOrder = (cap: FileCapability): number => {
+    const storyboardRef = cap.fields?.['Storyboard Reference'] || '';
+    if (!storyboardRef) return Number.MAX_SAFE_INTEGER; // No reference = at the end
+
+    // Find matching storyboard card (case-insensitive)
+    const matchingCard = storyboardCards.find(
+      card => card.title.toLowerCase() === storyboardRef.toLowerCase()
+    );
+
+    return matchingCard?.flowOrder ?? Number.MAX_SAFE_INTEGER;
+  };
+
+  // Sort capabilities by storyboard flow order
+  const sortByFlowOrder = (caps: FileCapability[]): FileCapability[] => {
+    return [...caps].sort((a, b) => {
+      const orderA = getCapabilityFlowOrder(a);
+      const orderB = getCapabilityFlowOrder(b);
+      if (orderA !== orderB) return orderA - orderB;
+      // Secondary sort by name for capabilities with same/no flow order
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  };
+
+  // Group capabilities by status, sorted by storyboard flow order within each group
   const groupByStatus = (caps: FileCapability[]) => {
     const groups: Record<string, FileCapability[]> = {
       'Not Specified': [],
@@ -810,6 +888,11 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
           groups['Planned'].push(cap);
         }
       }
+    });
+
+    // Sort each group by storyboard flow order
+    Object.keys(groups).forEach(status => {
+      groups[status] = sortByFlowOrder(groups[status]);
     });
 
     return groups;
@@ -1344,7 +1427,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                                             cursor: 'pointer',
                                             color: 'var(--color-systemBlue)',
                                           }}
-                                          onClick={() => setSelectedFileCapability(fileCap)}
+                                          onClick={() => handleOpenCapabilityInEditMode(fileCap)}
                                         >
                                           {fileCap.name || fileCap.filename}
                                         </h3>
@@ -1382,7 +1465,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                                       </div>
                                       <div style={{ marginLeft: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                         <button
-                                          onClick={() => setSelectedFileCapability(fileCap)}
+                                          onClick={() => handleOpenCapabilityInEditMode(fileCap)}
                                           style={{
                                             background: 'none',
                                             border: 'none',
@@ -1392,7 +1475,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                                             padding: '4px 8px',
                                           }}
                                         >
-                                          View
+                                          Edit
                                         </button>
                                         <button
                                           onClick={() => handleDeleteFileCapability(fileCap)}
@@ -1599,7 +1682,19 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                   {isEditingFileCapability ? 'Edit Capability' : (selectedFileCapability.name || selectedFileCapability.filename)}
                 </h2>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  {!isEditingFileCapability && (
+                  {isEditingFileCapability ? (
+                    <>
+                      <Button variant="primary" onClick={handleSaveFileCapability} disabled={savingCapability}>
+                        {savingCapability ? 'Saving...' : 'Save'}
+                      </Button>
+                      <Button variant="secondary" onClick={() => {
+                        setSelectedFileCapability(null);
+                        setIsEditingFileCapability(false);
+                      }}>
+                        Close
+                      </Button>
+                    </>
+                  ) : (
                     <>
                       <Button variant="primary" onClick={() => handleEditFileCapability(selectedFileCapability)}>
                         Edit
@@ -1612,14 +1707,14 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                       >
                         {deletingCapability ? 'Deleting...' : 'Delete'}
                       </Button>
+                      <Button variant="secondary" onClick={() => {
+                        setSelectedFileCapability(null);
+                        setIsEditingFileCapability(false);
+                      }}>
+                        Close
+                      </Button>
                     </>
                   )}
-                  <Button variant="secondary" onClick={() => {
-                    setSelectedFileCapability(null);
-                    setIsEditingFileCapability(false);
-                  }}>
-                    Close
-                  </Button>
                 </div>
               </div>
 

@@ -97,6 +97,8 @@ func main() {
 	mux.HandleFunc("OPTIONS /capability-files", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /enabler-files", corsMiddleware(handler.HandleEnablerFiles))
 	mux.HandleFunc("OPTIONS /enabler-files", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+	mux.HandleFunc("POST /test-scenario-files", corsMiddleware(handler.HandleTestScenarioFiles))
+	mux.HandleFunc("OPTIONS /test-scenario-files", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /save-capability", corsMiddleware(handler.HandleSaveCapability))
 	mux.HandleFunc("OPTIONS /save-capability", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /update-capability-storyboard", corsMiddleware(handler.HandleUpdateCapabilityStoryboard))

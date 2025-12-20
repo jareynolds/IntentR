@@ -1,6 +1,6 @@
 # Location Management
 
-**Status:** Planned
+**Status:** Implemented
 
 **Description:** Enables users to configure, store, and retrieve location preferences for weather data. Provides default location handling and supports location-based weather queries to ensure users always receive relevant geographical weather information.
 

@@ -1,6 +1,6 @@
 # Configuration Management
 
-**Status:** Planned
+**Status:** Implemented
 
 **Storyboard Reference:** read default location
 

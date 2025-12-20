@@ -1,12 +1,12 @@
-# UI Style Specification: Dark Blue
+# UI Style Specification: Tailwind CSS
 
-**Generated:** 2025-12-17T01:19:07.606Z
-**Style ID:** darkblue
+**Generated:** 2025-12-19T19:52:15.720Z
+**Style ID:** tailwind
 
 
 ## Overview
 
-This document provides comprehensive specifications for implementing the Dark Blue UI style system in your application. It includes detailed color palettes, typography scales, spacing systems, and component styles that form the visual foundation of your user interface.
+This document provides comprehensive specifications for implementing the Tailwind CSS UI style system in your application. It includes detailed color palettes, typography scales, spacing systems, and component styles that form the visual foundation of your user interface.
 
 ## Background Colors
 
@@ -26,13 +26,13 @@ body {
 ```
 
 **Surface**
-- **Hex:** `#F5F5F5`
+- **Hex:** `#F9FAFB`
 - **Usage:** Cards, panels, content areas
 - **CSS Variable:** `--color-surface`
 
 ```css
 .card {
-  background-color: #F5F5F5;
+  background-color: #F9FAFB;
   /* or */
   background-color: var(--color-surface);
 }
@@ -56,58 +56,58 @@ body {
 ### Primary Colors
 
 
-**Maastricht Blue**
-- **Hex:** `#081534`
-- **Usage:** Primary dark, headers, key elements
-- **CSS Variable:** `--color-primary-maastricht-blue`
+**Blue 600**
+- **Hex:** `#2563eb`
+- **Usage:** Primary
+- **CSS Variable:** `--color-primary-blue-600`
 
 ```css
 .element {
-  background-color: #081534;
+  background-color: #2563eb;
   /* or */
-  background-color: var(--color-primary-maastricht-blue);
+  background-color: var(--color-primary-blue-600);
 }
 ```
 
 
-**Dark Cerulean**
-- **Hex:** `#133A7C`
-- **Usage:** Primary brand color, CTAs, buttons
-- **CSS Variable:** `--color-primary-dark-cerulean`
+**Blue 700**
+- **Hex:** `#1d4ed8`
+- **Usage:** Primary dark
+- **CSS Variable:** `--color-primary-blue-700`
 
 ```css
 .element {
-  background-color: #133A7C;
+  background-color: #1d4ed8;
   /* or */
-  background-color: var(--color-primary-dark-cerulean);
+  background-color: var(--color-primary-blue-700);
 }
 ```
 
 
-**Lapis Lazuli**
-- **Hex:** `#2A6BAC`
-- **Usage:** Secondary actions, links
-- **CSS Variable:** `--color-primary-lapis-lazuli`
+**Indigo 600**
+- **Hex:** `#4f46e5`
+- **Usage:** Secondary
+- **CSS Variable:** `--color-primary-indigo-600`
 
 ```css
 .element {
-  background-color: #2A6BAC;
+  background-color: #4f46e5;
   /* or */
-  background-color: var(--color-primary-lapis-lazuli);
+  background-color: var(--color-primary-indigo-600);
 }
 ```
 
 
-**Picton Blue**
-- **Hex:** `#47A8E5`
-- **Usage:** Accents, highlights, interactive elements
-- **CSS Variable:** `--color-primary-picton-blue`
+**Sky 500**
+- **Hex:** `#0ea5e9`
+- **Usage:** Accent
+- **CSS Variable:** `--color-primary-sky-500`
 
 ```css
 .element {
-  background-color: #47A8E5;
+  background-color: #0ea5e9;
   /* or */
-  background-color: var(--color-primary-picton-blue);
+  background-color: var(--color-primary-sky-500);
 }
 ```
 
@@ -116,13 +116,13 @@ body {
 
 
 **White**
-- **Hex:** `#FFFFFF`
-- **Usage:** Backgrounds, cards, contrast
+- **Hex:** `#ffffff`
+- **Usage:** Backgrounds
 - **CSS Variable:** `--color-neutral-white`
 
 ```css
 .element {
-  color: #FFFFFF;
+  color: #ffffff;
   /* or */
   color: var(--color-neutral-white);
 }
@@ -143,44 +143,44 @@ body {
 ```
 
 
-**Silver Sand**
-- **Hex:** `#C6C6C6`
-- **Usage:** Borders, dividers, disabled states
-- **CSS Variable:** `--color-neutral-silver-sand`
+**Gray 300**
+- **Hex:** `#d1d5db`
+- **Usage:** Borders
+- **CSS Variable:** `--color-neutral-gray-300`
 
 ```css
 .element {
-  color: #C6C6C6;
+  color: #d1d5db;
   /* or */
-  color: var(--color-neutral-silver-sand);
+  color: var(--color-neutral-gray-300);
 }
 ```
 
 
-**Slogan Gray**
-- **Hex:** `#3E5966`
+**Gray 600**
+- **Hex:** `#4b5563`
 - **Usage:** Secondary text
-- **CSS Variable:** `--color-neutral-slogan-gray`
+- **CSS Variable:** `--color-neutral-gray-600`
 
 ```css
 .element {
-  color: #3E5966;
+  color: #4b5563;
   /* or */
-  color: var(--color-neutral-slogan-gray);
+  color: var(--color-neutral-gray-600);
 }
 ```
 
 
-**Text Primary**
-- **Hex:** `#212121`
-- **Usage:** Primary body text
-- **CSS Variable:** `--color-neutral-text-primary`
+**Gray 900**
+- **Hex:** `#111827`
+- **Usage:** Primary text
+- **CSS Variable:** `--color-neutral-gray-900`
 
 ```css
 .element {
-  color: #212121;
+  color: #111827;
   /* or */
-  color: var(--color-neutral-text-primary);
+  color: var(--color-neutral-gray-900);
 }
 ```
 
@@ -188,54 +188,54 @@ body {
 ### Semantic Colors
 
 
-**Success**
-- **Hex:** `#4caf50`
-- **Usage:** Success messages, confirmations
-- **CSS Variable:** `--color-success`
+**Green 500**
+- **Hex:** `#10b981`
+- **Usage:** Success
+- **CSS Variable:** `--color-green 500`
 
 ```css
-.alert-success {
-  background-color: #4caf50;
-  border-color: #4caf50;
+.alert-green 500 {
+  background-color: #10b981;
+  border-color: #10b981;
 }
 ```
 
 
-**Warning**
-- **Hex:** `#ff9800`
-- **Usage:** Warnings, alerts
-- **CSS Variable:** `--color-warning`
+**Yellow 500**
+- **Hex:** `#f59e0b`
+- **Usage:** Warning
+- **CSS Variable:** `--color-yellow 500`
 
 ```css
-.alert-warning {
-  background-color: #ff9800;
-  border-color: #ff9800;
+.alert-yellow 500 {
+  background-color: #f59e0b;
+  border-color: #f59e0b;
 }
 ```
 
 
-**Error**
-- **Hex:** `#f44336`
-- **Usage:** Errors, destructive actions
-- **CSS Variable:** `--color-error`
+**Red 500**
+- **Hex:** `#ef4444`
+- **Usage:** Error
+- **CSS Variable:** `--color-red 500`
 
 ```css
-.alert-error {
-  background-color: #f44336;
-  border-color: #f44336;
+.alert-red 500 {
+  background-color: #ef4444;
+  border-color: #ef4444;
 }
 ```
 
 
-**Info**
-- **Hex:** `#47A8E5`
-- **Usage:** Information, help text
-- **CSS Variable:** `--color-info`
+**Blue 500**
+- **Hex:** `#3b82f6`
+- **Usage:** Info
+- **CSS Variable:** `--color-blue 500`
 
 ```css
-.alert-info {
-  background-color: #47A8E5;
-  border-color: #47A8E5;
+.alert-blue 500 {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
 }
 ```
 
@@ -245,43 +245,19 @@ body {
 ### Typography Scale
 
 
-**Display 1**
-- **Font Family:** Inter, system-ui, sans-serif
-- **Font Size:** 6rem
-- **Font Weight:** 300
-- **Font Style:** normal
-- **Line Height:** 1
-- **CSS Class:** `.text-display-1`
-
-```css
-.text-display-1 {
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 6rem;
-  font-weight: 300;
-  font-style: normal;
-  line-height: 1;
-}
-```
-
-**HTML Usage:**
-```html
-<h1 class="text-display-1">Heading Text</h1>
-```
-
-
-**Display 2**
+**text-6xl**
 - **Font Family:** Inter, system-ui, sans-serif
 - **Font Size:** 3.75rem
-- **Font Weight:** 300
+- **Font Weight:** 700
 - **Font Style:** normal
 - **Line Height:** 1
-- **CSS Class:** `.text-display-2`
+- **CSS Class:** `.text-text-6xl`
 
 ```css
-.text-display-2 {
+.text-text-6xl {
   font-family: Inter, system-ui, sans-serif;
   font-size: 3.75rem;
-  font-weight: 300;
+  font-weight: 700;
   font-style: normal;
   line-height: 1;
 }
@@ -289,151 +265,175 @@ body {
 
 **HTML Usage:**
 ```html
-<h1 class="text-display-2">Heading Text</h1>
+<h1 class="text-text-6xl">Heading Text</h1>
 ```
 
 
-**Headline**
+**text-5xl**
 - **Font Family:** Inter, system-ui, sans-serif
 - **Font Size:** 3rem
-- **Font Weight:** 400
+- **Font Weight:** 700
 - **Font Style:** normal
-- **Line Height:** 1.2
-- **CSS Class:** `.text-headline`
+- **Line Height:** 1
+- **CSS Class:** `.text-text-5xl`
 
 ```css
-.text-headline {
+.text-text-5xl {
   font-family: Inter, system-ui, sans-serif;
   font-size: 3rem;
-  font-weight: 400;
+  font-weight: 700;
   font-style: normal;
-  line-height: 1.2;
+  line-height: 1;
 }
 ```
 
 **HTML Usage:**
 ```html
-<h1 class="text-headline">Heading Text</h1>
+<h1 class="text-text-5xl">Heading Text</h1>
 ```
 
 
-**Title**
+**text-4xl**
 - **Font Family:** Inter, system-ui, sans-serif
-- **Font Size:** 2.125rem
-- **Font Weight:** 500
+- **Font Size:** 2.25rem
+- **Font Weight:** 700
 - **Font Style:** normal
-- **Line Height:** 1.3
-- **CSS Class:** `.text-title`
+- **Line Height:** 2.5rem
+- **CSS Class:** `.text-text-4xl`
 
 ```css
-.text-title {
+.text-text-4xl {
   font-family: Inter, system-ui, sans-serif;
-  font-size: 2.125rem;
-  font-weight: 500;
+  font-size: 2.25rem;
+  font-weight: 700;
   font-style: normal;
-  line-height: 1.3;
+  line-height: 2.5rem;
 }
 ```
 
 **HTML Usage:**
 ```html
-<h1 class="text-title">Heading Text</h1>
+<h1 class="text-text-4xl">Heading Text</h1>
 ```
 
 
-**Subheading**
+**text-3xl**
+- **Font Family:** Inter, system-ui, sans-serif
+- **Font Size:** 1.875rem
+- **Font Weight:** 700
+- **Font Style:** normal
+- **Line Height:** 2.25rem
+- **CSS Class:** `.text-text-3xl`
+
+```css
+.text-text-3xl {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 1.875rem;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 2.25rem;
+}
+```
+
+**HTML Usage:**
+```html
+<h1 class="text-text-3xl">Heading Text</h1>
+```
+
+
+**text-2xl**
 - **Font Family:** Inter, system-ui, sans-serif
 - **Font Size:** 1.5rem
-- **Font Weight:** 400
+- **Font Weight:** 700
 - **Font Style:** normal
-- **Line Height:** 1.5
-- **CSS Class:** `.text-subheading`
+- **Line Height:** 2rem
+- **CSS Class:** `.text-text-2xl`
 
 ```css
-.text-subheading {
+.text-text-2xl {
   font-family: Inter, system-ui, sans-serif;
   font-size: 1.5rem;
-  font-weight: 400;
+  font-weight: 700;
   font-style: normal;
-  line-height: 1.5;
+  line-height: 2rem;
 }
 ```
 
 **HTML Usage:**
 ```html
-<h1 class="text-subheading">Heading Text</h1>
+<h1 class="text-text-2xl">Heading Text</h1>
 ```
 
 
-**Body 1**
+**text-xl**
+- **Font Family:** Inter, system-ui, sans-serif
+- **Font Size:** 1.25rem
+- **Font Weight:** 600
+- **Font Style:** normal
+- **Line Height:** 1.75rem
+- **CSS Class:** `.text-text-xl`
+
+```css
+.text-text-xl {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.75rem;
+}
+```
+
+**HTML Usage:**
+```html
+<h1 class="text-text-xl">Heading Text</h1>
+```
+
+
+**text-base**
 - **Font Family:** Inter, system-ui, sans-serif
 - **Font Size:** 1rem
 - **Font Weight:** 400
 - **Font Style:** normal
-- **Line Height:** 1.6
-- **CSS Class:** `.text-body-1`
+- **Line Height:** 1.5rem
+- **CSS Class:** `.text-text-base`
 
 ```css
-.text-body-1 {
+.text-text-base {
   font-family: Inter, system-ui, sans-serif;
   font-size: 1rem;
   font-weight: 400;
   font-style: normal;
-  line-height: 1.6;
+  line-height: 1.5rem;
 }
 ```
 
 **HTML Usage:**
 ```html
-<h1 class="text-body-1">Heading Text</h1>
+<h1 class="text-text-base">Heading Text</h1>
 ```
 
 
-**Body 2**
+**text-sm**
 - **Font Family:** Inter, system-ui, sans-serif
 - **Font Size:** 0.875rem
 - **Font Weight:** 400
 - **Font Style:** normal
-- **Line Height:** 1.5
-- **CSS Class:** `.text-body-2`
+- **Line Height:** 1.25rem
+- **CSS Class:** `.text-text-sm`
 
 ```css
-.text-body-2 {
+.text-text-sm {
   font-family: Inter, system-ui, sans-serif;
   font-size: 0.875rem;
   font-weight: 400;
   font-style: normal;
-  line-height: 1.5;
+  line-height: 1.25rem;
 }
 ```
 
 **HTML Usage:**
 ```html
-<h1 class="text-body-2">Heading Text</h1>
-```
-
-
-**Caption**
-- **Font Family:** Inter, system-ui, sans-serif
-- **Font Size:** 0.75rem
-- **Font Weight:** 400
-- **Font Style:** normal
-- **Line Height:** 1.4
-- **CSS Class:** `.text-caption`
-
-```css
-.text-caption {
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 400;
-  font-style: normal;
-  line-height: 1.4;
-}
-```
-
-**HTML Usage:**
-```html
-<h1 class="text-caption">Heading Text</h1>
+<h1 class="text-text-sm">Heading Text</h1>
 ```
 
 
@@ -456,9 +456,9 @@ body {
 ### Spacing Scale
 
 
-**xs**
+**2**
 - **Size:** 8px
-- **CSS Variable:** `--spacing-xs`
+- **CSS Variable:** `--spacing-2`
 - **Usage:** Margins, padding, gaps
 
 ```css
@@ -467,14 +467,14 @@ body {
   padding: 8px;
   gap: 8px;
   /* or */
-  margin: var(--spacing-xs);
+  margin: var(--spacing-2);
 }
 ```
 
 
-**sm**
+**4**
 - **Size:** 16px
-- **CSS Variable:** `--spacing-sm`
+- **CSS Variable:** `--spacing-4`
 - **Usage:** Margins, padding, gaps
 
 ```css
@@ -483,14 +483,14 @@ body {
   padding: 16px;
   gap: 16px;
   /* or */
-  margin: var(--spacing-sm);
+  margin: var(--spacing-4);
 }
 ```
 
 
-**md**
+**6**
 - **Size:** 24px
-- **CSS Variable:** `--spacing-md`
+- **CSS Variable:** `--spacing-6`
 - **Usage:** Margins, padding, gaps
 
 ```css
@@ -499,14 +499,14 @@ body {
   padding: 24px;
   gap: 24px;
   /* or */
-  margin: var(--spacing-md);
+  margin: var(--spacing-6);
 }
 ```
 
 
-**lg**
+**8**
 - **Size:** 32px
-- **CSS Variable:** `--spacing-lg`
+- **CSS Variable:** `--spacing-8`
 - **Usage:** Margins, padding, gaps
 
 ```css
@@ -515,14 +515,14 @@ body {
   padding: 32px;
   gap: 32px;
   /* or */
-  margin: var(--spacing-lg);
+  margin: var(--spacing-8);
 }
 ```
 
 
-**xl**
+**12**
 - **Size:** 48px
-- **CSS Variable:** `--spacing-xl`
+- **CSS Variable:** `--spacing-12`
 - **Usage:** Margins, padding, gaps
 
 ```css
@@ -531,14 +531,14 @@ body {
   padding: 48px;
   gap: 48px;
   /* or */
-  margin: var(--spacing-xl);
+  margin: var(--spacing-12);
 }
 ```
 
 
-**2xl**
+**16**
 - **Size:** 64px
-- **CSS Variable:** `--spacing-2xl`
+- **CSS Variable:** `--spacing-16`
 - **Usage:** Margins, padding, gaps
 
 ```css
@@ -547,34 +547,34 @@ body {
   padding: 64px;
   gap: 64px;
   /* or */
-  margin: var(--spacing-2xl);
+  margin: var(--spacing-16);
 }
 ```
 
 
 ### Spacing Usage Guidelines
 
-- **xs (8px):** Tight spacing, inline elements, compact layouts
-- **sm (16px):** Default spacing between related elements
-- **md (24px):** Section spacing, card padding
-- **lg (32px):** Large section gaps, major layout divisions
-- **xl (48px):** Hero sections, major page divisions
-- **2xl (64px):** Maximum spacing for dramatic separation
+- **xs (undefined):** Tight spacing, inline elements, compact layouts
+- **sm (undefined):** Default spacing between related elements
+- **md (undefined):** Section spacing, card padding
+- **lg (undefined):** Large section gaps, major layout divisions
+- **xl (undefined):** Hero sections, major page divisions
+- **2xl (undefined):** Maximum spacing for dramatic separation
 
 ## Button Styles
 
 ### Primary Button
 
 **Colors:**
-- Background: `#133A7C`
-- Hover: `#081534`
+- Background: `#2563eb`
+- Hover: `#1d4ed8`
 - Text: `#FFFFFF`
 
 **Implementation:**
 
 ```css
 .btn-primary {
-  background-color: #133A7C;
+  background-color: #2563eb;
   color: #FFFFFF;
   padding: 12px 24px;
   border: none;
@@ -586,7 +586,7 @@ body {
 }
 
 .btn-primary:hover {
-  background-color: #081534;
+  background-color: #1d4ed8;
   transform: translateY(-1px);
 }
 
@@ -608,15 +608,15 @@ body {
 ### Secondary Button
 
 **Colors:**
-- Background: `#2A6BAC`
-- Hover: `#133A7C`
+- Background: `#6b7280`
+- Hover: `#4b5563`
 - Text: `#FFFFFF`
 
 **Implementation:**
 
 ```css
 .btn-secondary {
-  background-color: #2A6BAC;
+  background-color: #6b7280;
   color: #FFFFFF;
   padding: 12px 24px;
   border: none;
@@ -628,7 +628,7 @@ body {
 }
 
 .btn-secondary:hover {
-  background-color: #133A7C;
+  background-color: #4b5563;
 }
 ```
 
@@ -639,15 +639,15 @@ body {
 ### Accent Button
 
 **Colors:**
-- Background: `#47A8E5`
-- Hover: `#2A6BAC`
+- Background: `#0ea5e9`
+- Hover: `#0284c7`
 - Text: `#FFFFFF`
 
 **Implementation:**
 
 ```css
 .btn-accent {
-  background-color: #47A8E5;
+  background-color: #0ea5e9;
   color: #FFFFFF;
   padding: 12px 24px;
   border: none;
@@ -659,7 +659,7 @@ body {
 }
 
 .btn-accent:hover {
-  background-color: #2A6BAC;
+  background-color: #0284c7;
 }
 ```
 
@@ -675,89 +675,89 @@ For easier maintenance and theming, implement CSS variables:
 :root {
   /* Background Colors */
   --color-background: #FFFFFF;
-  --color-surface: #F5F5F5;
+  --color-surface: #F9FAFB;
   --color-elevated: #FFFFFF;
 
   /* Primary Colors */
-  --color-primary-maastricht-blue: #081534;
-  --color-primary-dark-cerulean: #133A7C;
-  --color-primary-lapis-lazuli: #2A6BAC;
-  --color-primary-picton-blue: #47A8E5;
+  --color-primary-blue-600: #2563eb;
+  --color-primary-blue-700: #1d4ed8;
+  --color-primary-indigo-600: #4f46e5;
+  --color-primary-sky-500: #0ea5e9;
 
   /* Neutral Colors */
-  --color-neutral-white: #FFFFFF;
+  --color-neutral-white: #ffffff;
   --color-neutral-header-text: #FFFFFF;
-  --color-neutral-silver-sand: #C6C6C6;
-  --color-neutral-slogan-gray: #3E5966;
-  --color-neutral-text-primary: #212121;
+  --color-neutral-gray-300: #d1d5db;
+  --color-neutral-gray-600: #4b5563;
+  --color-neutral-gray-900: #111827;
 
   /* Semantic Colors */
-  --color-success: #4caf50;
-  --color-warning: #ff9800;
-  --color-error: #f44336;
-  --color-info: #47A8E5;
+  --color-green 500: #10b981;
+  --color-yellow 500: #f59e0b;
+  --color-red 500: #ef4444;
+  --color-blue 500: #3b82f6;
 
   /* Spacing */
-  --spacing-xs: 8px;
-  --spacing-sm: 16px;
-  --spacing-md: 24px;
-  --spacing-lg: 32px;
-  --spacing-xl: 48px;
-  --spacing-2xl: 64px;
+  --spacing-2: 8px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
 
   /* Typography */
-  --font-family-display-1: Inter, system-ui, sans-serif;
-  --font-size-display-1: 6rem;
-  --font-weight-display-1: 300;
-  --font-style-display-1: normal;
-  --line-height-display-1: 1;
-  --font-family-display-2: Inter, system-ui, sans-serif;
-  --font-size-display-2: 3.75rem;
-  --font-weight-display-2: 300;
-  --font-style-display-2: normal;
-  --line-height-display-2: 1;
-  --font-family-headline: Inter, system-ui, sans-serif;
-  --font-size-headline: 3rem;
-  --font-weight-headline: 400;
-  --font-style-headline: normal;
-  --line-height-headline: 1.2;
-  --font-family-title: Inter, system-ui, sans-serif;
-  --font-size-title: 2.125rem;
-  --font-weight-title: 500;
-  --font-style-title: normal;
-  --line-height-title: 1.3;
-  --font-family-subheading: Inter, system-ui, sans-serif;
-  --font-size-subheading: 1.5rem;
-  --font-weight-subheading: 400;
-  --font-style-subheading: normal;
-  --line-height-subheading: 1.5;
-  --font-family-body-1: Inter, system-ui, sans-serif;
-  --font-size-body-1: 1rem;
-  --font-weight-body-1: 400;
-  --font-style-body-1: normal;
-  --line-height-body-1: 1.6;
-  --font-family-body-2: Inter, system-ui, sans-serif;
-  --font-size-body-2: 0.875rem;
-  --font-weight-body-2: 400;
-  --font-style-body-2: normal;
-  --line-height-body-2: 1.5;
-  --font-family-caption: Inter, system-ui, sans-serif;
-  --font-size-caption: 0.75rem;
-  --font-weight-caption: 400;
-  --font-style-caption: normal;
-  --line-height-caption: 1.4;
+  --font-family-text-6xl: Inter, system-ui, sans-serif;
+  --font-size-text-6xl: 3.75rem;
+  --font-weight-text-6xl: 700;
+  --font-style-text-6xl: normal;
+  --line-height-text-6xl: 1;
+  --font-family-text-5xl: Inter, system-ui, sans-serif;
+  --font-size-text-5xl: 3rem;
+  --font-weight-text-5xl: 700;
+  --font-style-text-5xl: normal;
+  --line-height-text-5xl: 1;
+  --font-family-text-4xl: Inter, system-ui, sans-serif;
+  --font-size-text-4xl: 2.25rem;
+  --font-weight-text-4xl: 700;
+  --font-style-text-4xl: normal;
+  --line-height-text-4xl: 2.5rem;
+  --font-family-text-3xl: Inter, system-ui, sans-serif;
+  --font-size-text-3xl: 1.875rem;
+  --font-weight-text-3xl: 700;
+  --font-style-text-3xl: normal;
+  --line-height-text-3xl: 2.25rem;
+  --font-family-text-2xl: Inter, system-ui, sans-serif;
+  --font-size-text-2xl: 1.5rem;
+  --font-weight-text-2xl: 700;
+  --font-style-text-2xl: normal;
+  --line-height-text-2xl: 2rem;
+  --font-family-text-xl: Inter, system-ui, sans-serif;
+  --font-size-text-xl: 1.25rem;
+  --font-weight-text-xl: 600;
+  --font-style-text-xl: normal;
+  --line-height-text-xl: 1.75rem;
+  --font-family-text-base: Inter, system-ui, sans-serif;
+  --font-size-text-base: 1rem;
+  --font-weight-text-base: 400;
+  --font-style-text-base: normal;
+  --line-height-text-base: 1.5rem;
+  --font-family-text-sm: Inter, system-ui, sans-serif;
+  --font-size-text-sm: 0.875rem;
+  --font-weight-text-sm: 400;
+  --font-style-text-sm: normal;
+  --line-height-text-sm: 1.25rem;
 
   /* Button Styles */
-  --btn-primary-bg: #133A7C;
-  --btn-primary-hover: #081534;
+  --btn-primary-bg: #2563eb;
+  --btn-primary-hover: #1d4ed8;
   --btn-primary-color: #FFFFFF;
 
-  --btn-secondary-bg: #2A6BAC;
-  --btn-secondary-hover: #133A7C;
+  --btn-secondary-bg: #6b7280;
+  --btn-secondary-hover: #4b5563;
   --btn-secondary-color: #FFFFFF;
 
-  --btn-accent-bg: #47A8E5;
-  --btn-accent-hover: #2A6BAC;
+  --btn-accent-bg: #0ea5e9;
+  --btn-accent-hover: #0284c7;
   --btn-accent-color: #FFFFFF;
 }
 ```
@@ -858,7 +858,7 @@ For easier maintenance and theming, implement CSS variables:
 Ensure all text meets WCAG 2.1 AA standards (minimum 4.5:1 contrast ratio for normal text):
 
 - Test all color combinations using tools like WebAIM Contrast Checker
-- Primary text on white background should use dark colors (#212121)
+- Primary text on white background should use dark colors (#111827)
 - Light text on dark backgrounds should use white or very light colors
 
 ### Focus States
@@ -923,6 +923,6 @@ This UI Style specification should be used in conjunction with the active UI Fra
 ---
 
 **Specification Version:** 1.0
-**Last Updated:** 2025-12-17T01:19:07.606Z
+**Last Updated:** 2025-12-19T19:52:15.720Z
 
 **Note:** This specification should be reviewed and updated whenever the UI style is modified to ensure consistency across the application.

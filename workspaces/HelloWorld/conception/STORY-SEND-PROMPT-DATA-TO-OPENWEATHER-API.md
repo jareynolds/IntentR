@@ -2,12 +2,12 @@
 
 ## Metadata
 - **Type**: Story Card
-- **Storyboard**: HelloWeatherWorld
+- **Storyboard**: HelloWorldWeather
 - **Card ID**: card-1765942941837
 - **Status**: Completed
-- **Grid Position X**: 543
-- **Grid Position Y**: 1026
-- **Generated**: 12/16/2025, 7:46:24 PM
+- **Grid Position X**: 127
+- **Grid Position Y**: 1520
+- **Generated**: 12/19/2025, 11:47:27 AM
 - **File**: STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md
 
 ## Description
@@ -27,5 +27,6 @@ Completing this story card enables the following cards:
 
 | Card Title | Card ID | Connection ID | File Reference |
 |------------|---------|---------------|----------------|
+| Provide Prompt field | card-1765940802459 | conn-card-1765937186735-card-1765940802459-1765943147768 | [STORY-PROVIDE-PROMPT-FIELD.md](./STORY-PROVIDE-PROMPT-FIELD.md) |
 | display prompt results | card-1765943031022 | conn-card-1765942941837-card-1765943031022-1765943150785 | [STORY-DISPLAY-PROMPT-RESULTS.md](./STORY-DISPLAY-PROMPT-RESULTS.md) |
 

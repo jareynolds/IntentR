@@ -1,6 +1,6 @@
 # Weather Query Intelligence
 
-**Status:** Planned
+**Status:** Implemented
 
 **Storyboard Reference:** send prompt data to openweather API
 

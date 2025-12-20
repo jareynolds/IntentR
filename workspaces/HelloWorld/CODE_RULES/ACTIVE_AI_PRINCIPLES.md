@@ -27,7 +27,28 @@ This AI Policy document defines the complete governance framework for **Preset 3
 ### Policy Statement
 AI must strictly follow state machine compliance with explicit warnings before any deviation.
 
+
 ### Implementation Rules
+
+
+
+ ## Mandatory Testing Before Completion
+
+  **NEVER claim a feature is "ready" or "done" without:**
+
+  1. **For backend changes**: Rebuild the service (`go build`) and restart it
+  2. **For API endpoints**: Test with `curl` and verify the response
+  3. **For file operations**: Verify the file exists at the expected path using `ls` or `cat`
+  4. **For frontend changes**: Verify no TypeScript/compilation errors
+
+  **After ANY code change that writes files:**
+  - Execute the functionality (via curl, API call, or UI action)
+  - Verify the file was created: `ls -la <expected-path>`
+  - Show the user the verification output
+
+  **Do NOT say "should work" or "will be saved to" - PROVE IT WORKS FIRST.**
+
+
 
 ```
 AI must strictly follow state machine compliance with explicit warnings before any deviation.

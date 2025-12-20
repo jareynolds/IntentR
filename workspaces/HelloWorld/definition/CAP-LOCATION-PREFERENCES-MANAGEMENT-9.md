@@ -1,24 +1,20 @@
 # Location Preferences Management
 
-**Status:** Planned
+**Status:** Implemented
 
 **Storyboard Reference:** read default location
 
 ## Metadata
-- **ID**: CAP-007
+- **ID**: CAP-009
 - **Type**: Capability
-- **Generated**: 12/16/2025, 8:32:09 PM
+- **Generated**: 12/18/2025, 8:44:52 PM
 
 - **Storyboard Reference**: read default location
 ## Description
 _Add description for this capability._
 
-## Upstream Dependencies
-- Configuration Management
-- Location Services
-
 ## Downstream Impacts
-- Weather Data Management
+- Weather Data Retrieval
 
 ## Implementation Notes
 _Add implementation notes here._

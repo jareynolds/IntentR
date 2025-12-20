@@ -1,6 +1,6 @@
 # Weather Data Presentation
 
-**Status:** Planned
+**Status:** Implemented
 
 **Description:** Display the results of the openweather API on the screen
 

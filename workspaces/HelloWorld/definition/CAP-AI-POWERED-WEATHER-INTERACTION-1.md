@@ -1,6 +1,6 @@
 # AI-Powered Weather Interaction
 
-**Status:** Planned
+**Status:** Implemented
 
 **Description:** **Storyboard Reference:** send prompt data to openweather API
 

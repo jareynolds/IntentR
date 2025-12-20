@@ -1,16 +1,17 @@
 {
   "id": "workspace-1765770831790",
-  "name": "HelloWeatherWorld",
+  "name": "HelloWorldWeather",
   "description": "Imported from workspaces/HelloWorld",
   "workspaceType": "new",
+  "figmaTeamUrl": "ttps://www.figma.com/files/team/1567988176582054443",
   "projectFolder": "workspaces/HelloWorld",
   "activeAIPreset": 3,
-  "selectedUIFramework": "darkblue",
+  "selectedUIFramework": "tailwind",
   "selectedUILayout": "dashboard-admin",
   "ownerId": "admin@ubecode.local",
   "ownerName": "System Administrator",
   "isShared": false,
   "createdAt": "2025-12-15T03:53:51.790Z",
-  "updatedAt": "2025-12-18T06:41:22.643Z",
+  "updatedAt": "2025-12-19T19:52:15.705Z",
   "version": "1.0"
 }

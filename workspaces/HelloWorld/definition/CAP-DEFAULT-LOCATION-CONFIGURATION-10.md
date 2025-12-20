@@ -1,25 +1,20 @@
-# Location Services
+# Default Location Configuration
 
-**Status:** Planned
+**Status:** Implemented
 
 **Storyboard Reference:** read default location
 
 ## Metadata
-- **ID**: CAP-005
+- **ID**: CAP-010
 - **Type**: Capability
-- **Generated**: 12/16/2025, 8:32:09 PM
+- **Generated**: 12/18/2025, 8:44:52 PM
 
 - **Storyboard Reference**: read default location
 ## Description
 _Add description for this capability._
 
 ## Upstream Dependencies
-- Configuration Management
-
-## Downstream Impacts
-- Natural Language Weather Queries
-- Location Preferences Management
-- Weather Data Management
+- Weather Query Intelligence
 
 ## Implementation Notes
 _Add implementation notes here._

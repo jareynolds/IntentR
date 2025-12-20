@@ -2,12 +2,12 @@
 
 ## Metadata
 - **Type**: Story Card
-- **Storyboard**: HelloWeatherWorld
+- **Storyboard**: HelloWorldWeather
 - **Card ID**: card-1765937126217
 - **Status**: Completed
-- **Grid Position X**: 538
-- **Grid Position Y**: 588
-- **Generated**: 12/16/2025, 7:46:24 PM
+- **Grid Position X**: 573
+- **Grid Position Y**: 789
+- **Generated**: 12/19/2025, 11:47:27 AM
 - **File**: STORY-PULL-WEATHER-DATA.md
 
 ## Description
@@ -22,7 +22,8 @@ This story card depends on the following cards being completed first:
 
 | Card Title | Card ID | Connection ID | File Reference |
 |------------|---------|---------------|----------------|
-| read default location | card-1765937281984 | conn-card-1765937281984-card-1765937126217-1765937308600 | [STORY-READ-DEFAULT-LOCATION.md](./STORY-READ-DEFAULT-LOCATION.md) |
+| Enter City | card-1766171921085 | conn-card-1766171921085-card-1765937126217-1766171965052 | [STORY-ENTER-CITY.md](./STORY-ENTER-CITY.md) |
+| read default location | card-1765937281984 | conn-card-1765937281984-card-1765937126217-1766172037213 | [STORY-READ-DEFAULT-LOCATION.md](./STORY-READ-DEFAULT-LOCATION.md) |
 
 ### Downstream Impact
 Completing this story card enables the following cards:

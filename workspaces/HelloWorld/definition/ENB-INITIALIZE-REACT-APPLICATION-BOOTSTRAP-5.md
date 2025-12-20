@@ -3,7 +3,7 @@
 ## Metadata
 - **ID**: ENB-INITIALIZE
 - **Type**: Enabler
-- **Capability**: Application Lifecycle Management (CAP-APPLICATION-LIFECYCLE-MANAGEMENT-4)
+- **Capability**: Application Lifecycle Management (CAP-APPLICATION-LIFECYCLE-MANAGEMENT-3)
 - **Owner**: Not specified
 - **Priority**: Medium
 - **Status**: planned

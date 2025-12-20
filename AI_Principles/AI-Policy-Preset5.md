@@ -109,6 +109,22 @@ AI must maintain absolute pre-condition verification with immediate termination 
 - CRITICAL MESSAGE: "CRITICAL PRE-CONDITION FAILURE - IMMEDIATE TERMINATION - GOVERNANCE ESCALATION REQUIRED"
 ```
 
+## Mandatory Testing Before Completion
+
+  **NEVER claim a feature is "ready" or "done" without:**
+
+  1. **For backend changes**: Rebuild the service (`go build`) and restart it
+  2. **For API endpoints**: Test with `curl` and verify the response
+  3. **For file operations**: Verify the file exists at the expected path using `ls` or `cat`
+  4. **For frontend changes**: Verify no TypeScript/compilation errors
+
+  **After ANY code change that writes files:**
+  - Execute the functionality (via curl, API call, or UI action)
+  - Verify the file was created: `ls -la <expected-path>`
+  - Show the user the verification output
+
+  **Do NOT say "should work" or "will be saved to" - PROVE IT WORKS FIRST.**
+
 ### Behavioral Guidelines
 - **ZERO TOLERANCE**: No pre-condition failures accepted
 - **IMMEDIATE STOP**: All processing halts instantly

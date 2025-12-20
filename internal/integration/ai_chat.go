@@ -1392,11 +1392,15 @@ func (h *Handler) HandleGenerateCodeCLI(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Get proxy URL from environment or use default
-	// When running in Docker, use host.docker.internal to reach the host
+	// Get proxy URL from environment or auto-detect
 	proxyURL := os.Getenv("CLAUDE_PROXY_URL")
 	if proxyURL == "" {
-		proxyURL = "http://host.docker.internal:9085"
+		// Auto-detect: use host.docker.internal when running in Docker, localhost otherwise
+		if isRunningInDocker() {
+			proxyURL = "http://host.docker.internal:9085"
+		} else {
+			proxyURL = "http://localhost:9085"
+		}
 	}
 
 	fmt.Printf("Forwarding request to Claude CLI Proxy at: %s\n", proxyURL)
@@ -1436,4 +1440,13 @@ func (h *Handler) HandleGenerateCodeCLI(w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(proxyResp)
+}
+
+// isRunningInDocker detects if the current process is running inside a Docker container
+func isRunningInDocker() bool {
+	// Check for /.dockerenv file which Docker creates in containers
+	if _, err := os.Stat("/.dockerenv"); err == nil {
+		return true
+	}
+	return false
 }

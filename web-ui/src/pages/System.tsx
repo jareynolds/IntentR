@@ -21,6 +21,8 @@ interface Capability {
   downstreamImpacts: string[];
   x: number;
   y: number;
+  fields?: Record<string, string>; // For Storyboard Reference and other metadata
+  filename?: string; // Original filename for deletion
 }
 
 interface Enabler {
@@ -29,6 +31,7 @@ interface Enabler {
   capabilityId: string;
   x: number;
   y: number;
+  filename?: string; // Original filename for deletion
 }
 
 interface CapabilityDependency {
@@ -40,6 +43,33 @@ interface EnablerConnection {
   capabilityId: string;
   enablerId: string;
 }
+
+interface TestScenario {
+  id: string;
+  name: string;
+  enablerId: string;
+  x: number;
+  y: number;
+}
+
+interface TestScenarioConnection {
+  enablerId: string;
+  scenarioId: string;
+}
+
+interface StoryboardCard {
+  id: string;
+  title: string;
+  positionY: number;
+  flowOrder: number;
+}
+
+// Helper function to get first N words from a string
+const getFirstWords = (text: string, count: number = 3): string => {
+  const words = text.split(/\s+/).filter(w => w.length > 0);
+  if (words.length <= count) return text;
+  return words.slice(0, count).join(' ') + '...';
+};
 
 type DiagramTab = 'capability-map' | 'state-diagram' | 'sequence-diagram' | 'data-models' | 'class-diagrams';
 
@@ -71,16 +101,18 @@ export const System: React.FC = () => {
   const [activeTab, setActiveTab] = useState<DiagramTab>('capability-map');
   const [capabilities, setCapabilities] = useState<Capability[]>([]);
   const [enablers, setEnablers] = useState<Enabler[]>([]);
+  const [testScenarios, setTestScenarios] = useState<TestScenario[]>([]);
   const [capabilityDependencies, setCapabilityDependencies] = useState<CapabilityDependency[]>([]);
   const [enablerConnections, setEnablerConnections] = useState<EnablerConnection[]>([]);
+  const [testScenarioConnections, setTestScenarioConnections] = useState<TestScenarioConnection[]>([]);
   const [zoom, setZoom] = useState(1);
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [draggingCard, setDraggingCard] = useState<{ type: 'capability' | 'enabler'; id: string; offsetX: number; offsetY: number } | null>(null);
+  const [draggingCard, setDraggingCard] = useState<{ type: 'capability' | 'enabler' | 'testScenario'; id: string; offsetX: number; offsetY: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [editingCard, setEditingCard] = useState<{ type: 'capability' | 'enabler'; id: string } | null>(null);
-  const [selectedCard, setSelectedCard] = useState<{ type: 'capability' | 'enabler'; id: string } | null>(null);
+  const [editingCard, setEditingCard] = useState<{ type: 'capability' | 'enabler' | 'testScenario'; id: string } | null>(null);
+  const [selectedCard, setSelectedCard] = useState<{ type: 'capability' | 'enabler' | 'testScenario'; id: string } | null>(null);
 
   // State for each diagram type
   const [stateDiagramLoading, setStateDiagramLoading] = useState(false);
@@ -91,6 +123,9 @@ export const System: React.FC = () => {
   const [dataModelsContent, setDataModelsContent] = useState<string>('');
   const [classDiagramsLoading, setClassDiagramsLoading] = useState(false);
   const [classDiagramsContent, setClassDiagramsContent] = useState<string>('');
+
+  // Storyboard cards for ordering
+  const [storyboardCards, setStoryboardCards] = useState<StoryboardCard[]>([]);
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -107,55 +142,78 @@ export const System: React.FC = () => {
 
   // Load saved diagram on mount and when workspace changes
   useEffect(() => {
+    console.log('[System] ==== useEffect TRIGGERED ===='); // VERY VISIBLE LOG
     if (currentWorkspace?.id) {
       console.log('[System] Workspace changed, loading saved diagram for:', currentWorkspace.id);
+      console.log('[System] projectFolder:', currentWorkspace.projectFolder);
 
-      // Load capability map from localStorage first, then database
+      // First restore zoom and scroll position from localStorage for immediate UI
       const savedKey = `system_positions_${currentWorkspace.id}`;
       const saved = localStorage.getItem(savedKey);
 
       if (saved) {
         try {
           const savedData = JSON.parse(saved);
-          if (savedData && savedData.capabilities && savedData.capabilities.length > 0) {
-            console.log('[System] Loaded', savedData.capabilities.length, 'capabilities from localStorage');
-            setCapabilities(savedData.capabilities);
-            setEnablers(savedData.enablers || []);
-            setCapabilityDependencies(savedData.capabilityDependencies || []);
-            setEnablerConnections(savedData.enablerConnections || []);
-
-            if (savedData.zoom !== undefined) {
-              setZoom(savedData.zoom);
-            }
-
-            // Restore scroll position after DOM is ready
-            setTimeout(() => {
-              if (wrapperRef.current && savedData.scrollLeft !== undefined) {
-                wrapperRef.current.scrollLeft = savedData.scrollLeft;
-                wrapperRef.current.scrollTop = savedData.scrollTop || 0;
-              }
-            }, 200);
+          if (savedData.zoom !== undefined) {
+            setZoom(savedData.zoom);
           }
+          // Restore scroll position after DOM is ready
+          setTimeout(() => {
+            if (wrapperRef.current && savedData.scrollLeft !== undefined) {
+              wrapperRef.current.scrollLeft = savedData.scrollLeft;
+              wrapperRef.current.scrollTop = savedData.scrollTop || 0;
+            }
+          }, 200);
         } catch (error) {
           console.error('[System] Error parsing saved diagram:', error);
         }
-      } else if (currentWorkspace.systemDiagram) {
-        // Fallback to database if localStorage is empty
-        console.log('[System] Loading diagram from database');
-        const savedData = currentWorkspace.systemDiagram as any;
-        if (savedData.capabilities && savedData.capabilities.length > 0) {
-          setCapabilities(savedData.capabilities);
-          setEnablers(savedData.enablers || []);
-          setCapabilityDependencies(savedData.capabilityDependencies || []);
-          setEnablerConnections(savedData.enablerConnections || []);
-          if (savedData.zoom !== undefined) setZoom(savedData.zoom);
-        }
       }
-
-      setIsLoading(false);
 
       // Load saved diagrams for each tab from localStorage
       loadSavedDiagrams();
+
+      // ALWAYS load fresh capabilities from definition folder if workspace has projectFolder
+      // This ensures we get the Storyboard Reference fields for proper sorting
+      // The loadSpecifications function will merge positions from localStorage
+      if (currentWorkspace.projectFolder) {
+        console.log('[System] Auto-loading specifications to get fresh fields (including Storyboard Reference)');
+        // Use a small delay to ensure the component is mounted
+        setTimeout(() => {
+          loadSpecifications();
+        }, 100);
+      } else {
+        // No project folder - check if we have cached data or systemDiagram
+        if (saved) {
+          try {
+            const savedData = JSON.parse(saved);
+            if (savedData && savedData.capabilities && savedData.capabilities.length > 0) {
+              console.log('[System] No project folder - using cached capabilities:', savedData.capabilities.length);
+              setCapabilities(savedData.capabilities);
+              setEnablers(savedData.enablers || []);
+              setTestScenarios(savedData.testScenarios || []);
+              setCapabilityDependencies(savedData.capabilityDependencies || []);
+              setEnablerConnections(savedData.enablerConnections || []);
+              setTestScenarioConnections(savedData.testScenarioConnections || []);
+            }
+          } catch (error) {
+            console.error('[System] Error loading cached data:', error);
+          }
+        } else if (currentWorkspace.systemDiagram) {
+          // Fallback to database if localStorage is empty
+          console.log('[System] Loading diagram from database');
+          const savedData = currentWorkspace.systemDiagram as any;
+          if (savedData.capabilities && savedData.capabilities.length > 0) {
+            setCapabilities(savedData.capabilities);
+            setEnablers(savedData.enablers || []);
+            setTestScenarios(savedData.testScenarios || []);
+            setCapabilityDependencies(savedData.capabilityDependencies || []);
+            setEnablerConnections(savedData.enablerConnections || []);
+            setTestScenarioConnections(savedData.testScenarioConnections || []);
+            if (savedData.zoom !== undefined) setZoom(savedData.zoom);
+          }
+        }
+        setIsLoading(false);
+      }
     }
   }, [currentWorkspace?.id]);
 
@@ -196,6 +254,148 @@ export const System: React.FC = () => {
     if (classContent) setClassDiagramsContent(classContent);
   };
 
+  // Fetch storyboard cards for ordering (matches Capabilities page logic EXACTLY)
+  const fetchStoryboardCards = async () => {
+    if (!currentWorkspace?.projectFolder) return;
+
+    console.log('[System] fetchStoryboardCards called');
+    console.log('[System] currentWorkspace.storyboard:', currentWorkspace?.storyboard);
+    console.log('[System] currentWorkspace.storyboard?.cards:', currentWorkspace?.storyboard?.cards);
+
+    try {
+      // Use /story-files endpoint like Capabilities page does
+      const response = await fetch(`${INTEGRATION_URL}/story-files`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('[System] /story-files response:', data);
+
+      if (data.stories) {
+        // Get storyboard canvas data for positioning (same approach as Capabilities page)
+        const storyboardData = currentWorkspace?.storyboard;
+
+        // Create a position map from the storyboard canvas cards (matching Capabilities page logic)
+        const positionMap = new Map<string, number>();
+        if (storyboardData?.cards && storyboardData.cards.length > 0) {
+          console.log('[System] Creating positionMap from', storyboardData.cards.length, 'storyboard canvas cards');
+          storyboardData.cards.forEach((card: { id: string; title: string; y?: number }) => {
+            // Match by ID or title (lowercase for case-insensitive matching)
+            positionMap.set(card.id, card.y || 0);
+            positionMap.set(card.title.toLowerCase(), card.y || 0);
+            console.log(`[System] positionMap: "${card.title}" (${card.id}) -> y=${card.y}`);
+          });
+        } else {
+          console.log('[System] WARNING: No storyboard canvas cards found for positionMap!');
+        }
+
+        // Create cards with position info
+        const cardsWithPosition: StoryboardCard[] = data.stories.map((story: {
+          id: string;
+          filename: string;
+          title: string;
+          description: string;
+          fields?: Record<string, string>;
+        }) => {
+          // Get Y position from storyboard canvas (matching by id or title)
+          // This matches the Capabilities page approach exactly
+          const posY = positionMap.get(story.id) ??
+                       positionMap.get(story.title?.toLowerCase()) ??
+                       positionMap.get((story.title || story.filename).toLowerCase()) ??
+                       Infinity;
+
+          return {
+            id: story.id || story.filename,
+            title: story.title || story.filename,
+            positionY: posY,
+            flowOrder: 0, // Will be computed after sorting
+          };
+        });
+
+        // Sort by Y position from storyboard canvas (top to bottom)
+        // This matches the Capabilities page logic exactly
+        cardsWithPosition.sort((a, b) => {
+          return (a.positionY || 0) - (b.positionY || 0);
+        });
+
+        // Assign flow order after sorting
+        cardsWithPosition.forEach((card, index) => {
+          card.flowOrder = index;
+        });
+
+        setStoryboardCards(cardsWithPosition);
+        console.log('[System] Loaded', cardsWithPosition.length, 'storyboard cards for ordering from workspace storyboard');
+        console.log('[System] Storyboard cards:', cardsWithPosition.map(c => ({ title: c.title, flowOrder: c.flowOrder, posY: c.positionY })));
+      }
+    } catch (err) {
+      console.error('[System] Failed to fetch storyboard cards:', err);
+    }
+  };
+
+  // Fetch storyboard cards when workspace changes (matches Capabilities page dependencies)
+  useEffect(() => {
+    if (currentWorkspace?.projectFolder) {
+      fetchStoryboardCards();
+    }
+  }, [currentWorkspace?.id, currentWorkspace?.projectFolder]);
+
+  // Helper: Get flow order for a capability based on its storyboard reference
+  // This matches the Capabilities page logic EXACTLY
+  const getCapabilityFlowOrder = React.useCallback((cap: Capability): number => {
+    const storyboardRef = cap.fields?.['Storyboard Reference'] || '';
+    if (!storyboardRef) return Number.MAX_SAFE_INTEGER; // No reference = at the end
+
+    // Find matching storyboard card (case-insensitive)
+    const matchingCard = storyboardCards.find(
+      card => card.title.toLowerCase() === storyboardRef.toLowerCase()
+    );
+
+    return matchingCard?.flowOrder ?? Number.MAX_SAFE_INTEGER;
+  }, [storyboardCards]);
+
+  // Sort capabilities by storyboard flow order - use useMemo for proper recalculation
+  const sortedCapabilities = React.useMemo(() => {
+    console.log('[System] COMPUTING sortedCapabilities:', {
+      capabilitiesCount: capabilities.length,
+      storyboardCardsCount: storyboardCards.length,
+      capsWithFields: capabilities.filter(c => c.fields?.['Storyboard Reference']).length
+    });
+
+    if (capabilities.length === 0) return [];
+
+    const sorted = [...capabilities].sort((a, b) => {
+      const refA = a.fields?.['Storyboard Reference'] || '';
+      const refB = b.fields?.['Storyboard Reference'] || '';
+
+      // Find matching storyboard cards
+      const cardA = storyboardCards.find(c => c.title.toLowerCase() === refA.toLowerCase());
+      const cardB = storyboardCards.find(c => c.title.toLowerCase() === refB.toLowerCase());
+
+      const orderA = cardA?.flowOrder ?? Number.MAX_SAFE_INTEGER;
+      const orderB = cardB?.flowOrder ?? Number.MAX_SAFE_INTEGER;
+
+      if (orderA !== orderB) return orderA - orderB;
+      // Secondary sort by name for capabilities with same/no flow order
+      return (a.name || '').localeCompare(b.name || '');
+    });
+
+    // Log first 5 sorted capabilities
+    console.log('[System] SORTED RESULT (first 5):');
+    sorted.slice(0, 5).forEach((cap, idx) => {
+      const ref = cap.fields?.['Storyboard Reference'] || 'NONE';
+      const card = storyboardCards.find(c => c.title.toLowerCase() === ref.toLowerCase());
+      console.log(`  ${idx + 1}. "${cap.name}" [ref="${ref}"] flowOrder=${card?.flowOrder ?? 'N/A'}`);
+    });
+
+    return sorted;
+  }, [capabilities, storyboardCards]);
+
   // Save positions to localStorage whenever they change
   useEffect(() => {
     if (currentWorkspace && capabilities.length > 0) {
@@ -208,8 +408,10 @@ export const System: React.FC = () => {
         const systemData = {
           capabilities: capabilities,
           enablers: enablers,
+          testScenarios: testScenarios,
           capabilityDependencies: capabilityDependencies,
           enablerConnections: enablerConnections,
+          testScenarioConnections: testScenarioConnections,
           zoom: zoom,
           scrollLeft: scrollLeft,
           scrollTop: scrollTop,
@@ -217,12 +419,12 @@ export const System: React.FC = () => {
 
         // Save to localStorage with workspace ID
         localStorage.setItem(`system_positions_${currentWorkspace.id}`, JSON.stringify(systemData));
-        console.log('[System] Auto-saved diagram to localStorage:', capabilities.length, 'capabilities');
+        console.log('[System] Auto-saved diagram to localStorage:', capabilities.length, 'capabilities,', testScenarios.length, 'test scenarios');
       }, 500);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [capabilities, enablers, capabilityDependencies, enablerConnections, zoom, currentWorkspace]);
+  }, [capabilities, enablers, testScenarios, capabilityDependencies, enablerConnections, testScenarioConnections, zoom, currentWorkspace]);
 
   // Save scroll position when user scrolls
   useEffect(() => {
@@ -240,8 +442,10 @@ export const System: React.FC = () => {
         const systemData = {
           capabilities: capabilities,
           enablers: enablers,
+          testScenarios: testScenarios,
           capabilityDependencies: capabilityDependencies,
           enablerConnections: enablerConnections,
+          testScenarioConnections: testScenarioConnections,
           zoom: zoom,
           scrollLeft: scrollLeft,
           scrollTop: scrollTop,
@@ -270,8 +474,10 @@ export const System: React.FC = () => {
     const systemData = {
       capabilities: capabilities,
       enablers: enablers,
+      testScenarios: testScenarios,
       capabilityDependencies: capabilityDependencies,
       enablerConnections: enablerConnections,
+      testScenarioConnections: testScenarioConnections,
       zoom: zoom,
       scrollLeft: scrollLeft,
       scrollTop: scrollTop,
@@ -291,8 +497,10 @@ export const System: React.FC = () => {
     const systemData = {
       capabilities: capabilities,
       enablers: enablers,
+      testScenarios: testScenarios,
       capabilityDependencies: capabilityDependencies,
       enablerConnections: enablerConnections,
+      testScenarioConnections: testScenarioConnections,
       zoom: zoom,
       scrollLeft: scrollLeft,
       scrollTop: scrollTop,
@@ -501,6 +709,130 @@ export const System: React.FC = () => {
   const exportSequenceDiagram = () => exportDiagramToMarkdown('SEQ', sequenceDiagramContent, 'Sequence Diagram');
   const exportDataModelDiagram = () => exportDiagramToMarkdown('DATA', dataModelsContent, 'Data Model');
   const exportClassDiagram = () => exportDiagramToMarkdown('CLASS', classDiagramsContent, 'Class Diagram');
+
+  // Export system diagram to SYSTEM-SYSTEM.md
+  const exportSystemDiagram = async () => {
+    console.log('[System] exportSystemDiagram called');
+    console.log('[System] currentWorkspace:', currentWorkspace);
+    console.log('[System] projectFolder:', currentWorkspace?.projectFolder);
+    console.log('[System] capabilities count:', capabilities.length);
+
+    if (!currentWorkspace?.projectFolder) {
+      alert('Please set a project folder for this workspace first.');
+      return;
+    }
+
+    if (capabilities.length === 0) {
+      alert('No system diagram data to export. Please run AI Analyze first.');
+      return;
+    }
+
+    const fileName = 'SYSTEM-SYSTEM.md';
+    console.log('[System] Exporting to:', currentWorkspace.projectFolder, '/implementation/', fileName);
+
+    // Generate markdown content
+    let markdown = `# System Diagram\n\n`;
+    markdown += `## Metadata\n`;
+    markdown += `- **Type**: System Diagram\n`;
+    markdown += `- **Workspace**: ${currentWorkspace.name}\n`;
+    markdown += `- **Generated**: ${new Date().toISOString()}\n`;
+    markdown += `- **Capabilities**: ${capabilities.length}\n`;
+    markdown += `- **Enablers**: ${enablers.length}\n`;
+    markdown += `- **Test Scenarios**: ${testScenarios.length}\n\n`;
+
+    // Capabilities section
+    markdown += `## Capabilities\n\n`;
+    markdown += `| ID | Name | Status | X | Y |\n`;
+    markdown += `|----|------|--------|---|---|\n`;
+    capabilities.forEach((cap) => {
+      markdown += `| ${cap.id} | ${cap.name} | ${cap.status} | ${cap.x} | ${cap.y} |\n`;
+    });
+    markdown += `\n`;
+
+    // Enablers section
+    markdown += `## Enablers\n\n`;
+    markdown += `| ID | Name | Capability ID | X | Y |\n`;
+    markdown += `|----|------|---------------|---|---|\n`;
+    enablers.forEach((enb) => {
+      markdown += `| ${enb.id} | ${enb.name} | ${enb.capabilityId} | ${enb.x} | ${enb.y} |\n`;
+    });
+    markdown += `\n`;
+
+    // Test Scenarios section
+    markdown += `## Test Scenarios\n\n`;
+    markdown += `| ID | Name | Enabler ID | X | Y |\n`;
+    markdown += `|----|------|------------|---|---|\n`;
+    testScenarios.forEach((ts) => {
+      markdown += `| ${ts.id} | ${ts.name} | ${ts.enablerId} | ${ts.x} | ${ts.y} |\n`;
+    });
+    markdown += `\n`;
+
+    // Connections section
+    markdown += `## Connections\n\n`;
+
+    markdown += `### Capability Dependencies\n\n`;
+    markdown += `| From | To |\n`;
+    markdown += `|------|----|\n`;
+    capabilityDependencies.forEach((dep) => {
+      markdown += `| ${dep.from} | ${dep.to} |\n`;
+    });
+    markdown += `\n`;
+
+    markdown += `### Enabler Connections (Capability -> Enabler)\n\n`;
+    markdown += `| Capability ID | Enabler ID |\n`;
+    markdown += `|---------------|------------|\n`;
+    enablerConnections.forEach((conn) => {
+      markdown += `| ${conn.capabilityId} | ${conn.enablerId} |\n`;
+    });
+    markdown += `\n`;
+
+    markdown += `### Test Scenario Connections (Enabler -> Test Scenario)\n\n`;
+    markdown += `| Enabler ID | Scenario ID |\n`;
+    markdown += `|------------|-------------|\n`;
+    testScenarioConnections.forEach((conn) => {
+      markdown += `| ${conn.enablerId} | ${conn.scenarioId} |\n`;
+    });
+    markdown += `\n`;
+
+    // View settings
+    const currentScrollLeft = wrapperRef.current?.scrollLeft || 0;
+    const currentScrollTop = wrapperRef.current?.scrollTop || 0;
+    markdown += `## View Settings\n\n`;
+    markdown += `- **Zoom**: ${zoom}\n`;
+    markdown += `- **Scroll Left**: ${currentScrollLeft}\n`;
+    markdown += `- **Scroll Top**: ${currentScrollTop}\n`;
+
+    try {
+      console.log('[System] Calling API:', `${INTEGRATION_URL}/save-specifications`);
+      const requestBody = {
+        workspacePath: currentWorkspace.projectFolder,
+        subfolder: 'implementation',
+        files: [{ fileName, content: markdown }],
+      };
+      console.log('[System] Request body:', JSON.stringify(requestBody, null, 2));
+
+      const response = await fetch(`${INTEGRATION_URL}/save-specifications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log('[System] Response status:', response.status);
+      const responseText = await response.text();
+      console.log('[System] Response body:', responseText);
+
+      if (response.ok) {
+        alert(`✅ System Diagram exported!\n\nFile: ${fileName}\n\nSaved to: ${currentWorkspace.projectFolder}/implementation/`);
+      } else {
+        throw new Error(`Failed to save file: ${responseText}`);
+      }
+    } catch (error) {
+      console.error('[System] Failed to export system diagram:', error);
+      alert(`Failed to export System Diagram: ${error}`);
+    }
+  };
 
   // Import state diagram from markdown file
   const importStateDiagram = async () => {
@@ -985,7 +1317,7 @@ export const System: React.FC = () => {
 
     try {
       // Read capabilities and enablers from the definition folder
-      console.log('[System] Fetching capabilities and enablers from definition folder...');
+      console.log('[System] Fetching capabilities, enablers, and test scenarios from definition folder...');
 
       // Fetch capabilities from definition folder
       const capResponse = await fetch(`${INTEGRATION_URL}/capability-files`, {
@@ -1001,18 +1333,29 @@ export const System: React.FC = () => {
         body: JSON.stringify({ workspacePath: currentWorkspace.projectFolder }),
       });
 
+      // Fetch test scenarios from definition folder
+      const tsResponse = await fetch(`${INTEGRATION_URL}/test-scenario-files`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workspacePath: currentWorkspace.projectFolder }),
+      });
+
       const capData = await capResponse.json();
       const enbData = await enbResponse.json();
+      const tsData = await tsResponse.json();
 
       console.log('[System] Capabilities found:', capData.capabilities?.length || 0);
       console.log('[System] Enablers found:', enbData.enablers?.length || 0);
+      console.log('[System] Test scenarios found:', tsData.testScenarios?.length || 0);
 
       // Directly use the parsed file data (no AI re-analysis needed)
       const capabilitiesFromFiles = capData.capabilities || [];
       const enablersFromFiles = enbData.enablers || [];
+      const testScenariosFromFiles = tsData.testScenarios || [];
 
       console.log('[System] Total capabilities from files:', capabilitiesFromFiles.length);
       console.log('[System] Total enablers from files:', enablersFromFiles.length);
+      console.log('[System] Total test scenarios from files:', testScenariosFromFiles.length);
 
       if (capabilitiesFromFiles.length === 0 && enablersFromFiles.length === 0) {
         console.log('[System] No capability/enabler files found in definition folder - loading mock data');
@@ -1021,16 +1364,20 @@ export const System: React.FC = () => {
       }
 
       // Helper function to extract ID from filename or content
+      // IMPORTANT: Use filename-based ID because enablers reference capabilities by filename pattern
+      // e.g., enabler has "**Capability**: Name (CAP-WEATHER-DATA-RETRIEVAL-16)"
+      // NOT the numeric content ID like "CAP-016"
       const extractId = (filename: string, content: string, prefix: string): string => {
-        // Try to extract from filename first (e.g., CAP-123456-capability.md)
+        // Try to extract from filename FIRST (e.g., CAP-WEATHER-DATA-RETRIEVAL-16.md)
+        // This is what enablers use to reference capabilities
         const filenameMatch = filename.match(new RegExp(`(${prefix}-[A-Z0-9-]+)`, 'i'));
         if (filenameMatch) return filenameMatch[1].toUpperCase();
 
-        // Try to extract from content (e.g., **ID**: CAP-123456)
+        // Fallback: Try to extract from content (e.g., **ID**: CAP-123456)
         const contentMatch = content.match(new RegExp(`\\*\\*ID\\*\\*:\\s*(${prefix}-[A-Z0-9-]+)`, 'i'));
         if (contentMatch) return contentMatch[1].toUpperCase();
 
-        // Generate from filename
+        // Last resort: Generate from filename number
         const numMatch = filename.match(/(\d+)/);
         return numMatch ? `${prefix}-${numMatch[1]}` : `${prefix}-${filename.replace(/[^a-zA-Z0-9]/g, '').substring(0, 6).toUpperCase()}`;
       };
@@ -1038,14 +1385,18 @@ export const System: React.FC = () => {
       // Helper function to extract Capability ID from enabler content (tries multiple patterns)
       const extractCapabilityId = (content: string, fields: Record<string, string> | undefined): string | null => {
         // Try multiple patterns for capability ID reference
+        // Order matters: more specific patterns first
         const patterns = [
           /\*\*Capability ID\*\*:\s*(CAP-[A-Z0-9-]+)/i,
           /\*\*Capability\s*ID\*\*:\s*(CAP-[A-Z0-9-]+)/i,
           /Capability ID:\s*(CAP-[A-Z0-9-]+)/i,
           /capabilityId:\s*(CAP-[A-Z0-9-]+)/i,
+          // Match "**Capability**: Name (CAP-NAME-123)" format - extract the ID in parentheses
+          /\*\*Capability\*\*:[^(]*\((CAP-[A-Z0-9-]+)\)/i,
           /capability:\s*(CAP-[A-Z0-9-]+)/i,
           /parent:\s*(CAP-[A-Z0-9-]+)/i,
-          /(CAP-\d{6})/i,  // Match CAP-XXXXXX pattern anywhere
+          /(CAP-\d{3,6})/i,  // Match CAP-XXX to CAP-XXXXXX numeric pattern
+          /(CAP-[A-Z]+-[A-Z0-9-]+-\d+)/i,  // Match CAP-NAME-WORDS-123 pattern anywhere
         ];
 
         for (const pattern of patterns) {
@@ -1062,6 +1413,19 @@ export const System: React.FC = () => {
                 return value.toUpperCase();
               }
             }
+            // Also check for just "Capability" field that may contain the ID in parentheses
+            if (key.toLowerCase() === 'capability') {
+              const value = fields[key];
+              if (value) {
+                // Extract ID from "Name (CAP-XXX)" format
+                const idMatch = value.match(/\((CAP-[A-Z0-9-]+)\)/i);
+                if (idMatch) return idMatch[1].toUpperCase();
+                // Or if it directly starts with CAP-
+                if (value.toUpperCase().startsWith('CAP-')) {
+                  return value.toUpperCase();
+                }
+              }
+            }
           }
         }
 
@@ -1076,10 +1440,23 @@ export const System: React.FC = () => {
         enablers: [],
         upstreamDependencies: [],
         downstreamImpacts: [],
+        fields: cap.fields || {}, // Include fields for Storyboard Reference
+        filename: cap.filename, // Store original filename for deletion
       }));
 
       console.log('[System] Processed capabilities:', uniqueCapabilities.length);
       console.log('[System] Capability IDs:', uniqueCapabilities.map((c: any) => c.id));
+      // Log each capability's storyboard reference individually for visibility
+      uniqueCapabilities.forEach((c: any) => {
+        const ref = c.fields?.['Storyboard Reference'];
+        if (ref) {
+          console.log(`[System] Cap "${c.name}" has Storyboard Ref: "${ref}"`);
+        }
+      });
+      const capsWithRefs = uniqueCapabilities.filter((c: any) => c.fields?.['Storyboard Reference']);
+      const capsWithoutRefs = uniqueCapabilities.filter((c: any) => !c.fields?.['Storyboard Reference']);
+      console.log(`[System] Capabilities WITH Storyboard Reference: ${capsWithRefs.length}`);
+      console.log(`[System] Capabilities WITHOUT Storyboard Reference: ${capsWithoutRefs.length}`);
 
       // Build a map of capability IDs for quick lookup
       const capIdSet = new Set(uniqueCapabilities.map((c: any) => c.id));
@@ -1108,15 +1485,24 @@ export const System: React.FC = () => {
           id: extractId(enb.filename, enb.content || '', 'ENB'),
           name: enb.name || enb.filename.replace(/\.md$/i, ''),
           capabilityId: capabilityId,
+          filename: enb.filename, // Store original filename for deletion
         };
       });
 
       console.log('[System] Processed enablers:', safeEnablers.length);
-      console.log('[System] Enabler assignments:', safeEnablers.map((e: any) => `${e.id} -> ${e.capabilityId}`));
+      console.log('[System] Enabler assignments:', safeEnablers.map((e: any) => `${e.name} -> ${e.capabilityId}`));
 
       // Log matching info
       const matchedEnablers = safeEnablers.filter((e: any) => capIdSet.has(e.capabilityId));
-      console.log('[System] Enablers with valid capability:', matchedEnablers.length);
+      console.log('[System] Enablers with valid capability match:', matchedEnablers.length, 'of', safeEnablers.length);
+
+      // Log enabler count per capability for debugging
+      const enablersByCapDebug: Record<string, string[]> = {};
+      safeEnablers.forEach((e: any) => {
+        if (!enablersByCapDebug[e.capabilityId]) enablersByCapDebug[e.capabilityId] = [];
+        enablersByCapDebug[e.capabilityId].push(e.name);
+      });
+      console.log('[System] Enablers grouped by capability:', enablersByCapDebug);
 
       // Calculate positions for auto-layout with proper spacing
       // Card dimensions and spacing constants
@@ -1187,6 +1573,8 @@ export const System: React.FC = () => {
           enablers: cap.enablers || [],
           upstreamDependencies: cap.upstreamDependencies || [],
           downstreamImpacts: cap.downstreamImpacts || [],
+          fields: cap.fields || {}, // CRITICAL: Include fields for Storyboard Reference sorting
+          filename: cap.filename, // Include filename for deletion
           x: 100 + colIdx * capHorizontalSpacing,
           y: rowYPositions[rowIdx],
         };
@@ -1278,19 +1666,44 @@ export const System: React.FC = () => {
         });
       }
 
+      // Process test scenarios - convert from files to diagram format
+      const safeTestScenarios: TestScenario[] = testScenariosFromFiles.map((ts: any, idx: number) => {
+        const tsId = ts.id || ts.scenarioId || `TS-${idx + 1}`;
+        const enbId = ts.enablerId || ts.fields?.['Enabler ID'] || '';
+        return {
+          id: tsId,
+          name: ts.name || ts.title || tsId,
+          enablerId: enbId,
+          x: 0, // Will be positioned automatically
+          y: 0,
+        };
+      });
+
+      // Build test scenario connections
+      const tsConnections: TestScenarioConnection[] = [];
+      safeTestScenarios.forEach((ts: TestScenario) => {
+        if (ts.enablerId) {
+          tsConnections.push({ enablerId: ts.enablerId, scenarioId: ts.id });
+        }
+      });
+
       console.log('[System] Setting diagram state:');
       console.log('[System] - Capabilities:', finalCapabilities.length);
       console.log('[System] - Enablers:', finalEnablers.length);
+      console.log('[System] - Test Scenarios:', safeTestScenarios.length);
       console.log('[System] - Dependencies:', dependencies.length);
       console.log('[System] - Enabler Connections:', connections.length);
+      console.log('[System] - Test Scenario Connections:', tsConnections.length);
       if (connections.length > 0) {
         console.log('[System] - Connection details:', connections.map(c => `${c.capabilityId} -> ${c.enablerId}`));
       }
 
       setCapabilities(finalCapabilities);
       setEnablers(finalEnablers);
+      setTestScenarios(safeTestScenarios);
       setCapabilityDependencies(dependencies);
       setEnablerConnections(connections);
+      setTestScenarioConnections(tsConnections);
 
       console.log('[System] Diagram state updated successfully');
 
@@ -1330,25 +1743,34 @@ export const System: React.FC = () => {
     setIsLoading(true);
     setCapabilities([]);
     setEnablers([]);
+    setTestScenarios([]);
     setCapabilityDependencies([]);
     setEnablerConnections([]);
+    setTestScenarioConnections([]);
 
     try {
-      // Fetch capabilities and enablers from definition folder
-      const capResponse = await fetch(`${INTEGRATION_URL}/capability-files`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ workspacePath: currentWorkspace.projectFolder }),
-      });
-
-      const enbResponse = await fetch(`${INTEGRATION_URL}/enabler-files`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ workspacePath: currentWorkspace.projectFolder }),
-      });
+      // Fetch capabilities, enablers, and test scenarios from workspace folders
+      const [capResponse, enbResponse, tsResponse] = await Promise.all([
+        fetch(`${INTEGRATION_URL}/capability-files`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workspacePath: currentWorkspace.projectFolder }),
+        }),
+        fetch(`${INTEGRATION_URL}/enabler-files`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workspacePath: currentWorkspace.projectFolder }),
+        }),
+        fetch(`${INTEGRATION_URL}/test-scenario-files`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workspacePath: currentWorkspace.projectFolder }),
+        }),
+      ]);
 
       const capData = await capResponse.json();
       const enbData = await enbResponse.json();
+      const tsData = await tsResponse.json();
 
       // Combine files for AI analysis
       const files: Array<{ name: string; content: string }> = [];
@@ -1399,67 +1821,161 @@ export const System: React.FC = () => {
         return;
       }
 
-      // Deduplicate capabilities
+      // Deduplicate capabilities - check both id and capabilityId since backend sends capabilityId
       const seenCapIds = new Set<string>();
       const uniqueCapabilities = parsedCapabilities.filter((cap: any) => {
-        if (seenCapIds.has(cap.id)) return false;
-        seenCapIds.add(cap.id);
+        const capId = cap.id || cap.capabilityId || cap.filename || '';
+        if (!capId || seenCapIds.has(capId)) return false;
+        seenCapIds.add(capId);
         return true;
       });
 
       // Process enablers
       const safeEnablers = parsedEnablers && Array.isArray(parsedEnablers) ? parsedEnablers : [];
 
-      // Calculate positions (same layout as Import)
-      const CAPABILITY_WIDTH = 250;
-      const CAPABILITY_HEIGHT = 150;
-      const ENABLER_WIDTH = 200;
-      const ENABLER_HEIGHT = 100;
-      const CAPABILITY_SPACING = 100;
-      const CAP_TO_ENABLER_SPACING = 20;
-      const ENABLER_SPACING = 10;
-      const COLS_PER_ROW = 3;
+      // Process test scenarios from the fetched data
+      const safeTestScenarios = tsData.testScenarios && Array.isArray(tsData.testScenarios) ? tsData.testScenarios : [];
 
-      const capHorizontalSpacing = CAPABILITY_WIDTH + 200;
-      const capVerticalSpacing = CAPABILITY_HEIGHT + CAP_TO_ENABLER_SPACING + ENABLER_HEIGHT + CAPABILITY_SPACING;
-      const enbHorizontalSpacing = ENABLER_WIDTH + ENABLER_SPACING;
-      const enbVerticalSpacing = ENABLER_HEIGHT + ENABLER_SPACING;
+      // Calculate positions - smart masonry layout
+      const CAPABILITY_WIDTH = 160;
+      const CAPABILITY_HEIGHT = 60;
+      const ENABLER_WIDTH = 140;
+      const ENABLER_HEIGHT = 50;
+      const TEST_SCENARIO_WIDTH = 120;
+      const TEST_SCENARIO_HEIGHT = 40;
+      const ELEMENT_SPACING = 20;
+      const GROUP_SPACING = 40; // Space between capability groups
+      const NUM_COLUMNS = 4;
+      const COLUMN_WIDTH = CAPABILITY_WIDTH + 60;
 
-      const capsWithPositions = uniqueCapabilities.map((cap: any, idx: number) => ({
-        id: cap.id,
-        name: cap.name,
-        status: cap.status || 'Planned',
-        enablers: cap.enablers || [],
-        upstreamDependencies: cap.upstreamDependencies || [],
-        downstreamImpacts: cap.downstreamImpacts || [],
-        x: 100 + (idx % COLS_PER_ROW) * capHorizontalSpacing,
-        y: 100 + Math.floor(idx / COLS_PER_ROW) * capVerticalSpacing,
-      }));
+      // First pass: Build mapping of enablers per capability and test scenarios per enabler
+      const capToEnablers: Record<string, any[]> = {};
+      const enbToTestScenarios: Record<string, any[]> = {};
 
-      const enbsWithPositions = safeEnablers.map((enb: any, idx: number) => {
-        const parentCap = capsWithPositions.find((c: Capability) => c.id === enb.capabilityId);
-        if (parentCap) {
-          const siblingEnablers = safeEnablers.slice(0, idx).filter((e: any) => e.capabilityId === enb.capabilityId);
-          const siblingIndex = siblingEnablers.length;
-          const maxEnablersPerRow = Math.floor((CAPABILITY_WIDTH + ENABLER_SPACING) / (ENABLER_WIDTH + ENABLER_SPACING));
-          const enablerRow = Math.floor(siblingIndex / maxEnablersPerRow);
-          const enablerCol = siblingIndex % maxEnablersPerRow;
-
-          return {
-            id: enb.id,
-            name: enb.name,
-            capabilityId: enb.capabilityId,
-            x: parentCap.x + enablerCol * (ENABLER_WIDTH + ENABLER_SPACING),
-            y: parentCap.y + CAPABILITY_HEIGHT + CAP_TO_ENABLER_SPACING + enablerRow * (ENABLER_HEIGHT + ENABLER_SPACING),
-          };
+      safeEnablers.forEach((enb: any) => {
+        const enbId = enb.enablerId || enb.id || enb.fields?.ID || '';
+        const capId = enb.capabilityId || enb.fields?.['Capability ID'] || '';
+        if (capId) {
+          if (!capToEnablers[capId]) capToEnablers[capId] = [];
+          capToEnablers[capId].push({ ...enb, enbId });
         }
-        return {
-          id: enb.id,
-          name: enb.name,
-          capabilityId: enb.capabilityId,
-          x: 100 + (idx % COLS_PER_ROW) * enbHorizontalSpacing,
-          y: 800 + Math.floor(idx / COLS_PER_ROW) * enbVerticalSpacing,
-        };
+      });
+
+      safeTestScenarios.forEach((ts: any) => {
+        const enbId = ts.enablerId || '';
+        if (enbId) {
+          if (!enbToTestScenarios[enbId]) enbToTestScenarios[enbId] = [];
+          enbToTestScenarios[enbId].push(ts);
+        }
+      });
+
+      // Calculate total height for each capability group
+      const calcGroupHeight = (capId: string) => {
+        let height = CAPABILITY_HEIGHT + ELEMENT_SPACING;
+        const enablers = capToEnablers[capId] || [];
+        enablers.forEach((enb: any) => {
+          height += ENABLER_HEIGHT + ELEMENT_SPACING;
+          const tests = enbToTestScenarios[enb.enbId] || [];
+          height += tests.length * (TEST_SCENARIO_HEIGHT + ELEMENT_SPACING);
+        });
+        return height + GROUP_SPACING;
+      };
+
+      // Track column heights for masonry layout
+      const columnHeights = new Array(NUM_COLUMNS).fill(100); // Start at y=100
+
+      // Position capabilities using masonry layout
+      const capsWithPositions: Capability[] = [];
+      const capPositionMap: Record<string, { x: number; y: number }> = {};
+
+      uniqueCapabilities.forEach((cap: any) => {
+        let capId = cap.id || cap.capabilityId || '';
+        if (!capId && cap.fields?.Metadata) {
+          const idMatch = cap.fields.Metadata.match(/\*\*ID\*\*:\s*(CAP-\d+)/);
+          if (idMatch) capId = idMatch[1];
+        }
+        if (!capId && cap.filename) {
+          const numMatch = cap.filename.match(/^(\d+)-capability/);
+          if (numMatch) capId = 'CAP-' + numMatch[1];
+        }
+
+        // Find column with shortest height
+        let shortestCol = 0;
+        let shortestHeight = columnHeights[0];
+        for (let i = 1; i < NUM_COLUMNS; i++) {
+          if (columnHeights[i] < shortestHeight) {
+            shortestCol = i;
+            shortestHeight = columnHeights[i];
+          }
+        }
+
+        const x = 100 + shortestCol * COLUMN_WIDTH;
+        const y = columnHeights[shortestCol];
+
+        capPositionMap[capId] = { x, y };
+
+        // Update column height
+        const groupHeight = calcGroupHeight(capId);
+        columnHeights[shortestCol] += groupHeight;
+
+        capsWithPositions.push({
+          id: capId,
+          name: cap.name,
+          status: cap.status || 'Planned',
+          enablers: cap.enablers || [],
+          upstreamDependencies: cap.upstreamDependencies || [],
+          downstreamImpacts: cap.downstreamImpacts || [],
+          fields: cap.fields || {}, // Include fields for Storyboard Reference sorting
+          x,
+          y,
+        });
+      });
+
+      // Position enablers directly below their capability
+      const enbsWithPositions: Enabler[] = [];
+      const enbPositionMap: Record<string, { x: number; y: number }> = {};
+
+      Object.entries(capToEnablers).forEach(([capId, enablers]) => {
+        const capPos = capPositionMap[capId];
+        if (!capPos) return;
+
+        let currentY = capPos.y + CAPABILITY_HEIGHT + ELEMENT_SPACING;
+
+        enablers.forEach((enb: any) => {
+          const enbId = enb.enbId;
+          enbPositionMap[enbId] = { x: capPos.x, y: currentY };
+
+          enbsWithPositions.push({
+            id: enbId,
+            name: enb.name,
+            capabilityId: capId,
+            x: capPos.x,
+            y: currentY,
+          });
+
+          currentY += ENABLER_HEIGHT + ELEMENT_SPACING;
+
+          // Add space for test scenarios
+          const tests = enbToTestScenarios[enbId] || [];
+          currentY += tests.length * (TEST_SCENARIO_HEIGHT + ELEMENT_SPACING);
+        });
+      });
+
+      // Add orphaned enablers at bottom
+      let orphanY = Math.max(...columnHeights) + 100;
+      safeEnablers.forEach((enb: any, idx: number) => {
+        const enbId = enb.enablerId || enb.id || enb.fields?.ID || '';
+        if (!enbPositionMap[enbId]) {
+          enbPositionMap[enbId] = { x: 100 + (idx % NUM_COLUMNS) * COLUMN_WIDTH, y: orphanY };
+          enbsWithPositions.push({
+            id: enbId,
+            name: enb.name,
+            capabilityId: enb.capabilityId || '',
+            x: 100 + (idx % NUM_COLUMNS) * COLUMN_WIDTH,
+            y: orphanY,
+          });
+          if ((idx + 1) % NUM_COLUMNS === 0) orphanY += ENABLER_HEIGHT + ELEMENT_SPACING;
+        }
       });
 
       // Build dependencies
@@ -1476,15 +1992,54 @@ export const System: React.FC = () => {
         connections.push({ capabilityId: enb.capabilityId, enablerId: enb.id });
       });
 
+      // Process test scenarios with positions (below their parent enabler, stacked vertically)
+      const testScenariosWithPositions = safeTestScenarios.map((ts: any, idx: number) => {
+        const parentEnb = enbsWithPositions.find((e: Enabler) => e.id === ts.enablerId);
+        if (parentEnb) {
+          // Count siblings before this test scenario
+          const siblingScenarios = safeTestScenarios.slice(0, idx).filter((s: any) => s.enablerId === ts.enablerId);
+          const siblingIndex = siblingScenarios.length;
+
+          // Stack test scenarios vertically under enabler with 20px spacing
+          return {
+            id: ts.scenarioId || ts.id || `TS-${idx}`,
+            name: ts.name || ts.filename,
+            enablerId: ts.enablerId,
+            x: parentEnb.x + 10, // Slight indent to show hierarchy
+            y: parentEnb.y + ENABLER_HEIGHT + ELEMENT_SPACING + siblingIndex * (TEST_SCENARIO_HEIGHT + ELEMENT_SPACING),
+          };
+        }
+        // Orphaned test scenarios - place them at the bottom
+        return {
+          id: ts.scenarioId || ts.id || `TS-${idx}`,
+          name: ts.name || ts.filename,
+          enablerId: ts.enablerId || '',
+          x: 100 + (idx % NUM_COLUMNS) * (TEST_SCENARIO_WIDTH + ELEMENT_SPACING),
+          y: orphanY + 200 + Math.floor(idx / NUM_COLUMNS) * (TEST_SCENARIO_HEIGHT + ELEMENT_SPACING),
+        };
+      });
+
+      // Build test scenario connections
+      const tsConnections: TestScenarioConnection[] = [];
+      testScenariosWithPositions.forEach((ts: TestScenario) => {
+        if (ts.enablerId) {
+          tsConnections.push({ enablerId: ts.enablerId, scenarioId: ts.id });
+        }
+      });
+
       console.log('[System] AI Analysis complete:');
       console.log('[System] - Capabilities:', capsWithPositions.length);
       console.log('[System] - Enablers:', enbsWithPositions.length);
-      console.log('[System] - Connections:', connections.length);
+      console.log('[System] - Test Scenarios:', testScenariosWithPositions.length);
+      console.log('[System] - Enabler Connections:', connections.length);
+      console.log('[System] - Test Scenario Connections:', tsConnections.length);
 
       setCapabilities(capsWithPositions);
       setEnablers(enbsWithPositions);
+      setTestScenarios(testScenariosWithPositions);
       setCapabilityDependencies(dependencies);
       setEnablerConnections(connections);
+      setTestScenarioConnections(tsConnections);
 
     } catch (error: any) {
       console.error('AI Analysis error:', error);
@@ -1837,6 +2392,12 @@ export const System: React.FC = () => {
             ? { ...enb, x: newX, y: newY }
             : enb
         ));
+      } else if (draggingCard.type === 'testScenario') {
+        setTestScenarios(testScenarios.map(ts =>
+          ts.id === draggingCard.id
+            ? { ...ts, x: newX, y: newY }
+            : ts
+        ));
       }
     }
   };
@@ -1879,16 +2440,101 @@ export const System: React.FC = () => {
     ));
   };
 
-  const handleDeleteCapability = (id: string) => {
+  const handleDeleteCapability = async (id: string) => {
+    if (!currentWorkspace) {
+      alert('No workspace selected');
+      return;
+    }
+
+    // Find the capability to get its filename
+    const capability = capabilities.find(cap => cap.id === id);
+    if (!capability) {
+      alert('Capability not found');
+      return;
+    }
+
+    // Delete the file from the filesystem
+    if (capability.filename) {
+      try {
+        const response = await fetch(`${INTEGRATION_URL}/delete-specification`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workspacePath: currentWorkspace.projectFolder,
+            fileName: capability.filename,
+            subfolder: 'definition',
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('[System] Failed to delete capability file:', errorText);
+          alert(`Failed to delete file: ${errorText}`);
+          return;
+        }
+
+        console.log(`[System] Deleted capability file: ${capability.filename}`);
+      } catch (error) {
+        console.error('[System] Error deleting capability file:', error);
+        alert(`Error deleting file: ${error}`);
+        return;
+      }
+    }
+
+    // Update in-memory state
     setCapabilities(capabilities.filter(cap => cap.id !== id));
     // Also remove related dependencies
     setCapabilityDependencies(capabilityDependencies.filter(dep => dep.from !== id && dep.to !== id));
-    // Remove related enabler connections
+    // Remove related enabler connections (enablers become orphaned)
     setEnablerConnections(enablerConnections.filter(conn => conn.capabilityId !== id));
     setSelectedCard(null);
+
+    // Note: Associated enablers will now appear in the "Orphaned Enablers" section
+    // since their capabilityId no longer matches any capability
   };
 
-  const handleDeleteEnabler = (id: string) => {
+  const handleDeleteEnabler = async (id: string) => {
+    if (!currentWorkspace) {
+      alert('No workspace selected');
+      return;
+    }
+
+    // Find the enabler to get its filename
+    const enabler = enablers.find(enb => enb.id === id);
+    if (!enabler) {
+      alert('Enabler not found');
+      return;
+    }
+
+    // Delete the file from the filesystem
+    if (enabler.filename) {
+      try {
+        const response = await fetch(`${INTEGRATION_URL}/delete-specification`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workspacePath: currentWorkspace.projectFolder,
+            fileName: enabler.filename,
+            subfolder: 'definition',
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('[System] Failed to delete enabler file:', errorText);
+          alert(`Failed to delete file: ${errorText}`);
+          return;
+        }
+
+        console.log(`[System] Deleted enabler file: ${enabler.filename}`);
+      } catch (error) {
+        console.error('[System] Error deleting enabler file:', error);
+        alert(`Error deleting file: ${error}`);
+        return;
+      }
+    }
+
+    // Update in-memory state
     setEnablers(enablers.filter(enb => enb.id !== id));
     // Remove related connections
     setEnablerConnections(enablerConnections.filter(conn => conn.enablerId !== id));
@@ -1956,22 +2602,19 @@ export const System: React.FC = () => {
     };
   };
 
-  // Get connection points for enabler connections
+  // Get connection points for enabler connections (capability to enabler)
   const getEnablerConnectionPoints = (capId: string, enbId: string) => {
     const cap = capabilities.find(c => c.id === capId);
     const enb = enablers.find(e => e.id === enbId);
 
     if (!cap || !enb) {
-      // Debug: log missing elements
-      if (!cap) console.log(`[System] Connection: capability ${capId} not found`);
-      if (!enb) console.log(`[System] Connection: enabler ${enbId} not found`);
       return { from: { x: 0, y: 0 }, to: { x: 0, y: 0 } };
     }
 
-    const capWidth = 250;
-    const capHeight = 150;
-    const enbWidth = 200;
-    const enbHeight = 100;
+    // Smaller card sizes
+    const capWidth = 140;
+    const capHeight = 60;
+    const enbWidth = 120;
 
     return {
       from: {
@@ -1981,6 +2624,32 @@ export const System: React.FC = () => {
       to: {
         x: (enb.x + enbWidth / 2) * zoom,
         y: (enb.y) * zoom
+      }
+    };
+  };
+
+  // Get connection points for test scenario connections (enabler to test scenario)
+  const getTestScenarioConnectionPoints = (enbId: string, tsId: string) => {
+    const enb = enablers.find(e => e.id === enbId);
+    const ts = testScenarios.find(t => t.id === tsId);
+
+    if (!enb || !ts) {
+      return { from: { x: 0, y: 0 }, to: { x: 0, y: 0 } };
+    }
+
+    // Smaller card sizes
+    const enbWidth = 120;
+    const enbHeight = 50;
+    const tsWidth = 100;
+
+    return {
+      from: {
+        x: (enb.x + enbWidth / 2) * zoom,
+        y: (enb.y + enbHeight) * zoom
+      },
+      to: {
+        x: (ts.x + tsWidth / 2) * zoom,
+        y: (ts.y) * zoom
       }
     };
   };
@@ -2025,10 +2694,10 @@ export const System: React.FC = () => {
               </Button>
               <Button
                 variant="primary"
-                onClick={savePositionsToDatabase}
+                onClick={exportSystemDiagram}
                 disabled={!currentWorkspace || capabilities.length === 0}
               >
-                📄 Export to Markdown
+                📄 Export System
               </Button>
               <Button
                 variant="secondary"
@@ -2084,253 +2753,115 @@ export const System: React.FC = () => {
       {activeTab === 'capability-map' && (
       <div
         ref={setWrapperRef}
-        className={`system-canvas-wrapper ${isFullscreen ? 'fullscreen' : ''}`}
+        className="system-cards-wrapper"
       >
-        <div
-          ref={canvasRef}
-          className="system-canvas"
-          onMouseDown={handleCanvasMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
-          <div className="system-canvas-inner">
-            {/* Draw controls toolbar */}
-            <div className="draw-controls-toolbar">
-              <div className="draw-controls-label">View</div>
-              <button className="draw-control-btn" onClick={handleToggleFullscreen}>
-                {isFullscreen ? '⊡' : '⛶'}
-              </button>
+        {/* Storyboard-style cards grid */}
+        <div className="system-cards-grid">
+          {capabilities.length === 0 ? (
+            <div className="empty-state">
+              <h3>No Capabilities Found</h3>
+              <p>Click "Import" or "AI Analysis" to load capabilities from your workspace.</p>
             </div>
-
-            {/* Connections SVG */}
-            <svg
-              ref={svgRef}
-              className="connections-svg"
-              style={{ position: 'absolute', top: 0, left: 0, width: '10000px', height: '10000px', pointerEvents: 'auto' }}
-            >
-              <rect
-                x="0"
-                y="0"
-                width="10000"
-                height="10000"
-                fill="transparent"
-                style={{ pointerEvents: 'none' }}
-              />
-
-              {/* Capability dependency lines (solid) */}
-              {capabilityDependencies.map((dep, idx) => {
-                const { from, to } = getCapabilityConnectionPoints(dep.from, dep.to);
-
-                return (
-                  <line
-                    key={`dep-${idx}`}
-                    x1={from.x}
-                    y1={from.y}
-                    x2={to.x}
-                    y2={to.y}
-                    stroke="black"
-                    strokeWidth={2 * zoom}
-                    markerEnd="url(#arrowhead-black)"
-                    style={{ pointerEvents: 'none' }}
-                  />
-                );
-              })}
-
-              {/* Enabler connection lines (dotted blue with arrow) */}
-              {enablerConnections.map((conn, idx) => {
-                const { from, to } = getEnablerConnectionPoints(conn.capabilityId, conn.enablerId);
-
-                // Skip if points are at origin (element not found)
-                if (from.x === 0 && from.y === 0 && to.x === 0 && to.y === 0) {
-                  return null;
-                }
-
-                return (
-                  <line
-                    key={`enb-${idx}`}
-                    x1={from.x}
-                    y1={from.y}
-                    x2={to.x}
-                    y2={to.y}
-                    stroke="var(--color-systemBlue, #007AFF)"
-                    strokeWidth={2 * zoom}
-                    strokeDasharray={`${5 * zoom} ${5 * zoom}`}
-                    markerEnd="url(#arrowhead-blue)"
-                    style={{ pointerEvents: 'none' }}
-                  />
-                );
-              })}
-
-              <defs>
-                <marker
-                  id="arrowhead-black"
-                  markerWidth="10"
-                  markerHeight="10"
-                  refX="9"
-                  refY="3"
-                  orient="auto"
-                >
-                  <polygon points="0 0, 10 3, 0 6" fill="black" />
-                </marker>
-                <marker
-                  id="arrowhead-blue"
-                  markerWidth="10"
-                  markerHeight="10"
-                  refX="9"
-                  refY="3"
-                  orient="auto"
-                >
-                  <polygon points="0 0, 10 3, 0 6" fill="#007AFF" />
-                </marker>
-              </defs>
-            </svg>
-
-            {/* Capability Cards */}
-            {capabilities.map((cap) => {
-              const isSelected = selectedCard?.type === 'capability' && selectedCard?.id === cap.id;
-              const isEditing = editingCard?.type === 'capability' && editingCard?.id === cap.id;
+          ) : (
+            // Use sortedCapabilities which are sorted by storyboard flow order (same as Capabilities page)
+            sortedCapabilities.map((cap, index) => {
+              const capEnablers = enablers.filter(e => e.capabilityId === cap.id).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+              const capTestScenarios = capEnablers.flatMap(e => testScenarios.filter(ts => ts.enablerId === e.id)).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+              const isCapSelected = selectedCard?.type === 'capability' && selectedCard?.id === cap.id;
 
               return (
                 <div
                   key={cap.id}
-                  className={`capability-card ${isSelected ? 'selected' : ''}`}
-                  style={{
-                    left: cap.x * zoom,
-                    top: cap.y * zoom,
-                    transform: `scale(${zoom})`,
-                    transformOrigin: '0 0',
-                  }}
-                  onMouseDown={(e) => handleMouseDownOnCard(e, 'capability', cap.id, cap.x, cap.y)}
+                  className={`system-story-card ${isCapSelected ? 'selected' : ''}`}
+                  onClick={() => setSelectedCard({ type: 'capability', id: cap.id })}
                   onDoubleClick={(e) => handleCardDoubleClick(e, 'capability', cap.id)}
                 >
-                  <div className="card-header">
-                    <div className="card-id">{cap.id}</div>
-                    <div className="card-status">{cap.status}</div>
+                  {/* Card Header */}
+                  <div className="story-card-header">
+                    <span className="story-card-id">{cap.id}</span>
+                    <span className={`story-card-status status-${cap.status?.toLowerCase().replace(' ', '-') || 'planned'}`}>
+                      {cap.status || 'Planned'}
+                    </span>
                   </div>
-                  {isEditing ? (
-                    <div className="card-edit-form" onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="text"
-                        value={cap.name}
-                        onChange={(e) => handleUpdateCapability(cap.id, { name: e.target.value })}
-                        className="card-title-input"
-                        placeholder="Capability name"
-                      />
-                      <select
-                        value={cap.status}
-                        onChange={(e) => handleUpdateCapability(cap.id, { status: e.target.value })}
-                        className="card-status-select"
-                      >
-                        <option value="Implemented">Implemented</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Planned">Planned</option>
-                        <option value="Deferred">Deferred</option>
-                      </select>
-                      <button
-                        className="card-edit-done"
-                        onClick={() => setEditingCard(null)}
-                      >
-                        Done
-                      </button>
+                  <div className="story-card-divider"></div>
+
+                  {/* Capability Name */}
+                  <div className="story-card-section">
+                    <span className="story-card-label">Capability:</span>
+                    <span className="story-card-value">{cap.name}</span>
+                  </div>
+
+                  {/* Enablers List */}
+                  {capEnablers.length > 0 && (
+                    <div className="story-card-section">
+                      <span className="story-card-label">Enablers:</span>
+                      <ul className="story-card-list">
+                        {capEnablers.map(enb => (
+                          <li
+                            key={enb.id}
+                            className={`story-card-list-item ${selectedCard?.type === 'enabler' && selectedCard?.id === enb.id ? 'selected' : ''}`}
+                            onClick={(e) => { e.stopPropagation(); setSelectedCard({ type: 'enabler', id: enb.id }); }}
+                          >
+                            {enb.name}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  ) : (
-                    <>
-                      <h3 className="card-title">{cap.name}</h3>
-                      <div className="card-stats">
-                        <span>{cap.enablers.length} enablers</span>
-                        {cap.upstreamDependencies.length > 0 && (
-                          <span>{cap.upstreamDependencies.length} dependencies</span>
-                        )}
-                      </div>
-                    </>
                   )}
-                  {isSelected && !isEditing && (
-                    <div className="card-actions" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        className="card-action-btn"
-                        onClick={() => setEditingCard({ type: 'capability', id: cap.id })}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="card-action-btn delete"
-                        onClick={() => {
-                          if (confirm('Delete this capability?')) {
-                            handleDeleteCapability(cap.id);
-                          }
-                        }}
-                      >
-                        Delete
-                      </button>
+
+                  {/* Test Scenarios List */}
+                  {capTestScenarios.length > 0 && (
+                    <div className="story-card-section">
+                      <span className="story-card-label">Test Scenarios:</span>
+                      <ul className="story-card-list test-scenarios">
+                        {capTestScenarios.map(ts => (
+                          <li
+                            key={ts.id}
+                            className={`story-card-list-item ${selectedCard?.type === 'testScenario' && selectedCard?.id === ts.id ? 'selected' : ''}`}
+                            onClick={(e) => { e.stopPropagation(); setSelectedCard({ type: 'testScenario', id: ts.id }); }}
+                          >
+                            {ts.name}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Card Actions (shown when selected) */}
+                  {isCapSelected && (
+                    <div className="story-card-actions">
+                      <button onClick={(e) => { e.stopPropagation(); setEditingCard({ type: 'capability', id: cap.id }); }}>Edit</button>
+                      <button className="delete" onClick={(e) => { e.stopPropagation(); if(confirm('Delete this capability?')) handleDeleteCapability(cap.id); }}>Delete</button>
                     </div>
                   )}
                 </div>
               );
-            })}
+            })
+          )}
 
-            {/* Enabler Cards */}
-            {enablers.map((enb) => {
-              const isSelected = selectedCard?.type === 'enabler' && selectedCard?.id === enb.id;
-              const isEditing = editingCard?.type === 'enabler' && editingCard?.id === enb.id;
-
-              return (
-                <div
-                  key={enb.id}
-                  className={`enabler-card ${isSelected ? 'selected' : ''}`}
-                  style={{
-                    left: enb.x * zoom,
-                    top: enb.y * zoom,
-                    transform: `scale(${zoom})`,
-                    transformOrigin: '0 0',
-                  }}
-                  onMouseDown={(e) => handleMouseDownOnCard(e, 'enabler', enb.id, enb.x, enb.y)}
-                  onDoubleClick={(e) => handleCardDoubleClick(e, 'enabler', enb.id)}
-                >
-                  <div className="enabler-id">{enb.id}</div>
-                  {isEditing ? (
-                    <div className="card-edit-form" onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="text"
-                        value={enb.name}
-                        onChange={(e) => handleUpdateEnabler(enb.id, { name: e.target.value })}
-                        className="enabler-name-input"
-                        placeholder="Enabler name"
-                      />
-                      <button
-                        className="card-edit-done"
-                        onClick={() => setEditingCard(null)}
-                      >
-                        Done
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="enabler-name">{enb.name}</div>
-                  )}
-                  {isSelected && !isEditing && (
-                    <div className="card-actions" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        className="card-action-btn"
-                        onClick={() => setEditingCard({ type: 'enabler', id: enb.id })}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="card-action-btn delete"
-                        onClick={() => {
-                          if (confirm('Delete this enabler?')) {
-                            handleDeleteEnabler(enb.id);
-                          }
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          {/* Orphaned Enablers Card */}
+          {enablers.filter(e => !capabilities.find(c => c.id === e.capabilityId)).length > 0 && (
+            <div className="system-story-card orphaned">
+              <div className="story-card-header">
+                <span className="story-card-id">Unassigned</span>
+              </div>
+              <div className="story-card-divider"></div>
+              <div className="story-card-section">
+                <span className="story-card-label">Orphaned Enablers:</span>
+                <ul className="story-card-list">
+                  {enablers.filter(e => !capabilities.find(c => c.id === e.capabilityId)).map(enb => (
+                    <li
+                      key={enb.id}
+                      className={`story-card-list-item ${selectedCard?.type === 'enabler' && selectedCard?.id === enb.id ? 'selected' : ''}`}
+                      onClick={() => setSelectedCard({ type: 'enabler', id: enb.id })}
+                    >
+                      {enb.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       )}
@@ -2681,6 +3212,225 @@ export const System: React.FC = () => {
           overflow: auto;
         }
 
+        /* Storyboard-style cards wrapper */
+        .system-cards-wrapper {
+          flex: 1;
+          overflow: auto;
+          padding: 24px;
+          background: var(--color-systemGray6);
+        }
+
+        .system-cards-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 20px;
+          max-width: 1600px;
+          margin: 0 auto;
+        }
+
+        .empty-state {
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: 60px 24px;
+          background: var(--color-systemBackground);
+          border-radius: 12px;
+          border: 2px dashed var(--color-systemGray4);
+        }
+
+        .empty-state h3 {
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--color-label);
+          margin-bottom: 8px;
+        }
+
+        .empty-state p {
+          font-size: 14px;
+          color: var(--color-secondaryLabel);
+        }
+
+        /* Storyboard-style card */
+        .system-story-card {
+          background: var(--color-systemBackground);
+          border: 2px solid var(--color-systemGray4);
+          border-radius: 12px;
+          padding: 16px;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .system-story-card:hover {
+          border-color: var(--color-systemBlue);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .system-story-card.selected {
+          border-color: var(--color-systemBlue);
+          box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+        }
+
+        .system-story-card.orphaned {
+          border-color: var(--color-systemOrange);
+          background: rgba(255, 149, 0, 0.05);
+        }
+
+        .story-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+
+        .story-card-id {
+          font-size: 12px;
+          font-weight: 600;
+          color: var(--color-secondaryLabel);
+          font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .story-card-status {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 3px 8px;
+          border-radius: 4px;
+          text-transform: uppercase;
+        }
+
+        .story-card-status.status-implemented {
+          background: var(--color-systemGreen);
+          color: white;
+        }
+
+        .story-card-status.status-in-progress {
+          background: var(--color-systemBlue);
+          color: white;
+        }
+
+        .story-card-status.status-planned {
+          background: var(--color-systemGray);
+          color: white;
+        }
+
+        .story-card-status.status-deferred {
+          background: var(--color-systemOrange);
+          color: white;
+        }
+
+        .story-card-divider {
+          height: 1px;
+          background: var(--color-systemGray4);
+          margin: 12px 0;
+        }
+
+        .story-card-section {
+          margin-bottom: 12px;
+        }
+
+        .story-card-label {
+          display: block;
+          font-size: 11px;
+          font-weight: 600;
+          color: var(--color-secondaryLabel);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 4px;
+        }
+
+        .story-card-value {
+          font-size: 15px;
+          font-weight: 600;
+          color: var(--color-label);
+          line-height: 1.3;
+        }
+
+        .story-card-list {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+
+        .story-card-list-item {
+          display: flex;
+          align-items: center;
+          padding: 6px 10px;
+          margin: 4px 0;
+          font-size: 13px;
+          color: var(--color-label);
+          background: var(--color-systemGray6);
+          border-radius: 6px;
+          border-left: 3px solid var(--color-systemBlue);
+          cursor: pointer;
+          transition: all 0.1s ease;
+        }
+
+        .story-card-list-item:hover {
+          background: var(--color-systemGray5);
+        }
+
+        .story-card-list-item.selected {
+          background: rgba(0, 122, 255, 0.15);
+          border-left-color: var(--color-systemBlue);
+        }
+
+        .story-card-list-item::before {
+          content: '';
+          display: inline-block;
+          width: 6px;
+          height: 6px;
+          background: var(--color-systemBlue);
+          border-radius: 50%;
+          margin-right: 8px;
+          flex-shrink: 0;
+        }
+
+        .story-card-list.test-scenarios .story-card-list-item {
+          border-left-color: var(--color-systemPurple);
+        }
+
+        .story-card-list.test-scenarios .story-card-list-item::before {
+          background: var(--color-systemPurple);
+        }
+
+        .story-card-list.test-scenarios .story-card-list-item.selected {
+          background: rgba(175, 82, 222, 0.15);
+        }
+
+        .story-card-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid var(--color-systemGray5);
+        }
+
+        .story-card-actions button {
+          flex: 1;
+          padding: 8px 12px;
+          font-size: 13px;
+          font-weight: 500;
+          border: 1px solid var(--color-systemGray4);
+          border-radius: 6px;
+          background: var(--color-systemBackground);
+          color: var(--color-systemBlue);
+          cursor: pointer;
+          transition: all 0.1s ease;
+        }
+
+        .story-card-actions button:hover {
+          background: var(--color-systemGray6);
+        }
+
+        .story-card-actions button.delete {
+          color: var(--color-systemRed);
+          border-color: var(--color-systemRed);
+        }
+
+        .story-card-actions button.delete:hover {
+          background: rgba(255, 59, 48, 0.1);
+        }
+
+        /* Keep old canvas styles for compatibility */
         .system-canvas-wrapper {
           flex: 1;
           position: relative;
@@ -2939,6 +3689,95 @@ export const System: React.FC = () => {
         .card-action-btn.delete:hover {
           background: var(--color-systemRed);
           color: white;
+        }
+
+        /* Small card styles for compact view */
+        .capability-card-small {
+          width: 140px !important;
+          min-height: 60px !important;
+          padding: 8px !important;
+        }
+
+        .card-header-compact {
+          margin-bottom: 4px;
+        }
+
+        .card-id-small {
+          font-size: 9px;
+          font-weight: 600;
+          color: var(--color-systemGray);
+          font-family: monospace;
+        }
+
+        .card-title-small {
+          font-size: 11px;
+          font-weight: 600;
+          color: var(--color-label);
+          line-height: 1.2;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .enabler-card-small {
+          width: 120px !important;
+          min-height: 50px !important;
+          padding: 6px !important;
+        }
+
+        .enabler-id-small {
+          font-size: 8px;
+          font-weight: 600;
+          color: var(--color-systemBlue);
+          font-family: monospace;
+          margin-bottom: 4px;
+        }
+
+        .enabler-name-small {
+          font-size: 10px;
+          font-weight: 600;
+          color: var(--color-label);
+          line-height: 1.2;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        /* Test Scenario Card Styles */
+        .test-scenario-card {
+          position: absolute;
+          width: 100px;
+          min-height: 40px;
+          background: white;
+          border: 2px solid var(--color-systemPurple, #AF52DE);
+          border-radius: 6px;
+          padding: 4px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+          cursor: pointer;
+          transition: box-shadow 0.2s ease;
+        }
+
+        .test-scenario-card:hover {
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-scenario-card.selected {
+          box-shadow: 0 0 0 2px var(--color-systemPurple, #AF52DE);
+        }
+
+        .ts-id-small {
+          font-size: 7px;
+          font-weight: 600;
+          color: var(--color-systemPurple, #AF52DE);
+          font-family: monospace;
+          margin-bottom: 2px;
+        }
+
+        .ts-name-small {
+          font-size: 9px;
+          font-weight: 600;
+          color: var(--color-label);
+          line-height: 1.2;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
       `}</style>
     </div>

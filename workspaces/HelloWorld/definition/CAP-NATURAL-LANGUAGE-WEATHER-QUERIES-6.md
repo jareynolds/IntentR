@@ -1,9 +1,12 @@
 # Natural Language Weather Queries
 
+**Status:** Implemented
+
+**Storyboard Reference:** Provide Prompt field
+
 ## Metadata
 - **ID**: CAP-006
 - **Type**: Capability
-- **Status**: Planned
 - **Generated**: 12/16/2025, 8:32:09 PM
 
 - **Storyboard Reference**: Provide Prompt field
