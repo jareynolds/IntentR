@@ -20,6 +20,18 @@
 /capability-service
 /balut
 
+# Built Go binaries in cmd/ directories
+cmd/*/integration-service
+cmd/*/claude-proxy
+cmd/*/auth-service
+cmd/*/design-service
+cmd/*/capability-service
+cmd/*/balut
+cmd/*/ubecli
+# Corrupted/temp build files
+.!*!*
+cmd/*/.!*
+
 # Test binary, built with `go test -c`
 *.test
 
@@ -48,8 +60,10 @@ go.work.sum
 bin/
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+*.swp
+*.swo
 
 # Built binaries
 /ubecode
@@ -69,10 +83,17 @@ web-ui/node_modules/
 web-ui/dist/
 web-ui/.env
 
-# Runtime artifacts
+# Runtime artifacts - broader patterns
 .pids/
-logs/*.log
+**/*.pid
+logs/
+**/*.log
+
+# Databases
 workspaces.db
+*.sqlite
+*.sqlite3
+*.db
 
 # Temporary/generated files
 *.tmp
@@ -82,3 +103,44 @@ workspaces.db
 # Archived/legacy directories
 archived-specifications/
 archived-legacy/
+
+# ============================================
+# SECURITY - Certificates and Keys
+# ============================================
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+id_rsa*
+
+# ============================================
+# CLAUDE CODE - Local settings contain paths
+# ============================================
+.claude/
+**/.claude/
+
+# ============================================
+# LOCAL CONFIG FILES
+# ============================================
+.ubecli.yaml
+*.local.json
+**/*.local.json
+
+# ============================================
+# PYTHON ARTIFACTS
+# ============================================
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+**/venv/
+**/.venv/
+**/__pycache__/
+
+# ============================================
+# NODE MODULES (global pattern)
+# ============================================
+**/node_modules/
