@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, AIPresetIndicator, PageHeader } from '../components';
-import { WizardPageNavigation } from '../components/wizard';
+import { Card, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import axios from 'axios';
 import { INTEGRATION_URL } from '../api/client';
@@ -223,18 +222,14 @@ export const Designs: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <WizardPageNavigation />
-      <AIPresetIndicator />
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="Design Artifacts"
-          quickDescription="Manage design files and assets from Figma and other sources."
-          detailedDescription="Connect to your Figma team workspace to browse and select design files for your project.
+    <PageLayout
+      title="Design Artifacts"
+      quickDescription="Manage design files and assets from Figma and other sources."
+      detailedDescription="Connect to your Figma team workspace to browse and select design files for your project.
 Selected design files are linked to your workspace and can be referenced when creating capabilities and features.
 Figma integration enables AI tools to understand visual requirements and generate consistent implementations."
-          workspaceName={currentWorkspace.name}
-        />
+      className="max-w-7xl mx-auto"
+    >
 
         {error && (
           <div style={{
@@ -373,7 +368,6 @@ Figma integration enables AI tools to understand visual requirements and generat
             </div>
           )}
         </div>
-      </div>
 
       {/* Files Selection Modal */}
       {showFilesModal && (
@@ -533,6 +527,6 @@ Figma integration enables AI tools to understand visual requirements and generat
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 };

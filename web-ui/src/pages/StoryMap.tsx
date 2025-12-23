@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Card, Alert, Button, PageHeader } from '../components';
-import { WizardPageNavigation } from '../components/wizard';
+import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -1195,8 +1194,12 @@ Only include capabilities that have a clear relationship to a storyboard. If a c
   };
 
   return (
-    <div className="story-map-page">
-      <WizardPageNavigation />
+    <PageLayout
+      title="Story Map"
+      quickDescription="Visualize relationships between storyboards, capabilities, and enablers"
+      detailedDescription="The Story Map provides a visual representation of your project's structure, showing how storyboards connect to capabilities and how capabilities are realized through enablers. Use this view to understand dependencies and manage relationships."
+      fullWidth
+    >
       <style>{`
         .story-map-page {
           padding: 0;
@@ -1492,17 +1495,7 @@ Only include capabilities that have a clear relationship to a storyboard. If a c
         }
       `}</style>
 
-      <div style={{ padding: '16px', paddingBottom: 0 }}>
-        <PageHeader
-          title="Dependencies"
-          quickDescription="Hierarchical view: User Intent -> Business Capabilities -> Technical Enablers."
-          detailedDescription="This visualization shows how your storyboard cards (user intent) connect to capabilities and enablers.
-Drag to connect related items and visualize dependencies between different layers of your specification.
-Use this view to ensure all user stories are properly linked to technical implementations."
-          workspaceName={currentWorkspace?.name}
-        />
-      </div>
-      <div className="page-header" style={{ marginTop: 0, paddingTop: 0 }}>
+      <div className="page-header" style={{ marginTop: 0, paddingTop: '16px' }}>
         <div></div>
         <div className="controls">
           <div className="zoom-controls">
@@ -1960,7 +1953,7 @@ Use this view to ensure all user stories are properly linked to technical implem
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 };
 

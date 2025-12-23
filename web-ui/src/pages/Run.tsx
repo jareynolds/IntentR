@@ -2,9 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { AIPresetIndicator } from '../components/AIPresetIndicator';
-import { UIFrameworkIndicator } from '../components/UIFrameworkIndicator';
-import { WizardPageNavigation } from '../components/wizard';
+import { PageLayout } from '../components';
 import { CLAUDE_PROXY_URL } from '../api/client';
 
 interface AppStatus {
@@ -153,31 +151,14 @@ export const Run: React.FC = () => {
   };
 
   return (
-    <div className="page-container" style={{ padding: '16px' }}>
-      <WizardPageNavigation />
-      <AIPresetIndicator />
-      <UIFrameworkIndicator />
-
-      {/* Workspace Header */}
-      {currentWorkspace && (
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-      )}
-
-      <div className="page-header">
-        <h1 className="page-title">Run Application</h1>
-        <p className="page-subtitle">
-          Start and test your generated application
-        </p>
-      </div>
+    <PageLayout
+      title="Run Application"
+      quickDescription="Start and test your generated application."
+      detailedDescription="Launch and manage your workspace application from this page.
+The Run page detects start.sh and stop.sh scripts in your code folder to manage application lifecycle.
+Monitor running status, access application URLs, and view startup logs all in one place."
+      className="page-container"
+    >
 
       {/* Status Detection Card */}
       <Card style={{ marginBottom: '24px' }}>
@@ -373,6 +354,6 @@ export const Run: React.FC = () => {
           </p>
         </Card>
       )}
-    </div>
+    </PageLayout>
   );
 };

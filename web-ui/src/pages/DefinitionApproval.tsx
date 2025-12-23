@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Alert, Button, PageHeader } from '../components';
+import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -629,17 +629,14 @@ export const DefinitionApproval: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="Formal Specification Phase Approval"
-          quickDescription="Review and approve all formal specification phase items."
-          detailedDescription="The Formal Specification phase includes Capabilities and Enablers documentation.
+    <PageLayout
+      title="Formal Specification Phase Approval"
+      quickDescription="Review and approve all formal specification phase items."
+      detailedDescription="The Formal Specification phase includes Capabilities and Enablers documentation.
 Each capability and enabler must be reviewed for completeness and technical accuracy.
 All items must be approved before proceeding to the System Derivation phase."
-          workspaceName={currentWorkspace?.name}
-        />
-      </div>
+      className="max-w-7xl mx-auto"
+    >
 
       {/* Phase Status Overview */}
       <Card style={{ marginBottom: '24px', backgroundColor: 'var(--color-secondarySystemBackground)' }}>
@@ -838,6 +835,6 @@ All items must be approved before proceeding to the System Derivation phase."
           </Card>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 };

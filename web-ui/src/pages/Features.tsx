@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Alert, Button, AIPresetIndicator, PageHeader } from '../components';
+import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -483,22 +483,16 @@ export const Features: React.FC = () => {
 
   // Main List View
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <AIPresetIndicator />
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="Feature Management"
-          quickDescription="INTENT Features - Deliverables that provide measurable business value."
-          detailedDescription="In Intent-Centered and Engineering-Driven, Narration for Transformation (INTENT), features are services that fulfill stakeholder needs.
-Each feature includes a benefit hypothesis and acceptance criteria.
-With AI-assisted development, feature specifications become the blueprint for rapid implementation."
-          workspaceName={currentWorkspace?.name}
-          actions={
-            <Button variant="primary" onClick={handleCreateFeature}>
-              + Create Feature
-            </Button>
-          }
-        />
+    <PageLayout
+      title="Feature Management"
+      quickDescription="INTENT Features - Deliverables that provide measurable business value."
+      detailedDescription="In Intent-Centered and Engineering-Driven, Narration for Transformation (INTENT), features are services that fulfill stakeholder needs. Each feature includes a benefit hypothesis and acceptance criteria. With AI-assisted development, feature specifications become the blueprint for rapid implementation."
+      actions={
+        <Button variant="primary" onClick={handleCreateFeature}>
+          + Create Feature
+        </Button>
+      }
+    >
 
         {error && (
           <Alert type="error" style={{ marginBottom: '24px' }}>
@@ -798,7 +792,6 @@ With AI-assisted development, feature specifications become the blueprint for ra
             </div>
           </Card>
         )}
-      </div>
-    </div>
+    </PageLayout>
   );
 };

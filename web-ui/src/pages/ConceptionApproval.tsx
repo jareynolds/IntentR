@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Alert, Button, PageHeader } from '../components';
+import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -676,17 +676,14 @@ export const ConceptionApproval: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="Intent Declaration Phase Approval"
-          quickDescription="Review and approve all intent declaration phase items before proceeding."
-          detailedDescription="The Intent Declaration phase includes Vision documents, Ideation boards, and Storyboard cards.
+    <PageLayout
+      title="Intent Declaration Phase Approval"
+      quickDescription="Review and approve all intent declaration phase items before proceeding."
+      detailedDescription="The Intent Declaration phase includes Vision documents, Ideation boards, and Storyboard cards.
 Each item must be individually reviewed and approved before the phase can be marked complete.
 Rejected items need revision before they can be approved. All items must be approved with no rejections to proceed."
-          workspaceName={currentWorkspace?.name}
-        />
-      </div>
+      className="max-w-7xl mx-auto"
+    >
 
       {/* Phase Status Overview */}
       <Card style={{ marginBottom: '24px', backgroundColor: 'var(--color-secondarySystemBackground)' }}>
@@ -888,6 +885,6 @@ Rejected items need revision before they can be approved. All items must be appr
           </Card>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 };

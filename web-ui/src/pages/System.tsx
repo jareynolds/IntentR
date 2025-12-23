@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import mermaid from 'mermaid';
 import { Button } from '../components/Button';
-import { AIPresetIndicator } from '../components/AIPresetIndicator';
-import { WizardPageNavigation } from '../components/wizard';
+import { PageLayout } from '../components';
 import { useWorkspace, type SystemCapability, type SystemEnabler } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -2656,66 +2655,53 @@ export const System: React.FC = () => {
   };
 
   return (
-    <div className={`system-page ${isFullscreen ? 'fullscreen' : ''}`}>
-      <WizardPageNavigation />
-      <AIPresetIndicator />
-      {/* Workspace Header */}
-      {currentWorkspace && (
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-      )}
-      <div className="system-header">
-        <div className="header-left">
-          <h1 className="text-title">System Architecture</h1>
-        </div>
-        <div className="header-actions">
-          {activeTab === 'capability-map' && (
-            <>
-              <Button
-                variant="outline"
-                onClick={loadSpecifications}
-                disabled={isLoading}
-              >
-                {isLoading ? '📥 Importing...' : '📥 Import'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={runAIAnalysis}
-                disabled={isLoading || !currentWorkspace?.projectFolder}
-                title="Use Claude AI to analyze and generate capabilities/enablers"
-              >
-                {isLoading ? '🤖 Analyzing...' : '🤖 AI Analysis'}
-              </Button>
-              <Button
-                variant="primary"
-                onClick={exportSystemDiagram}
-                disabled={!currentWorkspace || capabilities.length === 0}
-              >
-                📄 Export System
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={exportAllDiagrams}
-                disabled={!currentWorkspace || (capabilities.length === 0 && !stateDiagramContent && !sequenceDiagramContent && !dataModelsContent && !classDiagramsContent)}
-              >
-                📦 Export All
-              </Button>
-              <Button variant="outline" onClick={handleZoomOut}>-</Button>
-              <span className="text-body">{Math.round(zoom * 100)}%</span>
-              <Button variant="outline" onClick={handleZoomIn}>+</Button>
-              <Button variant="outline" onClick={handleResetView}>Reset View</Button>
-            </>
-          )}
-        </div>
-      </div>
+    <PageLayout
+      title="System Architecture"
+      quickDescription="Visualize and manage your system's capabilities, enablers, and relationships."
+      detailedDescription="The System Architecture page provides a visual map of your application's capabilities and their enabling components.
+Import specifications from your definition folder, use AI analysis to discover capabilities, and export diagrams for documentation.
+Navigate between different views: Capability Map, State Diagrams, Sequence Diagrams, Data Models, and Class Diagrams."
+      actions={
+        activeTab === 'capability-map' ? (
+          <div className="header-actions">
+            <Button
+              variant="outline"
+              onClick={loadSpecifications}
+              disabled={isLoading}
+            >
+              {isLoading ? '📥 Importing...' : '📥 Import'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={runAIAnalysis}
+              disabled={isLoading || !currentWorkspace?.projectFolder}
+              title="Use Claude AI to analyze and generate capabilities/enablers"
+            >
+              {isLoading ? '🤖 Analyzing...' : '🤖 AI Analysis'}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={exportSystemDiagram}
+              disabled={!currentWorkspace || capabilities.length === 0}
+            >
+              📄 Export System
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={exportAllDiagrams}
+              disabled={!currentWorkspace || (capabilities.length === 0 && !stateDiagramContent && !sequenceDiagramContent && !dataModelsContent && !classDiagramsContent)}
+            >
+              📦 Export All
+            </Button>
+            <Button variant="outline" onClick={handleZoomOut}>-</Button>
+            <span className="text-body">{Math.round(zoom * 100)}%</span>
+            <Button variant="outline" onClick={handleZoomIn}>+</Button>
+            <Button variant="outline" onClick={handleResetView}>Reset View</Button>
+          </div>
+        ) : undefined
+      }
+      className={`system-page ${isFullscreen ? 'fullscreen' : ''}`}
+    >
 
       {/* Tab Navigation */}
       <div className="system-tabs">
@@ -3782,6 +3768,6 @@ export const System: React.FC = () => {
           text-overflow: ellipsis;
         }
       `}</style>
-    </div>
+    </PageLayout>
   );
 };

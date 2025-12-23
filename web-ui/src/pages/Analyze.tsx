@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
+import { PageLayout } from '../components/PageLayout';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { AIPresetIndicator } from '../components/AIPresetIndicator';
 import { INTEGRATION_URL } from '../api/client';
 
 interface AnalysisFile {
@@ -163,13 +163,12 @@ export const Analyze: React.FC = () => {
   };
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title">Application Analysis</h1>
-        <p className="page-subtitle">
-          Reverse engineer and analyze existing applications using AI to generate specifications, capabilities, and code
-        </p>
-      </div>
+    <PageLayout
+      title="Application Analysis"
+      quickDescription="Reverse engineer and analyze existing applications using AI."
+      detailedDescription="Use AI to analyze existing applications and generate specifications, capabilities, and code documentation. The analysis process examines your codebase structure, identifies patterns, and creates comprehensive documentation."
+      className="page-container"
+    >
 
       {currentWorkspace && (
         <Card className="mb-6">
@@ -178,7 +177,6 @@ export const Analyze: React.FC = () => {
               <h3 className="text-lg font-semibold">{currentWorkspace.name}</h3>
               <p className="text-sm text-gray-500">{currentWorkspace.projectFolder || 'No project folder configured'}</p>
             </div>
-            <AIPresetIndicator />
           </div>
 
           <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -313,6 +311,6 @@ export const Analyze: React.FC = () => {
           <div ref={logEndRef} />
         </div>
       </Card>
-    </div>
+    </PageLayout>
   );
 };

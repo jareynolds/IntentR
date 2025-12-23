@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Card, Alert, Button, AIPresetIndicator, PageHeader } from '../components';
-import { WizardPageNavigation } from '../components/wizard';
+import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -529,23 +528,16 @@ export const Vision: React.FC = () => {
 
   // Main List View
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <WizardPageNavigation />
-      <AIPresetIndicator />
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="Product Vision and Business Strategy"
-          quickDescription="Strategic Intent / Product Thesis (Why this exists, success criteria)."
-          detailedDescription="In Intent-Centered Engineering, strategic themes are differentiating business objectives that connect your portfolio to the enterprise strategy.
-With AI-assisted development, the emphasis shifts to high-quality description of Intent.
-Well-defined themes guide AI tools to generate better outcomes and ensure alignment between business goals and technical implementation."
-          workspaceName={currentWorkspace?.name}
-          actions={
-            <Button variant="primary" onClick={handleCreateTheme}>
-              + Create Theme
-            </Button>
-          }
-        />
+    <PageLayout
+      title="Product Vision and Business Strategy"
+      quickDescription="Strategic Intent / Product Thesis (Why this exists, success criteria)."
+      detailedDescription="In Intent-Centered Engineering, strategic themes are differentiating business objectives that connect your portfolio to the enterprise strategy. With AI-assisted development, the emphasis shifts to high-quality description of Intent. Well-defined themes guide AI tools to generate better outcomes and ensure alignment between business goals and technical implementation."
+      actions={
+        <Button variant="primary" onClick={handleCreateTheme}>
+          + Create Theme
+        </Button>
+      }
+    >
 
         {error && (
           <Alert type="error" style={{ marginBottom: '24px' }}>
@@ -911,7 +903,6 @@ Well-defined themes guide AI tools to generate better outcomes and ensure alignm
             </div>
           </Card>
         )}
-      </div>
-    </div>
+    </PageLayout>
   );
 };

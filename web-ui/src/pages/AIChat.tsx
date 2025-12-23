@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { AIPresetIndicator } from '../components/AIPresetIndicator';
-import { UIFrameworkIndicator } from '../components/UIFrameworkIndicator';
+import { PageLayout } from '../components';
 import { INTEGRATION_URL } from '../api/client';
 
 interface Message {
@@ -180,32 +179,16 @@ export const AIChat: React.FC = () => {
   };
 
   return (
-    <div className="ai-chat-page" style={{ padding: '16px' }}>
-      <AIPresetIndicator />
-      <UIFrameworkIndicator />
-
-      {/* Workspace Header */}
-      {currentWorkspace && (
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-      )}
-
-      <div className="chat-header">
-        <h2>AI Assistant</h2>
-        <p>
-          {currentWorkspace?.projectFolder
-            ? `Working in: ${currentWorkspace.projectFolder}`
-            : 'Select a workspace with a project folder to enable AI assistance'}
-        </p>
-      </div>
+    <PageLayout
+      title="AI Assistant"
+      quickDescription={currentWorkspace?.projectFolder
+        ? `Working in: ${currentWorkspace.projectFolder}`
+        : 'Select a workspace with a project folder to enable AI assistance'}
+      detailedDescription="Chat with Claude AI to get help with your project.
+The AI assistant can read and write files in your workspace, answer questions about your code, and help with code generation.
+Your chat history is maintained throughout the session for context-aware responses."
+      className="ai-chat-page"
+    >
 
       {error && (
         <div style={{
@@ -463,6 +446,6 @@ export const AIChat: React.FC = () => {
           }
         }
       `}</style>
-    </div>
+    </PageLayout>
   );
 };

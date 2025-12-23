@@ -72,7 +72,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       {/* Workspace indicator (if provided) */}
       {workspaceName && (
         <div className="page-header__workspace">
-          <h4 className="text-title3">{workspaceName}</h4>
+          <h4 className="text-title3">Workspace: {workspaceName}</h4>
         </div>
       )}
 
@@ -133,18 +133,19 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         }
 
         .page-header__workspace {
-          background: var(--color-blue-500, #3b82f6);
+          background: var(--color-primary, #133A7C);
           color: white;
-          padding: 8px 16px;
+          padding: 12px 16px;
           border-radius: 8px;
           margin-bottom: 16px;
-          display: inline-block;
+          display: block;
         }
 
         .page-header__workspace h4 {
           margin: 0;
           font-size: 14px;
           font-weight: 500;
+          color: white;
         }
 
         .page-header__title-row {

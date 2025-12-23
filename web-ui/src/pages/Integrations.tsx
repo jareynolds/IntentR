@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Alert, Button, AIPresetIndicator, PageHeader, CreateIntegrationModal } from '../components';
+import { Card, Alert, Button, PageLayout, CreateIntegrationModal } from '../components';
 import type { CustomIntegration } from '../components';
 import axios from 'axios';
 import { INTEGRATION_URL } from '../api/client';
@@ -521,26 +521,23 @@ export const Integrations: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <AIPresetIndicator />
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="External Integrations"
-          quickDescription="Manage connections to external design tools and services."
-          detailedDescription="Configure integrations with external services like Figma, GitHub, and Jira.
+    <PageLayout
+      title="External Integrations"
+      quickDescription="Manage connections to external design tools and services."
+      detailedDescription="Configure integrations with external services like Figma, GitHub, and Jira.
 Integrations enable automatic synchronization of design assets, code repositories, and project management data.
 Each integration requires API credentials which are stored securely in your browser's local storage."
-          actions={
-            <Button
-              variant="primary"
-              onClick={() => setShowCreateModal(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-            >
-              <span style={{ fontSize: '18px' }}>+</span>
-              Create Integration
-            </Button>
-          }
-        />
+      actions={
+        <Button
+          variant="primary"
+          onClick={() => setShowCreateModal(true)}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
+          <span style={{ fontSize: '18px' }}>+</span>
+          Create Integration
+        </Button>
+      }
+    >
 
         <Alert type="success" style={{ marginBottom: '24px' }}>
           <strong>Success:</strong> Figma integration is active and connected.
@@ -1014,13 +1011,12 @@ Each integration requires API credentials which are stored securely in your brow
           </div>
         )}
 
-        {/* Create Integration Modal */}
-        <CreateIntegrationModal
-          isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          onIntegrationCreated={handleIntegrationCreated}
-        />
-      </div>
-    </div>
+      {/* Create Integration Modal */}
+      <CreateIntegrationModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onIntegrationCreated={handleIntegrationCreated}
+      />
+    </PageLayout>
   );
 };

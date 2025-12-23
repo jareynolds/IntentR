@@ -5,8 +5,7 @@ import { useWorkspace, type StoryCard, type Connection } from '../context/Worksp
 import { useCollaboration } from '../context/CollaborationContext';
 import RemoteCursors from '../components/RemoteCursors';
 import { AssetsPane } from '../components/AssetsPane';
-import { AIPresetIndicator, ConfirmDialog } from '../components';
-import { WizardPageNavigation } from '../components/wizard';
+import { ConfirmDialog, PageLayout } from '../components';
 import { INTEGRATION_URL, SPEC_URL } from '../api/client';
 
 export const Storyboard: React.FC = () => {
@@ -1389,32 +1388,14 @@ export const Storyboard: React.FC = () => {
   };
 
   return (
-    <div className="storyboard-page" style={{ padding: '16px' }}>
-      <WizardPageNavigation />
-      <AIPresetIndicator />
-      {/* Workspace Header */}
-      {currentWorkspace && (
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-      )}
-      {/* Header - Apple HIG */}
-      <div className="storyboard-header">
-        <div>
-          <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Storyboard Canvas</h1>
-          <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
-            Drag cards to arrange, click connect to link
-          </p>
-        </div>
+    <PageLayout
+      title="Storyboard Canvas"
+      quickDescription="Drag cards to arrange, click connect to link."
+      detailedDescription="The Storyboard Canvas is where you visually map out your user journey and application flow.
+Create cards representing screens or features, connect them to show navigation paths, and organize your application's structure.
+Cards can be linked to ideation content and later analyzed to generate capabilities and enablers."
+      actions={
         <div className="header-actions">
-          {/* Hide "Analyze & Generate" for "Create New Application" workspace type */}
           {currentWorkspace?.workspaceType !== 'new' && (
             <Button
               variant="primary"
@@ -1436,7 +1417,9 @@ export const Storyboard: React.FC = () => {
             </Button>
           )}
         </div>
-      </div>
+      }
+      className="storyboard-page"
+    >
 
       {/* Auto-loading indicator - only shown after 300ms delay to prevent flash */}
       {showAutoLoadingIndicator && (
@@ -2410,6 +2393,6 @@ export const Storyboard: React.FC = () => {
           onSelectFile={handleSelectAsset}
         />
       )}
-    </div>
+    </PageLayout>
   );
 };

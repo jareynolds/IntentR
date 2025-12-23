@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
-import { AIPresetIndicator } from '../components/AIPresetIndicator';
-import { WizardPageNavigation } from '../components/wizard';
+import { PageLayout } from '../components/PageLayout';
 import { useWorkspace } from '../context/WorkspaceContext';
 import axios from 'axios';
 import { SPEC_URL } from '../api/client';
@@ -2400,33 +2399,18 @@ This UI Style specification should be used in conjunction with the active UI Fra
   };
 
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <WizardPageNavigation />
-      <AIPresetIndicator />
-      {/* Workspace Header */}
-      {currentWorkspace && (
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-      )}
-
+    <PageLayout
+      title="UI Styles Editor"
+      quickDescription="Customize your design system elements"
+      detailedDescription="The UI Styles Editor allows you to define and customize the visual design system for your application. Configure colors, typography, spacing, and other design tokens that will be used consistently throughout your application. Changes made here can be exported as CSS variables or design tokens."
+    >
       {/* Header with Framework Selector */}
       <div style={{ marginBottom: '24px', backgroundColor: '#081534', padding: '24px 32px', borderRadius: '12px', color: 'white' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h1 style={{ fontSize: '2rem', fontWeight: '500', marginBottom: '8px', letterSpacing: '1px', color: 'white' }}>
-              UI Styles Editor
-            </h1>
-            <p style={{ fontSize: '1rem', opacity: 0.9, color: 'white', margin: 0 }}>
-              Customize your design system elements
-            </p>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '500', marginBottom: '8px', letterSpacing: '1px', color: 'white', margin: 0 }}>
+              Framework Selector
+            </h2>
           </div>
 
           {/* Framework Selector */}
@@ -2695,6 +2679,6 @@ This UI Style specification should be used in conjunction with the active UI Fra
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 };

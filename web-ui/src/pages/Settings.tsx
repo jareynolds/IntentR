@@ -5,7 +5,7 @@ import { Button } from '../components/Button';
 import { useTheme } from '../context/ThemeContext';
 import { Alert } from '../components/Alert';
 import { useAuth } from '../context/AuthContext';
-import { AIPresetIndicator, ConfirmDialog, PageHeader } from '../components';
+import { ConfirmDialog, PageLayout } from '../components';
 
 export const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -281,17 +281,11 @@ export const Settings: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <AIPresetIndicator />
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="Settings"
-          quickDescription="Manage your application preferences and design system."
-          detailedDescription="Configure API keys for AI-powered features, manage your theme preferences, and adjust application settings.
-Your Anthropic API key is stored securely in your browser's local storage and is required for AI analysis features.
-You can also manage workspace data, clear integrations, and toggle wizard mode for guided workflows."
-        />
-      </div>
+    <PageLayout
+      title="Settings"
+      quickDescription="Manage your application preferences and design system."
+      detailedDescription="Configure API keys for AI-powered features, manage your theme preferences, and adjust application settings. Your Anthropic API key is stored securely in your browser's local storage and is required for AI analysis features. You can also manage workspace data, clear integrations, and toggle wizard mode for guided workflows."
+    >
 
       <div className="space-y-6">
         {/* API Keys Section */}
@@ -792,6 +786,6 @@ You can also manage workspace data, clear integrations, and toggle wizard mode f
         onConfirm={confirmDialog.onConfirm}
         onCancel={closeConfirmDialog}
       />
-    </div>
+    </PageLayout>
   );
 };

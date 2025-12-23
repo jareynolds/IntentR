@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Card, Alert, Button, CapabilityForm, AIPresetIndicator, AcceptanceCriteriaSection, ConfirmDialog, PageHeader } from '../components';
+import { Card, Alert, Button, CapabilityForm, AcceptanceCriteriaSection, ConfirmDialog, PageLayout } from '../components';
 import { ApprovalSection } from '../components/ApprovalSection';
 import { StageBadge, ApprovalStatusBadge } from '../components/ApprovalStatusBadge';
-import { WizardPageNavigation } from '../components/wizard';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useApproval } from '../context/ApprovalContext';
 import { INTEGRATION_URL } from '../api/client';
@@ -1170,23 +1169,16 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
   }
 
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <WizardPageNavigation />
-      <AIPresetIndicator />
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="Capability Management"
-          quickDescription="Track and manage INTENT capabilities - high-level business outcomes across your organization."
-          detailedDescription="In Intent-Centered and Engineering-Driven, Narration for Transformation (INTENT), capabilities represent high-level business outcomes that contain multiple enablers.
-They integrate with design artifacts and AI-assisted development tools to accelerate delivery.
-Each capability should focus on delivering measurable business value and can be broken down into technical enablers that implement specific functionality."
-          workspaceName={currentWorkspace?.name}
-          actions={
-            <Button variant="primary" onClick={handleCreate}>
-              + Create Capability
-            </Button>
-          }
-        />
+    <PageLayout
+      title="Capability Management"
+      quickDescription="Track and manage INTENT capabilities - high-level business outcomes across your organization."
+      detailedDescription="In Intent-Centered and Engineering-Driven, Narration for Transformation (INTENT), capabilities represent high-level business outcomes that contain multiple enablers. They integrate with design artifacts and AI-assisted development tools to accelerate delivery. Each capability should focus on delivering measurable business value and can be broken down into technical enablers that implement specific functionality."
+      actions={
+        <Button variant="primary" onClick={handleCreate}>
+          + Create Capability
+        </Button>
+      }
+    >
 
         {error && (
           <Alert type="error" style={{ marginBottom: '24px' }}>
@@ -2081,7 +2073,6 @@ Each capability should focus on delivering measurable business value and can be 
             </div>
           </>
         ) : null}
-      </div>
 
       {/* Confirmation Dialog */}
       <ConfirmDialog
@@ -2093,6 +2084,6 @@ Each capability should focus on delivering measurable business value and can be 
         onConfirm={confirmDialog.onConfirm}
         onCancel={closeConfirmDialog}
       />
-    </div>
+    </PageLayout>
   );
 };

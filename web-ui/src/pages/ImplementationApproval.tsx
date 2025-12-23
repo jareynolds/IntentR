@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Alert, Button, PageHeader } from '../components';
+import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -515,17 +515,14 @@ export const ImplementationApproval: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="System Derivation Phase Approval"
-          quickDescription="Review and approve all system derivation phase items."
-          detailedDescription="The System Derivation phase includes System Architecture, AI Principles configuration, Code Generation, and Run Configuration.
+    <PageLayout
+      title="System Derivation Phase Approval"
+      quickDescription="Review and approve all system derivation phase items."
+      detailedDescription="The System Derivation phase includes System Architecture, AI Principles configuration, Code Generation, and Run Configuration.
 Each item has specific checklist requirements that must be satisfied.
 Complete all reviews and approve each section before proceeding to Continuous Validation."
-          workspaceName={currentWorkspace?.name}
-        />
-      </div>
+      className="max-w-7xl mx-auto"
+    >
 
       {/* Phase Status Overview */}
       <Card style={{ marginBottom: '24px', backgroundColor: 'var(--color-secondarySystemBackground)' }}>
@@ -698,6 +695,6 @@ Complete all reviews and approve each section before proceeding to Continuous Va
           </Card>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 };

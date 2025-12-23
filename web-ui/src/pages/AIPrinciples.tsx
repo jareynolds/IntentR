@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { AIPresetIndicator, PageHeader } from '../components';
-import { UIFrameworkIndicator } from '../components/UIFrameworkIndicator';
-import { WizardPageNavigation } from '../components/wizard';
+import { PageLayout } from '../components';
 import { INTEGRATION_URL } from '../api/client';
 
 const presetDescriptions = [
@@ -161,20 +159,14 @@ export const AIPrinciples: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <WizardPageNavigation />
-      <AIPresetIndicator />
-      <UIFrameworkIndicator />
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="AI Governance & Principles"
-          quickDescription="Configure AI governance framework for your workspace."
-          detailedDescription="INTENT provides 5 levels of AI governance enforcement, from Advisory (Level 1) to Zero-Tolerance (Level 5).
+    <PageLayout
+      title="AI Governance & Principles"
+      quickDescription="Configure AI governance framework for your workspace."
+      detailedDescription="INTENT provides 5 levels of AI governance enforcement, from Advisory (Level 1) to Zero-Tolerance (Level 5).
 Each level defines how strictly AI agents must follow development rules and approval workflows.
 Select a preset that matches your project's risk profile and regulatory requirements."
-          workspaceName={currentWorkspace?.name}
-        />
-      </div>
+      className="max-w-7xl mx-auto"
+    >
 
       {activationSuccess && (
         <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -386,6 +378,6 @@ Select a preset that matches your project's risk profile and regulatory requirem
           ))}
         </div>
       </Card>
-    </div>
+    </PageLayout>
   );
 };

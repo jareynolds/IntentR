@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, type ReactNode }
 import { useAuth } from './AuthContext';
 import axios from 'axios';
 import { INTEGRATION_URL, WORKSPACE_URL } from '../api/client';
+import type { PageLayoutConfig } from '../components/PageLayout';
 
 const SHARED_WORKSPACE_API = `${WORKSPACE_URL}/api`;
 
@@ -139,6 +140,8 @@ export interface Workspace {
   customUIFrameworks?: any[]; // Custom UI frameworks created by user
   selectedUILayout?: string; // ID of the selected UI layout
   customUILayouts?: any[]; // Custom UI layouts created by user
+  pageLayoutConfig?: PageLayoutConfig; // Active page layout configuration
+  customPageLayouts?: PageLayoutConfig[]; // Custom page layouts created by user
   storyboard?: StoryboardData;
   ideation?: IdeationData;
   systemDiagram?: SystemData;

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Card, Alert, Button, ConfirmDialog, PageHeader } from '../components';
-import { WizardPageNavigation } from '../components/wizard';
+import { Card, Alert, Button, ConfirmDialog, PageLayout } from '../components';
 import { useEnabler } from '../context/EnablerContext';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
@@ -2084,27 +2083,22 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
   };
 
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <WizardPageNavigation />
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="Enabler Management"
-          quickDescription="Manage enablers, requirements, and acceptance criteria for your capabilities."
-          detailedDescription="In INTENT, enablers are technical implementations that realize capabilities through specific functionality.
+    <PageLayout
+      title="Enabler Management"
+      quickDescription="Manage enablers, requirements, and acceptance criteria for your capabilities."
+      detailedDescription="In INTENT, enablers are technical implementations that realize capabilities through specific functionality.
 Each enabler contains functional and non-functional requirements with testable acceptance criteria.
 Enablers bridge the gap between high-level business capabilities and actual code implementation, providing clear specifications for AI-assisted development."
-          workspaceName={currentWorkspace?.name}
-          actions={
-            <Button
-              variant="secondary"
-              onClick={handleAnalyzeSpecifications}
-              disabled={isAnalyzingCapabilities}
-            >
-              {isAnalyzingCapabilities ? 'Analyzing...' : 'Analyze'}
-            </Button>
-          }
-        />
-      </div>
+      actions={
+        <Button
+          variant="secondary"
+          onClick={handleAnalyzeSpecifications}
+          disabled={isAnalyzingCapabilities}
+        >
+          {isAnalyzingCapabilities ? 'Analyzing...' : 'Analyze'}
+        </Button>
+      }
+    >
 
       {error && (
         <Alert type="error" style={{ marginBottom: '16px' }}>
@@ -2937,6 +2931,6 @@ Enablers bridge the gap between high-level business capabilities and actual code
         onConfirm={confirmDialog.onConfirm}
         onCancel={closeConfirmDialog}
       />
-    </div>
+    </PageLayout>
   );
 };

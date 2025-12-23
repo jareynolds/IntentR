@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { AIPresetIndicator, PageHeader } from '../components';
-import { UIFrameworkIndicator } from '../components/UIFrameworkIndicator';
-import { WizardPageNavigation } from '../components/wizard';
+import { PageLayout } from '../components';
 import { INTEGRATION_URL } from '../api/client';
 
 interface CodeFile {
@@ -233,20 +231,14 @@ export const Code: React.FC = () => {
   };
 
   return (
-    <div className="page-container" style={{ padding: '16px' }}>
-      <WizardPageNavigation />
-      <AIPresetIndicator />
-      <UIFrameworkIndicator />
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="Code Generation"
-          quickDescription="Generate application code from specifications using AI governance principles."
-          detailedDescription="This page orchestrates code generation by sending your specifications to Claude CLI with the configured AI governance preset.
+    <PageLayout
+      title="Code Generation"
+      quickDescription="Generate application code from specifications using AI governance principles."
+      detailedDescription="This page orchestrates code generation by sending your specifications to Claude CLI with the configured AI governance preset.
 The AI reads through your conception, definition, design, and implementation folders in sequence to generate code.
 All generated code respects the active UI Framework and AI Principles settings for your workspace."
-          workspaceName={currentWorkspace?.name}
-        />
-      </div>
+      className="page-container"
+    >
 
       {currentWorkspace && (
         <Card className="mb-6">
@@ -424,6 +416,6 @@ All generated code respects the active UI Framework and AI Principles settings f
           <div ref={logEndRef} />
         </div>
       </Card>
-    </div>
+    </PageLayout>
   );
 };

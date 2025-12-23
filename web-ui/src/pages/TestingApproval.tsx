@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Alert, Button, PageHeader } from '../components';
-import { WizardPageNavigation } from '../components/wizard';
+import { Card, Alert, Button, PageLayout } from '../components';
 import { ValidationDashboard } from '../components/ValidationDashboard';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
@@ -392,8 +391,11 @@ export const TestingApproval: React.FC = () => {
   const hasRejections = testingItems.some(item => item.status === 'rejected');
 
   return (
-    <div className="testing-approval-page">
-      <WizardPageNavigation />
+    <PageLayout
+      title="Testing Approval"
+      quickDescription="Review and approve test scenarios, coverage, and execution results"
+      detailedDescription="The Testing Approval page allows you to review and approve test scenarios, verify test coverage meets thresholds, review execution results, and sign off on final test reports before completing the testing phase."
+    >
       <style>{`
         .testing-approval-page {
           max-width: 1200px;
@@ -601,20 +603,10 @@ export const TestingApproval: React.FC = () => {
         }
       `}</style>
 
-      <div style={{ padding: '16px', paddingBottom: 0 }}>
-        <PageHeader
-          title="Continuous Validation Phase Approval"
-          quickDescription="Review and approve validation artifacts to complete the development cycle."
-          detailedDescription="The Continuous Validation phase includes Test Scenarios, Coverage Review, Test Execution, and Test Reports.
-Each item has specific requirements that must be met before approval.
-Complete all checklist items and review the validation dashboard before approving this phase."
-          workspaceName={currentWorkspace?.name}
-          actions={
-            <Button variant="secondary" onClick={() => navigate('/testing')}>
-              Back to Testing
-            </Button>
-          }
-        />
+      <div style={{ padding: '16px', paddingBottom: 0, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button variant="secondary" onClick={() => navigate('/testing')}>
+          Back to Testing
+        </Button>
       </div>
 
       {/* Phase Status Banner */}
@@ -773,7 +765,7 @@ Complete all checklist items and review the validation dashboard before approvin
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 };
 

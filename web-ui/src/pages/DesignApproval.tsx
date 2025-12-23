@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Alert, Button, PageHeader } from '../components';
+import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -575,17 +575,14 @@ export const DesignApproval: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <PageHeader
-          title="Design Phase Approval"
-          quickDescription="Review and approve all design phase items before proceeding."
-          detailedDescription="The Design phase includes UI Assets, UI Framework selection, UI Styles, and UI Designer outputs.
+    <PageLayout
+      title="Design Phase Approval"
+      quickDescription="Review and approve all design phase items before proceeding."
+      detailedDescription="The Design phase includes UI Assets, UI Framework selection, UI Styles, and UI Designer outputs.
 Each design item has a checklist of requirements that must be satisfied for approval.
 Complete all checklist items and approve each section before proceeding to Implementation."
-          workspaceName={currentWorkspace?.name}
-        />
-      </div>
+      className="max-w-7xl mx-auto"
+    >
 
       {/* Phase Status Overview */}
       <Card style={{ marginBottom: '24px', backgroundColor: 'var(--color-secondarySystemBackground)' }}>
@@ -758,6 +755,6 @@ Complete all checklist items and approve each section before proceeding to Imple
           </Card>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 };

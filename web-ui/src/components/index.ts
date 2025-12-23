@@ -67,3 +67,6 @@ export { CreateIntegrationModal } from './CreateIntegrationModal';
 export type { CustomIntegration } from './CreateIntegrationModal';
 
 export { JiraImportModal } from './JiraImportModal';
+
+export { PageLayout, DEFAULT_LAYOUTS } from './PageLayout';
+export type { PageLayoutConfig } from './PageLayout';

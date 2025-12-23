@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '../components/Button';
-import { AIPresetIndicator } from '../components/AIPresetIndicator';
-import { WizardPageNavigation } from '../components/wizard';
+import { Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import axios from 'axios';
 import { SPEC_URL } from '../api/client';
+import { DEFAULT_LAYOUTS, type PageLayoutConfig } from '../components/PageLayout';
 
 interface LayoutConfig {
   id: string;
@@ -135,9 +134,15 @@ const defaultLayouts: LayoutConfig[] = [
   },
 ];
 
+type TabType = 'application' | 'page';
+
 export const UIFramework: React.FC = () => {
   const { currentWorkspace, updateWorkspace } = useWorkspace();
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState<TabType>('application');
+
+  // Application layouts state
   const [layouts, setLayouts] = useState<LayoutConfig[]>(defaultLayouts);
   const [selectedLayoutId, setSelectedLayoutId] = useState<string>('dashboard-admin');
   const [hasChanges, setHasChanges] = useState(false);
@@ -147,6 +152,25 @@ export const UIFramework: React.FC = () => {
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [activatedLayoutId, setActivatedLayoutId] = useState<string | null>(null);
   const [showActivationSuccess, setShowActivationSuccess] = useState(false);
+
+  // Page Layout state
+  const [pageLayouts, setPageLayouts] = useState<PageLayoutConfig[]>(DEFAULT_LAYOUTS);
+  const [selectedPageLayoutId, setSelectedPageLayoutId] = useState<string>('standard');
+  const [activePageLayoutId, setActivePageLayoutId] = useState<string | null>(null);
+  const [showPageLayoutSuccess, setShowPageLayoutSuccess] = useState(false);
+  const [showPageLayoutCustomizeModal, setShowPageLayoutCustomizeModal] = useState(false);
+  const [showPageLayoutSaveModal, setShowPageLayoutSaveModal] = useState(false);
+  const [newPageLayoutName, setNewPageLayoutName] = useState('');
+  const [pageLayoutHasChanges, setPageLayoutHasChanges] = useState(false);
+
+  // Page layout customization state
+  const [customShowWizard, setCustomShowWizard] = useState(true);
+  const [customShowAIPreset, setCustomShowAIPreset] = useState(true);
+  const [customShowUIFramework, setCustomShowUIFramework] = useState(true);
+  const [customShowWorkspace, setCustomShowWorkspace] = useState(true);
+  const [customShowTitle, setCustomShowTitle] = useState(true);
+  const [customShowDescription, setCustomShowDescription] = useState(true);
+  const [customShowInfoButton, setCustomShowInfoButton] = useState(true);
 
   // Current customization state
   const [customHeader, setCustomHeader] = useState(true);
@@ -182,6 +206,34 @@ export const UIFramework: React.FC = () => {
       setHasChanges(false);
     }
   }, [selectedLayoutId, layouts]);
+
+  // Load custom page layouts from workspace
+  useEffect(() => {
+    if (currentWorkspace?.customPageLayouts) {
+      setPageLayouts([...DEFAULT_LAYOUTS, ...currentWorkspace.customPageLayouts]);
+    }
+    // Load the saved page layout selection
+    if (currentWorkspace?.pageLayoutConfig) {
+      const configId = currentWorkspace.pageLayoutConfig.id;
+      setSelectedPageLayoutId(configId);
+      setActivePageLayoutId(configId);
+    }
+  }, [currentWorkspace]);
+
+  // Load selected page layout data
+  useEffect(() => {
+    const layout = pageLayouts.find(l => l.id === selectedPageLayoutId);
+    if (layout) {
+      setCustomShowWizard(layout.showWizard);
+      setCustomShowAIPreset(layout.showAIPreset);
+      setCustomShowUIFramework(layout.showUIFramework);
+      setCustomShowWorkspace(layout.showWorkspace);
+      setCustomShowTitle(layout.showTitle);
+      setCustomShowDescription(layout.showDescription);
+      setCustomShowInfoButton(layout.showInfoButton);
+      setPageLayoutHasChanges(false);
+    }
+  }, [selectedPageLayoutId, pageLayouts]);
 
   // Generate specification markdown for a layout
   const generateLayoutSpecification = (layout: LayoutConfig): string => {
@@ -1010,6 +1062,99 @@ This layout should be used in conjunction with the active UI Styles (colors, typ
     setSelectedLayoutId('dashboard-admin');
   };
 
+  // Page Layout handlers
+  const handleSelectPageLayout = (layoutId: string) => {
+    if (pageLayoutHasChanges) {
+      if (confirm('You have unsaved changes. Switch layout anyway?')) {
+        setSelectedPageLayoutId(layoutId);
+      }
+    } else {
+      setSelectedPageLayoutId(layoutId);
+    }
+  };
+
+  const handleActivatePageLayout = async () => {
+    const layout = pageLayouts.find(l => l.id === selectedPageLayoutId);
+    if (!layout || !currentWorkspace) return;
+
+    try {
+      // Update workspace with selected page layout
+      await updateWorkspace(currentWorkspace.id, { pageLayoutConfig: layout });
+
+      // Set as activated
+      setActivePageLayoutId(selectedPageLayoutId);
+
+      // Show success message
+      setShowPageLayoutSuccess(true);
+      setTimeout(() => setShowPageLayoutSuccess(false), 3000);
+    } catch (error) {
+      console.error('Failed to activate page layout:', error);
+      alert('Failed to activate page layout. Please try again.');
+    }
+  };
+
+  const handleCustomizePageLayout = () => {
+    setShowPageLayoutCustomizeModal(true);
+  };
+
+  const handleSaveCustomPageLayout = async () => {
+    if (!currentWorkspace || !newPageLayoutName.trim()) {
+      alert('Please enter a layout name');
+      return;
+    }
+
+    const newLayout: PageLayoutConfig = {
+      id: `custom-page-${Date.now()}`,
+      name: newPageLayoutName,
+      showWizard: customShowWizard,
+      showAIPreset: customShowAIPreset,
+      showUIFramework: customShowUIFramework,
+      showWorkspace: customShowWorkspace,
+      showTitle: customShowTitle,
+      showDescription: customShowDescription,
+      showInfoButton: customShowInfoButton,
+    };
+
+    const customLayouts = currentWorkspace.customPageLayouts || [];
+    const updatedCustomLayouts = [...customLayouts, newLayout];
+
+    await updateWorkspace(currentWorkspace.id, {
+      customPageLayouts: updatedCustomLayouts,
+    });
+
+    setPageLayouts([...DEFAULT_LAYOUTS, ...updatedCustomLayouts]);
+    setSelectedPageLayoutId(newLayout.id);
+
+    setShowPageLayoutSaveModal(false);
+    setShowPageLayoutCustomizeModal(false);
+    setNewPageLayoutName('');
+    setPageLayoutHasChanges(false);
+  };
+
+  const handleDeleteCustomPageLayout = async () => {
+    if (!currentWorkspace) return;
+
+    const layout = pageLayouts.find(l => l.id === selectedPageLayoutId);
+    if (!layout || layout.isDefault) {
+      alert('Can only delete custom layouts');
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete "${layout.name}"?`)) {
+      return;
+    }
+
+    const customLayouts = currentWorkspace.customPageLayouts || [];
+    const updatedCustomLayouts = customLayouts.filter(l => l.id !== selectedPageLayoutId);
+
+    await updateWorkspace(currentWorkspace.id, {
+      customPageLayouts: updatedCustomLayouts,
+    });
+
+    setPageLayouts([...DEFAULT_LAYOUTS, ...updatedCustomLayouts]);
+    setSelectedPageLayoutId('standard');
+  };
+
   const categories = ['all', ...Array.from(new Set(layouts.map(l => l.category)))];
   const filteredLayouts = filterCategory === 'all'
     ? layouts
@@ -1028,36 +1173,62 @@ This layout should be used in conjunction with the active UI Styles (colors, typ
     );
   }
 
+  const selectedPageLayout = pageLayouts.find(l => l.id === selectedPageLayoutId);
+
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <WizardPageNavigation />
-      <AIPresetIndicator />
+    <PageLayout
+      title="UI Framework"
+      quickDescription="Choose and customize layouts for your application and pages."
+      detailedDescription="The UI Framework page allows you to configure two types of layouts: Application Layouts (the overall structure of your web application) and Page Layouts (what header elements appear on each page within IntentR)."
+    >
 
-      {/* Workspace Header */}
-      {currentWorkspace && (
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-      )}
-
-      {/* Header */}
-      <div style={{ marginBottom: '32px', backgroundColor: '#081534', padding: '32px', borderRadius: '12px', color: 'white' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: '400', marginBottom: '10px', letterSpacing: '2px', color: 'white' }}>
-          UI Framework
-        </h1>
-        <p style={{ fontSize: '1.1rem', opacity: 0.9, color: 'white', marginBottom: '0' }}>
-          Choose and customize modern web layouts for your application
-        </p>
+      {/* Tab Navigation */}
+      <div style={{
+        display: 'flex',
+        gap: '0',
+        marginBottom: '24px',
+        borderBottom: '2px solid #e0e0e0',
+      }}>
+        <button
+          onClick={() => setActiveTab('application')}
+          style={{
+            padding: '12px 24px',
+            backgroundColor: 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'application' ? '3px solid #133A7C' : '3px solid transparent',
+            color: activeTab === 'application' ? '#133A7C' : '#666',
+            fontWeight: activeTab === 'application' ? '600' : '400',
+            fontSize: '15px',
+            cursor: 'pointer',
+            marginBottom: '-2px',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          Application Layouts
+        </button>
+        <button
+          onClick={() => setActiveTab('page')}
+          style={{
+            padding: '12px 24px',
+            backgroundColor: 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'page' ? '3px solid #133A7C' : '3px solid transparent',
+            color: activeTab === 'page' ? '#133A7C' : '#666',
+            fontWeight: activeTab === 'page' ? '600' : '400',
+            fontSize: '15px',
+            cursor: 'pointer',
+            marginBottom: '-2px',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          Page Layouts
+        </button>
       </div>
 
-      {/* Category Filter */}
+      {/* Application Layouts Tab */}
+      {activeTab === 'application' && (
+        <>
+          {/* Category Filter */}
       <div style={{ marginBottom: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
         <span style={{ fontWeight: '500', fontSize: '15px' }}>Filter by category:</span>
         {categories.map(cat => (
@@ -1524,6 +1695,593 @@ This layout should be used in conjunction with the active UI Styles (colors, typ
           </div>
         </div>
       )}
+        </>
+      )}
+
+      {/* Page Layouts Tab */}
+      {activeTab === 'page' && (
+        <>
+          {/* Description */}
+          <div style={{ marginBottom: '24px', padding: '16px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: '#333' }}>About Page Layouts</h3>
+            <p style={{ fontSize: '14px', color: '#666', margin: 0, lineHeight: '1.6' }}>
+              Page Layouts control which header elements appear on each page within IntentR. This includes the wizard navigation, AI/UI preset indicators, workspace bar, page title, and description. Choose a preset or create a custom configuration.
+            </p>
+          </div>
+
+          {/* Page Layout Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+            {pageLayouts.map(layout => (
+              <div
+                key={layout.id}
+                onClick={() => handleSelectPageLayout(layout.id)}
+                style={{
+                  padding: '20px',
+                  border: selectedPageLayoutId === layout.id ? '3px solid #133A7C' : '1px solid #e0e0e0',
+                  borderRadius: '12px',
+                  backgroundColor: selectedPageLayoutId === layout.id ? '#E8F4FB' : 'white',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: selectedPageLayoutId === layout.id ? '0 4px 12px rgba(19, 58, 124, 0.2)' : '0 2px 4px rgba(0,0,0,0.05)',
+                }}
+              >
+                {/* Preview */}
+                <div style={{
+                  height: '120px',
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: '8px',
+                  marginBottom: '16px',
+                  border: '1px solid #ddd',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}>
+                  <PageLayoutPreview layout={layout} />
+                </div>
+
+                {/* Info */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: '600', margin: 0, color: '#081534' }}>
+                    {layout.name}
+                  </h3>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {layout.isDefault && (
+                      <span style={{
+                        padding: '4px 8px',
+                        backgroundColor: '#6c757d',
+                        color: 'white',
+                        fontSize: '10px',
+                        borderRadius: '4px',
+                        fontWeight: '600',
+                      }}>
+                        DEFAULT
+                      </span>
+                    )}
+                    {!layout.isDefault && (
+                      <span style={{
+                        padding: '4px 8px',
+                        backgroundColor: '#47A8E5',
+                        color: 'white',
+                        fontSize: '10px',
+                        borderRadius: '4px',
+                        fontWeight: '600',
+                      }}>
+                        CUSTOM
+                      </span>
+                    )}
+                    {activePageLayoutId === layout.id && (
+                      <span style={{
+                        padding: '4px 8px',
+                        backgroundColor: '#4caf50',
+                        color: 'white',
+                        fontSize: '10px',
+                        borderRadius: '4px',
+                        fontWeight: '600',
+                      }}>
+                        ACTIVE
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Feature tags */}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {layout.showWizard && (
+                    <span style={{ fontSize: '10px', padding: '3px 6px', backgroundColor: '#e8f5e9', borderRadius: '4px', color: '#2e7d32' }}>
+                      Wizard
+                    </span>
+                  )}
+                  {layout.showAIPreset && (
+                    <span style={{ fontSize: '10px', padding: '3px 6px', backgroundColor: '#e3f2fd', borderRadius: '4px', color: '#1565c0' }}>
+                      AI Preset
+                    </span>
+                  )}
+                  {layout.showUIFramework && (
+                    <span style={{ fontSize: '10px', padding: '3px 6px', backgroundColor: '#fff3e0', borderRadius: '4px', color: '#e65100' }}>
+                      UI Framework
+                    </span>
+                  )}
+                  {layout.showWorkspace && (
+                    <span style={{ fontSize: '10px', padding: '3px 6px', backgroundColor: '#fce4ec', borderRadius: '4px', color: '#c2185b' }}>
+                      Workspace
+                    </span>
+                  )}
+                  {layout.showTitle && (
+                    <span style={{ fontSize: '10px', padding: '3px 6px', backgroundColor: '#f3e5f5', borderRadius: '4px', color: '#7b1fa2' }}>
+                      Title
+                    </span>
+                  )}
+                  {layout.showInfoButton && (
+                    <span style={{ fontSize: '10px', padding: '3px 6px', backgroundColor: '#e0f2f1', borderRadius: '4px', color: '#00695c' }}>
+                      Info
+                    </span>
+                  )}
+                </div>
+
+                {selectedPageLayoutId === layout.id && (
+                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #ddd', display: 'flex', gap: '8px' }}>
+                    <Button
+                      variant="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCustomizePageLayout();
+                      }}
+                      style={{ flex: 1, fontSize: '13px', padding: '8px 12px' }}
+                    >
+                      Customize
+                    </Button>
+                    {!layout.isDefault && (
+                      <Button
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCustomPageLayout();
+                        }}
+                        style={{ fontSize: '13px', padding: '8px 12px', color: '#dc3545', borderColor: '#dc3545' }}
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Activate Page Layout Section */}
+          <div style={{
+            position: 'sticky',
+            bottom: 0,
+            backgroundColor: 'white',
+            padding: '24px',
+            borderTop: '2px solid #e0e0e0',
+            boxShadow: '0 -4px 12px rgba(0,0,0,0.1)',
+            marginTop: '32px',
+            marginLeft: '-16px',
+            marginRight: '-16px',
+            marginBottom: '-16px',
+            borderRadius: '12px 12px 0 0',
+          }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', margin: 0, marginBottom: '8px', color: '#081534' }}>
+                  {selectedPageLayout ? selectedPageLayout.name : 'No layout selected'}
+                </h3>
+                <p style={{ fontSize: '14px', color: '#666', margin: 0 }}>
+                  {selectedPageLayout
+                    ? activePageLayoutId === selectedPageLayoutId
+                      ? 'This layout is currently active for this workspace'
+                      : 'Click "Activate Layout" to use this configuration'
+                    : 'Select a layout above to activate it'
+                  }
+                </p>
+              </div>
+              <Button
+                variant="primary"
+                onClick={handleActivatePageLayout}
+                disabled={!selectedPageLayout || activePageLayoutId === selectedPageLayoutId}
+                style={{
+                  padding: '14px 32px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  backgroundColor: activePageLayoutId === selectedPageLayoutId ? '#ccc' : '#133A7C',
+                  cursor: activePageLayoutId === selectedPageLayoutId ? 'not-allowed' : 'pointer',
+                  minWidth: '200px',
+                }}
+              >
+                {activePageLayoutId === selectedPageLayoutId ? 'Activated' : 'Activate Layout'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Page Layout Success Message */}
+          {showPageLayoutSuccess && (
+            <div style={{
+              position: 'fixed',
+              top: '20px',
+              right: '20px',
+              backgroundColor: '#4caf50',
+              color: 'white',
+              padding: '16px 24px',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}>
+              <span style={{ fontSize: '24px' }}>&#10003;</span>
+              <div>
+                <div style={{ fontWeight: '600', fontSize: '16px' }}>Page Layout Activated!</div>
+                <div style={{ fontSize: '14px', opacity: 0.9 }}>Changes will apply to all pages</div>
+              </div>
+            </div>
+          )}
+
+          {/* Page Layout Customize Modal */}
+          {showPageLayoutCustomizeModal && selectedPageLayout && (
+            <div
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1000,
+              }}
+              onClick={() => setShowPageLayoutCustomizeModal(false)}
+            >
+              <div
+                style={{
+                  backgroundColor: 'white',
+                  padding: '32px',
+                  borderRadius: '12px',
+                  maxWidth: '550px',
+                  width: '90%',
+                  maxHeight: '80vh',
+                  overflowY: 'auto',
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>Customize Page Layout</h3>
+                <p style={{ marginBottom: '24px', color: '#666', fontSize: '14px' }}>
+                  Toggle which header elements appear on pages. Save as a new layout when done.
+                </p>
+
+                {/* Toggle Options */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* Wizard Navigation */}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={customShowWizard}
+                      onChange={(e) => {
+                        setCustomShowWizard(e.target.checked);
+                        setPageLayoutHasChanges(true);
+                      }}
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    <div>
+                      <span style={{ fontWeight: '500', display: 'block' }}>Wizard Navigation</span>
+                      <span style={{ fontSize: '12px', color: '#666' }}>Step-by-step workflow navigation bar</span>
+                    </div>
+                  </label>
+
+                  {/* AI Preset Indicator */}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={customShowAIPreset}
+                      onChange={(e) => {
+                        setCustomShowAIPreset(e.target.checked);
+                        setPageLayoutHasChanges(true);
+                      }}
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    <div>
+                      <span style={{ fontWeight: '500', display: 'block' }}>AI Preset Badge</span>
+                      <span style={{ fontSize: '12px', color: '#666' }}>Shows active AI governance level (1-5)</span>
+                    </div>
+                  </label>
+
+                  {/* UI Framework Indicator */}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={customShowUIFramework}
+                      onChange={(e) => {
+                        setCustomShowUIFramework(e.target.checked);
+                        setPageLayoutHasChanges(true);
+                      }}
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    <div>
+                      <span style={{ fontWeight: '500', display: 'block' }}>UI Framework Badge</span>
+                      <span style={{ fontSize: '12px', color: '#666' }}>Shows selected application layout</span>
+                    </div>
+                  </label>
+
+                  {/* Workspace Bar */}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={customShowWorkspace}
+                      onChange={(e) => {
+                        setCustomShowWorkspace(e.target.checked);
+                        setPageLayoutHasChanges(true);
+                      }}
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    <div>
+                      <span style={{ fontWeight: '500', display: 'block' }}>Workspace Name</span>
+                      <span style={{ fontSize: '12px', color: '#666' }}>Displays current workspace name</span>
+                    </div>
+                  </label>
+
+                  {/* Page Title */}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={customShowTitle}
+                      onChange={(e) => {
+                        setCustomShowTitle(e.target.checked);
+                        setPageLayoutHasChanges(true);
+                      }}
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    <div>
+                      <span style={{ fontWeight: '500', display: 'block' }}>Page Title</span>
+                      <span style={{ fontSize: '12px', color: '#666' }}>Shows the page name heading</span>
+                    </div>
+                  </label>
+
+                  {/* Description */}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={customShowDescription}
+                      onChange={(e) => {
+                        setCustomShowDescription(e.target.checked);
+                        setPageLayoutHasChanges(true);
+                      }}
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    <div>
+                      <span style={{ fontWeight: '500', display: 'block' }}>Quick Description</span>
+                      <span style={{ fontSize: '12px', color: '#666' }}>Brief description below the title</span>
+                    </div>
+                  </label>
+
+                  {/* Info Button */}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={customShowInfoButton}
+                      onChange={(e) => {
+                        setCustomShowInfoButton(e.target.checked);
+                        setPageLayoutHasChanges(true);
+                      }}
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    <div>
+                      <span style={{ fontWeight: '500', display: 'block' }}>Info Button</span>
+                      <span style={{ fontSize: '12px', color: '#666' }}>Expandable detailed description</span>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: '12px', marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #e0e0e0' }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowPageLayoutCustomizeModal(false);
+                      // Reset to selected layout
+                      const layout = pageLayouts.find(l => l.id === selectedPageLayoutId);
+                      if (layout) {
+                        setCustomShowWizard(layout.showWizard);
+                        setCustomShowAIPreset(layout.showAIPreset);
+                        setCustomShowUIFramework(layout.showUIFramework);
+                        setCustomShowWorkspace(layout.showWorkspace);
+                        setCustomShowTitle(layout.showTitle);
+                        setCustomShowDescription(layout.showDescription);
+                        setCustomShowInfoButton(layout.showInfoButton);
+                        setPageLayoutHasChanges(false);
+                      }
+                    }}
+                    style={{ flex: 1 }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={() => setShowPageLayoutSaveModal(true)}
+                    disabled={!pageLayoutHasChanges}
+                    style={{ flex: 1 }}
+                  >
+                    Save as New Layout
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Page Layout Save Modal */}
+          {showPageLayoutSaveModal && (
+            <div
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1001,
+              }}
+              onClick={() => setShowPageLayoutSaveModal(false)}
+            >
+              <div
+                style={{
+                  backgroundColor: 'white',
+                  padding: '32px',
+                  borderRadius: '12px',
+                  maxWidth: '500px',
+                  width: '90%',
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '16px' }}>Save Custom Page Layout</h3>
+                <p style={{ marginBottom: '20px', color: '#666' }}>
+                  Enter a name for your custom page layout.
+                </p>
+                <input
+                  type="text"
+                  value={newPageLayoutName}
+                  onChange={(e) => setNewPageLayoutName(e.target.value)}
+                  placeholder="e.g., Minimal Development"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    fontSize: '15px',
+                    border: '1px solid #ccc',
+                    borderRadius: '6px',
+                    marginBottom: '20px',
+                  }}
+                  autoFocus
+                />
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowPageLayoutSaveModal(false);
+                      setNewPageLayoutName('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={handleSaveCustomPageLayout}
+                    disabled={!newPageLayoutName.trim()}
+                  >
+                    Save Layout
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </PageLayout>
+  );
+};
+
+// Page Layout Preview Component
+const PageLayoutPreview: React.FC<{ layout: PageLayoutConfig }> = ({ layout }) => {
+  return (
+    <div style={{
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      padding: '6px',
+      backgroundColor: '#fff',
+    }}>
+      {/* Wizard */}
+      {layout.showWizard && (
+        <div style={{
+          height: '12px',
+          backgroundColor: '#e3f2fd',
+          borderRadius: '2px',
+          marginBottom: '4px',
+          display: 'flex',
+          gap: '2px',
+          padding: '2px',
+        }}>
+          {[1,2,3,4,5].map(i => (
+            <div key={i} style={{ flex: 1, backgroundColor: i <= 2 ? '#1976d2' : '#90caf9', borderRadius: '1px' }} />
+          ))}
+        </div>
+      )}
+
+      {/* AI Preset / UI Framework Row */}
+      {(layout.showAIPreset || layout.showUIFramework) && (
+        <div style={{
+          height: '10px',
+          display: 'flex',
+          gap: '4px',
+          marginBottom: '4px',
+        }}>
+          {layout.showAIPreset && (
+            <div style={{ width: '40px', backgroundColor: '#e8f5e9', borderRadius: '2px' }} />
+          )}
+          {layout.showUIFramework && (
+            <div style={{ width: '50px', backgroundColor: '#fff3e0', borderRadius: '2px' }} />
+          )}
+        </div>
+      )}
+
+      {/* Workspace Bar */}
+      {layout.showWorkspace && (
+        <div style={{
+          height: '10px',
+          backgroundColor: '#f5f5f5',
+          borderRadius: '2px',
+          marginBottom: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          paddingLeft: '4px',
+        }}>
+          <div style={{ width: '30px', height: '6px', backgroundColor: '#bdbdbd', borderRadius: '1px' }} />
+        </div>
+      )}
+
+      {/* Title */}
+      {layout.showTitle && (
+        <div style={{
+          height: '14px',
+          backgroundColor: '#081534',
+          borderRadius: '2px',
+          marginBottom: '4px',
+          width: '60%',
+        }} />
+      )}
+
+      {/* Description + Info */}
+      {layout.showDescription && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          marginBottom: '4px',
+        }}>
+          <div style={{ flex: 1, height: '8px', backgroundColor: '#e0e0e0', borderRadius: '2px' }} />
+          {layout.showInfoButton && (
+            <div style={{
+              width: '12px',
+              height: '12px',
+              backgroundColor: '#133A7C',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '8px',
+              fontWeight: 'bold',
+            }}>i</div>
+          )}
+        </div>
+      )}
+
+      {/* Content placeholder */}
+      <div style={{ flex: 1, backgroundColor: '#fafafa', borderRadius: '2px', border: '1px dashed #ddd' }} />
     </div>
   );
 };

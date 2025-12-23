@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
-import { AIPresetIndicator } from '../components/AIPresetIndicator';
+import { PageLayout } from '../components/PageLayout';
 import { WorkspaceIntegrations } from '../components/WorkspaceIntegrations';
 import { WorkspaceVersionControl } from '../components/WorkspaceVersionControl';
 import { FolderBrowser } from '../components/FolderBrowser';
@@ -261,16 +261,15 @@ export const Workspaces: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <AIPresetIndicator />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-6, 24px)' }}>
-        <div>
-          <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Workspaces</h1>
-          <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>Manage your design workspaces and collaborate with others</p>
-        </div>
+    <PageLayout
+      title="Workspaces"
+      quickDescription="Manage your design workspaces and collaborate with others."
+      detailedDescription="Create, configure, and manage your project workspaces. You can scan existing folders for workspaces, share workspaces with collaborators, and join shared workspaces."
+      className="max-w-7xl mx-auto"
+      actions={
         <div style={{ display: 'flex', gap: '12px' }}>
           <Button variant="outline" onClick={scanWorkspaceFolders} disabled={isScanning}>
-            {isScanning ? 'Scanning...' : '📁 Scan Folders'}
+            {isScanning ? 'Scanning...' : 'Scan Folders'}
           </Button>
           <Button variant="outline" onClick={refreshSharedWorkspaces}>
             🔄 Refresh Shared
@@ -279,7 +278,8 @@ export const Workspaces: React.FC = () => {
             + Create Workspace
           </Button>
         </div>
-      </div>
+      }
+    >
 
       {/* My Workspaces */}
       <div style={{ marginBottom: '48px' }}>
@@ -965,6 +965,6 @@ export const Workspaces: React.FC = () => {
           }}
         />
       )}
-    </div>
+    </PageLayout>
   );
 };

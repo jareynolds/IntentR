@@ -7,6 +7,11 @@ import { Button } from '../components/Button';
 import { RoleManagement } from '../components/RoleManagement';
 import { Settings } from './Settings';
 import { Integrations } from './Integrations';
+import { DEFAULT_LAYOUTS, type PageLayoutConfig } from '../components/PageLayout';
+
+// Constants for global app settings storage
+const INTENTR_APP_PAGE_LAYOUT_KEY = 'intentr_app_page_layout';
+const INTENTR_CUSTOM_PAGE_LAYOUTS_KEY = 'intentr_custom_page_layouts';
 
 interface User {
   id: number;
@@ -53,7 +58,7 @@ const getRoleDisplayName = (role: string): string => {
 
 const Admin: React.FC = () => {
   const { user: currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'integrations' | 'settings'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'integrations' | 'settings' | 'pageLayouts'>('users');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +80,25 @@ const Admin: React.FC = () => {
 
   const [editForm, setEditForm] = useState<Partial<EditUserForm>>({});
 
+  // Page Layout state (for IntentR application appearance)
+  const [pageLayouts, setPageLayouts] = useState<PageLayoutConfig[]>(DEFAULT_LAYOUTS);
+  const [selectedPageLayoutId, setSelectedPageLayoutId] = useState<string>('standard');
+  const [activePageLayoutId, setActivePageLayoutId] = useState<string | null>(null);
+  const [showPageLayoutSuccess, setShowPageLayoutSuccess] = useState(false);
+  const [showPageLayoutCustomizeModal, setShowPageLayoutCustomizeModal] = useState(false);
+  const [showPageLayoutSaveModal, setShowPageLayoutSaveModal] = useState(false);
+  const [newPageLayoutName, setNewPageLayoutName] = useState('');
+  const [pageLayoutHasChanges, setPageLayoutHasChanges] = useState(false);
+
+  // Page layout customization state
+  const [customShowWizard, setCustomShowWizard] = useState(true);
+  const [customShowAIPreset, setCustomShowAIPreset] = useState(true);
+  const [customShowUIFramework, setCustomShowUIFramework] = useState(true);
+  const [customShowWorkspace, setCustomShowWorkspace] = useState(true);
+  const [customShowTitle, setCustomShowTitle] = useState(true);
+  const [customShowDescription, setCustomShowDescription] = useState(true);
+  const [customShowInfoButton, setCustomShowInfoButton] = useState(true);
+
   useEffect(() => {
     if (currentUser?.role !== 'admin') {
       setError('Access denied. Admin privileges required.');
@@ -83,6 +107,32 @@ const Admin: React.FC = () => {
     }
     fetchUsers();
   }, [currentUser]);
+
+  // Load page layouts from localStorage on mount
+  useEffect(() => {
+    // Load custom page layouts
+    const savedCustomLayouts = localStorage.getItem(INTENTR_CUSTOM_PAGE_LAYOUTS_KEY);
+    if (savedCustomLayouts) {
+      try {
+        const customLayouts = JSON.parse(savedCustomLayouts);
+        setPageLayouts([...DEFAULT_LAYOUTS, ...customLayouts]);
+      } catch (e) {
+        console.error('Failed to parse custom page layouts:', e);
+      }
+    }
+
+    // Load active page layout
+    const savedActiveLayout = localStorage.getItem(INTENTR_APP_PAGE_LAYOUT_KEY);
+    if (savedActiveLayout) {
+      try {
+        const activeConfig = JSON.parse(savedActiveLayout);
+        setActivePageLayoutId(activeConfig.id || null);
+        setSelectedPageLayoutId(activeConfig.id || 'standard');
+      } catch (e) {
+        console.error('Failed to parse active page layout:', e);
+      }
+    }
+  }, []);
 
   const fetchUsers = async () => {
     try {
@@ -200,6 +250,125 @@ const Admin: React.FC = () => {
     }
   };
 
+  // Page Layout handler functions
+  const handleSelectPageLayout = (id: string) => {
+    setSelectedPageLayoutId(id);
+    const layout = pageLayouts.find(l => l.id === id);
+    if (layout) {
+      setCustomShowWizard(layout.showWizard);
+      setCustomShowAIPreset(layout.showAIPreset);
+      setCustomShowUIFramework(layout.showUIFramework);
+      setCustomShowWorkspace(layout.showWorkspace);
+      setCustomShowTitle(layout.showTitle);
+      setCustomShowDescription(layout.showDescription);
+      setCustomShowInfoButton(layout.showInfoButton);
+      setPageLayoutHasChanges(false);
+    }
+  };
+
+  const handleActivatePageLayout = () => {
+    const layout = pageLayouts.find(l => l.id === selectedPageLayoutId);
+    if (layout) {
+      // Save to localStorage for global app setting
+      localStorage.setItem(INTENTR_APP_PAGE_LAYOUT_KEY, JSON.stringify(layout));
+      setActivePageLayoutId(selectedPageLayoutId);
+      setShowPageLayoutSuccess(true);
+      setTimeout(() => setShowPageLayoutSuccess(false), 3000);
+
+      // Dispatch a custom event so PageLayout components can react
+      window.dispatchEvent(new CustomEvent('intentr-page-layout-changed', { detail: layout }));
+    }
+  };
+
+  const handlePageLayoutCustomize = () => {
+    const layout = pageLayouts.find(l => l.id === selectedPageLayoutId);
+    if (layout) {
+      setCustomShowWizard(layout.showWizard);
+      setCustomShowAIPreset(layout.showAIPreset);
+      setCustomShowUIFramework(layout.showUIFramework);
+      setCustomShowWorkspace(layout.showWorkspace);
+      setCustomShowTitle(layout.showTitle);
+      setCustomShowDescription(layout.showDescription);
+      setCustomShowInfoButton(layout.showInfoButton);
+    }
+    setShowPageLayoutCustomizeModal(true);
+  };
+
+  const handlePageLayoutCustomizationChange = (field: string, value: boolean) => {
+    setPageLayoutHasChanges(true);
+    switch (field) {
+      case 'showWizard': setCustomShowWizard(value); break;
+      case 'showAIPreset': setCustomShowAIPreset(value); break;
+      case 'showUIFramework': setCustomShowUIFramework(value); break;
+      case 'showWorkspace': setCustomShowWorkspace(value); break;
+      case 'showTitle': setCustomShowTitle(value); break;
+      case 'showDescription': setCustomShowDescription(value); break;
+      case 'showInfoButton': setCustomShowInfoButton(value); break;
+    }
+  };
+
+  const handleSaveCustomPageLayout = () => {
+    if (!newPageLayoutName.trim()) return;
+
+    const newLayout: PageLayoutConfig = {
+      id: `custom-${Date.now()}`,
+      name: newPageLayoutName.trim(),
+      showWizard: customShowWizard,
+      showAIPreset: customShowAIPreset,
+      showUIFramework: customShowUIFramework,
+      showWorkspace: customShowWorkspace,
+      showTitle: customShowTitle,
+      showDescription: customShowDescription,
+      showInfoButton: customShowInfoButton,
+    };
+
+    // Get existing custom layouts
+    const savedCustomLayouts = localStorage.getItem(INTENTR_CUSTOM_PAGE_LAYOUTS_KEY);
+    let customLayouts: PageLayoutConfig[] = [];
+    if (savedCustomLayouts) {
+      try {
+        customLayouts = JSON.parse(savedCustomLayouts);
+      } catch (e) {
+        customLayouts = [];
+      }
+    }
+
+    // Add new layout
+    customLayouts.push(newLayout);
+    localStorage.setItem(INTENTR_CUSTOM_PAGE_LAYOUTS_KEY, JSON.stringify(customLayouts));
+
+    // Update state
+    setPageLayouts([...DEFAULT_LAYOUTS, ...customLayouts]);
+    setSelectedPageLayoutId(newLayout.id);
+    setShowPageLayoutSaveModal(false);
+    setNewPageLayoutName('');
+    setPageLayoutHasChanges(false);
+  };
+
+  const handleDeletePageLayout = (id: string) => {
+    if (!id.startsWith('custom-')) return; // Can only delete custom layouts
+
+    const savedCustomLayouts = localStorage.getItem(INTENTR_CUSTOM_PAGE_LAYOUTS_KEY);
+    if (savedCustomLayouts) {
+      try {
+        let customLayouts: PageLayoutConfig[] = JSON.parse(savedCustomLayouts);
+        customLayouts = customLayouts.filter(l => l.id !== id);
+        localStorage.setItem(INTENTR_CUSTOM_PAGE_LAYOUTS_KEY, JSON.stringify(customLayouts));
+        setPageLayouts([...DEFAULT_LAYOUTS, ...customLayouts]);
+
+        if (selectedPageLayoutId === id) {
+          setSelectedPageLayoutId('standard');
+        }
+        if (activePageLayoutId === id) {
+          localStorage.removeItem(INTENTR_APP_PAGE_LAYOUT_KEY);
+          setActivePageLayoutId(null);
+        }
+      } catch (e) {
+        console.error('Failed to delete layout:', e);
+      }
+    }
+  };
+
   if (currentUser?.role !== 'admin') {
     return (
       <div>
@@ -288,6 +457,23 @@ const Admin: React.FC = () => {
           }}
         >
           Settings
+        </button>
+        <button
+          onClick={() => setActiveTab('pageLayouts')}
+          style={{
+            padding: '12px 24px',
+            background: activeTab === 'pageLayouts' ? 'var(--color-primary)' : 'transparent',
+            color: activeTab === 'pageLayouts' ? 'white' : 'var(--color-grey-700)',
+            border: 'none',
+            borderRadius: '8px 8px 0 0',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            borderBottom: activeTab === 'pageLayouts' ? '2px solid var(--color-primary)' : 'none',
+            marginBottom: '-2px'
+          }}
+        >
+          Page Layouts
         </button>
       </div>
 
@@ -502,6 +688,237 @@ const Admin: React.FC = () => {
       <Integrations />
     ) : activeTab === 'settings' ? (
       <Settings />
+    ) : activeTab === 'pageLayouts' ? (
+      <div>
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{ margin: '0 0 8px 0' }}>IntentR Page Layouts</h2>
+          <p style={{ color: 'var(--color-grey-600)', margin: 0 }}>
+            Configure the page layout for the IntentR application. Changes here affect how all pages in IntentR are displayed.
+          </p>
+        </div>
+
+        {showPageLayoutSuccess && (
+          <Alert variant="success" message="Page layout activated successfully! The change will apply across all IntentR pages." />
+        )}
+
+        {/* Layout Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '16px',
+          marginBottom: '24px'
+        }}>
+          {pageLayouts.map(layout => (
+            <Card
+              key={layout.id}
+              onClick={() => handleSelectPageLayout(layout.id)}
+              style={{
+                cursor: 'pointer',
+                border: selectedPageLayoutId === layout.id
+                  ? '2px solid var(--color-primary)'
+                  : '1px solid var(--color-grey-200)',
+                position: 'relative',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {activePageLayoutId === layout.id && (
+                <div style={{
+                  position: 'absolute',
+                  top: '8px',
+                  right: '8px',
+                  background: 'var(--color-success)',
+                  color: 'white',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  fontWeight: 600
+                }}>
+                  ACTIVE
+                </div>
+              )}
+              <h3 style={{ margin: '0 0 12px 0' }}>{layout.name}</h3>
+
+              {/* Preview of what elements are shown */}
+              <div style={{
+                background: 'var(--color-grey-50)',
+                borderRadius: '8px',
+                padding: '12px',
+                marginBottom: '12px'
+              }}>
+                <div style={{ fontSize: '12px', color: 'var(--color-grey-600)' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    {layout.showWizard && <span style={{ background: 'var(--color-blue-100)', padding: '2px 6px', borderRadius: '4px' }}>Wizard</span>}
+                    {layout.showAIPreset && <span style={{ background: 'var(--color-green-100)', padding: '2px 6px', borderRadius: '4px' }}>AI Preset</span>}
+                    {layout.showUIFramework && <span style={{ background: 'var(--color-purple-100)', padding: '2px 6px', borderRadius: '4px' }}>UI Framework</span>}
+                    {layout.showWorkspace && <span style={{ background: 'var(--color-orange-100)', padding: '2px 6px', borderRadius: '4px' }}>Workspace</span>}
+                    {layout.showTitle && <span style={{ background: 'var(--color-grey-200)', padding: '2px 6px', borderRadius: '4px' }}>Title</span>}
+                    {layout.showDescription && <span style={{ background: 'var(--color-grey-200)', padding: '2px 6px', borderRadius: '4px' }}>Description</span>}
+                    {layout.showInfoButton && <span style={{ background: 'var(--color-grey-200)', padding: '2px 6px', borderRadius: '4px' }}>Info</span>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Delete button for custom layouts */}
+              {layout.id.startsWith('custom-') && (
+                <Button
+                  size="small"
+                  variant="secondary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm('Delete this custom layout?')) {
+                      handleDeletePageLayout(layout.id);
+                    }
+                  }}
+                  style={{ marginTop: '8px' }}
+                >
+                  Delete
+                </Button>
+              )}
+            </Card>
+          ))}
+        </div>
+
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+          <Button onClick={handleActivatePageLayout} disabled={selectedPageLayoutId === activePageLayoutId}>
+            Activate Layout
+          </Button>
+          <Button variant="secondary" onClick={handlePageLayoutCustomize}>
+            Customize
+          </Button>
+        </div>
+
+        {/* Customize Modal */}
+        {showPageLayoutCustomizeModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}>
+            <div style={{
+              backgroundColor: 'var(--color-surface, white)',
+              borderRadius: '12px',
+              padding: '24px',
+              width: '100%',
+              maxWidth: '500px',
+              maxHeight: '80vh',
+              overflow: 'auto'
+            }}>
+              <h3 style={{ margin: '0 0 16px 0' }}>Customize Page Layout</h3>
+              <p style={{ color: 'var(--color-grey-600)', marginBottom: '20px' }}>
+                Toggle which elements appear in the page header across IntentR.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+                {[
+                  { key: 'showWizard', label: 'Show Wizard Button', value: customShowWizard },
+                  { key: 'showAIPreset', label: 'Show AI Preset Indicator', value: customShowAIPreset },
+                  { key: 'showUIFramework', label: 'Show UI Framework Indicator', value: customShowUIFramework },
+                  { key: 'showWorkspace', label: 'Show Workspace Bar', value: customShowWorkspace },
+                  { key: 'showTitle', label: 'Show Page Title', value: customShowTitle },
+                  { key: 'showDescription', label: 'Show Description', value: customShowDescription },
+                  { key: 'showInfoButton', label: 'Show Info Button', value: customShowInfoButton },
+                ].map(item => (
+                  <label key={item.key} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '8px 12px',
+                    background: 'var(--color-grey-50)',
+                    borderRadius: '8px',
+                    cursor: 'pointer'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={item.value}
+                      onChange={(e) => handlePageLayoutCustomizationChange(item.key, e.target.checked)}
+                      style={{ width: '18px', height: '18px' }}
+                    />
+                    <span>{item.label}</span>
+                  </label>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <Button variant="secondary" onClick={() => setShowPageLayoutCustomizeModal(false)}>
+                  Cancel
+                </Button>
+                {pageLayoutHasChanges && (
+                  <Button onClick={() => {
+                    setShowPageLayoutCustomizeModal(false);
+                    setShowPageLayoutSaveModal(true);
+                  }}>
+                    Save as New Layout
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Save New Layout Modal */}
+        {showPageLayoutSaveModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}>
+            <div style={{
+              backgroundColor: 'var(--color-surface, white)',
+              borderRadius: '12px',
+              padding: '24px',
+              width: '100%',
+              maxWidth: '400px'
+            }}>
+              <h3 style={{ margin: '0 0 16px 0' }}>Save Custom Layout</h3>
+              <p style={{ color: 'var(--color-grey-600)', marginBottom: '20px' }}>
+                Enter a name for your custom page layout.
+              </p>
+
+              <input
+                type="text"
+                value={newPageLayoutName}
+                onChange={(e) => setNewPageLayoutName(e.target.value)}
+                placeholder="Layout name"
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--color-grey-300)',
+                  marginBottom: '20px',
+                  boxSizing: 'border-box'
+                }}
+              />
+
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <Button variant="secondary" onClick={() => {
+                  setShowPageLayoutSaveModal(false);
+                  setNewPageLayoutName('');
+                }}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveCustomPageLayout} disabled={!newPageLayoutName.trim()}>
+                  Save Layout
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     ) : null}
 
       {/* Reset Password Modal */}

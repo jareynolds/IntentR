@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
+import { PageLayout } from '../components/PageLayout';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { AIPresetIndicator } from '../components/AIPresetIndicator';
-import { UIFrameworkIndicator } from '../components/UIFrameworkIndicator';
-import { WizardPageNavigation } from '../components/wizard';
 import { INTEGRATION_URL } from '../api/client';
 
 type ComponentType = 'button' | 'card' | 'input' | 'alert' | 'navbar' | 'avatar' | 'progress' | 'toggle';
@@ -552,38 +550,16 @@ ${xmlEscaped}
   };
 
   return (
-    <div className="ui-designer-page" style={{ padding: '16px' }}>
-      <WizardPageNavigation />
-      <AIPresetIndicator />
-      <UIFrameworkIndicator />
-
-      {/* Workspace Header */}
-      {currentWorkspace && (
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-      )}
-
-      <div className="page-header">
-        <div className="header-content">
-          <h1 className="text-largeTitle">UI Designer</h1>
-          <p className="text-body text-secondary">
-            Generate UI components, styles, and layouts using the DELM API
-          </p>
-        </div>
-        <div className="header-actions">
-          <span className={`api-status ${apiStatus}`}>
-            DELM: {apiStatus === 'online' ? '● Online' : apiStatus === 'offline' ? '○ Offline' : '○ Unknown'}
-          </span>
-        </div>
-      </div>
+    <PageLayout
+      title="UI Designer"
+      quickDescription="Generate UI components, styles, and layouts using the DELM API"
+      detailedDescription="The UI Designer allows you to generate UI components, mockups, icons, logos, and illustrations using AI. Select a generation mode, configure your options, and generate visual assets that can be used in your application design."
+      actions={
+        <span className={`api-status ${apiStatus}`}>
+          DELM: {apiStatus === 'online' ? '● Online' : apiStatus === 'offline' ? '○ Offline' : '○ Unknown'}
+        </span>
+      }
+    >
 
       <div className="designer-content">
         {/* Input Section */}
@@ -1308,6 +1284,6 @@ ${xmlEscaped}
           border-color: var(--color-systemBlue);
         }
       `}</style>
-    </div>
+    </PageLayout>
   );
 };
