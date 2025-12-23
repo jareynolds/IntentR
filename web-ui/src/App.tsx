@@ -1,7 +1,22 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header, Sidebar, ProtectedRoute, ProtectedPage, UIFrameworkProvider, UIFrameworkIndicator } from './components';
-import { Login, GoogleCallback, Dashboard, WorkspaceOverview, Capabilities, Features, Vision, Designs, Integrations, AIChat, Code, Run, Workspaces, Storyboard, Ideation, Analyze, Settings, Admin, System, AIPrinciples, UIFramework, UIStyles, UIDesigner, DataCollection, Enablers, ConceptionApproval, DefinitionApproval, DesignApproval, ImplementationApproval, Testing, TestingApproval, StoryMap } from './pages';
+import { Login, GoogleCallback, Welcome, Dashboard, WorkspaceOverview, Capabilities, Features, Vision, Designs, Integrations, AIChat, Code, Run, Workspaces, Storyboard, Ideation, Analyze, Settings, Admin, System, AIPrinciples, UIFramework, UIStyles, UIDesigner, DataCollection, Enablers, ConceptionApproval, DefinitionApproval, DesignApproval, ImplementationApproval, Testing, TestingApproval, StoryMap, LearnINTENT } from './pages';
+import {
+  WizardWorkspace,
+  WizardConceptionStart,
+  WizardConception,
+  WizardDefinitionStart,
+  WizardDefinition,
+  WizardDesignStart,
+  WizardDesign,
+  WizardTestingStart,
+  WizardTesting,
+  WizardImplementationStart,
+  WizardImplementation,
+  WizardDiscoveryStart,
+  WizardDiscovery,
+} from './pages/wizard';
 import { defaultUIFrameworks, applyUIStyleToDOM } from './pages/UIStyles';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -11,6 +26,9 @@ import { CollaborationProvider } from './context/CollaborationContext';
 import { RoleAccessProvider } from './context/RoleAccessContext';
 import { ApprovalProvider } from './context/ApprovalContext';
 import { EnablerProvider } from './context/EnablerContext';
+import { WizardProvider } from './context/WizardContext';
+import { VersionControlProvider } from './context/VersionControlContext';
+import { VersionControlPanel, VersionHistoryDrawer } from './components';
 import './styles/main.css';
 
 const adminSidebarItems = [
@@ -159,18 +177,20 @@ function AppContent() {
   }, [currentWorkspace?.id]);
 
   // Build sidebar items with phase-based navigation
-  // Phase 1: CONCEPTION - Define what to build
-  // Phase 2: DEFINITION - Define the scope
-  // Phase 3: DESIGN - Define how it looks
-  // Phase 4: IMPLEMENTATION - Build and run it
+  // Phase 1: INTENT DECLARATION - Define what to build (formerly Conception)
+  // Phase 2: FORMAL SPECIFICATION - Define scope and design (formerly Definition + Design)
+  // Phase 3: SYSTEM DERIVATION - Build, test and run it (formerly Implementation + Test Scenarios)
+  // Phase 4: CONTINUOUS VALIDATION - Ongoing quality assurance (formerly Testing)
   const dynamicSidebarItems = [
-    { path: '/', label: 'Dashboard', icon: '▦' },
+    { path: '/', label: 'Welcome', icon: '⌂' },
+    { path: '/dashboard', label: 'Dashboard', icon: '▦' },
     { path: '/workspaces', label: 'Workspaces', icon: '◰' },
-    // CONCEPTION PHASE
+    // INTENT DECLARATION PHASE (formerly Conception)
     {
-      label: 'CONCEPTION',
+      label: 'INTENT DECLARATION',
+      path: '/wizard/conception/start',
       isPhase: true,
-      phaseIcon: '1',
+      phaseIcon: '◇',
       children: [
         { path: '/vision', label: 'Product Vision' },
         { path: '/ideation', label: 'Ideation' },
@@ -178,47 +198,31 @@ function AppContent() {
         { path: '/conception-approval', label: 'Phase Approval', hasRejection: phaseRejections.conception, isPhaseIncomplete: !phaseApprovals.conception },
       ]
     },
-    // DEFINITION PHASE
+    // FORMAL SPECIFICATION PHASE (formerly Definition + Design merged)
     {
-      label: 'DEFINITION',
+      label: 'FORMAL SPECIFICATION',
+      path: '/wizard/definition/start',
       isPhase: true,
-      phaseIcon: '2',
+      phaseIcon: '☰',
       children: [
         { path: '/capabilities', label: 'Capabilities' },
         { path: '/enablers', label: 'Enablers' },
-        { path: '/story-map', label: 'Narrative' },
-        { path: '/definition-approval', label: 'Phase Approval', hasRejection: phaseRejections.definition, isPhaseIncomplete: !phaseApprovals.definition },
-      ]
-    },
-    // DESIGN PHASE
-    {
-      label: 'DESIGN',
-      isPhase: true,
-      phaseIcon: '3',
-      children: [
+        { path: '/story-map', label: 'Dependencies' },
         { path: '/designs', label: 'UI Assets' },
         { path: '/ui-framework', label: 'UI Framework' },
         { path: '/ui-styles', label: 'UI Styles' },
         { path: '/ui-designer', label: 'UI Designer' },
-        { path: '/design-approval', label: 'Phase Approval', hasRejection: phaseRejections.design, isPhaseIncomplete: !phaseApprovals.design },
+        { path: '/definition-approval', label: 'Phase Approval', hasRejection: phaseRejections.definition || phaseRejections.design, isPhaseIncomplete: !phaseApprovals.definition || !phaseApprovals.design },
       ]
     },
-    // TESTING PHASE
+    // SYSTEM DERIVATION PHASE (formerly Implementation + Test Scenarios)
     {
-      label: 'TESTING',
+      label: 'SYSTEM DERIVATION',
+      path: '/wizard/implementation/start',
       isPhase: true,
-      phaseIcon: '4',
+      phaseIcon: '⚙',
       children: [
         { path: '/testing', label: 'Test Scenarios' },
-        { path: '/testing-approval', label: 'Phase Approval', hasRejection: phaseRejections.testing, isPhaseIncomplete: !phaseApprovals.testing },
-      ]
-    },
-    // IMPLEMENTATION PHASE
-    {
-      label: 'IMPLEMENTATION',
-      isPhase: true,
-      phaseIcon: '5',
-      children: [
         { path: '/system', label: 'System' },
         { path: '/ai-principles', label: 'AI Principles' },
         { path: '/code', label: 'Code' },
@@ -226,9 +230,17 @@ function AppContent() {
         { path: '/implementation-approval', label: 'Phase Approval', hasRejection: phaseRejections.implementation, isPhaseIncomplete: !phaseApprovals.implementation },
       ]
     },
+    // CONTINUOUS VALIDATION PHASE (formerly Testing - new pages to be added later)
+    {
+      label: 'CONTINUOUS VALIDATION',
+      path: '/wizard/testing/start',
+      isPhase: true,
+      phaseIcon: '✓',
+      children: [
+        { path: '/testing-approval', label: 'Phase Approval', hasRejection: phaseRejections.testing, isPhaseIncomplete: !phaseApprovals.testing },
+      ]
+    },
     { path: '/ai-chat', label: 'AI Assistant', icon: '◉' },
-    { path: '/integrations', label: 'Integrations', icon: '◎' },
-    { path: '/settings', label: 'Settings', icon: '⚙' },
   ];
 
   const sidebarItems = user?.role === 'admin'
@@ -237,13 +249,14 @@ function AppContent() {
 
   return (
     <div className="app">
-      <Header title="UbeCode" subtitle="Develop at the speed of Innovation" />
+      <Header title="Intentr" subtitle="Innovate Faster" />
       <div className="app-layout">
         <Sidebar items={sidebarItems} />
         <UIFrameworkIndicator />
         <main className="app-main">
           <Routes>
-            <Route path="/" element={<ProtectedPage path="/"><Dashboard /></ProtectedPage>} />
+            <Route path="/" element={<ProtectedPage path="/"><Welcome /></ProtectedPage>} />
+            <Route path="/dashboard" element={<ProtectedPage path="/dashboard"><Dashboard /></ProtectedPage>} />
             <Route path="/workspace-overview" element={<ProtectedPage path="/workspace-overview"><WorkspaceOverview /></ProtectedPage>} />
             <Route path="/ideation" element={<ProtectedPage path="/ideation"><Ideation /></ProtectedPage>} />
             <Route path="/analyze" element={<ProtectedPage path="/analyze"><Analyze /></ProtectedPage>} />
@@ -273,8 +286,27 @@ function AppContent() {
             <Route path="/settings" element={<ProtectedPage path="/settings"><Settings /></ProtectedPage>} />
             <Route path="/admin" element={<ProtectedPage path="/admin"><Admin /></ProtectedPage>} />
             <Route path="/data-collection" element={<ProtectedPage path="/data-collection"><DataCollection /></ProtectedPage>} />
+            <Route path="/learn-intent" element={<ProtectedPage path="/learn-intent"><LearnINTENT /></ProtectedPage>} />
+
+            {/* Wizard Routes */}
+            <Route path="/wizard/workspace" element={<ProtectedPage path="/wizard/workspace"><WizardWorkspace /></ProtectedPage>} />
+            <Route path="/wizard/conception/start" element={<ProtectedPage path="/wizard/conception/start"><WizardConceptionStart /></ProtectedPage>} />
+            <Route path="/wizard/conception" element={<ProtectedPage path="/wizard/conception"><WizardConception /></ProtectedPage>} />
+            <Route path="/wizard/definition/start" element={<ProtectedPage path="/wizard/definition/start"><WizardDefinitionStart /></ProtectedPage>} />
+            <Route path="/wizard/definition" element={<ProtectedPage path="/wizard/definition"><WizardDefinition /></ProtectedPage>} />
+            <Route path="/wizard/design/start" element={<ProtectedPage path="/wizard/design/start"><WizardDesignStart /></ProtectedPage>} />
+            <Route path="/wizard/design" element={<ProtectedPage path="/wizard/design"><WizardDesign /></ProtectedPage>} />
+            <Route path="/wizard/testing/start" element={<ProtectedPage path="/wizard/testing/start"><WizardTestingStart /></ProtectedPage>} />
+            <Route path="/wizard/testing" element={<ProtectedPage path="/wizard/testing"><WizardTesting /></ProtectedPage>} />
+            <Route path="/wizard/implementation/start" element={<ProtectedPage path="/wizard/implementation/start"><WizardImplementationStart /></ProtectedPage>} />
+            <Route path="/wizard/implementation" element={<ProtectedPage path="/wizard/implementation"><WizardImplementation /></ProtectedPage>} />
+            <Route path="/wizard/discovery/start" element={<ProtectedPage path="/wizard/discovery/start"><WizardDiscoveryStart /></ProtectedPage>} />
+            <Route path="/wizard/discovery" element={<ProtectedPage path="/wizard/discovery"><WizardDiscovery /></ProtectedPage>} />
           </Routes>
         </main>
+        {/* Version Control Components */}
+        <VersionControlPanel />
+        <VersionHistoryDrawer />
       </div>
     </div>
   );
@@ -289,9 +321,11 @@ function App() {
             <ApprovalProvider>
               <EnablerProvider>
               <WorkspaceProvider>
+                <VersionControlProvider>
                 <UIFrameworkProvider>
                   <CollaborationProvider>
                     <Router>
+                      <WizardProvider>
                     <Routes>
                       {/* Public routes */}
                       <Route path="/login" element={<Login />} />
@@ -326,9 +360,11 @@ function App() {
                       }
                     />
                   </Routes>
+                      </WizardProvider>
                     </Router>
                   </CollaborationProvider>
                 </UIFrameworkProvider>
+                </VersionControlProvider>
               </WorkspaceProvider>
               </EnablerProvider>
             </ApprovalProvider>

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # =============================================================================
-# UbeCode Documentation Reorganization Script
+# IntentR Documentation Reorganization Script
 # =============================================================================
 # This script reorganizes markdown files from the root directory into a
 # structured docs/ folder hierarchy.
@@ -32,7 +32,7 @@ if [[ "$1" == "--execute" ]]; then
 fi
 
 echo -e "${BLUE}=============================================${NC}"
-echo -e "${BLUE}  UbeCode Documentation Reorganization${NC}"
+echo -e "${BLUE}  IntentR Documentation Reorganization${NC}"
 echo -e "${BLUE}=============================================${NC}"
 echo ""
 
@@ -177,7 +177,7 @@ echo ""
 echo -e "${YELLOW}The following files need manual review:${NC}"
 echo ""
 echo "  1. DEVELOPMENT_GUIDE.md"
-echo "     - Check if content overlaps with CODE_RULES/SAWai.md"
+echo "     - Check if content overlaps with CODE_RULES/INTENT.md"
 echo "     - If unique content exists, move to docs/getting-started/"
 echo "     - Otherwise, consider removing"
 echo ""

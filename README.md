@@ -1,11 +1,11 @@
 
-# UbeCode - Design- and Capability-Driven Software Development
+# IntentR - Design- and Capability-Driven Software Development
 
 ## What it is and why it matters
-UbeCode is an open-source platform for DESIGN- and CAPABILITY-driven software development, treating capabilities as the structural backbone that connects specification, design, delivery, and AI governance.
+IntentR is an open-source platform for DESIGN- and CAPABILITY-driven software development, treating capabilities as the structural backbone that connects specification, design, delivery, and AI governance.
 
 
-## Why UbeCode Exists
+## Why IntentR Exists
 Modern software teams operate across an increasingly fragmented toolchain—design systems, backlogs, repositories, AI assistants, and collaboration tools—none of which share a common understanding of what the system is actually intended to do.
 
 This fragmentation was tolerable when delivery speed was constrained by human implementation. With AI-assisted development, that constraint has shifted.
@@ -13,12 +13,12 @@ This fragmentation was tolerable when delivery speed was constrained by human im
 As AI accelerates code generation, the primary bottleneck is no longer execution—it is specification.
 Most existing agile and scaled agile frameworks were not designed for this reality. They optimize for managing work, not for expressing intent, governing AI behavior, or preserving architectural clarity at scale.
 
-UbeCode is built around SAWai (Scaled Agile With AI)—an evolution of scaled agile practices specifically designed for AI-amplified software development.
+IntentR is built around INTENT (Scaled Agile With AI)—an evolution of scaled agile practices specifically designed for AI-amplified software development.
 
-### What is SAWai
-**SAWai (Scaled Agile With AI)** is an evolution of traditional scaled agile frameworks designed specifically for AI-assisted development. Key principles:
+### What is INTENT
+**INTENT (Scaled Agile With AI)** is an evolution of traditional scaled agile frameworks designed specifically for AI-assisted development. Key principles:
 
-- **Specification-First**: With AI accelerating code generation, the bottleneck shifts to specification quality. SAWai emphasizes thorough Vision, Ideation, and Storyboarding before implementation.
+- **Specification-First**: With AI accelerating code generation, the bottleneck shifts to specification quality. INTENT emphasizes thorough Vision, Ideation, and Storyboarding before implementation.
 - **Five-Phase Workflow**:
   1. **CONCEPTION** - Define what to build (Product Vision, Ideation, Storyboard)
   2. **DEFINITION** - Define the scope (Capabilities, Enablers, Narrative/Story Map)
@@ -31,25 +31,25 @@ UbeCode is built around SAWai (Scaled Agile With AI)—an evolution of scaled ag
 
 
 ## Quick Start
-UbeCode is designed to be explored quickly, without requiring deep setup or prior framework knowledge.
+IntentR is designed to be explored quickly, without requiring deep setup or prior framework knowledge.
 Prerequisites
 Git
 Node.js (LTS)
 Docker (recommended for local and cloud environments)
 1. Clone the Repository
-git clone https://github.com/jareynolds/ubecode.git
-cd ubecode
+git clone https://github.com/jareynolds/intentr.git
+cd intentr
 2. Set Up Your Development Environment
-UbeCode provides environment-specific setup scripts to streamline local and cloud development.
+IntentR provides environment-specific setup scripts to streamline local and cloud development.
 Choose the script that matches your environment:
 ./setup-osx-environment.sh
 ./setup-aws-environment.sh
 (more env coming in the future)
-Each script installs required dependencies, configures services, and prepares the environment for running UbeCode. Refer to the script contents if you need to customize or extend the setup for your environment.
+Each script installs required dependencies, configures services, and prepares the environment for running IntentR. Refer to the script contents if you need to customize or extend the setup for your environment.
 3. Start the Platform
 ./start.sh
 This launches:
-+ The UbeCode web UI
++ The IntentR web UI
 + Core backend services
 + A local development workspace
 4. Open the Web Interface
@@ -60,7 +60,7 @@ You can now:
 - Capture specification and design artifacts
 - Generate AI-powered test scenarios
 - Explore how capabilities structure delivery and AI governance
-5. Explore the SAWai Workflow
+5. Explore the INTENT Workflow
 Begin in the Conception phase:
 - Define vision, ideation, and storyboards
 - Get phase approval before proceeding
@@ -77,21 +77,21 @@ Interested in contributing?
 Browse issues labeled good-first-issue
 Review the architecture overview
 Open a discussion or submit a pull request
-UbeCode is built in the open and welcomes contributions across engineering, design systems, and AI governance.
+IntentR is built in the open and welcomes contributions across engineering, design systems, and AI governance.
 
 
 ## Env
-A GoLang-based microservices application for massively streamlined comprehensive software development using the **SAWai (Scaled Agile With AI)** methodology.
+A GoLang-based microservices application for massively streamlined comprehensive software development using the **INTENT (Scaled Agile With AI)** methodology.
 
-## SAWai Principles
+## INTENT Principles
 
-SAWai is based on several core principles:
+INTENT is based on several core principles:
 
 **Specification-first development**
 When AI can generate implementation rapidly, the quality of vision, ideation, and specification becomes the dominant success factor.
 
 **A structured, five-phase workflow**
-SAWai formalizes the lifecycle of software intent and delivery into five explicit phases:
+INTENT formalizes the lifecycle of software intent and delivery into five explicit phases:
 - **Conception** — Define what to build (Vision, Ideation, Storyboarding)
 - **Definition** — Define the scope (Capabilities, Enablers, Narrative)
 - **Design** — Define how it looks and behaves (UI assets, frameworks, styles, designer tools)
@@ -99,7 +99,7 @@ SAWai formalizes the lifecycle of software intent and delivery into five explici
 - **Implementation** — Build and run (System, AI Principles, Code, Runtime)
 
 **Capability-driven hierarchy**
-SAWai simplifies traditional agile hierarchies by treating capabilities as the primary unit of intent, with enablers representing technical implementations and requirements serving as execution specifications. No Epics needed—AI handles the complexity that traditionally required Epic-level grouping.
+INTENT simplifies traditional agile hierarchies by treating capabilities as the primary unit of intent, with enablers representing technical implementations and requirements serving as execution specifications. No Epics needed—AI handles the complexity that traditionally required Epic-level grouping.
 
 **AI-amplified delivery with governance**
 AI is not an add-on tool, but a governed participant in the development process, guided by explicit principles, constraints, and traceability back to the capabilities it affects. Each phase includes approval gates for human oversight.
@@ -108,11 +108,11 @@ AI is not an add-on tool, but a governed participant in the development process,
 Every phase includes a dedicated approval page where stakeholders can review, approve, or reject items before progressing to the next phase. Rejections are tracked and surfaced in the sidebar navigation.
 
 Existing tools struggle to support this model because they are artifact-centric—tickets, boards, files, and pipelines—rather than capability-centric.
-UbeCode exists to provide a unified, open-source platform that operationalizes SAWai by making capabilities the first-class abstraction that connects specification, design, testing, delivery, collaboration, and AI governance in a single, coherent system.
+IntentR exists to provide a unified, open-source platform that operationalizes INTENT by making capabilities the first-class abstraction that connects specification, design, testing, delivery, collaboration, and AI governance in a single, coherent system.
 
 ## Overview
 
-UbeCode is a web application that facilitates capability-driven software development by providing:
+IntentR is a web application that facilitates capability-driven software development by providing:
 
 - **Web UI** - Modern React-based interface with design system
 - **Design Service** - Manages design artifacts and versioning
@@ -128,7 +128,7 @@ UbeCode is a web application that facilitates capability-driven software develop
 
 ## AI-Powered Features
 
-UbeCode integrates AI throughout the development workflow:
+IntentR integrates AI throughout the development workflow:
 
 - **AI Chat Assistant** - Context-aware AI assistant for development questions and guidance
 - **Test Scenario Generation** - Automatically generates BDD/Gherkin test scenarios from enabler specifications
@@ -192,8 +192,8 @@ The application follows a microservices architecture pattern where each service:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/jareynolds/ubecode.git
-cd ubecode
+git clone https://github.com/jareynolds/intentr.git
+cd intentr
 ```
 
 ### 2. Set Up Environment Variables
@@ -213,9 +213,9 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 # Database (defaults shown - override if needed)
 DB_HOST=localhost
 DB_PORT=6432
-DB_USER=ubecode_user
-DB_PASSWORD=ubecode_pass
-DB_NAME=ubecode_db
+DB_USER=intentr_user
+DB_PASSWORD=intentr_pass
+DB_NAME=intentr_db
 ```
 
 **Getting API Keys:**
@@ -396,7 +396,7 @@ After running `./start.sh`, the application will be available at:
 
 ### Database
 
-- **PostgreSQL** (Port 6432): `localhost:6432` (user: ubecode_user, db: ubecode_db)
+- **PostgreSQL** (Port 6432): `localhost:6432` (user: intentr_user, db: intentr_db)
 
 ## Testing
 
@@ -426,13 +426,13 @@ The database is automatically initialized when using Docker. For manual setup:
 
 ```bash
 # Connect to PostgreSQL (via Docker)
-docker compose exec postgres psql -U ubecode_user -d ubecode_db
+docker compose exec postgres psql -U intentr_user -d intentr_db
 
 # Initialize schema manually (if needed)
-docker compose exec -T postgres psql -U ubecode_user -d ubecode_db < scripts/init-db.sql
+docker compose exec -T postgres psql -U intentr_user -d intentr_db < scripts/init-db.sql
 
 # Run approval workflow migration (REQUIRED for phase approvals)
-docker compose exec -T postgres psql -U ubecode_user -d ubecode_db < scripts/migration_approval.sql
+docker compose exec -T postgres psql -U intentr_user -d intentr_db < scripts/migration_approval.sql
 ```
 
 **Note**: The approval workflow migration creates tables for:
@@ -445,7 +445,7 @@ docker compose exec -T postgres psql -U ubecode_user -d ubecode_db < scripts/mig
 ### Project Structure
 
 ```
-ubecode/
+intentr/
 ├── web-ui/                # React Web UI
 │   ├── src/
 │   │   ├── api/          # Backend API clients
@@ -461,7 +461,7 @@ ubecode/
 │   ├── capability-service/ # Capability & approval service
 │   ├── integration-service/ # Figma & AI integration
 │   ├── claude-proxy/     # Claude CLI proxy service
-│   └── ubecli/           # UbeCode CLI tool
+│   └── ubecli/           # IntentR CLI tool
 ├── internal/              # Private application code
 │   ├── auth/             # Auth handlers & logic
 │   ├── design/           # Design handlers
@@ -473,7 +473,7 @@ ubecode/
 │   ├── middleware/       # HTTP middleware (auth, CORS)
 │   └── repository/       # Data access layer
 ├── workspaces/           # User workspaces (capabilities, enablers, tests)
-├── CODE_RULES/           # SAWai methodology documentation
+├── CODE_RULES/           # INTENT methodology documentation
 │   └── MAIN_SWDEV_PLAN.md # Main development plan
 ├── scripts/              # Build and utility scripts
 │   ├── init-db.sql       # Initial database schema
@@ -517,15 +517,15 @@ make lint
 ## Documentation
 
 - [CLAUDE.md](CLAUDE.md) - AI assistant context and quick reference
-- [SAWai Development Plan](CODE_RULES/MAIN_SWDEV_PLAN.md) - Complete SAWai methodology and workflows
+- [INTENT Development Plan](CODE_RULES/MAIN_SWDEV_PLAN.md) - Complete INTENT methodology and workflows
 - [API Documentation](docs/api/API.md) - API specifications
 - [Role-Based Access Control](docs/ROLE_BASED_ACCESS_CONTROL.md) - RBAC system documentation
 - [Real-time Collaboration](docs/REALTIME_COLLABORATION.md) - Collaboration features
-- [Contributions Guide](CONTRIBUTIONS.md) - How to contribute to UbeCode
+- [Contributions Guide](CONTRIBUTIONS.md) - How to contribute to IntentR
 
-## SAWai Framework
+## INTENT Framework
 
-This project follows the **SAWai (Scaled Agile With AI)** capability-driven approach:
+This project follows the **INTENT (Scaled Agile With AI)** capability-driven approach:
 
 **Hierarchy:**
 1. **Strategic Themes** - Business objectives and direction
@@ -555,7 +555,7 @@ We welcome contributions! Please follow these guidelines:
 
 ### Development Workflow
 
-This project follows the **SAWai methodology**. Before implementing features:
+This project follows the **INTENT methodology**. Before implementing features:
 1. Review [CODE_RULES/MAIN_SWDEV_PLAN.md](CODE_RULES/MAIN_SWDEV_PLAN.md) for the development workflow
 2. Check if specifications exist in `specifications/` folder
 3. Follow the Capability → Enabler → Requirement hierarchy
@@ -617,7 +617,7 @@ Example: `feat: add workspace export functionality`
 If you discover a security vulnerability, please:
 
 1. **Do NOT** open a public issue
-2. Email security concerns to: ubecodesoftware@gmail.com
+2. Email security concerns to: intentrsoftware@gmail.com
 3. Include detailed steps to reproduce
 4. Allow 48 hours for initial response
 
@@ -630,13 +630,13 @@ If you discover a security vulnerability, please:
 
 ## License
 
-# UbeCode — Dual Licensed (AGPLv3 or Commercial)
+# IntentR — Dual Licensed (AGPLv3 or Commercial)
 
-UbeCode is available under a **dual-licensing model**:
+IntentR is available under a **dual-licensing model**:
 
 ### 🔓 Open Source License: AGPLv3
-You may use UbeCode under the GNU Affero General Public License v3.
-If you modify UbeCode or build a system that uses it and make it available
+You may use IntentR under the GNU Affero General Public License v3.
+If you modify IntentR or build a system that uses it and make it available
 to others (including over a network), you **must** release your complete
 source code under the AGPLv3.
 
@@ -645,30 +645,30 @@ See: LICENSE.AGPL
 ### 💼 Commercial License
 If your company wants to:
 - keep its source code proprietary,
-- embed UbeCode into closed-source products,
-- run UbeCode as part of a SaaS platform without releasing your code,
+- embed IntentR into closed-source products,
+- run IntentR as part of a SaaS platform without releasing your code,
 - receive support, SLA, or custom terms,
 
 you must purchase a **commercial license**.
 
 See: LICENSE.COMMERCIAL
-Contact: ubecodesoftware@gmail.com
+Contact: intentrsoftware@gmail.com
 
 ### ⚠️ You must choose *one* license.
-Using UbeCode without complying with AGPLv3 or without a commercial license
+Using IntentR without complying with AGPLv3 or without a commercial license
 is a violation of copyright law.
 
 
 ## Contact
 
 
-Project Link: [https://github.com/jareynolds/ubecode](https://github.com/jareynolds/ubecode)
-Email: ubecodesoftware@gmail.com
+Project Link: [https://github.com/jareynolds/intentr](https://github.com/jareynolds/intentr)
+Email: intentrsoftware@gmail.com
 
 
 ## Acknowledgments
 
-- SAWai methodology - Scaled Agile With AI (inspired by SAFe, evolved for AI-assisted development)
+- INTENT methodology - Scaled Agile With AI (inspired by SAFe, evolved for AI-assisted development)
 - [Figma API](https://www.figma.com/developers/api)
 - [Go Programming Language](https://golang.org/)
 - [Docker](https://www.docker.com/)

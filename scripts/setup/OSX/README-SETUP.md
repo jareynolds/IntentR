@@ -1,6 +1,6 @@
-# UbeCode Microservices - macOS Setup Guide
+# IntentR Microservices - macOS Setup Guide
 
-Complete guide for setting up the UbeCode microservices environment on macOS.
+Complete guide for setting up the IntentR microservices environment on macOS.
 
 ## Table of Contents
 
@@ -16,14 +16,14 @@ Complete guide for setting up the UbeCode microservices environment on macOS.
 
 ## Overview
 
-This directory contains scripts and documentation for setting up the UbeCode microservices environment on macOS. The setup includes:
+This directory contains scripts and documentation for setting up the IntentR microservices environment on macOS. The setup includes:
 
 - **System Dependencies**: Git, wget, curl, make, jq, etc.
 - **Homebrew**: macOS package manager
 - **Docker Desktop**: Container runtime with Docker Compose
 - **Go 1.24+**: Programming language runtime
 - **Node.js**: For web UI development
-- **UbeCode Services**: Microservices (Integration, Design, Capability, Auth)
+- **IntentR Services**: Microservices (Integration, Design, Capability, Auth)
 
 ### Supported macOS Versions
 
@@ -67,8 +67,8 @@ This directory contains scripts and documentation for setting up the UbeCode mic
 
 ```bash
 # Clone the repository
-git clone https://github.com/jareynolds/ubecode.git
-cd ubecode
+git clone https://github.com/jareynolds/intentr.git
+cd intentr
 
 # Make scripts executable
 chmod +x scripts/setup/OSX/*.sh
@@ -82,7 +82,7 @@ chmod +x scripts/setup/OSX/*.sh
 Run scripts in numerical order (each script skips already-installed components):
 
 ```bash
-cd ubecode
+cd intentr
 chmod +x scripts/setup/OSX/*.sh
 
 # Step 1: Install dependencies
@@ -266,7 +266,7 @@ Create and configure the `.env` file:
 Create `.env` file in project root:
 
 ```bash
-# UbeCode Environment Configuration
+# IntentR Environment Configuration
 
 # API Keys
 FIGMA_TOKEN=figd_your_token_here
@@ -282,9 +282,9 @@ CAPABILITY_SERVICE_PORT=9082
 # Database
 POSTGRES_HOST=localhost
 POSTGRES_PORT=6432
-POSTGRES_USER=ubecode_user
-POSTGRES_PASSWORD=ubecode_password
-POSTGRES_DB=ubecode_db
+POSTGRES_USER=intentr_user
+POSTGRES_PASSWORD=intentr_password
+POSTGRES_DB=intentr_db
 
 # Application
 ENV=development
@@ -613,7 +613,7 @@ After setup, access these URLs:
 ## Support
 
 For issues and questions:
-- GitHub Issues: https://github.com/jareynolds/ubecode/issues
+- GitHub Issues: https://github.com/jareynolds/intentr/issues
 - Project Documentation: See README.md
 
 ---

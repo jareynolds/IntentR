@@ -1,6 +1,6 @@
-# UbeCode Microservices - Quick Start Guide
+# IntentR Microservices - Quick Start Guide
 
-Get your UbeCode microservices environment up and running on AWS EC2 in 5 minutes!
+Get your IntentR microservices environment up and running on AWS EC2 in 5 minutes!
 
 ## Prerequisites
 
@@ -19,8 +19,8 @@ ssh -i your-key.pem ec2-user@your-instance-ip
 ### Step 2: Clone the Repository
 
 ```bash
-git clone https://github.com/jareynolds/ubecode.git
-cd ubecode
+git clone https://github.com/jareynolds/intentr.git
+cd intentr
 ```
 
 ### Step 3: Run the Setup Script
@@ -45,7 +45,7 @@ This will take 5-10 minutes and install:
 # Log out and back in to apply Docker permissions
 exit
 ssh -i your-key.pem ec2-user@your-instance-ip
-cd ubecode
+cd intentr
 
 # Configure environment (interactive)
 ./scripts/setup/configure-environment.sh
@@ -167,7 +167,7 @@ go version
 
 - **Full documentation**: `scripts/setup/README-SETUP.md`
 - **Main README**: `README.md`
-- **GitHub Issues**: https://github.com/jareynolds/ubecode/issues
+- **GitHub Issues**: https://github.com/jareynolds/intentr/issues
 
 ---
 

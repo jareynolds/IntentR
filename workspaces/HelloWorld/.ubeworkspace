@@ -6,12 +6,12 @@
   "figmaTeamUrl": "ttps://www.figma.com/files/team/1567988176582054443",
   "projectFolder": "workspaces/HelloWorld",
   "activeAIPreset": 3,
-  "selectedUIFramework": "tailwind",
+  "selectedUIFramework": "darkblue",
   "selectedUILayout": "dashboard-admin",
   "ownerId": "admin@ubecode.local",
   "ownerName": "System Administrator",
   "isShared": false,
   "createdAt": "2025-12-15T03:53:51.790Z",
-  "updatedAt": "2025-12-19T19:52:15.705Z",
+  "updatedAt": "2025-12-22T23:30:26.099Z",
   "version": "1.0"
 }

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { AIPresetIndicator } from '../components/AIPresetIndicator';
+import { AIPresetIndicator, PageHeader } from '../components';
 import { UIFrameworkIndicator } from '../components/UIFrameworkIndicator';
+import { WizardPageNavigation } from '../components/wizard';
 import { INTEGRATION_URL } from '../api/client';
 
 interface CodeFile {
@@ -32,7 +33,6 @@ export const Code: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [codeFiles, setCodeFiles] = useState<CodeFile[]>([]);
   const [approvalError, setApprovalError] = useState<string | null>(null);
-  const [additionalPrompt, setAdditionalPrompt] = useState<string>('');
   const [cliCommand, setCliCommand] = useState<string>(() => {
     const saved = localStorage.getItem('code_generation_cli_command');
     return saved || `Claude, please follow the ./CLAUDE.md file (if not already) and ./CODE_RULES/MAIN_SWDEV_PLAN.md and use the ./CODE_RULES/ACTIVE_AI_PRINCIPLES.md and develop the application from all the specification markdown files that are specified in the following order: 1.) first read through all the files in the ./conception folder. 2.) Next read through the markdowns in the ./definition folder. 3.) next read the markdown files in the ./design folder. 4.) Next read the markdowns in the ./implementation folder and place the developed files into a new ./code folder (if it doesn't exist, then create it). Please apply the currently active UI Framework that is active for this workspace found in the ./design/UI_Framework.md file and ./design/UI_Style.md file.`;
@@ -97,11 +97,11 @@ export const Code: React.FC = () => {
     }
 
     const phases = [
-      { key: `conception-approved-${currentWorkspace.id}`, name: 'Conception' },
-      { key: `definition-approved-${currentWorkspace.id}`, name: 'Definition' },
-      { key: `design-approved-${currentWorkspace.id}`, name: 'Design' },
-      { key: `implementation-approved-${currentWorkspace.id}`, name: 'Implementation' },
-      { key: `phaseApprovals_${currentWorkspace.id}_testing`, name: 'Testing' },
+      { key: `conception-approved-${currentWorkspace.id}`, name: 'Intent Declaration' },
+      { key: `definition-approved-${currentWorkspace.id}`, name: 'Formal Specification' },
+      { key: `design-approved-${currentWorkspace.id}`, name: 'Formal Specification (Design)' },
+      { key: `implementation-approved-${currentWorkspace.id}`, name: 'System Derivation' },
+      { key: `phaseApprovals_${currentWorkspace.id}_testing`, name: 'Continuous Validation' },
     ];
 
     const missingPhases: string[] = [];
@@ -117,8 +117,8 @@ export const Code: React.FC = () => {
       try {
         const data = JSON.parse(stored);
 
-        // For Conception, Definition, Design, Implementation - check if approved flag is true
-        if (phase.name !== 'Testing') {
+        // For Intent Declaration, Formal Specification, System Derivation - check if approved flag is true
+        if (phase.name !== 'Continuous Validation') {
           if (!data.approved) {
             missingPhases.push(phase.name);
           }
@@ -192,7 +192,6 @@ export const Code: React.FC = () => {
         body: JSON.stringify({
           workspacePath: currentWorkspace.projectFolder,
           command: cliCommand,
-          additionalPrompt: additionalPrompt || '',
         }),
         signal: abortControllerRef.current.signal,
       });
@@ -235,28 +234,18 @@ export const Code: React.FC = () => {
 
   return (
     <div className="page-container" style={{ padding: '16px' }}>
+      <WizardPageNavigation />
       <AIPresetIndicator />
       <UIFrameworkIndicator />
-
-      {/* Workspace Header */}
-      {currentWorkspace && (
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-      )}
-
-      <div className="page-header">
-        <h1 className="page-title">Code Generation</h1>
-        <p className="page-subtitle">
-          Generate application code from specifications using AI governance principles
-        </p>
+      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
+        <PageHeader
+          title="Code Generation"
+          quickDescription="Generate application code from specifications using AI governance principles."
+          detailedDescription="This page orchestrates code generation by sending your specifications to Claude CLI with the configured AI governance preset.
+The AI reads through your conception, definition, design, and implementation folders in sequence to generate code.
+All generated code respects the active UI Framework and AI Principles settings for your workspace."
+          workspaceName={currentWorkspace?.name}
+        />
       </div>
 
       {currentWorkspace && (
@@ -284,24 +273,6 @@ export const Code: React.FC = () => {
             />
             <p className="text-xs text-gray-500 mt-1">
               This command will be sent to Claude CLI. AI Preset: {currentWorkspace.activeAIPreset || 'Not set'} | UI Framework: {currentWorkspace.selectedUIFramework || 'None'}
-            </p>
-          </div>
-
-          <div className="mb-4">
-            <h4 className="font-medium mb-2">Additional Instructions (Optional)</h4>
-            <textarea
-              value={additionalPrompt}
-              onChange={(e) => setAdditionalPrompt(e.target.value)}
-              placeholder="Add any additional instructions or context to help with code generation..."
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm"
-              rows={4}
-              style={{
-                resize: 'vertical',
-                minHeight: '100px',
-              }}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              These instructions will be appended to the main code generation command
             </p>
           </div>
 

@@ -1,4 +1,4 @@
-// UbeCode - Copyright 2025 James Reynolds
+// IntentR - Copyright 2025 James Reynolds
 //
 // Prework Pipeline for UbeCLI
 // Orchestrates prompt transformation before sending to LLM
@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jareynolds/ubecode/cmd/ubecli/adapters"
-	"github.com/jareynolds/ubecode/cmd/ubecli/config"
+	"github.com/jareynolds/intentr/cmd/ubecli/adapters"
+	"github.com/jareynolds/intentr/cmd/ubecli/config"
 )
 
 // PipelineContext carries data through stages
@@ -172,7 +172,7 @@ func (p *Pipeline) stageRuleApplication(ctx context.Context, pctx *PipelineConte
 	return nil
 }
 
-// stageApprovalValidation checks SAWai approval requirements
+// stageApprovalValidation checks INTENT approval requirements
 func (p *Pipeline) stageApprovalValidation(ctx context.Context, pctx *PipelineContext) error {
 	// Check if prompt references enablers or capabilities
 	pattern := regexp.MustCompile(`(CAP|ENB)-\d{6}`)

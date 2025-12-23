@@ -1,8 +1,8 @@
-# UbeCode Authentication System
+# IntentR Authentication System
 
 ## Overview
 
-The UbeCode application now includes a comprehensive authentication system with user management capabilities. This system supports local authentication with encrypted password storage and JWT-based session management.
+The IntentR application now includes a comprehensive authentication system with user management capabilities. This system supports local authentication with encrypted password storage and JWT-based session management.
 
 ## Features
 
@@ -31,8 +31,8 @@ The UbeCode application now includes a comprehensive authentication system with 
 ### Database
 
 **PostgreSQL** (Port 5432)
-- Database: `ubecode_db`
-- User: `ubecode_user`
+- Database: `intentr_db`
+- User: `intentr_user`
 - Tables:
   - `users` - User accounts with encrypted passwords
   - `sessions` - Session tracking (future enhancement)
@@ -67,7 +67,7 @@ The UbeCode application now includes a comprehensive authentication system with 
    - Auth Service: http://localhost:8083
 
 3. **Login with default admin account**:
-   - Email: `admin@ubecode.local`
+   - Email: `admin@intentr.local`
    - Password: `admin123`
    - **IMPORTANT**: Change this password after first login!
 
@@ -80,7 +80,7 @@ Create a `.env` file in the project root:
 JWT_SECRET=your-secret-key-change-in-production
 
 # Database (used by auth-service)
-DATABASE_URL=postgres://ubecode_user:ubecode_password@postgres:5432/ubecode_db?sslmode=disable
+DATABASE_URL=postgres://intentr_user:intentr_password@postgres:5432/intentr_db?sslmode=disable
 
 # Figma Integration (optional)
 FIGMA_TOKEN=your-figma-token
@@ -117,7 +117,7 @@ FIGMA_TOKEN=your-figma-token
 ```bash
 curl -X POST http://localhost:8083/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@ubecode.local","password":"admin123"}'
+  -d '{"email":"admin@intentr.local","password":"admin123"}'
 ```
 
 Response:
@@ -126,7 +126,7 @@ Response:
   "token": "eyJhbGciOiJIUzI1NiIs...",
   "user": {
     "id": 1,
-    "email": "admin@ubecode.local",
+    "email": "admin@intentr.local",
     "name": "System Administrator",
     "role": "admin",
     "isActive": true,
@@ -245,7 +245,7 @@ function AdminFeature() {
 - Check database initialization: `docker-compose logs postgres`
 - Connect to database and verify user exists:
   ```bash
-  docker-compose exec postgres psql -U ubecode_user -d ubecode_db -c "SELECT * FROM users;"
+  docker-compose exec postgres psql -U intentr_user -d intentr_db -c "SELECT * FROM users;"
   ```
 
 ### Permission denied errors
@@ -259,7 +259,7 @@ Before deploying to production:
 
 1. **Change default admin password** immediately after first login
 2. **Set strong JWT_SECRET** environment variable (use a long random string)
-3. **Use strong database password** (change from default `ubecode_password`)
+3. **Use strong database password** (change from default `intentr_password`)
 4. **Enable SSL/TLS** for database connections
 5. **Use HTTPS** for the frontend
 6. **Configure proper CORS** settings (don't use `*` in production)

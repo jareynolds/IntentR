@@ -266,7 +266,7 @@ Only after design phase complete:
 - Design System: https://vest-hazel-54208462.figma.site
 
 **Current Approach**:
-The existing Ford Design System from `uploaded-assets/ubecode-design-system.html` has been used. However, the specification now references a different design system URL.
+The existing Ford Design System from `uploaded-assets/intentr-design-system.html` has been used. However, the specification now references a different design system URL.
 
 **Options**:
 1. **Keep current Ford Design System** - Maintain consistency with existing implementation

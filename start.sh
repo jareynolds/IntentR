@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# UbeCode Application Startup Script
-# This script starts all services required for the UbeCode application
+# IntentR Application Startup Script
+# This script starts all services required for the IntentR application
 # Usage: ./start.sh [options]
 #   Options:
 #     --build    Force rebuild of Docker containers
@@ -72,7 +72,7 @@ mkdir -p "$LOG_DIR"
 mkdir -p "$PID_DIR"
 
 echo -e "${BOLD}${BLUE}========================================${NC}"
-echo -e "${BOLD}${BLUE}  UbeCode Application Startup${NC}"
+echo -e "${BOLD}${BLUE}  IntentR Application Startup${NC}"
 echo -e "${BOLD}${BLUE}========================================${NC}"
 echo ""
 
@@ -250,7 +250,7 @@ echo -e "${YELLOW}Waiting for Docker services to be healthy...${NC}"
 echo -ne "${CYAN}  Checking PostgreSQL...${NC}"
 attempt=0
 while [ $attempt -lt 30 ]; do
-    if docker compose exec -T postgres pg_isready -U ubecode_user -d ubecode_db > /dev/null 2>&1; then
+    if docker compose exec -T postgres pg_isready -U intentr_user -d intentr_db > /dev/null 2>&1; then
         echo -e " ${GREEN}✓${NC}"
         break
     fi
@@ -414,7 +414,7 @@ cd "$ROOT_DIR"
 
 echo ""
 echo -e "${BOLD}${GREEN}========================================${NC}"
-echo -e "${BOLD}${GREEN}  UbeCode Application Started!${NC}"
+echo -e "${BOLD}${GREEN}  IntentR Application Started!${NC}"
 echo -e "${BOLD}${GREEN}========================================${NC}"
 echo ""
 echo -e "${BOLD}Service URLs:${NC}"

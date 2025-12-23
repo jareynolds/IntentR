@@ -54,7 +54,7 @@ Added script:
 ./start.sh
 
 # The script will show:
-# ✅ UbeCode is running!
+# ✅ IntentR is running!
 #
 # 📍 Service URLs:
 #    - Web UI:              http://localhost:5173

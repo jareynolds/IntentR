@@ -3,7 +3,7 @@
 ################################################################################
 # System Dependencies Installation Script
 ################################################################################
-# This script installs system dependencies required for UbeCode microservices
+# This script installs system dependencies required for IntentR microservices
 #
 # Usage:
 #   sudo ./install-dependencies.sh

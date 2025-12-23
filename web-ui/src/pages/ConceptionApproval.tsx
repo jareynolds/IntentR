@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Alert, Button } from '../components';
+import { Card, Alert, Button, PageHeader } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -677,11 +677,15 @@ export const ConceptionApproval: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Conception Phase Approval</h1>
-        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
-          Review and approve all conception phase items before proceeding to Definition.
-        </p>
+      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
+        <PageHeader
+          title="Intent Declaration Phase Approval"
+          quickDescription="Review and approve all intent declaration phase items before proceeding."
+          detailedDescription="The Intent Declaration phase includes Vision documents, Ideation boards, and Storyboard cards.
+Each item must be individually reviewed and approved before the phase can be marked complete.
+Rejected items need revision before they can be approved. All items must be approved with no rejections to proceed."
+          workspaceName={currentWorkspace?.name}
+        />
       </div>
 
       {/* Phase Status Overview */}
@@ -719,7 +723,7 @@ export const ConceptionApproval: React.FC = () => {
           <div style={{ flex: 1 }}>
             <h3 className="text-title2" style={{ marginBottom: '8px' }}>
               {conceptionApproved
-                ? 'Conception Phase Approved'
+                ? 'Intent Declaration Phase Approved'
                 : getTotalRejected() > 0
                   ? 'Items Need Revision'
                   : canApprovePhase()
@@ -741,7 +745,7 @@ export const ConceptionApproval: React.FC = () => {
             {conceptionApproved ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
                 <Button variant="primary" onClick={() => navigate('/capabilities')}>
-                  Proceed to Definition
+                  Proceed to Formal Specification
                 </Button>
                 <button
                   onClick={handleRevokeApproval}
@@ -762,7 +766,7 @@ export const ConceptionApproval: React.FC = () => {
                 onClick={handleApproveConception}
                 disabled={!canApprovePhase()}
               >
-                Approve Conception Phase
+                Approve Intent Declaration Phase
               </Button>
             )}
           </div>
@@ -772,14 +776,14 @@ export const ConceptionApproval: React.FC = () => {
       {/* Workspace check */}
       {!currentWorkspace?.projectFolder && (
         <Alert type="warning" style={{ marginBottom: '24px' }}>
-          Please set a project folder for this workspace to review conception items.
+          Please set a project folder for this workspace to review intent declaration items.
         </Alert>
       )}
 
       {/* No Items Yet - Getting Started */}
       {!loading && getTotalItems() === 0 && currentWorkspace?.projectFolder && (
         <Alert type="info" style={{ marginBottom: '24px' }}>
-          <strong>No conception items found yet.</strong>
+          <strong>No intent declaration items found yet.</strong>
           <p style={{ margin: '8px 0 0 0' }}>
             To get started, create items in each section:
           </p>
@@ -810,7 +814,7 @@ export const ConceptionApproval: React.FC = () => {
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px' }}>
-          <p className="text-body text-secondary">Loading conception items...</p>
+          <p className="text-body text-secondary">Loading intent declaration items...</p>
         </div>
       ) : (
         <>
@@ -821,10 +825,10 @@ export const ConceptionApproval: React.FC = () => {
         </>
       )}
 
-      {/* SAWai Info */}
+      {/* INTENT Info */}
       <Alert type="info" style={{ marginTop: '24px' }}>
-        <strong>SAWai Conception Phase:</strong> The conception phase establishes the foundation for your project.
-        Before proceeding to Definition (Capabilities & Enablers), ensure all vision themes, ideas, and storyboards
+        <strong>INTENT Intent Declaration Phase:</strong> The intent declaration phase establishes the foundation for your project.
+        Before proceeding to Formal Specification (Capabilities & Enablers), ensure all vision themes, ideas, and storyboards
         have been reviewed and approved. This gate ensures alignment on what you're building before defining how.
       </Alert>
 

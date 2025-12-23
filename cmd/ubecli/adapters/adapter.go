@@ -1,4 +1,4 @@
-// UbeCode - Copyright 2025 James Reynolds
+// IntentR - Copyright 2025 James Reynolds
 //
 // LLM Adapter Interface for UbeCLI
 // Provides a pluggable interface for different LLM backends

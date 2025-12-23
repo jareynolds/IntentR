@@ -1,4 +1,4 @@
-// UbeCode - Copyright 2025 James Reynolds
+// IntentR - Copyright 2025 James Reynolds
 //
 // Mock Adapter for UbeCLI Testing
 // Provides predictable responses for testing without LLM calls

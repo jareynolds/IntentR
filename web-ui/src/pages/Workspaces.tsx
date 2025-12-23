@@ -4,6 +4,7 @@ import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { AIPresetIndicator } from '../components/AIPresetIndicator';
 import { WorkspaceIntegrations } from '../components/WorkspaceIntegrations';
+import { WorkspaceVersionControl } from '../components/WorkspaceVersionControl';
 import { FolderBrowser } from '../components/FolderBrowser';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -52,9 +53,11 @@ export const Workspaces: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showIntegrationsModal, setShowIntegrationsModal] = useState(false);
+  const [showVersionControlModal, setShowVersionControlModal] = useState(false);
   const [showFolderBrowser, setShowFolderBrowser] = useState(false);
   const [editingWorkspace, setEditingWorkspace] = useState<string | null>(null);
   const [selectedWorkspaceForIntegrations, setSelectedWorkspaceForIntegrations] = useState<any>(null);
+  const [selectedWorkspaceForVersionControl, setSelectedWorkspaceForVersionControl] = useState<any>(null);
   const [selectingFolderFor, setSelectingFolderFor] = useState<string | null>(null);
   const [scannedWorkspaces, setScannedWorkspaces] = useState<ScannedWorkspace[]>([]);
   const [isScanning, setIsScanning] = useState(false);
@@ -217,6 +220,11 @@ export const Workspaces: React.FC = () => {
   const openIntegrationsModal = (workspace: any) => {
     setSelectedWorkspaceForIntegrations(workspace);
     setShowIntegrationsModal(true);
+  };
+
+  const openVersionControlModal = (workspace: any) => {
+    setSelectedWorkspaceForVersionControl(workspace);
+    setShowVersionControlModal(true);
   };
 
   const openFolderBrowser = (workspaceId: string) => {
@@ -411,6 +419,13 @@ export const Workspaces: React.FC = () => {
                     style={{ flex: '1 1 auto', fontSize: '15px', padding: '8px 12px' }}
                   >
                     🔗 Integrations
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => openVersionControlModal(workspace)}
+                    style={{ flex: '1 1 auto', fontSize: '15px', padding: '8px 12px' }}
+                  >
+                    🔀 Version Control
                   </Button>
                   <Button
                     variant={workspace.isShared ? "secondary" : "outline"}
@@ -936,6 +951,17 @@ export const Workspaces: React.FC = () => {
           onClose={() => {
             setShowFolderBrowser(false);
             setSelectingFolderFor(null);
+          }}
+        />
+      )}
+
+      {/* Version Control Modal */}
+      {showVersionControlModal && selectedWorkspaceForVersionControl && (
+        <WorkspaceVersionControl
+          workspace={selectedWorkspaceForVersionControl}
+          onClose={() => {
+            setShowVersionControlModal(false);
+            setSelectedWorkspaceForVersionControl(null);
           }}
         />
       )}

@@ -3,7 +3,7 @@
 ################################################################################
 # System Dependencies Installation Script for macOS
 ################################################################################
-# This script installs system dependencies required for UbeCode microservices
+# This script installs system dependencies required for IntentR microservices
 #
 # Prerequisites:
 #   - macOS 11 (Big Sur) or later

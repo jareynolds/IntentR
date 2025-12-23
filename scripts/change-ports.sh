@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# UbeCode Port Configuration Script
+# IntentR Port Configuration Script
 # This script allows administrators to change all service ports to avoid conflicts
 # Usage: ./scripts/change-ports.sh
 
@@ -18,7 +18,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}UbeCode Port Configuration Tool${NC}"
+echo -e "${BLUE}IntentR Port Configuration Tool${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 

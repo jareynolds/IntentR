@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ################################################################################
-# UbeCode Microservices Environment Setup Script for macOS
+# IntentR Microservices Environment Setup Script for macOS
 ################################################################################
 # This is the MAIN setup script that runs all installation steps in sequence.
 #
@@ -74,7 +74,7 @@ step() {
 # Create log directory
 setup_logging() {
     mkdir -p "$(dirname "$LOG_FILE")"
-    echo "=== UbeCode macOS Setup Log ===" > "$LOG_FILE"
+    echo "=== IntentR macOS Setup Log ===" > "$LOG_FILE"
     echo "Started: $(date)" >> "$LOG_FILE"
     echo "" >> "$LOG_FILE"
 }
@@ -375,7 +375,7 @@ validate_installation() {
 display_completion() {
     echo ""
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${GREEN}  UbeCode macOS Setup Complete!${NC}"
+    echo -e "${GREEN}  IntentR macOS Setup Complete!${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     info "Next steps:"
@@ -412,7 +412,7 @@ main() {
     clear
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${CYAN}  UbeCode Microservices Environment Setup for macOS${NC}"
+    echo -e "${CYAN}  IntentR Microservices Environment Setup for macOS${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 

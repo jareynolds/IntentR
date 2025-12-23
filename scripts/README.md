@@ -1,13 +1,13 @@
-# UbeCode Administration Scripts
+# IntentR Administration Scripts
 
-This directory contains utility scripts for system administrators to manage and configure the UbeCode application.
+This directory contains utility scripts for system administrators to manage and configure the IntentR application.
 
 ## Quick Start Scripts (Root Directory)
 
 These essential scripts are located in the root directory for easy access:
 
 ### `start.sh` ⭐
-Start the entire UbeCode application with one command.
+Start the entire IntentR application with one command.
 
 **Usage:**
 ```bash
@@ -25,7 +25,7 @@ Start the entire UbeCode application with one command.
 - Shows service URLs and status
 
 ### `stop.sh`
-Stop all UbeCode services cleanly.
+Stop all IntentR services cleanly.
 
 **Usage:**
 ```bash
@@ -143,7 +143,7 @@ Quick reference guide for common port-related tasks.
 ### Check Current Port Usage
 
 ```bash
-# All UbeCode services
+# All IntentR services
 lsof -i :8080 -i :8081 -i :8082 -i :8083 -i :8084 -i :3001 -i :3002 -i :5173
 
 # Specific service
@@ -356,7 +356,7 @@ For production, consider using a reverse proxy:
 # nginx example
 server {
     listen 80;
-    server_name ubecode.example.com;
+    server_name intentr.example.com;
 
     location /api/integration {
         proxy_pass http://localhost:9080;

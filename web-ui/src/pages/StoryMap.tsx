@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Card, Alert, Button } from '../components';
+import { Card, Alert, Button, PageHeader } from '../components';
+import { WizardPageNavigation } from '../components/wizard';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -1195,6 +1196,7 @@ Only include capabilities that have a clear relationship to a storyboard. If a c
 
   return (
     <div className="story-map-page">
+      <WizardPageNavigation />
       <style>{`
         .story-map-page {
           padding: 0;
@@ -1490,13 +1492,18 @@ Only include capabilities that have a clear relationship to a storyboard. If a c
         }
       `}</style>
 
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Narrative</h1>
-          <p className="page-subtitle">
-            Hierarchical view: User Intent → Business Capabilities → Technical Enablers
-          </p>
-        </div>
+      <div style={{ padding: '16px', paddingBottom: 0 }}>
+        <PageHeader
+          title="Dependencies"
+          quickDescription="Hierarchical view: User Intent -> Business Capabilities -> Technical Enablers."
+          detailedDescription="This visualization shows how your storyboard cards (user intent) connect to capabilities and enablers.
+Drag to connect related items and visualize dependencies between different layers of your specification.
+Use this view to ensure all user stories are properly linked to technical implementations."
+          workspaceName={currentWorkspace?.name}
+        />
+      </div>
+      <div className="page-header" style={{ marginTop: 0, paddingTop: 0 }}>
+        <div></div>
         <div className="controls">
           <div className="zoom-controls">
             <span className="zoom-label">Zoom:</span>

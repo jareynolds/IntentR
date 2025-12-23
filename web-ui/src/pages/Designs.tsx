@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, AIPresetIndicator } from '../components';
+import { Card, Button, AIPresetIndicator, PageHeader } from '../components';
+import { WizardPageNavigation } from '../components/wizard';
 import { useWorkspace } from '../context/WorkspaceContext';
 import axios from 'axios';
 import { INTEGRATION_URL } from '../api/client';
@@ -223,22 +224,17 @@ export const Designs: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
+      <WizardPageNavigation />
       <AIPresetIndicator />
       <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-        <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Design Artifacts</h1>
-        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
-          Manage design files and assets
-        </p>
+        <PageHeader
+          title="Design Artifacts"
+          quickDescription="Manage design files and assets from Figma and other sources."
+          detailedDescription="Connect to your Figma team workspace to browse and select design files for your project.
+Selected design files are linked to your workspace and can be referenced when creating capabilities and features.
+Figma integration enables AI tools to understand visual requirements and generate consistent implementations."
+          workspaceName={currentWorkspace.name}
+        />
 
         {error && (
           <div style={{
@@ -249,35 +245,6 @@ export const Designs: React.FC = () => {
           }}>
             <p className="text-footnote" style={{ color: 'var(--color-systemRed)' }}>
               <strong>Error:</strong> {error}
-            </p>
-          </div>
-        )}
-
-        {/* Debug Info */}
-        {currentWorkspace?.figmaTeamUrl && (
-          <div style={{
-            padding: '12px',
-            backgroundColor: 'var(--color-systemBlue-light)',
-            borderRadius: '8px',
-            marginBottom: '16px',
-            border: '1px solid var(--color-systemBlue)'
-          }}>
-            <p className="text-footnote" style={{ color: 'var(--color-systemBlue)', marginBottom: '4px' }}>
-              <strong>🔍 Debug Info:</strong>
-            </p>
-            <p className="text-footnote" style={{ color: 'var(--color-label-primary)', fontFamily: 'monospace', fontSize: '11px' }}>
-              Team URL: {currentWorkspace.figmaTeamUrl}
-            </p>
-            <p className="text-footnote" style={{ color: 'var(--color-label-primary)', fontFamily: 'monospace', fontSize: '11px' }}>
-              Parsed Team ID: {currentWorkspace.figmaTeamUrl.includes('/team/')
-                ? currentWorkspace.figmaTeamUrl.split('/team/')[1]?.split('/')[0] || 'Not found'
-                : 'Invalid URL format'}
-            </p>
-            <p className="text-footnote" style={{ color: 'var(--color-label-primary)', fontFamily: 'monospace', fontSize: '11px' }}>
-              Figma Token: {figmaToken ? '✓ Configured' : '✗ Missing'}
-            </p>
-            <p className="text-footnote" style={{ color: 'var(--color-label-primary)', fontFamily: 'monospace', fontSize: '11px' }}>
-              Projects Found: {projects.length}
             </p>
           </div>
         )}

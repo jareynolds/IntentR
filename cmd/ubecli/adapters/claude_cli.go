@@ -1,4 +1,4 @@
-// UbeCode - Copyright 2025 James Reynolds
+// IntentR - Copyright 2025 James Reynolds
 //
 // Claude CLI Adapter for UbeCLI
 // Executes prompts via the local Claude CLI installation

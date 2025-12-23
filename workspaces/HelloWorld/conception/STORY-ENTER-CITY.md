@@ -7,11 +7,11 @@
 - **Status**: In Progress
 - **Grid Position X**: 570
 - **Grid Position Y**: 1194
-- **Generated**: 12/19/2025, 11:47:27 AM
+- **Generated**: 12/22/2025, 12:06:29 PM
 - **File**: STORY-ENTER-CITY.md
 
 ## Description
-Give the user the capability to manually select a city from popular cities from the drop down or even manually enter it.  After entering a new city, it will show it in the sidebar and also pull the weather via the api
+Give the user the capability to manually select a city from popular cities from the drop down or even manually enter it.  After entering a new city, it will show it in the sidebar and also pull the weather via the api.  the city name has to be checked for validity.
 
 ## Dependencies
 
@@ -20,7 +20,7 @@ This story card depends on the following cards being completed first:
 
 | Card Title | Card ID | Connection ID | File Reference |
 |------------|---------|---------------|----------------|
-| Navigation | card-1766171779671 | conn-card-1766171779671-card-1766171921085-1766171960476 | [STORY-NAVIGATION.md](./STORY-NAVIGATION.md) |
+| Provide Prompt field | card-1765940802459 | conn-card-1765940802459-card-1766171921085-1766433979577 | [STORY-PROVIDE-PROMPT-FIELD.md](./STORY-PROVIDE-PROMPT-FIELD.md) |
 
 ### Downstream Impact
 Completing this story card enables the following cards:

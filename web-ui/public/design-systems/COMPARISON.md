@@ -1,14 +1,14 @@
 # Design System Implementation Comparison
 
 ## Purpose
-This document compares the reverse-engineered design system files with the current UbeCode UI implementation to help debug styling issues.
+This document compares the reverse-engineered design system files with the current Intentr UI implementation to help debug styling issues.
 
 ## Available Files
 
-### 1. UbeCode Default / Figma Design System
-**File:** `/design-systems/ubecode-default-reverse-engineered.html`
+### 1. Intentr Default / Figma Design System
+**File:** `/design-systems/intentr-default-reverse-engineered.html`
 **Source:** Reverse-engineered from https://vest-hazel-54208462.figma.site/
-**CSS:** `/design-systems/ubecode ds_files/f9c3dafbf49c2a2d951bb41a41c3b88d36028835.css`
+**CSS:** `/design-systems/intentr ds_files/f9c3dafbf49c2a2d951bb41a41c3b88d36028835.css`
 
 ### 2. Ford Design System
 **File:** `/design-systems/ford-design-system.html`
@@ -102,7 +102,7 @@ This document compares the reverse-engineered design system files with the curre
 - `hover:bg-orange-600` - Darker on hover
 - `text-white` - White text
 
-## Current UbeCode Implementation
+## Current Intentr Implementation
 
 ### Card Component
 **Location:** `src/components/Card.tsx`
@@ -150,11 +150,11 @@ const classes = `
 ## Debugging Steps
 
 1. **Open Design System File:**
-   - Visit `/design-systems/ubecode-default-reverse-engineered.html`
+   - Visit `/design-systems/intentr-default-reverse-engineered.html`
    - Inspect a card element
    - Note computed CSS values in browser DevTools
 
-2. **Open UbeCode Dashboard:**
+2. **Open Intentr Dashboard:**
    - Visit `/` (Dashboard)
    - Inspect a card element
    - Compare computed CSS values
@@ -167,7 +167,7 @@ const classes = `
    - Compare fonts
 
 4. **CSS Loading:**
-   - Verify `/design-systems/ubecode ds_files/...css` loads correctly
+   - Verify `/design-systems/intentr ds_files/...css` loads correctly
    - Check for CSS conflicts
    - Ensure Tailwind CSS generates correct utilities
 
@@ -182,13 +182,13 @@ const classes = `
 - Subtle border
 - Shadow on hover
 
-### UbeCode UI Card (Current)
+### Intentr UI Card (Current)
 - Should match above exactly
 - If not, inspect computed styles in DevTools
 - Compare with design system HTML
 
 ## Links
 
-- **Design System (Reverse-Engineered):** [/design-systems/ubecode-default-reverse-engineered.html](/design-systems/ubecode-default-reverse-engineered.html)
+- **Design System (Reverse-Engineered):** [/design-systems/intentr-default-reverse-engineered.html](/design-systems/intentr-default-reverse-engineered.html)
 - **Ford Design System:** [/design-systems/ford-design-system.html](/design-systems/ford-design-system.html)
 - **Original Figma Site:** [https://vest-hazel-54208462.figma.site/](https://vest-hazel-54208462.figma.site/)

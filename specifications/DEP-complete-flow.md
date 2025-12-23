@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document provides a comprehensive view of all dependencies within the UbeCode application, showing how capabilities, enablers, and external services interact.
+This document provides a comprehensive view of all dependencies within the IntentR application, showing how capabilities, enablers, and external services interact.
 
 ## Capability-Level Dependencies
 
@@ -211,7 +211,7 @@ flowchart TD
         HF["Hugging Face<br/>Model Downloads"]
     end
 
-    subgraph DockerNetwork["ubecode-network"]
+    subgraph DockerNetwork["intentr-network"]
         INTEGRATION["Integration Service<br/>:8080"]
         DESIGN["Design Service<br/>:8081"]
         CAPABILITY["Capability Service<br/>:8082"]

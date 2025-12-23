@@ -69,7 +69,7 @@ export const Login: React.FC = () => {
               </svg>
             </div>
           </div>
-          <h3 className="text-grey-900 text-center text-2xl font-semibold">Welcome to UbeCode</h3>
+          <h3 className="text-grey-900 text-center text-2xl font-semibold">Welcome to INTENTR</h3>
           <p className="text-sm text-grey-500 text-center">Design-first development workflow management</p>
         </div>
 

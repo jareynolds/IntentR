@@ -1,8 +1,8 @@
-# UbeCode Web UI - Quick Start Guide
+# IntentR Web UI - Quick Start Guide
 
 ## Overview
 
-The UbeCode Web UI is now fully implemented with all 6 enablers completed:
+The IntentR Web UI is now fully implemented with all 6 enablers completed:
 
 - ✅ **ENB-173294** - React Application Bootstrap
 - ✅ **ENB-284951** - Ford Design System Integration
@@ -46,7 +46,7 @@ npm run preview
 ## Pages Available
 
 ### 1. Dashboard (/)
-- Overview of the UbeCode platform
+- Overview of the IntentR platform
 - Quick access cards to Capabilities, Designs, and Integrations
 
 ### 2. Capabilities (/capabilities)

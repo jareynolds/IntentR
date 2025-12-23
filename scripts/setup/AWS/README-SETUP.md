@@ -1,6 +1,6 @@
-# UbeCode Microservices - AWS EC2 Setup Guide
+# IntentR Microservices - AWS EC2 Setup Guide
 
-Complete guide for setting up the UbeCode microservices environment on AWS EC2 Linux instances.
+Complete guide for setting up the IntentR microservices environment on AWS EC2 Linux instances.
 
 ## Table of Contents
 
@@ -15,12 +15,12 @@ Complete guide for setting up the UbeCode microservices environment on AWS EC2 L
 
 ## Overview
 
-This directory contains scripts and documentation for setting up the UbeCode microservices environment on AWS EC2 Linux instances. The setup includes:
+This directory contains scripts and documentation for setting up the IntentR microservices environment on AWS EC2 Linux instances. The setup includes:
 
 - **System Dependencies**: Git, wget, curl, make, gcc, etc.
 - **Docker & Docker Compose**: Container runtime and orchestration
 - **Go 1.21+**: Programming language runtime
-- **UbeCode Services**: Three microservices (Design, Capability, Integration)
+- **IntentR Services**: Three microservices (Design, Capability, Integration)
 - **DELM Service** (optional): Image generation for UI Designer
 - **Python 3.9+**: For DELM service
 
@@ -69,8 +69,8 @@ Run the all-in-one setup script:
 ssh -i your-key.pem ec2-user@your-instance-ip
 
 # Clone the repository
-git clone https://github.com/jareynolds/ubecode.git
-cd ubecode
+git clone https://github.com/jareynolds/intentr.git
+cd intentr
 
 # Make scripts executable
 chmod +x scripts/setup/*.sh
@@ -87,7 +87,7 @@ This will install everything needed: Docker, Docker Compose, Go, and all system 
 # Log out and back in to apply Docker group permissions
 exit
 ssh -i your-key.pem ec2-user@your-instance-ip
-cd ubecode
+cd intentr
 
 # Configure environment
 ./scripts/setup/configure-environment.sh
@@ -124,8 +124,8 @@ exit
 # SSH back in
 
 # 6. Clone repository (if not done)
-git clone https://github.com/jareynolds/ubecode.git
-cd ubecode
+git clone https://github.com/jareynolds/intentr.git
+cd intentr
 
 # 7. Configure environment
 ./scripts/setup/configure-environment.sh
@@ -227,12 +227,12 @@ Create and configure the `.env` file:
 Create `.env` file in project root:
 
 ```bash
-# UbeCode Environment Configuration
+# IntentR Environment Configuration
 FIGMA_TOKEN=figd_your_token_here
 INTEGRATION_SERVICE_PORT=8080
 DESIGN_SERVICE_PORT=8081
 CAPABILITY_SERVICE_PORT=8082
-NETWORK_NAME=ubecode-network
+NETWORK_NAME=intentr-network
 LOG_LEVEL=info
 ENV=development
 ```
@@ -550,8 +550,8 @@ If you encounter issues:
 # Create AMI of configured instance
 aws ec2 create-image \
   --instance-id i-1234567890abcdef0 \
-  --name "ubecode-configured-$(date +%Y%m%d)" \
-  --description "UbeCode microservices configured instance"
+  --name "intentr-configured-$(date +%Y%m%d)" \
+  --description "IntentR microservices configured instance"
 ```
 
 ### Monitoring
@@ -567,7 +567,7 @@ sudo ./install.sh
 **Container Logs**:
 ```bash
 # Forward Docker logs to CloudWatch
-docker-compose logs -f | logger -t ubecode-services
+docker-compose logs -f | logger -t intentr-services
 ```
 
 ## Quick Reference
@@ -667,7 +667,7 @@ sudo systemctl start delm
 
 ### Log Files
 
-- Setup log: `/var/log/ubecode-setup.log`
+- Setup log: `/var/log/intentr-setup.log`
 - Docker logs: `docker-compose logs`
 - Service logs: `docker-compose logs <service-name>`
 
@@ -683,7 +683,7 @@ sudo systemctl start delm
 ## Support
 
 For issues and questions:
-- GitHub Issues: https://github.com/jareynolds/ubecode/issues
+- GitHub Issues: https://github.com/jareynolds/intentr/issues
 - Project Documentation: See README.md
 
 ---

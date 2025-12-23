@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-This guide will help you get the UbeCode application up and running in minutes.
+This guide will help you get the IntentR application up and running in minutes.
 
 ## Prerequisites
 
@@ -37,8 +37,8 @@ Before you begin, ensure you have the following installed:
 ## Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/jareynolds/ubecode.git
-cd ubecode
+git clone https://github.com/jareynolds/intentr.git
+cd intentr
 ```
 
 ## Step 2: Set Up Environment Variables
@@ -61,7 +61,7 @@ FIGMA_TOKEN=your_figma_personal_access_token
 2. Go to Settings → Account
 3. Scroll to "Personal access tokens"
 4. Click "Generate new token"
-5. Give it a name (e.g., "UbeCode Development")
+5. Give it a name (e.g., "IntentR Development")
 6. Copy the token and paste it in your `.env` file
 
 **Note**: Keep your token secret and never commit it to version control!

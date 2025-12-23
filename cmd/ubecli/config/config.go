@@ -1,4 +1,4 @@
-// UbeCode - Copyright 2025 James Reynolds
+// IntentR - Copyright 2025 James Reynolds
 //
 // Configuration Management for UbeCLI
 // Handles loading, parsing, and providing access to configuration

@@ -1,5 +1,5 @@
 /* Ford Design System - Material Based */
-/* Extracted from ubecode-design-system.html for React integration */
+/* Extracted from intentr-design-system.html for React integration */
 
 * {
     margin: 0;
@@ -223,15 +223,17 @@ h3 {
 
 /* Cards */
 .card {
-    background: white;
-    border-radius: 8px;
+    background: var(--card-background, white);
+    color: var(--card-foreground, inherit);
+    border-radius: var(--card-border-radius, 8px);
+    border: 1px solid var(--card-border-color, transparent);
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: var(--card-shadow, 0 2px 4px rgba(0,0,0,0.1));
     transition: box-shadow 0.3s;
 }
 
 .card:hover {
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    box-shadow: var(--card-hover-shadow, 0 8px 16px rgba(0,0,0,0.2));
 }
 
 .card-image {
@@ -241,17 +243,18 @@ h3 {
 
 .card-content {
     padding: 20px;
+    color: var(--card-foreground, inherit);
 }
 
 .card-title {
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: var(--ford-maastricht-blue);
+    font-size: var(--card-title-font-size, 1.5rem);
+    font-weight: var(--card-title-font-weight, 500);
+    color: var(--card-title-color, var(--card-foreground, var(--ford-maastricht-blue)));
     margin-bottom: 10px;
 }
 
 .card-text {
-    color: #666;
+    color: var(--card-body-color, var(--card-foreground, #666));
     margin-bottom: 15px;
 }
 

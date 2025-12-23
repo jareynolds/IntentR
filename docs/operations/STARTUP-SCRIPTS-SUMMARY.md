@@ -2,7 +2,7 @@
 
 ## Overview
 
-Complete startup automation system for the UbeCode application, providing one-command startup, status monitoring, and graceful shutdown.
+Complete startup automation system for the IntentR application, providing one-command startup, status monitoring, and graceful shutdown.
 
 ## Created Files
 
@@ -192,7 +192,7 @@ tail -f logs/collaboration-server.log
 ## Directory Structure
 
 ```
-ubecode/
+intentr/
 ├── start.sh                  # Main startup script
 ├── stop.sh                   # Shutdown script
 ├── status.sh                 # Status monitoring script

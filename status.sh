@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# UbeCode Application Status Script
-# This script checks the status of all UbeCode services
+# IntentR Application Status Script
+# This script checks the status of all IntentR services
 # Usage: ./status.sh [options]
 #   Options:
 #     --watch    Continuously monitor services (refresh every 5 seconds)
@@ -136,7 +136,7 @@ check_status() {
     fi
 
     echo -e "${BOLD}${BLUE}========================================${NC}"
-    echo -e "${BOLD}${BLUE}  UbeCode Application Status${NC}"
+    echo -e "${BOLD}${BLUE}  IntentR Application Status${NC}"
     echo -e "${BOLD}${BLUE}========================================${NC}"
     echo ""
     echo -e "${CYAN}$(date '+%Y-%m-%d %H:%M:%S')${NC}"

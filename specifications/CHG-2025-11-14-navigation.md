@@ -1,7 +1,7 @@
 # UI and Navigation Updates
 
 ## Overview
-This document details the user interface and navigation improvements made to the UbeCode web application, focusing on Apple Human Interface Guidelines (HIG) compliance and enhanced user experience.
+This document details the user interface and navigation improvements made to the IntentR web application, focusing on Apple Human Interface Guidelines (HIG) compliance and enhanced user experience.
 
 **Generated**: 2025-11-14
 **Version**: 1.0
@@ -453,4 +453,4 @@ const sidebarItems = [
 
 ## Conclusion
 
-The navigation and UI updates bring UbeCode into alignment with Apple's Human Interface Guidelines, creating a more professional, consistent, and user-friendly experience. The addition of the Ideation page and improved navigation structure supports the complete product development workflow from initial concept to implementation.
+The navigation and UI updates bring IntentR into alignment with Apple's Human Interface Guidelines, creating a more professional, consistent, and user-friendly experience. The addition of the Ideation page and improved navigation structure supports the complete product development workflow from initial concept to implementation.

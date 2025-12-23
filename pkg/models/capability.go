@@ -1,16 +1,16 @@
-// UbeCode — Copyright © 2025 James Reynolds
+// IntentR — Copyright © 2025 James Reynolds
 //
-// This file is part of UbeCode.
+// This file is part of IntentR.
 // You may use this file under either:
 //   • The AGPLv3 Open Source License, OR
-//   • The UbeCode Commercial License
+//   • The IntentR Commercial License
 // See the LICENSE.AGPL and LICENSE.COMMERCIAL files for details.
 
 package models
 
 import "time"
 
-// Capability represents a SAWai capability in the system (Scaled Agile With AI)
+// Capability represents a INTENT capability in the system (Scaled Agile With AI)
 type Capability struct {
 	ID                  int       `json:"id"`
 	CapabilityID        string    `json:"capability_id"`

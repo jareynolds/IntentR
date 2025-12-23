@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button } from './Button';
 import { Alert } from './Alert';
+import { JiraImportModal } from './JiraImportModal';
 import { INTEGRATION_URL } from '../api/client';
 
 interface Workspace {
   id: string;
   name: string;
   description?: string;
+  projectFolder?: string;
 }
 
 interface IntegrationResource {
@@ -48,6 +50,8 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [existingIntegrations, setExistingIntegrations] = useState<Record<string, IntegrationResource[]>>({});
+  const [showJiraImport, setShowJiraImport] = useState(false);
+  const [selectedJiraProject, setSelectedJiraProject] = useState<IntegrationResource | null>(null);
 
   // Load existing workspace integrations on mount
   useEffect(() => {
@@ -57,11 +61,59 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
     }
   }, [workspace.id]);
 
+  // Known integration required fields - these are the fields that must be present
+  // for each integration to work, regardless of what the LLM analysis returns
+  const KNOWN_INTEGRATION_REQUIREMENTS: Record<string, { fields: string[], fieldLabels: Record<string, string> }> = {
+    'Jira': {
+      fields: ['email', 'api_token', 'domain'],
+      fieldLabels: {
+        'email': 'Email (your Atlassian account email)',
+        'api_token': 'API Token (from https://id.atlassian.com/manage-profile/security/api-tokens)',
+        'domain': 'Domain (e.g., yourcompany.atlassian.net)',
+      }
+    },
+    'GitHub': {
+      fields: ['access_token'],
+      fieldLabels: {
+        'access_token': 'Personal Access Token',
+      }
+    },
+    'Figma API': {
+      fields: ['access_token'],
+      fieldLabels: {
+        'access_token': 'Personal Access Token',
+      }
+    }
+  };
+
   const getIntegrationConfig = (integrationName: string) => {
     const configKey = `integration_config_${integrationName.toLowerCase().replace(/\s+/g, '_')}`;
     const config = localStorage.getItem(configKey);
     if (!config) return null;
     return JSON.parse(config);
+  };
+
+  // Validate that all required fields are present for known integrations
+  const validateIntegrationConfig = (integrationName: string, fields: Record<string, string>): { valid: boolean, missingFields: string[] } => {
+    const requirements = KNOWN_INTEGRATION_REQUIREMENTS[integrationName];
+    if (!requirements) {
+      // Unknown integration, assume it's valid
+      return { valid: true, missingFields: [] };
+    }
+
+    const missingFields: string[] = [];
+    for (const field of requirements.fields) {
+      // Check for the exact field name or common variations
+      const hasField = fields[field] ||
+        fields[field.replace(/_/g, '')] || // api_token -> apitoken
+        fields[field.replace(/_([a-z])/g, (_, c) => c.toUpperCase())]; // api_token -> apiToken
+
+      if (!hasField) {
+        missingFields.push(requirements.fieldLabels[field] || field);
+      }
+    }
+
+    return { valid: missingFields.length === 0, missingFields };
   };
 
   const fetchResources = async (integrationName: string) => {
@@ -74,6 +126,16 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
       const config = getIntegrationConfig(integrationName);
       if (!config || !config.fields) {
         throw new Error(`${integrationName} is not configured. Please configure it in the Integrations page first.`);
+      }
+
+      // Validate required fields for known integrations
+      const validation = validateIntegrationConfig(integrationName, config.fields);
+      if (!validation.valid) {
+        throw new Error(
+          `${integrationName} configuration is incomplete. Missing required fields:\n` +
+          validation.missingFields.map(f => `  • ${f}`).join('\n') +
+          `\n\nPlease go to the Integrations page and update your ${integrationName} configuration.`
+        );
       }
 
       // Fetch resources from integration
@@ -504,6 +566,23 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
                   >
                     {saving ? 'Saving...' : saveSuccess ? 'Saved!' : `Save ${selectedResources.size} Resource${selectedResources.size !== 1 ? 's' : ''}`}
                   </Button>
+                  {/* Show Import button only for Jira when a project is selected */}
+                  {selectedIntegration === 'Jira' && selectedResources.size === 1 && (
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        const selectedProject = resources.find(r => selectedResources.has(r.id));
+                        if (selectedProject) {
+                          setSelectedJiraProject(selectedProject);
+                          setShowJiraImport(true);
+                        }
+                      }}
+                      disabled={saving || saveSuccess}
+                      style={{ whiteSpace: 'nowrap' }}
+                    >
+                      Import Epics as Capabilities
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     onClick={() => setSelectedIntegration(null)}
@@ -515,6 +594,25 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
               </div>
             )}
           </div>
+        )}
+
+        {/* Jira Import Modal */}
+        {showJiraImport && selectedJiraProject && (
+          <JiraImportModal
+            isOpen={showJiraImport}
+            onClose={() => {
+              setShowJiraImport(false);
+              setSelectedJiraProject(null);
+            }}
+            projectKey={selectedJiraProject.metadata?.key as string || selectedJiraProject.id}
+            projectName={selectedJiraProject.name}
+            credentials={getIntegrationConfig('Jira')?.fields || {}}
+            workspacePath={workspace.projectFolder || ''}
+            onImportComplete={(count) => {
+              console.log(`Imported ${count} capabilities from Jira`);
+              // Optionally refresh capabilities list or show notification
+            }}
+          />
         )}
       </div>
     </div>

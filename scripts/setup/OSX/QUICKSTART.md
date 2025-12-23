@@ -1,6 +1,6 @@
-# UbeCode Microservices - macOS Quick Start Guide
+# IntentR Microservices - macOS Quick Start Guide
 
-Get your UbeCode microservices environment up and running on macOS in 10 minutes!
+Get your IntentR microservices environment up and running on macOS in 10 minutes!
 
 ## Prerequisites
 
@@ -16,8 +16,8 @@ Run the all-in-one setup script:
 
 ```bash
 # Clone the repository
-git clone https://github.com/jareynolds/ubecode.git
-cd ubecode
+git clone https://github.com/jareynolds/intentr.git
+cd intentr
 
 # Make scripts executable
 chmod +x scripts/setup/OSX/*.sh
@@ -41,7 +41,7 @@ This will install everything automatically:
 Run each script in numerical order (if a component is already installed, it will be skipped):
 
 ```bash
-cd ubecode
+cd intentr
 
 # Make scripts executable
 chmod +x scripts/setup/OSX/*.sh

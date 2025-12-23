@@ -305,25 +305,26 @@ h6,
    ============================================ */
 
 .card {
-  background: var(--color-systemBackground);
-  border-radius: 10px;  /* iOS standard corner radius */
+  background: var(--card-background, var(--color-systemBackground));
+  color: var(--card-foreground, inherit);
+  border-radius: var(--card-border-radius, 10px);  /* iOS standard corner radius */
+  border: 1px solid var(--card-border-color, transparent);
   overflow: hidden;
 
   /* iOS-style shadow */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
-              0 1px 2px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--card-shadow, 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08));
 
   transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.16),
-              0 2px 4px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--card-hover-shadow, 0 4px 8px rgba(0, 0, 0, 0.16), 0 2px 4px rgba(0, 0, 0, 0.12));
   transform: translateY(-2px);
 }
 
 .card-content {
   padding: 16px;  /* iOS standard padding */
+  color: var(--card-foreground, inherit);
 }
 
 /* ============================================

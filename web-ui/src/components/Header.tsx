@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { HelpDrawer } from './HelpDrawer';
 
 export interface HeaderProps {
   title: string;
@@ -10,6 +11,7 @@ export interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   return (
     <header style={{
@@ -25,7 +27,7 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img
               src="/ube-logo.svg"
-              alt="UbeCode Logo"
+              alt="IntentR Logo"
               style={{ width: '48px', height: '48px' }}
             />
             <div>
@@ -40,6 +42,41 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
             <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>
               {user?.name || 'User'}
             </span>
+            <button
+              onClick={() => setIsHelpOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                fontWeight: 500,
+                color: '#FFFFFF',
+                backgroundColor: 'transparent',
+                border: 'none',
+                height: '32px',
+                width: '32px',
+                borderRadius: 'var(--button-border-radius, 6px)',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-secondary, #3b82f6)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              title="Help"
+            >
+              <svg
+                style={{ width: '20px', height: '20px' }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </button>
             <button
               onClick={() => navigate('/settings')}
               style={{
@@ -106,6 +143,9 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
           </div>
         </div>
       </div>
+
+      {/* Help Drawer */}
+      <HelpDrawer isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </header>
   );
 };

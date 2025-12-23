@@ -3,6 +3,10 @@ import cors from 'cors';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -449,6 +453,861 @@ app.post('/api/delete-specification', async (req, res) => {
     console.error('Error deleting specification:', error);
     res.status(500).json({
       error: 'Failed to delete specification',
+      details: error.message
+    });
+  }
+});
+
+// =====================
+// GIT VERSION CONTROL API
+// =====================
+
+// Helper function to get workspace path
+function getWorkspacePath(workspace) {
+  if (!workspace) {
+    return path.join(__dirname, '..');
+  }
+  if (path.isAbsolute(workspace)) {
+    return workspace;
+  }
+  return path.join(__dirname, '..', workspace);
+}
+
+// Helper function to execute git command in workspace
+async function gitExec(workspace, command) {
+  const cwd = getWorkspacePath(workspace);
+  console.log(`[git] Executing in ${cwd}: git ${command}`);
+  const { stdout, stderr } = await execAsync(`git ${command}`, { cwd, maxBuffer: 1024 * 1024 * 10 });
+  return { stdout: stdout.trim(), stderr: stderr.trim() };
+}
+
+// GET /git/status - Get current git status for workspace
+app.get('/git/status', async (req, res) => {
+  try {
+    const { workspace } = req.query;
+
+    // Get current branch (handle case where repo has no commits yet)
+    let branch = 'main';
+    try {
+      const branchResult = await gitExec(workspace, 'rev-parse --abbrev-ref HEAD');
+      branch = branchResult.stdout;
+    } catch (branchError) {
+      // Repository might have no commits yet - try symbolic ref
+      try {
+        const symbolicResult = await gitExec(workspace, 'symbolic-ref --short HEAD');
+        branch = symbolicResult.stdout || 'main';
+      } catch {
+        branch = 'main'; // Ultimate fallback
+      }
+    }
+
+    // Get status (porcelain for parsing)
+    const statusResult = await gitExec(workspace, 'status --porcelain');
+    const statusLines = statusResult.stdout.split('\n').filter(Boolean);
+
+    const staged = [];
+    const unstaged = [];
+    const untracked = [];
+
+    for (const line of statusLines) {
+      const indexStatus = line[0];
+      const workTreeStatus = line[1];
+      const fileName = line.substring(3);
+
+      if (indexStatus === '?' && workTreeStatus === '?') {
+        untracked.push(fileName);
+      } else if (indexStatus !== ' ' && indexStatus !== '?') {
+        staged.push(fileName);
+      }
+      if (workTreeStatus !== ' ' && workTreeStatus !== '?') {
+        unstaged.push(fileName);
+      }
+    }
+
+    // Get ahead/behind counts (if remote exists)
+    let ahead = 0;
+    let behind = 0;
+    try {
+      const trackingResult = await gitExec(workspace, `rev-list --left-right --count HEAD...@{upstream}`);
+      const parts = trackingResult.stdout.split('\t');
+      if (parts.length === 2) {
+        ahead = parseInt(parts[0], 10) || 0;
+        behind = parseInt(parts[1], 10) || 0;
+      }
+    } catch {
+      // No upstream branch configured
+    }
+
+    res.json({
+      status: {
+        branch,
+        isClean: statusLines.length === 0,
+        staged,
+        unstaged,
+        untracked,
+        ahead,
+        behind
+      }
+    });
+  } catch (error) {
+    console.error('Error getting git status:', error);
+    res.status(500).json({ error: 'Failed to get git status', details: error.message });
+  }
+});
+
+// GET /git/log - Get commit history
+app.get('/git/log', async (req, res) => {
+  try {
+    const { workspace, file, limit = 50 } = req.query;
+
+    // Custom format: hash|shortHash|message|author|date|relativeDate
+    const format = '%H|%h|%s|%an|%aI|%ar';
+    let command = `log -${limit} --format="${format}"`;
+
+    // If file specified, show history for that file
+    if (file) {
+      command += ` -- "${file}"`;
+    }
+
+    const result = await gitExec(workspace, command);
+    const lines = result.stdout.split('\n').filter(Boolean);
+
+    const commits = lines.map(line => {
+      const [hash, shortHash, message, author, date, relativeDate] = line.split('|');
+      return { hash, shortHash, message, author, date, relativeDate };
+    });
+
+    res.json({ commits });
+  } catch (error) {
+    console.error('Error getting git log:', error);
+    res.status(500).json({ error: 'Failed to get git log', details: error.message });
+  }
+});
+
+// POST /git/commit - Create a new commit (checkpoint)
+app.post('/git/commit', async (req, res) => {
+  try {
+    const { workspace, message, files } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ error: 'Commit message is required' });
+    }
+
+    // Stage files (if specific files provided) or all changes
+    if (files && files.length > 0) {
+      for (const file of files) {
+        await gitExec(workspace, `add "${file}"`);
+      }
+    } else {
+      // Stage all specification-related changes
+      await gitExec(workspace, 'add -A');
+    }
+
+    // Create commit
+    const escapedMessage = message.replace(/"/g, '\\"');
+    const result = await gitExec(workspace, `commit -m "${escapedMessage}"`);
+
+    // Get the new commit hash
+    const hashResult = await gitExec(workspace, 'rev-parse HEAD');
+
+    res.json({
+      success: true,
+      hash: hashResult.stdout,
+      message: result.stdout
+    });
+  } catch (error) {
+    console.error('Error creating commit:', error);
+    if (error.message.includes('nothing to commit')) {
+      return res.status(400).json({ error: 'Nothing to commit', details: 'No changes staged' });
+    }
+    res.status(500).json({ error: 'Failed to create commit', details: error.message });
+  }
+});
+
+// GET /git/show - Show details of a specific commit
+app.get('/git/show', async (req, res) => {
+  try {
+    const { workspace, hash } = req.query;
+
+    if (!hash) {
+      return res.status(400).json({ error: 'Commit hash is required' });
+    }
+
+    // Get commit details
+    const format = '%H|%h|%s|%an|%aI|%ar|%b';
+    const result = await gitExec(workspace, `show -s --format="${format}" ${hash}`);
+    const [commitHash, shortHash, subject, author, date, relativeDate, body] = result.stdout.split('|');
+
+    // Get files changed
+    const filesResult = await gitExec(workspace, `show --name-status --format="" ${hash}`);
+    const changedFiles = filesResult.stdout.split('\n').filter(Boolean).map(line => {
+      const [status, ...fileParts] = line.split('\t');
+      return { status, file: fileParts.join('\t') };
+    });
+
+    res.json({
+      commit: {
+        hash: commitHash,
+        shortHash,
+        message: subject,
+        body: body || '',
+        author,
+        date,
+        relativeDate,
+        changedFiles
+      }
+    });
+  } catch (error) {
+    console.error('Error showing commit:', error);
+    res.status(500).json({ error: 'Failed to show commit', details: error.message });
+  }
+});
+
+// POST /git/revert - Revert workspace to a specific commit
+app.post('/git/revert', async (req, res) => {
+  try {
+    const { workspace, hash } = req.body;
+
+    if (!hash) {
+      return res.status(400).json({ error: 'Commit hash is required' });
+    }
+
+    // Check for uncommitted changes first
+    const statusResult = await gitExec(workspace, 'status --porcelain');
+    if (statusResult.stdout.trim()) {
+      return res.status(400).json({
+        error: 'Uncommitted changes exist',
+        details: 'Please commit or stash your changes before reverting'
+      });
+    }
+
+    // Reset to the specified commit
+    await gitExec(workspace, `checkout ${hash} -- .`);
+
+    res.json({
+      success: true,
+      message: `Workspace reverted to commit ${hash}`
+    });
+  } catch (error) {
+    console.error('Error reverting:', error);
+    res.status(500).json({ error: 'Failed to revert', details: error.message });
+  }
+});
+
+// POST /git/branch - Create a new branch
+app.post('/git/branch', async (req, res) => {
+  try {
+    const { workspace, name, checkout = true } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'Branch name is required' });
+    }
+
+    // Sanitize branch name
+    const safeName = name.replace(/[^a-zA-Z0-9-_\/]/g, '-');
+
+    if (checkout) {
+      await gitExec(workspace, `checkout -b ${safeName}`);
+    } else {
+      await gitExec(workspace, `branch ${safeName}`);
+    }
+
+    res.json({
+      success: true,
+      branch: safeName,
+      message: `Branch '${safeName}' created${checkout ? ' and checked out' : ''}`
+    });
+  } catch (error) {
+    console.error('Error creating branch:', error);
+    if (error.message.includes('already exists')) {
+      return res.status(400).json({ error: 'Branch already exists', details: error.message });
+    }
+    res.status(500).json({ error: 'Failed to create branch', details: error.message });
+  }
+});
+
+// POST /git/checkout - Switch to a different branch
+app.post('/git/checkout', async (req, res) => {
+  try {
+    const { workspace, branch } = req.body;
+
+    if (!branch) {
+      return res.status(400).json({ error: 'Branch name is required' });
+    }
+
+    // Check for uncommitted changes
+    const statusResult = await gitExec(workspace, 'status --porcelain');
+    if (statusResult.stdout.trim()) {
+      return res.status(400).json({
+        error: 'Uncommitted changes exist',
+        details: 'Please commit or stash your changes before switching branches'
+      });
+    }
+
+    await gitExec(workspace, `checkout ${branch}`);
+
+    res.json({
+      success: true,
+      branch,
+      message: `Switched to branch '${branch}'`
+    });
+  } catch (error) {
+    console.error('Error switching branch:', error);
+    res.status(500).json({ error: 'Failed to switch branch', details: error.message });
+  }
+});
+
+// GET /git/branches - List all branches
+app.get('/git/branches', async (req, res) => {
+  try {
+    const { workspace } = req.query;
+
+    // Get all local branches
+    const result = await gitExec(workspace, 'branch -a --format="%(refname:short)|%(objectname:short)|%(committerdate:relative)"');
+    const lines = result.stdout.split('\n').filter(Boolean);
+
+    const branches = lines.map(line => {
+      const [name, hash, lastCommit] = line.split('|');
+      return {
+        name,
+        hash,
+        lastCommit,
+        isRemote: name.startsWith('origin/')
+      };
+    });
+
+    // Get current branch
+    const currentResult = await gitExec(workspace, 'rev-parse --abbrev-ref HEAD');
+
+    res.json({
+      branches,
+      current: currentResult.stdout
+    });
+  } catch (error) {
+    console.error('Error listing branches:', error);
+    res.status(500).json({ error: 'Failed to list branches', details: error.message });
+  }
+});
+
+// POST /git/pull - Pull changes from remote
+app.post('/git/pull', async (req, res) => {
+  try {
+    const { workspace } = req.body;
+
+    const result = await gitExec(workspace, 'pull');
+
+    res.json({
+      success: true,
+      message: result.stdout || 'Already up to date'
+    });
+  } catch (error) {
+    console.error('Error pulling:', error);
+    if (error.message.includes('conflict')) {
+      return res.status(409).json({ error: 'Merge conflict', details: error.message });
+    }
+    res.status(500).json({ error: 'Failed to pull', details: error.message });
+  }
+});
+
+// POST /git/push - Push changes to remote
+app.post('/git/push', async (req, res) => {
+  try {
+    const { workspace, setUpstream = false, token } = req.body;
+    const cwd = getWorkspacePath(workspace);
+
+    // Get current branch
+    const branchResult = await gitExec(workspace, 'rev-parse --abbrev-ref HEAD');
+    const currentBranch = branchResult.stdout;
+
+    // If token provided, configure git to use it for this push
+    if (token) {
+      // Get the current remote URL
+      let remoteUrl = '';
+      try {
+        const remoteResult = await gitExec(workspace, 'remote get-url origin');
+        remoteUrl = remoteResult.stdout;
+      } catch {
+        return res.status(400).json({ error: 'No remote configured', details: 'Please add a remote repository first' });
+      }
+
+      // Construct authenticated URL
+      // Convert https://github.com/user/repo.git to https://token@github.com/user/repo.git
+      let authUrl = remoteUrl;
+      if (remoteUrl.startsWith('https://')) {
+        // Remove any existing credentials from URL
+        authUrl = remoteUrl.replace(/https:\/\/[^@]*@/, 'https://');
+        // Add token
+        authUrl = authUrl.replace('https://', `https://${token}@`);
+      }
+
+      // Push using the authenticated URL directly (without modifying stored remote)
+      let command = `push ${authUrl} ${currentBranch}`;
+      if (setUpstream) {
+        command = `push -u ${authUrl} ${currentBranch}`;
+      }
+
+      try {
+        const { stdout, stderr } = await execAsync(`git ${command}`, { cwd, maxBuffer: 1024 * 1024 * 10 });
+        res.json({
+          success: true,
+          message: stdout || stderr || 'Changes pushed successfully'
+        });
+      } catch (pushError) {
+        // Clean up error message to not expose token
+        const cleanError = pushError.message.replace(token, '***TOKEN***');
+        throw new Error(cleanError);
+      }
+    } else {
+      // No token - use default git push (relies on system credentials)
+      let command = 'push';
+      if (setUpstream) {
+        command = `push -u origin ${currentBranch}`;
+      }
+
+      const result = await gitExec(workspace, command);
+
+      res.json({
+        success: true,
+        message: result.stdout || result.stderr || 'Changes pushed successfully'
+      });
+    }
+  } catch (error) {
+    console.error('Error pushing:', error);
+    res.status(500).json({ error: 'Failed to push', details: error.message });
+  }
+});
+
+// POST /git/pr - Create a pull request (using gh CLI)
+app.post('/git/pr', async (req, res) => {
+  try {
+    const { workspace, title, description, base = 'main', head } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ error: 'PR title is required' });
+    }
+
+    const cwd = getWorkspacePath(workspace);
+
+    // Check if gh CLI is available
+    try {
+      await execAsync('gh --version');
+    } catch {
+      return res.status(503).json({
+        error: 'GitHub CLI not available',
+        details: 'Please install GitHub CLI (gh) to create pull requests'
+      });
+    }
+
+    // Push current branch first (with upstream)
+    const branchResult = await gitExec(workspace, 'rev-parse --abbrev-ref HEAD');
+    const currentBranch = branchResult.stdout;
+
+    try {
+      await gitExec(workspace, `push -u origin ${currentBranch}`);
+    } catch {
+      // Branch might already be pushed
+    }
+
+    // Create PR using gh CLI
+    const escapedTitle = title.replace(/"/g, '\\"');
+    const escapedBody = (description || '').replace(/"/g, '\\"');
+
+    const { stdout } = await execAsync(
+      `gh pr create --title "${escapedTitle}" --body "${escapedBody}" --base ${base} --head ${head || currentBranch}`,
+      { cwd }
+    );
+
+    // Extract PR URL from output
+    const urlMatch = stdout.match(/https:\/\/github\.com\/[^\s]+/);
+
+    res.json({
+      success: true,
+      url: urlMatch ? urlMatch[0] : null,
+      message: stdout
+    });
+  } catch (error) {
+    console.error('Error creating PR:', error);
+    res.status(500).json({ error: 'Failed to create pull request', details: error.message });
+  }
+});
+
+// GET /git/diff - Get diff of pending changes
+app.get('/git/diff', async (req, res) => {
+  try {
+    const { workspace, file } = req.query;
+
+    let command = 'diff';
+    if (file) {
+      command += ` -- "${file}"`;
+    }
+
+    const result = await gitExec(workspace, command);
+
+    res.json({
+      diff: result.stdout,
+      hasDiff: result.stdout.length > 0
+    });
+  } catch (error) {
+    console.error('Error getting diff:', error);
+    res.status(500).json({ error: 'Failed to get diff', details: error.message });
+  }
+});
+
+// GET /git/config - Get git configuration for workspace
+app.get('/git/config', async (req, res) => {
+  try {
+    const { workspace } = req.query;
+    const cwd = getWorkspacePath(workspace);
+
+    // Check if .git directory exists
+    try {
+      await fs.access(path.join(cwd, '.git'));
+    } catch {
+      return res.json({ initialized: false });
+    }
+
+    // Get user config
+    let userName = '';
+    let userEmail = '';
+    try {
+      const nameResult = await gitExec(workspace, 'config user.name');
+      userName = nameResult.stdout;
+    } catch { /* not configured */ }
+
+    try {
+      const emailResult = await gitExec(workspace, 'config user.email');
+      userEmail = emailResult.stdout;
+    } catch { /* not configured */ }
+
+    // Get remote URL
+    let remoteUrl = '';
+    let remoteName = '';
+    try {
+      const remoteResult = await gitExec(workspace, 'remote -v');
+      const lines = remoteResult.stdout.split('\n');
+      if (lines.length > 0 && lines[0]) {
+        const parts = lines[0].split(/\s+/);
+        remoteName = parts[0] || '';
+        remoteUrl = parts[1] || '';
+      }
+    } catch { /* no remote */ }
+
+    // Get current branch
+    let currentBranch = '';
+    try {
+      const branchResult = await gitExec(workspace, 'rev-parse --abbrev-ref HEAD');
+      currentBranch = branchResult.stdout;
+    } catch { /* no commits yet */ }
+
+    res.json({
+      initialized: true,
+      userName,
+      userEmail,
+      remoteUrl,
+      remoteName,
+      currentBranch
+    });
+  } catch (error) {
+    console.error('Error getting git config:', error);
+    res.status(500).json({ error: 'Failed to get git config', details: error.message });
+  }
+});
+
+// POST /git/config - Set git configuration for workspace
+app.post('/git/config', async (req, res) => {
+  try {
+    const { workspace, userName, userEmail } = req.body;
+
+    if (userName) {
+      await gitExec(workspace, `config user.name "${userName}"`);
+    }
+
+    if (userEmail) {
+      await gitExec(workspace, `config user.email "${userEmail}"`);
+    }
+
+    res.json({ success: true, message: 'Git configuration updated' });
+  } catch (error) {
+    console.error('Error setting git config:', error);
+    res.status(500).json({ error: 'Failed to set git config', details: error.message });
+  }
+});
+
+// POST /git/init - Initialize a new git repository
+app.post('/git/init', async (req, res) => {
+  try {
+    const { workspace, userName, userEmail } = req.body;
+    const cwd = getWorkspacePath(workspace);
+
+    // Check if already initialized
+    try {
+      await fs.access(path.join(cwd, '.git'));
+      return res.status(400).json({ error: 'Repository already initialized' });
+    } catch {
+      // Good, not initialized yet
+    }
+
+    // Initialize repository
+    await gitExec(workspace, 'init');
+
+    // Set user config if provided
+    if (userName) {
+      await gitExec(workspace, `config user.name "${userName}"`);
+    }
+
+    if (userEmail) {
+      await gitExec(workspace, `config user.email "${userEmail}"`);
+    }
+
+    // Create initial .gitignore
+    const gitignorePath = path.join(cwd, '.gitignore');
+    const gitignoreContent = `# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+`;
+
+    try {
+      await fs.writeFile(gitignorePath, gitignoreContent, 'utf-8');
+    } catch {
+      // Ignore if can't create .gitignore
+    }
+
+    res.json({ success: true, message: 'Repository initialized successfully' });
+  } catch (error) {
+    console.error('Error initializing git:', error);
+    res.status(500).json({ error: 'Failed to initialize repository', details: error.message });
+  }
+});
+
+// POST /git/remote - Add or update remote
+app.post('/git/remote', async (req, res) => {
+  try {
+    const { workspace, url, name = 'origin' } = req.body;
+
+    if (!url) {
+      return res.status(400).json({ error: 'Remote URL is required' });
+    }
+
+    // Check if remote exists
+    try {
+      await gitExec(workspace, `remote get-url ${name}`);
+      // Remote exists, update it
+      await gitExec(workspace, `remote set-url ${name} "${url}"`);
+    } catch {
+      // Remote doesn't exist, add it
+      await gitExec(workspace, `remote add ${name} "${url}"`);
+    }
+
+    res.json({ success: true, message: `Remote '${name}' set to ${url}` });
+  } catch (error) {
+    console.error('Error setting remote:', error);
+    res.status(500).json({ error: 'Failed to set remote', details: error.message });
+  }
+});
+
+// POST /git/create-repo - Create a new GitHub repository
+app.post('/git/create-repo', async (req, res) => {
+  try {
+    const { workspace, name, private: isPrivate = true, token } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'Repository name is required' });
+    }
+
+    if (!token) {
+      return res.status(400).json({ error: 'GitHub token is required' });
+    }
+
+    // Create repo using GitHub API
+    const response = await fetch('https://api.github.com/user/repos', {
+      method: 'POST',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name,
+        private: isPrivate,
+        auto_init: false,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create GitHub repository');
+    }
+
+    const repoData = await response.json();
+    const repoUrl = repoData.clone_url;
+
+    // Add remote to local repo
+    try {
+      await gitExec(workspace, `remote get-url origin`);
+      await gitExec(workspace, `remote set-url origin "${repoUrl}"`);
+    } catch {
+      await gitExec(workspace, `remote add origin "${repoUrl}"`);
+    }
+
+    res.json({
+      success: true,
+      url: repoUrl,
+      htmlUrl: repoData.html_url,
+      message: `Repository created: ${repoData.full_name}`
+    });
+  } catch (error) {
+    console.error('Error creating repo:', error);
+    res.status(500).json({ error: 'Failed to create repository', details: error.message });
+  }
+});
+
+// POST /generate-readme - Generate README.md from conception folder using AI
+app.post('/generate-readme', async (req, res) => {
+  try {
+    const { workspace, apiKey } = req.body;
+
+    if (!workspace) {
+      return res.status(400).json({ error: 'Workspace path is required' });
+    }
+
+    const cwd = getWorkspacePath(workspace);
+    const conceptionPath = path.join(cwd, 'conception');
+
+    // Check if conception folder exists
+    try {
+      await fs.access(conceptionPath);
+    } catch {
+      return res.status(400).json({
+        error: 'Conception folder not found',
+        details: `No conception folder found at ${conceptionPath}. README generation requires conception documents.`
+      });
+    }
+
+    // Read all markdown files from conception folder
+    const files = await fs.readdir(conceptionPath);
+    const mdFiles = files.filter(f => f.endsWith('.md'));
+
+    if (mdFiles.length === 0) {
+      return res.status(400).json({
+        error: 'No markdown files in conception folder',
+        details: 'README generation requires at least one .md file in the conception folder.'
+      });
+    }
+
+    // Read content of all markdown files
+    const conceptionContent = [];
+    for (const file of mdFiles) {
+      const filePath = path.join(conceptionPath, file);
+      const content = await fs.readFile(filePath, 'utf-8');
+      conceptionContent.push(`## ${file}\n\n${content}`);
+    }
+
+    const combinedContent = conceptionContent.join('\n\n---\n\n');
+
+    // Get API key from request or environment
+    const anthropicKey = apiKey || process.env.ANTHROPIC_API_KEY;
+    if (!anthropicKey) {
+      return res.status(400).json({
+        error: 'Anthropic API key required',
+        details: 'Please configure your Anthropic API key in Settings or set ANTHROPIC_API_KEY environment variable.'
+      });
+    }
+
+    // Build the prompt for README generation
+    const prompt = `You are a technical writer creating a professional GitHub README.md file.
+
+Based on the following conception documents for a software project, create a comprehensive README.md that follows GitHub best practices.
+
+## CONCEPTION DOCUMENTS:
+
+${combinedContent}
+
+## INSTRUCTIONS:
+
+Generate a professional README.md that includes:
+
+1. **Project Title and Description** - Clear, concise explanation of what the project does
+2. **Features** - Key features and capabilities (bullet points)
+3. **Getting Started** - Prerequisites, installation, and setup instructions
+4. **Usage** - Basic usage examples and how to run the application
+5. **Configuration** - Environment variables and configuration options (if mentioned)
+6. **Project Structure** - Brief overview of the codebase organization (if applicable)
+7. **Contributing** - Brief contribution guidelines
+8. **License** - Placeholder for license information
+
+IMPORTANT:
+- Use proper Markdown formatting with headers, code blocks, and bullet points
+- Keep it concise but informative
+- If start/stop scripts are mentioned, document them
+- Include any environment variables or configuration mentioned in the conception docs
+- Make assumptions about standard practices if information is missing
+- Output ONLY the README.md content, no explanations or preamble
+
+Generate the README.md now:`;
+
+    // Call Anthropic API
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        messages: [
+          { role: 'user', content: prompt }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.content || result.content.length === 0) {
+      throw new Error('Empty response from Anthropic API');
+    }
+
+    const readmeContent = result.content[0].text;
+
+    // Write README.md to workspace root
+    const readmePath = path.join(cwd, 'README.md');
+    await fs.writeFile(readmePath, readmeContent, 'utf-8');
+
+    console.log(`Generated README.md at ${readmePath}`);
+
+    res.json({
+      success: true,
+      message: 'README.md generated successfully',
+      path: 'README.md',
+      content: readmeContent
+    });
+
+  } catch (error) {
+    console.error('Error generating README:', error);
+    res.status(500).json({
+      error: 'Failed to generate README',
       details: error.message
     });
   }

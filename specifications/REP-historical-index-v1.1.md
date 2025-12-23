@@ -1,4 +1,4 @@
-# UbeCode Specifications Index
+# IntentR Specifications Index
 
 **Last Updated**: November 23, 2025
 **Total Specifications**: 22 documents
@@ -56,7 +56,7 @@ Track SAFe capabilities, features, and user stories to support scaled agile fram
 
 ### CAP-471395: Container Orchestration
 **File**: [471395-capability.md](./471395-capability.md)
-**Component**: UbeCode Orchestrator
+**Component**: IntentR Orchestrator
 **Priority**: Medium
 **Status**: Implemented ✅
 
@@ -228,7 +228,7 @@ Container health monitoring through standardized Health() interface method.
 
 Coordinate graceful service shutdown with signal handling and reverse-order stopping.
 
-**Implementation**: `pkg/container/orchestrator.go`, `cmd/ubecode/main.go`
+**Implementation**: `pkg/container/orchestrator.go`, `cmd/intentr/main.go`
 
 ---
 

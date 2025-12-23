@@ -2,7 +2,7 @@
 
 ## Overview
 
-The UbeCode platform now supports real-time collaboration, allowing multiple users to work together simultaneously on ideation and storyboarding pages. Users can see each other's cursors in real-time with their initials displayed, and all changes to the grid are instantly synchronized across all connected users.
+The IntentR platform now supports real-time collaboration, allowing multiple users to work together simultaneously on ideation and storyboarding pages. Users can see each other's cursors in real-time with their initials displayed, and all changes to the grid are instantly synchronized across all connected users.
 
 ## Features
 

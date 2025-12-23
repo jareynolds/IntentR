@@ -1,6 +1,6 @@
-# Contributing to UbeCode
+# Contributing to IntentR
 
-Thank you for your interest in contributing to UbeCode! This document outlines areas where we need help and how you can get involved.
+Thank you for your interest in contributing to IntentR! This document outlines areas where we need help and how you can get involved.
 
 ## What Help is Needed Right Now
 
@@ -17,13 +17,13 @@ We're actively looking for help with:
 
 - **API Documentation** - Expanding OpenAPI/Swagger specs for all service endpoints
 - **Tutorial Content** - Step-by-step guides for common workflows
-- **SAWai Methodology Guides** - Practical examples of the Scaled Agile With AI approach
+- **INTENT Methodology Guides** - Practical examples of the Scaled Agile With AI approach
 - **Architecture Decision Records** - Documenting key design decisions and rationale
 
 ### Integrations
 
 - **Design Tool Plugins** - Extending beyond Figma to support Sketch, Adobe XD
-- **CI/CD Pipelines** - GitHub Actions, GitLab CI templates for UbeCode workflows
+- **CI/CD Pipelines** - GitHub Actions, GitLab CI templates for IntentR workflows
 - **IDE Extensions** - VS Code and JetBrains plugins for specification editing
 - **Project Management Tools** - Jira, Linear, and Notion integrations
 

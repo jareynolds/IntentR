@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import mermaid from 'mermaid';
 import { Button } from '../components/Button';
 import { AIPresetIndicator } from '../components/AIPresetIndicator';
+import { WizardPageNavigation } from '../components/wizard';
 import { useWorkspace, type SystemCapability, type SystemEnabler } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -2656,6 +2657,7 @@ export const System: React.FC = () => {
 
   return (
     <div className={`system-page ${isFullscreen ? 'fullscreen' : ''}`}>
+      <WizardPageNavigation />
       <AIPresetIndicator />
       {/* Workspace Header */}
       {currentWorkspace && (

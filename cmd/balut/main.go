@@ -1,9 +1,9 @@
-// UbeCode — Copyright © 2025 James Reynolds
+// IntentR — Copyright © 2025 James Reynolds
 //
-// This file is part of UbeCode.
+// This file is part of IntentR.
 // You may use this file under either:
 //   • The AGPLv3 Open Source License, OR
-//   • The UbeCode Commercial License
+//   • The IntentR Commercial License
 // See the LICENSE.AGPL and LICENSE.COMMERCIAL files for details.
 
 package main
@@ -15,7 +15,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/jareynolds/ubecode/pkg/container"
+	"github.com/jareynolds/intentr/pkg/container"
 )
 
 func main() {
@@ -35,10 +35,9 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
 	// Start all containers
-	fmt.Println("Starting UbeCode orchestrator...")
+	fmt.Println("Starting IntentR orchestrator...")
 	if err := orchestrator.Start(ctx); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to start orchestrator: %v
-", err)
+		fmt.Fprintf(os.Stderr, "Failed to start orchestrator: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -46,21 +45,17 @@ func main() {
 
 	// Print status
 	for _, info := range orchestrator.Status() {
-		fmt.Printf("  - %s
-", info)
+		fmt.Printf("  - %s\n", info)
 	}
 
 	// Wait for shutdown signal
-	fmt.Println("
-Press Ctrl+C to stop...")
+	fmt.Println("\nPress Ctrl+C to stop...")
 	<-sigChan
 
 	// Graceful shutdown
-	fmt.Println("
-Shutting down orchestrator...")
+	fmt.Println("\nShutting down orchestrator...")
 	if err := orchestrator.Stop(ctx); err != nil {
-		fmt.Fprintf(os.Stderr, "Error during shutdown: %v
-", err)
+		fmt.Fprintf(os.Stderr, "Error during shutdown: %v\n", err)
 		os.Exit(1)
 	}
 

@@ -1,8 +1,8 @@
-# Project Summary: UbeCode - SAFe Capability-Driven Development Framework
+# Project Summary: IntentR - SAFe Capability-Driven Development Framework
 
 ## Overview
 
-UbeCode is a comprehensive GoLang-based microservices application designed to support design-driven development using the SAFe (Scaled Agile Framework) capability-driven approach, with full integration to Figma and other UI design tools.
+IntentR is a comprehensive GoLang-based microservices application designed to support design-driven development using the SAFe (Scaled Agile Framework) capability-driven approach, with full integration to Figma and other UI design tools.
 
 ## Project Status: ✅ Foundation Complete + UI Enhancements
 
@@ -153,7 +153,7 @@ PASS: TestFigmaModels
 ### 5. Project Structure
 
 ```
-ubecode/
+intentr/
 ├── cmd/                          # Service entry points
 │   ├── capability-service/
 │   ├── design-service/
@@ -365,7 +365,7 @@ docker-compose up -d
 
 ## Conclusion
 
-The UbeCode project successfully delivers a comprehensive foundation for SAFe capability-driven development with GoLang microservices and Figma integration. All core requirements have been met:
+The IntentR project successfully delivers a comprehensive foundation for SAFe capability-driven development with GoLang microservices and Figma integration. All core requirements have been met:
 
 ✅ Comprehensive guidance document for Claude Code
 ✅ GoLang-based microservices architecture

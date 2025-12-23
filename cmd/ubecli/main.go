@@ -1,8 +1,8 @@
-// UbeCode - Copyright 2025 James Reynolds
+// IntentR - Copyright 2025 James Reynolds
 //
 // UbeCLI - LLM Request Interception Proxy
 // An interactive CLI that intercepts and enhances LLM requests
-// with project context and SAWai methodology enforcement.
+// with project context and INTENT methodology enforcement.
 
 package main
 
@@ -11,13 +11,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jareynolds/ubecode/cmd/ubecli/adapters"
-	"github.com/jareynolds/ubecode/cmd/ubecli/cli"
-	"github.com/jareynolds/ubecode/cmd/ubecli/config"
-	"github.com/jareynolds/ubecode/cmd/ubecli/pipeline"
+	"github.com/jareynolds/intentr/cmd/ubecli/adapters"
+	"github.com/jareynolds/intentr/cmd/ubecli/cli"
+	"github.com/jareynolds/intentr/cmd/ubecli/config"
+	"github.com/jareynolds/intentr/cmd/ubecli/pipeline"
 
 	// Import adapters to trigger init() registration
-	_ "github.com/jareynolds/ubecode/cmd/ubecli/adapters"
+	_ "github.com/jareynolds/intentr/cmd/ubecli/adapters"
 )
 
 var (
@@ -239,6 +239,6 @@ EXAMPLES:
   # Initialize configuration
   ubecli -init
 
-For more information: https://github.com/ubecode/ubecli
+For more information: https://github.com/intentr/ubecli
 `, version)
 }

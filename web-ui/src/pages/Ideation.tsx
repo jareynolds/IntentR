@@ -3,7 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { useWorkspace, type Connection } from '../context/WorkspaceContext';
 import { useCollaboration } from '../context/CollaborationContext';
 import RemoteCursors from '../components/RemoteCursors';
-import { AssetsPane, WorkspaceHeader, AIPresetIndicator } from '../components';
+import { AssetsPane, WorkspaceHeader, AIPresetIndicator, Alert } from '../components';
+import { WizardPageNavigation } from '../components/wizard';
 import { Button } from '../components/Button';
 import { SPEC_URL } from '../api/client';
 
@@ -2112,6 +2113,7 @@ export const Ideation: React.FC = () => {
 
   return (
     <>
+      <WizardPageNavigation />
       <AIPresetIndicator />
       {/* Workspace Header */}
       {currentWorkspace && (
@@ -2132,6 +2134,12 @@ export const Ideation: React.FC = () => {
           <div style={{ width: '100%' }}>
             <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Ideation Canvas</h1>
             <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>Freeform whiteboard for your ideas</p>
+            <Alert type="info" style={{ marginBottom: '16px' }}>
+              <strong>Ideation:</strong> In Intent-Centered Engineering, ideation is the creative exploration phase where raw ideas are captured,
+              organized, and refined before formal specification. This freeform canvas allows you to brainstorm features, sketch user flows,
+              and collaborate on concepts without constraints. The ideas captured here feed directly into your storyboards and capabilities,
+              ensuring that innovation drives your development process from the very beginning.
+            </Alert>
             <div className="ideation-controls">
             <Button variant="primary" onClick={handleAddTextBlock}>
               ⊞ Add Card

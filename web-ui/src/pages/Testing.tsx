@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Alert, Button, ConfirmDialog } from '../components';
+import { Card, Alert, Button, ConfirmDialog, PageHeader } from '../components';
+import { WizardPageNavigation } from '../components/wizard';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -724,6 +725,7 @@ Scenario: [Scenario Name]
 
   return (
     <div className="testing-page">
+      <WizardPageNavigation />
       <style>{`
         .testing-page {
           padding: 0;
@@ -1079,26 +1081,30 @@ Scenario: [Scenario Name]
         }
       `}</style>
 
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Testing (BDD/Gherkin)</h1>
-          <p className="page-subtitle">
-            Create and manage Gherkin test scenarios for your enablers
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <span style={{ fontSize: '12px', color: 'var(--color-grey-600)' }}>
-            {enablers.length} enablers loaded
-          </span>
-          <Button
-            variant="primary"
-            onClick={handleAnalyzeScenarios}
-            disabled={isAnalyzing || enablers.length === 0}
-            title={enablers.length === 0 ? 'No enablers found - add enabler files to the definition folder' : 'Analyze enablers and generate test scenarios'}
-          >
-            {isAnalyzing ? 'Analyzing...' : 'Analyze with AI'}
-          </Button>
-        </div>
+      <div style={{ padding: '16px', paddingBottom: 0 }}>
+        <PageHeader
+          title="Testing (BDD/Gherkin)"
+          quickDescription="Create and manage Gherkin test scenarios for your enablers."
+          detailedDescription="INTENT uses Behavior-Driven Development (BDD) with Gherkin syntax for testing.
+Test scenarios are linked to requirements in enablers and provide executable specifications.
+AI analysis can automatically generate test scenarios from your enabler requirements, ensuring comprehensive coverage."
+          workspaceName={currentWorkspace?.name}
+          actions={
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', color: 'var(--color-grey-600)' }}>
+                {enablers.length} enablers loaded
+              </span>
+              <Button
+                variant="primary"
+                onClick={handleAnalyzeScenarios}
+                disabled={isAnalyzing || enablers.length === 0}
+                title={enablers.length === 0 ? 'No enablers found - add enabler files to the definition folder' : 'Analyze enablers and generate test scenarios'}
+              >
+                {isAnalyzing ? 'Analyzing...' : 'Analyze with AI'}
+              </Button>
+            </div>
+          }
+        />
       </div>
 
       {error && (

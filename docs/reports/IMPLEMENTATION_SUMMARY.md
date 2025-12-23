@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Successfully implemented a complete React-based web UI for the UbeCode platform using the Ford Design System. All 6 enablers have been developed, tested, and integrated with the existing backend microservices architecture.
+Successfully implemented a complete React-based web UI for the IntentR platform using the Ford Design System. All 6 enablers have been developed, tested, and integrated with the existing backend microservices architecture.
 
 ---
 
@@ -50,7 +50,7 @@ Successfully implemented a complete React-based web UI for the UbeCode platform 
 **Priority**: High
 
 **Deliverables**:
-- Complete CSS conversion from `ubecode-design-system.html`
+- Complete CSS conversion from `intentr-design-system.html`
 - 5 React components with TypeScript
 - Official Ford color palette
 - Roboto font family integration

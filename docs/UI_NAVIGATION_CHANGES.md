@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the UI and navigation changes implemented in UbeCode v1.1.0.
+This document describes the UI and navigation changes implemented in IntentR v1.1.0.
 
 ## Navigation Restructuring
 

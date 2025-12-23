@@ -12,14 +12,14 @@
 ### Issue
 Cannot access the Figma design mockup required for UI implementation.
 
-**Figma URL**: https://www.figma.com/design/f7cexaGHsYERSTNkPriC6L/UbeCode-Web-Platform-Design
+**Figma URL**: https://www.figma.com/design/f7cexaGHsYERSTNkPriC6L/IntentR-Web-Platform-Design
 
 **Error**: HTTP 403 Forbidden - The Figma file requires authentication
 
 ### Impact
 The capability specification (CAP-944623) states:
 
-> "The display UI will be based on the mockup that is found at https://www.figma.com/make/f7cexaGHsYERSTNkPriC6L/UbeCode-Web-Platform-Design?t=APmuh1XxwRvODipc&fullscreen=1. **This link will need to be very precisely reverse engineered** to create actual react.js code..."
+> "The display UI will be based on the mockup that is found at https://www.figma.com/make/f7cexaGHsYERSTNkPriC6L/IntentR-Web-Platform-Design?t=APmuh1XxwRvODipc&fullscreen=1. **This link will need to be very precisely reverse engineered** to create actual react.js code..."
 
 Without access to the Figma mockup, I cannot:
 1. Identify the specific screens/pages to build
@@ -52,7 +52,7 @@ Without access to the Figma mockup, I cannot:
 ## WHAT CAN BE DONE NOW
 
 ### Available Resources
-✅ **Ford Design System** (ubecode-design-system.html) - Complete and accessible
+✅ **Ford Design System** (intentr-design-system.html) - Complete and accessible
 - Full color palette
 - Typography system
 - Component library (buttons, cards, forms, alerts)

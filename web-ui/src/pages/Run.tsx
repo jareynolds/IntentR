@@ -4,6 +4,7 @@ import { Card } from '../components/Card';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { AIPresetIndicator } from '../components/AIPresetIndicator';
 import { UIFrameworkIndicator } from '../components/UIFrameworkIndicator';
+import { WizardPageNavigation } from '../components/wizard';
 import { CLAUDE_PROXY_URL } from '../api/client';
 
 interface AppStatus {
@@ -153,6 +154,7 @@ export const Run: React.FC = () => {
 
   return (
     <div className="page-container" style={{ padding: '16px' }}>
+      <WizardPageNavigation />
       <AIPresetIndicator />
       <UIFrameworkIndicator />
 

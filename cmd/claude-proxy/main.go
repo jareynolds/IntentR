@@ -1,4 +1,4 @@
-// UbeCode — Copyright © 2025 James Reynolds
+// IntentR — Copyright © 2025 James Reynolds
 //
 // Claude CLI Proxy Service
 // This service runs on the host machine (outside Docker) and executes

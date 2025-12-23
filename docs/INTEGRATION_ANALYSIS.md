@@ -2,7 +2,7 @@
 
 ## Overview
 
-The UbeCode application uses Claude AI to automatically analyze integration provider APIs and generate configuration forms dynamically. This feature allows users to configure new integrations without manual form creation.
+The IntentR application uses Claude AI to automatically analyze integration provider APIs and generate configuration forms dynamically. This feature allows users to configure new integrations without manual form creation.
 
 ## How It Works
 
@@ -41,9 +41,9 @@ The UbeCode application uses Claude AI to automatically analyze integration prov
 2. Create a new API key
 3. Copy the key (starts with `sk-ant-`)
 
-### 2. Add API Key to UbeCode
+### 2. Add API Key to IntentR
 
-1. Open UbeCode application
+1. Open IntentR application
 2. Navigate to **Settings** page
 3. Scroll to **API Keys** section
 4. Paste your Anthropic API key

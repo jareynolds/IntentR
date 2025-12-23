@@ -1,9 +1,9 @@
-// UbeCode — Copyright © 2025 James Reynolds
+// IntentR — Copyright © 2025 James Reynolds
 //
-// This file is part of UbeCode.
+// This file is part of IntentR.
 // You may use this file under either:
 //   • The AGPLv3 Open Source License, OR
-//   • The UbeCode Commercial License
+//   • The IntentR Commercial License
 // See the LICENSE.AGPL and LICENSE.COMMERCIAL files for details.
 
 package main
@@ -21,9 +21,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jareynolds/ubecode/pkg/database"
-	"github.com/jareynolds/ubecode/pkg/models"
-	"github.com/jareynolds/ubecode/pkg/repository"
+	"github.com/jareynolds/intentr/pkg/database"
+	"github.com/jareynolds/intentr/pkg/models"
+	"github.com/jareynolds/intentr/pkg/repository"
 )
 
 type Server struct {
@@ -50,15 +50,15 @@ func main() {
 	}
 	dbUser := os.Getenv("DB_USER")
 	if dbUser == "" {
-		dbUser = "ubecode"
+		dbUser = "intentr"
 	}
 	dbPassword := os.Getenv("DB_PASSWORD")
 	if dbPassword == "" {
-		dbPassword = "ubecode123"
+		dbPassword = "intentr123"
 	}
 	dbName := os.Getenv("DB_NAME")
 	if dbName == "" {
-		dbName = "ubecode"
+		dbName = "intentr"
 	}
 
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",

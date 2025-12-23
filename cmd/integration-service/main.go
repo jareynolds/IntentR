@@ -1,9 +1,9 @@
-// UbeCode — Copyright © 2025 James Reynolds
+// IntentR — Copyright © 2025 James Reynolds
 //
-// This file is part of UbeCode.
+// This file is part of IntentR.
 // You may use this file under either:
 //   • The AGPLv3 Open Source License, OR
-//   • The UbeCode Commercial License
+//   • The IntentR Commercial License
 // See the LICENSE.AGPL and LICENSE.COMMERCIAL files for details.
 
 package main
@@ -18,7 +18,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jareynolds/ubecode/internal/integration"
+	"github.com/jareynolds/intentr/internal/integration"
 )
 
 func main() {
@@ -63,6 +63,10 @@ func main() {
 	mux.HandleFunc("OPTIONS /figma/files/{fileKey}/comments", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /analyze-integration", corsMiddleware(handler.HandleAnalyzeIntegration))
 	mux.HandleFunc("OPTIONS /analyze-integration", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+	mux.HandleFunc("POST /test-connection", corsMiddleware(handler.HandleTestConnection))
+	mux.HandleFunc("OPTIONS /test-connection", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+	mux.HandleFunc("POST /analyze-connection-error", corsMiddleware(handler.HandleAnalyzeConnectionError))
+	mux.HandleFunc("OPTIONS /analyze-connection-error", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /fetch-resources", corsMiddleware(handler.HandleFetchResources))
 	mux.HandleFunc("OPTIONS /fetch-resources", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /suggest-resources", corsMiddleware(handler.HandleSuggestResources))
@@ -71,6 +75,10 @@ func main() {
 	mux.HandleFunc("OPTIONS /fetch-files", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /fetch-file-meta", corsMiddleware(handler.HandleFetchFileMeta))
 	mux.HandleFunc("OPTIONS /fetch-file-meta", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+	mux.HandleFunc("POST /fetch-jira-epics", corsMiddleware(handler.HandleFetchJiraEpics))
+	mux.HandleFunc("OPTIONS /fetch-jira-epics", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+	mux.HandleFunc("POST /import-jira-epics", corsMiddleware(handler.HandleImportJiraEpics))
+	mux.HandleFunc("OPTIONS /import-jira-epics", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("GET /specifications/list", corsMiddleware(handler.HandleListSpecifications))
 	mux.HandleFunc("OPTIONS /specifications/list", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /specifications/analyze", corsMiddleware(handler.HandleAnalyzeSpecifications))
@@ -158,7 +166,7 @@ func main() {
 	mux.HandleFunc("POST /read-file", corsMiddleware(handler.HandleReadFile))
 	mux.HandleFunc("OPTIONS /read-file", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 
-	// SAWai Epic routes (Scaled Agile With AI)
+	// INTENT Epic routes (Scaled Agile With AI)
 	mux.HandleFunc("POST /epic-files", corsMiddleware(handler.HandleEpicFiles))
 	mux.HandleFunc("OPTIONS /epic-files", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /save-epic", corsMiddleware(handler.HandleSaveEpic))
@@ -166,7 +174,7 @@ func main() {
 	mux.HandleFunc("POST /delete-epic", corsMiddleware(handler.HandleDeleteEpic))
 	mux.HandleFunc("OPTIONS /delete-epic", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 
-	// SAWai Theme/Vision routes
+	// INTENT Theme/Vision routes
 	mux.HandleFunc("POST /theme-files", corsMiddleware(handler.HandleThemeFiles))
 	mux.HandleFunc("OPTIONS /theme-files", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /save-theme", corsMiddleware(handler.HandleSaveTheme))
@@ -174,7 +182,7 @@ func main() {
 	mux.HandleFunc("POST /delete-theme", corsMiddleware(handler.HandleDeleteTheme))
 	mux.HandleFunc("OPTIONS /delete-theme", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 
-	// SAWai Feature routes
+	// INTENT Feature routes
 	mux.HandleFunc("POST /feature-files", corsMiddleware(handler.HandleFeatureFiles))
 	mux.HandleFunc("OPTIONS /feature-files", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /save-feature", corsMiddleware(handler.HandleSaveFeature))

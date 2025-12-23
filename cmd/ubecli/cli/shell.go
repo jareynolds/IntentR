@@ -1,4 +1,4 @@
-// UbeCode - Copyright 2025 James Reynolds
+// IntentR - Copyright 2025 James Reynolds
 //
 // Interactive Shell for UbeCLI
 // Provides a REPL interface for LLM interactions
@@ -15,9 +15,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jareynolds/ubecode/cmd/ubecli/adapters"
-	"github.com/jareynolds/ubecode/cmd/ubecli/config"
-	"github.com/jareynolds/ubecode/cmd/ubecli/pipeline"
+	"github.com/jareynolds/intentr/cmd/ubecli/adapters"
+	"github.com/jareynolds/intentr/cmd/ubecli/config"
+	"github.com/jareynolds/intentr/cmd/ubecli/pipeline"
 )
 
 // Shell represents the interactive CLI shell

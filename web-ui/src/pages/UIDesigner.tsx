@@ -4,6 +4,7 @@ import { Button } from '../components/Button';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { AIPresetIndicator } from '../components/AIPresetIndicator';
 import { UIFrameworkIndicator } from '../components/UIFrameworkIndicator';
+import { WizardPageNavigation } from '../components/wizard';
 import { INTEGRATION_URL } from '../api/client';
 
 type ComponentType = 'button' | 'card' | 'input' | 'alert' | 'navbar' | 'avatar' | 'progress' | 'toggle';
@@ -552,6 +553,7 @@ ${xmlEscaped}
 
   return (
     <div className="ui-designer-page" style={{ padding: '16px' }}>
+      <WizardPageNavigation />
       <AIPresetIndicator />
       <UIFrameworkIndicator />
 

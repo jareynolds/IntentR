@@ -1,4 +1,4 @@
--- UbeCode User Authentication Database Schema
+-- IntentR User Authentication Database Schema
 -- This script initializes the database with user table and admin user
 
 -- Create users table
@@ -36,7 +36,7 @@ CREATE INDEX IF NOT EXISTS idx_sessions_token_hash ON sessions(token_hash);
 -- IMPORTANT: Change this password after first login!
 INSERT INTO users (email, password_hash, name, role, is_active)
 VALUES (
-    'admin@ubecode.local',
+    'admin@intentra.local',
     '$2a$10$3ool914vjg3JAynM0TuLe.fmNwiLC9qysfpH8Klxzg8qyG1ZhHoQK',
     'System Administrator',
     'admin',

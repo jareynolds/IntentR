@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Card, Alert, Button, AIPresetIndicator } from '../components';
+import { Card, Alert, Button, AIPresetIndicator, PageHeader } from '../components';
+import { WizardPageNavigation } from '../components/wizard';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -529,47 +530,28 @@ export const Vision: React.FC = () => {
   // Main List View
   return (
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
+      <WizardPageNavigation />
       <AIPresetIndicator />
-
-      {/* Workspace Header */}
-      {currentWorkspace && (
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-      )}
-
       <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <div>
-            <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Product vision and business strategy</h1>
-            <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
-              Strategic Intent / Product Thesis (Why this exists, success criteria)
-            </p>
-          </div>
-          <Button variant="primary" onClick={handleCreateTheme}>
-            + Create Theme
-          </Button>
-        </div>
+        <PageHeader
+          title="Product Vision and Business Strategy"
+          quickDescription="Strategic Intent / Product Thesis (Why this exists, success criteria)."
+          detailedDescription="In Intent-Centered Engineering, strategic themes are differentiating business objectives that connect your portfolio to the enterprise strategy.
+With AI-assisted development, the emphasis shifts to high-quality description of Intent.
+Well-defined themes guide AI tools to generate better outcomes and ensure alignment between business goals and technical implementation."
+          workspaceName={currentWorkspace?.name}
+          actions={
+            <Button variant="primary" onClick={handleCreateTheme}>
+              + Create Theme
+            </Button>
+          }
+        />
 
         {error && (
           <Alert type="error" style={{ marginBottom: '24px' }}>
             <strong>Error:</strong> {error}
           </Alert>
         )}
-
-        <Alert type="info" style={{ marginBottom: '24px' }}>
-          <strong>SAWai Strategic Themes:</strong> In Scaled Agile With AI (SAWai), strategic themes are
-          differentiating business objectives that connect your portfolio to the enterprise strategy.
-          With AI-assisted development, the emphasis shifts to high-quality specifications - well-defined
-          themes guide AI tools to generate better outcomes.
-        </Alert>
 
         {/* File-based Themes Section */}
         {currentWorkspace?.projectFolder && (

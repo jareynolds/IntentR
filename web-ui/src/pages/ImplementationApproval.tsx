@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Alert, Button } from '../components';
+import { Card, Alert, Button, PageHeader } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -516,11 +516,15 @@ export const ImplementationApproval: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Implementation Phase Approval</h1>
-        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
-          Review and approve all implementation phase items to complete the project.
-        </p>
+      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
+        <PageHeader
+          title="System Derivation Phase Approval"
+          quickDescription="Review and approve all system derivation phase items."
+          detailedDescription="The System Derivation phase includes System Architecture, AI Principles configuration, Code Generation, and Run Configuration.
+Each item has specific checklist requirements that must be satisfied.
+Complete all reviews and approve each section before proceeding to Continuous Validation."
+          workspaceName={currentWorkspace?.name}
+        />
       </div>
 
       {/* Phase Status Overview */}
@@ -558,7 +562,7 @@ export const ImplementationApproval: React.FC = () => {
           <div style={{ flex: 1 }}>
             <h3 className="text-title2" style={{ marginBottom: '8px' }}>
               {implementationApproved
-                ? 'Implementation Complete!'
+                ? 'System Derivation Phase Approved'
                 : getTotalRejected() > 0
                   ? 'Items Need Revision'
                   : canApprovePhase()
@@ -579,17 +583,9 @@ export const ImplementationApproval: React.FC = () => {
           <div>
             {implementationApproved ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                <div style={{
-                  padding: '12px 24px',
-                  backgroundColor: 'rgba(52, 199, 89, 0.1)',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                }}>
-                  <span style={{ fontSize: '24px' }}>🎉</span>
-                  <p className="text-headline" style={{ color: 'var(--color-systemGreen)', marginTop: '4px' }}>
-                    Project Complete!
-                  </p>
-                </div>
+                <Button variant="primary" onClick={() => navigate('/testing-approval')}>
+                  Proceed to Continuous Validation
+                </Button>
                 <button
                   onClick={handleRevokeApproval}
                   style={{
@@ -609,7 +605,7 @@ export const ImplementationApproval: React.FC = () => {
                 onClick={handleApproveImplementation}
                 disabled={!canApprovePhase()}
               >
-                Complete Implementation
+                Approve System Derivation Phase
               </Button>
             )}
           </div>
@@ -639,11 +635,11 @@ export const ImplementationApproval: React.FC = () => {
         </>
       )}
 
-      {/* SAWai Info */}
+      {/* INTENT Info */}
       <Alert type="info" style={{ marginTop: '24px' }}>
-        <strong>SAWai Implementation Phase:</strong> The implementation phase is where your application comes to life.
+        <strong>INTENT System Derivation Phase:</strong> The system derivation phase is where your application comes to life.
         Ensure the system architecture is documented, AI principles are configured, code is generated and reviewed,
-        and the application runs correctly. This final gate validates that the implementation meets all requirements.
+        and the application runs correctly. This gate validates that the implementation meets all requirements before proceeding to Continuous Validation.
       </Alert>
 
       {/* Rejection Modal */}

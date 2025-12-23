@@ -1,4 +1,4 @@
-// UbeCode - Copyright 2025 James Reynolds
+// IntentR - Copyright 2025 James Reynolds
 //
 // OpenAI Codex CLI Adapter for UbeCLI
 // Executes prompts via the local Codex CLI installation (@openai/codex)

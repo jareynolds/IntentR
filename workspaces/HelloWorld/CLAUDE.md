@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-UbeCode is a GoLang microservices application for design-driven development using the SAWai (Scaled Agile With AI) methodology. It integrates with Figma and provides capability-driven software development workflows.
+IntentR is a GoLang microservices application for design-driven development using the INTENT (Scaled Agile With AI) methodology. It integrates with Figma and provides capability-driven software development workflows.
 
 ## Quick Start Commands
 
@@ -188,7 +188,7 @@ go test -v ./pkg/client/...
 
 ```bash
 # Connect to PostgreSQL
-psql -h localhost -p 6432 -U ubecode_user -d ubecode_db
+psql -h localhost -p 6432 -U intentr_user -d intentr_db
 
 # Initialize schema (automatic on Docker startup)
 # Manual: scripts/init-db.sql
@@ -220,11 +220,11 @@ tail -f logs/*.log
 - `docs/api/API.md` - API endpoint documentation
 - `docs/ROLE_BASED_ACCESS_CONTROL.md` - RBAC system
 - `docs/REALTIME_COLLABORATION.md` - WebSocket features
-- `DEVELOPMENT_GUIDE.md` - SAWai methodology details
+- `DEVELOPMENT_GUIDE.md` - INTENT methodology details
 
 ## Development Methodology
 
-This project uses the **SAWai (Scaled Agile With AI)** methodology. See the MANDATORY section at the top of this file for the primary reference (MAIN_SWDEV_PLAN.md).
+This project uses the **INTENT (Scaled Agile With AI)** methodology. See the MANDATORY section at the top of this file for the primary reference (MAIN_SWDEV_PLAN.md).
 
 **Key Concepts:**
 - **Hierarchy:** Component → Capability → Enabler → Requirement (no Epics)
@@ -235,7 +235,7 @@ This project uses the **SAWai (Scaled Agile With AI)** methodology. See the MAND
 - **BDD/Gherkin Testing:** Test scenarios linked to requirements
 
 **Supporting References:**
-- `CODE_RULES/SAWai.md` - SAWai methodology overview
+- `CODE_RULES/INTENT.md` - INTENT methodology overview
 - `CODE_RULES/CODE_COMPLETE.md` - Implementation best practices
 
 ## Approval Workflow

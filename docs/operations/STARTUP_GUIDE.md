@@ -1,8 +1,8 @@
-# UbeCode Startup Guide
+# IntentR Startup Guide
 
 ## Quick Start Options
 
-UbeCode offers two ways to start the application depending on your needs:
+IntentR offers two ways to start the application depending on your needs:
 
 ### Option 1: Development Mode (Recommended for Frontend Development)
 
@@ -109,7 +109,7 @@ Once started, access these URLs:
 ## Default Login (Full Stack mode)
 
 When authentication is enabled:
-- **Email**: admin@ubecode.local
+- **Email**: admin@intentr.local
 - **Password**: admin123
 - ⚠️ **Change password after first login!**
 

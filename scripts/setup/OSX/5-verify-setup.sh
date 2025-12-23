@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ################################################################################
-# UbeCode Setup Verification Script for macOS
+# IntentR Setup Verification Script for macOS
 ################################################################################
 # This script verifies that all components are properly installed and configured
 #
@@ -412,7 +412,7 @@ display_next_steps() {
 
 main() {
     echo ""
-    log "Starting UbeCode setup verification for macOS..."
+    log "Starting IntentR setup verification for macOS..."
     echo ""
 
     check_macos

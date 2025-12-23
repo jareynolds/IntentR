@@ -1,4 +1,4 @@
-// UbeCode - Copyright 2025 James Reynolds
+// IntentR - Copyright 2025 James Reynolds
 //
 // Context Loader for UbeCLI
 // Loads project context files (CLAUDE.md, MAIN_SWDEV_PLAN.md, specifications)

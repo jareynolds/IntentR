@@ -30,10 +30,10 @@ export interface Theme {
 }
 
 export const defaultTheme: Theme = {
-  id: 'ubecode-default',
-  name: 'UbeCode Default',
+  id: 'intentr-default',
+  name: 'IntentR Default',
   description: 'Grey foundations with blue interactions and vibrant orange accents',
-  designSystemUrl: '/design-systems/ubecode-default-reverse-engineered.html',
+  designSystemUrl: '/design-systems/intentr-default-reverse-engineered.html',
   colors: {
     grey: {
       50: '#f9fafb',
@@ -128,7 +128,7 @@ export const figmaTheme: Theme = {
   id: 'figma-design-system',
   name: 'Figma Design System',
   description: 'Official design system from Figma - Grey foundations, blue interactions, vibrant orange accents',
-  designSystemUrl: '/design-systems/ubecode-default-reverse-engineered.html',
+  designSystemUrl: '/design-systems/intentr-default-reverse-engineered.html',
   colors: {
     grey: {
       50: '#f9fafb',

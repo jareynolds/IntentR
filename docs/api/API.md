@@ -1,6 +1,6 @@
 # API Documentation
 
-This document describes the REST API endpoints for all UbeCode microservices.
+This document describes the REST API endpoints for all IntentR microservices.
 
 ## Base URLs
 

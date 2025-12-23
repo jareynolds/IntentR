@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Card, Alert, Button, ConfirmDialog } from '../components';
+import { Card, Alert, Button, ConfirmDialog, PageHeader } from '../components';
+import { WizardPageNavigation } from '../components/wizard';
 import { useEnabler } from '../context/EnablerContext';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
@@ -1002,7 +1003,7 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
     const sequenceNum = fileEnablers.length + proposedEnablers.indexOf(enabler) + 1;
     const fileName = `ENB-${safeName}-${sequenceNum}.md`;
 
-    // Generate markdown content following SAWai Enabler template
+    // Generate markdown content following INTENT Enabler template
     let markdown = `# ${enabler.name}\n\n`;
     markdown += `## Metadata\n`;
     markdown += `- **Name**: ${enabler.name}\n`;
@@ -2084,20 +2085,25 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
 
   return (
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-        <div>
-          <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Enabler Management</h1>
-          <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
-            Manage enablers, requirements, and acceptance criteria for your capabilities.
-          </p>
-        </div>
-        <Button
-          variant="secondary"
-          onClick={handleAnalyzeSpecifications}
-          disabled={isAnalyzingCapabilities}
-        >
-          {isAnalyzingCapabilities ? 'Analyzing...' : 'Analyze'}
-        </Button>
+      <WizardPageNavigation />
+      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
+        <PageHeader
+          title="Enabler Management"
+          quickDescription="Manage enablers, requirements, and acceptance criteria for your capabilities."
+          detailedDescription="In INTENT, enablers are technical implementations that realize capabilities through specific functionality.
+Each enabler contains functional and non-functional requirements with testable acceptance criteria.
+Enablers bridge the gap between high-level business capabilities and actual code implementation, providing clear specifications for AI-assisted development."
+          workspaceName={currentWorkspace?.name}
+          actions={
+            <Button
+              variant="secondary"
+              onClick={handleAnalyzeSpecifications}
+              disabled={isAnalyzingCapabilities}
+            >
+              {isAnalyzingCapabilities ? 'Analyzing...' : 'Analyze'}
+            </Button>
+          }
+        />
       </div>
 
       {error && (
@@ -2117,11 +2123,6 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
           </button>
         </Alert>
       )}
-
-      <Alert type="info" style={{ marginBottom: '24px' }}>
-        <strong>Enablers:</strong> Technical implementations that realize capabilities through specific functionality.
-        Each enabler contains functional and non-functional requirements with testable acceptance criteria.
-      </Alert>
 
       {/* Proposed Enablers Section */}
       {showProposedEnablers && proposedEnablers.length > 0 && (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Alert, Button } from '../components';
+import { Card, Alert, Button, PageHeader } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -576,11 +576,15 @@ export const DesignApproval: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Design Phase Approval</h1>
-        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
-          Review and approve all design phase items before proceeding to Implementation.
-        </p>
+      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
+        <PageHeader
+          title="Design Phase Approval"
+          quickDescription="Review and approve all design phase items before proceeding."
+          detailedDescription="The Design phase includes UI Assets, UI Framework selection, UI Styles, and UI Designer outputs.
+Each design item has a checklist of requirements that must be satisfied for approval.
+Complete all checklist items and approve each section before proceeding to Implementation."
+          workspaceName={currentWorkspace?.name}
+        />
       </div>
 
       {/* Phase Status Overview */}
@@ -691,9 +695,9 @@ export const DesignApproval: React.FC = () => {
         </>
       )}
 
-      {/* SAWai Info */}
+      {/* INTENT Info */}
       <Alert type="info" style={{ marginTop: '24px' }}>
-        <strong>SAWai Design Phase:</strong> The design phase establishes how your application will look and feel.
+        <strong>INTENT Design Phase:</strong> The design phase establishes how your application will look and feel.
         Before proceeding to Implementation, ensure all UI assets, framework choices, styles, and component designs
         have been reviewed and approved. This gate ensures visual alignment before building.
       </Alert>

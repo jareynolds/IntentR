@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { AIPresetIndicator } from '../components/AIPresetIndicator';
+import { WizardPageNavigation } from '../components/wizard';
 import { useWorkspace } from '../context/WorkspaceContext';
 import axios from 'axios';
 import { SPEC_URL } from '../api/client';
@@ -140,19 +141,31 @@ export function applyUIStyleToDOM(framework: UIFrameworkConfig): void {
   // Apply sidebar styles
   if (framework.sidebarStyles) {
     root.style.setProperty('--sidebar-background', framework.sidebarStyles.background);
-    root.style.setProperty('--sidebar-foreground', framework.sidebarStyles.foreground);
     root.style.setProperty('--sidebar-font-size', framework.sidebarStyles.fontSize);
     root.style.setProperty('--sidebar-font-weight', framework.sidebarStyles.fontWeight);
     root.style.setProperty('--sidebar-active-background', framework.sidebarStyles.activeBackground);
     root.style.setProperty('--sidebar-active-foreground', framework.sidebarStyles.activeForeground);
     root.style.setProperty('--sidebar-hover-background', framework.sidebarStyles.hoverBackground);
     root.style.setProperty('--sidebar-border-color', framework.sidebarStyles.borderColor);
+
+    // Determine if sidebar background is dark and set text color accordingly
+    const sidebarBg = framework.sidebarStyles.background.toLowerCase();
+    const isSidebarDark = sidebarBg === '#000000' || sidebarBg === '#1a1a1a' || sidebarBg === '#2d2d2d' ||
+                          sidebarBg === '#111111' || sidebarBg === '#1a1528' || sidebarBg === '#2d2640' ||
+                          sidebarBg === '#081534' || sidebarBg === '#453a5c' || sidebarBg === '#374151' ||
+                          sidebarBg === '#3f51b5' || sidebarBg === '#303f9f';
+
+    // For dark sidebar backgrounds, always use white text
+    if (isSidebarDark) {
+      root.style.setProperty('--sidebar-foreground', '#FFFFFF');
+    } else {
+      root.style.setProperty('--sidebar-foreground', framework.sidebarStyles.foreground);
+    }
   }
 
   // Apply card styles
   if (framework.cardStyles) {
     root.style.setProperty('--card-background', framework.cardStyles.background);
-    root.style.setProperty('--card-foreground', framework.cardStyles.foreground);
     root.style.setProperty('--card-title-font-size', framework.cardStyles.titleFontSize);
     root.style.setProperty('--card-title-font-weight', framework.cardStyles.titleFontWeight);
     root.style.setProperty('--card-body-font-size', framework.cardStyles.bodyFontSize);
@@ -161,6 +174,23 @@ export function applyUIStyleToDOM(framework: UIFrameworkConfig): void {
     root.style.setProperty('--card-border-color', framework.cardStyles.borderColor);
     root.style.setProperty('--card-shadow', framework.cardStyles.shadow);
     root.style.setProperty('--card-hover-shadow', framework.cardStyles.hoverShadow);
+
+    // Determine if card background is dark and set text color accordingly
+    const cardBg = framework.cardStyles.background.toLowerCase();
+    const isCardDark = cardBg === '#000000' || cardBg === '#1a1a1a' || cardBg === '#2d2d2d' ||
+                       cardBg === '#111111' || cardBg === '#1a1528' || cardBg === '#2d2640' ||
+                       cardBg === '#081534' || cardBg === '#453a5c' || cardBg === '#374151';
+
+    // For dark card backgrounds, always use white text
+    if (isCardDark) {
+      root.style.setProperty('--card-foreground', '#FFFFFF');
+      root.style.setProperty('--card-title-color', '#FFFFFF');
+      root.style.setProperty('--card-body-color', '#FFFFFF');
+    } else {
+      root.style.setProperty('--card-foreground', framework.cardStyles.foreground);
+      root.style.setProperty('--card-title-color', framework.cardStyles.foreground);
+      root.style.setProperty('--card-body-color', framework.cardStyles.foreground);
+    }
   }
 }
 
@@ -293,7 +323,7 @@ export const defaultUIFrameworks: UIFrameworkConfig[] = [
     },
     sidebarStyles: {
       background: '#2d2640',
-      foreground: '#E5E5E5',
+      foreground: '#FFFFFF',
       fontSize: '14px',
       fontWeight: '500',
       activeBackground: '#8b5cf6',
@@ -302,8 +332,8 @@ export const defaultUIFrameworks: UIFrameworkConfig[] = [
       borderColor: '#5c4f7a',
     },
     cardStyles: {
-      background: '#2d2640',
-      foreground: '#E5E5E5',
+      background: '#000000',
+      foreground: '#FFFFFF',
       titleFontSize: '1.25rem',
       titleFontWeight: '600',
       bodyFontSize: '0.875rem',
@@ -663,7 +693,7 @@ export const defaultUIFrameworks: UIFrameworkConfig[] = [
     },
     sidebarStyles: {
       background: '#1a1a1a',
-      foreground: '#E5E5E5',
+      foreground: '#FFFFFF',
       fontSize: '14px',
       fontWeight: '500',
       activeBackground: '#3b82f6',
@@ -672,8 +702,8 @@ export const defaultUIFrameworks: UIFrameworkConfig[] = [
       borderColor: '#374151',
     },
     cardStyles: {
-      background: '#1a1a1a',
-      foreground: '#E5E5E5',
+      background: '#000000',
+      foreground: '#FFFFFF',
       titleFontSize: '1.25rem',
       titleFontWeight: '600',
       bodyFontSize: '0.875rem',
@@ -2371,6 +2401,7 @@ This UI Style specification should be used in conjunction with the active UI Fra
 
   return (
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
+      <WizardPageNavigation />
       <AIPresetIndicator />
       {/* Workspace Header */}
       {currentWorkspace && (

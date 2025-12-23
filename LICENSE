@@ -1,10 +1,10 @@
-# UbeCode — Dual Licensed (AGPLv3 or Commercial)
+# IntentR — Dual Licensed (AGPLv3 or Commercial)
 
-UbeCode is available under a **dual-licensing model**:
+IntentR is available under a **dual-licensing model**:
 
 ### 🔓 Open Source License: AGPLv3
-You may use UbeCode under the GNU Affero General Public License v3.  
-If you modify UbeCode or build a system that uses it and make it available
+You may use IntentR under the GNU Affero General Public License v3.
+If you modify IntentR or build a system that uses it and make it available
 to others (including over a network), you **must** release your complete
 source code under the AGPLv3.
 
@@ -13,17 +13,17 @@ See: LICENSE.AGPL
 ### 💼 Commercial License
 If your company wants to:
 - keep its source code proprietary,
-- embed UbeCode into closed-source products,
-- run UbeCode as part of a SaaS platform without releasing your code,
+- embed IntentR into closed-source products,
+- run IntentR as part of a SaaS platform without releasing your code,
 - receive support, SLA, or custom terms,
 
 you must purchase a **commercial license**.
 
 See: LICENSE.COMMERCIAL  
-Contact: ubecodeai@gmail.com
+Contact: intentraai@gmail.com
 
 ### ⚠️ You must choose *one* license.
-Using UbeCode without complying with AGPLv3 or without a commercial license
+Using IntentR without complying with AGPLv3 or without a commercial license
 is a violation of copyright law.
 
 

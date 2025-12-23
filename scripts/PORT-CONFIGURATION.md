@@ -1,8 +1,8 @@
-# UbeCode Port Configuration Guide
+# IntentR Port Configuration Guide
 
 ## Overview
 
-This document describes all ports used by the UbeCode application and provides guidance for administrators who need to change ports to avoid conflicts.
+This document describes all ports used by the IntentR application and provides guidance for administrators who need to change ports to avoid conflicts.
 
 ## Current Default Ports
 

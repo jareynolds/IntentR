@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Alert, Button } from '../components';
+import { Card, Alert, Button, PageHeader } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -630,11 +630,15 @@ export const DefinitionApproval: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Definition Phase Approval</h1>
-        <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
-          Review and approve all definition phase items before proceeding to Design.
-        </p>
+      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
+        <PageHeader
+          title="Formal Specification Phase Approval"
+          quickDescription="Review and approve all formal specification phase items."
+          detailedDescription="The Formal Specification phase includes Capabilities and Enablers documentation.
+Each capability and enabler must be reviewed for completeness and technical accuracy.
+All items must be approved before proceeding to the System Derivation phase."
+          workspaceName={currentWorkspace?.name}
+        />
       </div>
 
       {/* Phase Status Overview */}
@@ -672,7 +676,7 @@ export const DefinitionApproval: React.FC = () => {
           <div style={{ flex: 1 }}>
             <h3 className="text-title2" style={{ marginBottom: '8px' }}>
               {definitionApproved
-                ? 'Definition Phase Approved'
+                ? 'Formal Specification Phase Approved'
                 : getTotalRejected() > 0
                   ? 'Items Need Revision'
                   : canApprovePhase()
@@ -693,8 +697,8 @@ export const DefinitionApproval: React.FC = () => {
           <div>
             {definitionApproved ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                <Button variant="primary" onClick={() => navigate('/designs')}>
-                  Proceed to Design
+                <Button variant="primary" onClick={() => navigate('/testing')}>
+                  Proceed to System Derivation
                 </Button>
                 <button
                   onClick={handleRevokeApproval}
@@ -715,7 +719,7 @@ export const DefinitionApproval: React.FC = () => {
                 onClick={handleApproveDefinition}
                 disabled={!canApprovePhase()}
               >
-                Approve Definition Phase
+                Approve Formal Specification Phase
               </Button>
             )}
           </div>
@@ -771,11 +775,11 @@ export const DefinitionApproval: React.FC = () => {
         </>
       )}
 
-      {/* SAWai Info */}
+      {/* INTENT Info */}
       <Alert type="info" style={{ marginTop: '24px' }}>
-        <strong>SAWai Definition Phase:</strong> The definition phase establishes the scope of your project.
-        Before proceeding to Design, ensure all capabilities and enablers have been reviewed and approved.
-        This gate ensures alignment on what you're building before designing how it looks.
+        <strong>INTENT Formal Specification Phase:</strong> The formal specification phase establishes the scope and design of your project.
+        Before proceeding to System Derivation, ensure all capabilities and enablers have been reviewed and approved.
+        This gate ensures alignment on what you're building and how it will work.
       </Alert>
 
       {/* Rejection Modal */}

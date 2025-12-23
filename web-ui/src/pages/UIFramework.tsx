@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { AIPresetIndicator } from '../components/AIPresetIndicator';
+import { WizardPageNavigation } from '../components/wizard';
 import { useWorkspace } from '../context/WorkspaceContext';
 import axios from 'axios';
 import { SPEC_URL } from '../api/client';
@@ -1029,6 +1030,7 @@ This layout should be used in conjunction with the active UI Styles (colors, typ
 
   return (
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
+      <WizardPageNavigation />
       <AIPresetIndicator />
 
       {/* Workspace Header */}

@@ -2,7 +2,7 @@
 
 ## Overview
 
-UbeCode implements a comprehensive Role-Based Access Control system that allows administrators to define and manage user permissions across all pages and features in the application.
+IntentR implements a comprehensive Role-Based Access Control system that allows administrators to define and manage user permissions across all pages and features in the application.
 
 ## Features
 

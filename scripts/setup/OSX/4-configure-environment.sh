@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ################################################################################
-# UbeCode Environment Configuration Script for macOS
+# IntentR Environment Configuration Script for macOS
 ################################################################################
-# This script helps configure the UbeCode microservices environment
+# This script helps configure the IntentR microservices environment
 #
 # Usage:
 #   ./configure-environment.sh [options]
@@ -61,7 +61,7 @@ info() {
 # Show help
 show_help() {
     cat << EOF
-UbeCode Environment Configuration Script (macOS)
+IntentR Environment Configuration Script (macOS)
 
 Usage:
     ./configure-environment.sh [options]
@@ -136,7 +136,7 @@ interactive_config() {
 
     echo ""
     info "==================================================="
-    info "  UbeCode Environment Configuration"
+    info "  IntentR Environment Configuration"
     info "==================================================="
     echo ""
 
@@ -199,7 +199,7 @@ create_env_file() {
 
     # Create .env file
     cat > "$ENV_FILE" << EOF
-# UbeCode Microservices Environment Configuration
+# IntentR Microservices Environment Configuration
 # Generated on $(date)
 # Platform: macOS
 
@@ -244,15 +244,15 @@ POSTGRES_PORT=6432
 # =============================================================================
 
 POSTGRES_HOST=localhost
-POSTGRES_USER=ubecode_user
-POSTGRES_PASSWORD=ubecode_password
-POSTGRES_DB=ubecode_db
+POSTGRES_USER=intentr_user
+POSTGRES_PASSWORD=intentr_password
+POSTGRES_DB=intentr_db
 
 # =============================================================================
 # DOCKER CONFIGURATION
 # =============================================================================
 
-NETWORK_NAME=ubecode-network
+NETWORK_NAME=intentr-network
 
 # =============================================================================
 # APPLICATION SETTINGS
@@ -283,7 +283,7 @@ create_env_example() {
     log "Creating .env.example file..."
 
     cat > "$env_example" << 'EOF'
-# UbeCode Microservices Environment Configuration Template
+# IntentR Microservices Environment Configuration Template
 # Copy this file to .env and fill in your actual values
 # DO NOT commit .env to version control!
 
@@ -321,9 +321,9 @@ POSTGRES_PORT=6432
 # =============================================================================
 
 POSTGRES_HOST=localhost
-POSTGRES_USER=ubecode_user
-POSTGRES_PASSWORD=ubecode_password
-POSTGRES_DB=ubecode_db
+POSTGRES_USER=intentr_user
+POSTGRES_PASSWORD=intentr_password
+POSTGRES_DB=intentr_db
 
 # =============================================================================
 # APPLICATION SETTINGS
@@ -331,7 +331,7 @@ POSTGRES_DB=ubecode_db
 
 ENV=development
 LOG_LEVEL=info
-NETWORK_NAME=ubecode-network
+NETWORK_NAME=intentr-network
 CORS_ORIGIN=http://localhost:6173
 EOF
 

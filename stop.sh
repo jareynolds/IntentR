@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# UbeCode Application Stop Script
-# This script stops all running UbeCode services
+# IntentR Application Stop Script
+# This script stops all running IntentR services
 # Usage: ./stop.sh [options]
 #   Options:
 #     --clean    Remove containers and volumes (WARNING: deletes database data)
@@ -46,7 +46,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo -e "${BOLD}${BLUE}========================================${NC}"
-echo -e "${BOLD}${BLUE}  UbeCode Application Shutdown${NC}"
+echo -e "${BOLD}${BLUE}  IntentR Application Shutdown${NC}"
 echo -e "${BOLD}${BLUE}========================================${NC}"
 echo ""
 
@@ -171,7 +171,7 @@ echo -e "${BOLD}${GREEN}  All Services Stopped${NC}"
 echo -e "${BOLD}${GREEN}========================================${NC}"
 echo ""
 
-# Check if any UbeCode ports are still in use
+# Check if any IntentR ports are still in use
 echo -e "${YELLOW}Checking for any remaining port usage...${NC}"
 
 PORTS=(6173 9080 9081 9082 9083 9084 9085 4001 4002 6432)
@@ -188,7 +188,7 @@ for port in "${PORTS[@]}"; do
 done
 
 if [ "$FOUND_PORTS" = false ]; then
-    echo -e "  ${GREEN}✓${NC} All UbeCode ports are free"
+    echo -e "  ${GREEN}✓${NC} All IntentR ports are free"
 fi
 
 echo ""

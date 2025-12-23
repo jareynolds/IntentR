@@ -1,6 +1,6 @@
 # Google OAuth Setup Guide
 
-This guide will help you set up Google OAuth authentication for the UbeCode application.
+This guide will help you set up Google OAuth authentication for the IntentR application.
 
 ## Prerequisites
 
@@ -22,7 +22,7 @@ This guide will help you set up Google OAuth authentication for the UbeCode appl
 ## Step 2: Configure OAuth Client
 
 1. Select **Web application** as the application type
-2. Add a name for your OAuth client (e.g., "UbeCode Auth")
+2. Add a name for your OAuth client (e.g., "IntentR Auth")
 3. Add **Authorized JavaScript origins**:
    ```
    http://localhost:3000
@@ -58,7 +58,7 @@ You can set these in:
 
 ```env
 # Database
-DATABASE_URL=postgresql://user:password@localhost:5432/ubecode
+DATABASE_URL=postgresql://user:password@localhost:5432/intentr
 
 # JWT
 JWT_SECRET=your_super_secret_jwt_key_here
@@ -81,7 +81,7 @@ cd cmd/auth-service
 export GOOGLE_CLIENT_ID="your_client_id"
 export GOOGLE_CLIENT_SECRET="your_client_secret"
 export GOOGLE_REDIRECT_URL="http://localhost:3000/auth/google/callback"
-export DATABASE_URL="postgresql://user:password@localhost:5432/ubecode"
+export DATABASE_URL="postgresql://user:password@localhost:5432/intentr"
 export JWT_SECRET="your_jwt_secret"
 go run main.go
 ```

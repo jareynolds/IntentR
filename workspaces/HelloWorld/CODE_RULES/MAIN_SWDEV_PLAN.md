@@ -1,18 +1,18 @@
 # MAIN SOFTWARE DEVELOPMENT PLAN
 **Version**: 1.0.0
 **Last Updated**: December 2, 2025
-**Framework**: SAWai (Scaled Agile With AI)
+**Framework**: INTENT (Scaled Agile With AI)
 **Author**: Development Team
 
 ---
 
 ## Overview
 
-This document is the **single source of truth** for all software development activities. It consolidates the SAWai methodology, AI agent development workflows, and implementation best practices into one comprehensive guide.
+This document is the **single source of truth** for all software development activities. It consolidates the INTENT methodology, AI agent development workflows, and implementation best practices into one comprehensive guide.
 
-**SAWai (Scaled Agile With AI)** is a streamlined agile methodology optimized for AI-assisted software development. It adapts traditional scaled agile principles to leverage AI tools effectively, emphasizing specification quality over heavy process ceremony.
+**INTENT (Scaled Agile With AI)** is a streamlined agile methodology optimized for AI-assisted software development. It adapts traditional scaled agile principles to leverage AI tools effectively, emphasizing specification quality over heavy process ceremony.
 
-**Key Insight**: AI amplifies delivery speed. When AI can accelerate implementation, the bottleneck shifts to specification quality. SAWai invests effort where it matters most.
+**Key Insight**: AI amplifies delivery speed. When AI can accelerate implementation, the bottleneck shifts to specification quality. INTENT invests effort where it matters most.
 
 **Core Philosophy**: No Epics. Capabilities and Enablers are sufficient when well-specified. AI can handle the implementation complexity that traditionally required Epic-level grouping.
 
@@ -51,7 +51,7 @@ There are 5 levels of AI governance enforcement, selectable via the AI Principle
 ## Table of Contents
 
 1. [Core Principles](#core-principles)
-2. [SAWai Hierarchy](#sawai-hierarchy)
+2. [INTENT Hierarchy](#sawai-hierarchy)
 3. [Development Lifecycle](#development-lifecycle)
 4. [Strategic Themes](#strategic-themes)
 5. [Capabilities](#capabilities)
@@ -78,7 +78,7 @@ There are 5 levels of AI governance enforcement, selectable via the AI Principle
 
 ### 1. Specification Quality Over Process Ceremony
 
-Traditional agile frameworks like SAFe include extensive ceremonies (PI Planning, multiple roles, complex documentation). SAWai recognizes that with AI assistance:
+Traditional agile frameworks like SAFe include extensive ceremonies (PI Planning, multiple roles, complex documentation). INTENT recognizes that with AI assistance:
 
 - **Well-defined specifications** yield better AI-generated outcomes
 - **Heavy process overhead** slows delivery without proportional benefit
@@ -86,7 +86,7 @@ Traditional agile frameworks like SAFe include extensive ceremonies (PI Planning
 
 ### 2. Accelerated Delivery Focus
 
-AI tools can dramatically speed up implementation. SAWai optimizes for:
+AI tools can dramatically speed up implementation. INTENT optimizes for:
 
 - Maximizing business value per unit time
 - Reducing time from idea to deployed feature
@@ -130,7 +130,7 @@ Before any code is written, AI should review specifications to:
 
 ---
 
-## SAWai Hierarchy
+## INTENT Hierarchy
 
 ```
 Enterprise Strategy
@@ -181,7 +181,7 @@ The development lifecycle follows these phases:
 7. **Reverse-to-Design** - Update design documentation from code
 8. **Retirement** - Decommission obsolete components
 
-### SAWai Development Workflow
+### INTENT Development Workflow
 
 ```
 Strategic Theme → Component → Capability → Enabler → Requirement
@@ -206,7 +206,7 @@ Strategic themes are differentiating business objectives that connect your portf
 - Guide prioritization decisions
 - Provide context for AI-assisted development
 
-### In SAWai
+### In INTENT
 With AI-assisted development, the emphasis shifts to high-quality theme definitions. Well-defined themes:
 
 - Guide AI tools to generate better outcomes
@@ -237,7 +237,7 @@ With AI-assisted development, the emphasis shifts to high-quality theme definiti
 
 ## Capabilities
 
-In SAWai, capabilities represent high-level business outcomes that contain multiple enablers. This is where business alignment happens.
+In INTENT, capabilities represent high-level business outcomes that contain multiple enablers. This is where business alignment happens.
 
 ### Purpose
 - Define what the system should be able to do
@@ -301,7 +301,7 @@ Enablers are the technical implementations that realize capabilities. This is wh
 
 ## Capability Workflow
 
-SAWai uses a streamlined four-stage workflow for capabilities:
+INTENT uses a streamlined four-stage workflow for capabilities:
 
 ```
 Specification → Definition → Design → Execution
@@ -403,7 +403,7 @@ Specification → Definition → Design → Execution
 
 ## WSJF Prioritization
 
-**WSJF (Weighted Shortest Job First)** is the primary prioritization mechanism in SAWai.
+**WSJF (Weighted Shortest Job First)** is the primary prioritization mechanism in INTENT.
 
 ### Formula
 
@@ -1482,9 +1482,9 @@ AI-generated code should pass through:
 
 ---
 
-## SAWai vs Traditional SAFe
+## INTENT vs Traditional SAFe
 
-| Aspect | Traditional SAFe | SAWai |
+| Aspect | Traditional SAFe | INTENT |
 |--------|------------------|-------|
 | Process ceremony | Heavy (PI Planning, etc.) | Light |
 | Hierarchy | Theme → Epic → Feature → Story | Theme → Capability → Enabler → Requirement |
@@ -2154,6 +2154,6 @@ Strategic Theme → Component → Capability → Enabler → Requirement
 ---
 
 **Document Version**: 1.0.0
-**Framework**: SAWai (Scaled Agile With AI)
+**Framework**: INTENT (Scaled Agile With AI)
 **Last Updated**: December 2, 2025
 **Maintained By**: Development Team

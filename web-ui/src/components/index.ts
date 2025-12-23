@@ -46,3 +46,24 @@ export { AcceptanceCriteriaSection } from './AcceptanceCriteriaSection';
 
 export { ConfirmDialog } from './ConfirmDialog';
 export type { ConfirmDialogProps } from './ConfirmDialog';
+
+export { ValidationDashboard } from './ValidationDashboard';
+
+export { GettingStartedWizard } from './GettingStartedWizard';
+
+export { OnboardingProgress } from './OnboardingProgress';
+
+export { HelpDrawer } from './HelpDrawer';
+
+export { VersionControlPanel } from './VersionControlPanel';
+
+export { VersionHistoryDrawer } from './VersionHistoryDrawer';
+
+export { WorkspaceVersionControl } from './WorkspaceVersionControl';
+
+export { PageHeader } from './PageHeader';
+
+export { CreateIntegrationModal } from './CreateIntegrationModal';
+export type { CustomIntegration } from './CreateIntegrationModal';
+
+export { JiraImportModal } from './JiraImportModal';

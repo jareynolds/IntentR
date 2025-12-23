@@ -1,4 +1,4 @@
-# UbeCode Application Reverse Engineering Report
+# IntentR Application Reverse Engineering Report
 
 **Date**: November 24, 2025
 **AI Agent**: Claude Code (Anthropic Sonnet 4.5)
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Successfully completed comprehensive reverse engineering of the UbeCode application, analyzing 90+ specification files from the `./specifications` folder and reorganizing them into structured, categorized documentation in the `./enh-specifications`, `./enh-code`, and `./enh-assets` folders.
+Successfully completed comprehensive reverse engineering of the IntentR application, analyzing 90+ specification files from the `./specifications` folder and reorganizing them into structured, categorized documentation in the `./enh-specifications`, `./enh-code`, and `./enh-assets` folders.
 
 ### Key Achievements
 
@@ -24,7 +24,7 @@ Successfully completed comprehensive reverse engineering of the UbeCode applicat
 
 ## Application Overview
 
-**UbeCode** is a comprehensive design-driven development workflow management system featuring:
+**IntentR** is a comprehensive design-driven development workflow management system featuring:
 
 ### Core Features
 - 🎨 **Ideation Canvas**: Freeform infinite canvas for capturing and organizing ideas
@@ -120,7 +120,7 @@ SAFe framework capability, feature, and user story tracking
 ---
 
 ### 4. CAP-471395: Container Orchestration
-**Status**: Implemented ✅ | **Priority**: Medium | **Component**: UbeCode Orchestrator
+**Status**: Implemented ✅ | **Priority**: Medium | **Component**: IntentR Orchestrator
 
 Application container lifecycle management with graceful operations
 
@@ -206,7 +206,7 @@ Complete React-based web UI with storyboarding, ideation, and workflow managemen
 
 ### Infrastructure
 - **Containerization**: Docker + Docker Compose
-- **Networking**: Docker bridge network (ubecode-network)
+- **Networking**: Docker bridge network (intentr-network)
 - **External APIs**: Figma API v1, Hugging Face
 
 ---
@@ -652,7 +652,7 @@ Total: 93 files (88 specs + 4 code + 1 report)
 
 ## Conclusion
 
-Successfully completed comprehensive reverse engineering of the UbeCode application, producing:
+Successfully completed comprehensive reverse engineering of the IntentR application, producing:
 
 - **88 organized specification files** with standardized naming
 - **1 comprehensive dependency document** with Mermaid diagrams

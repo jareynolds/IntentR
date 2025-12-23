@@ -1,4 +1,4 @@
--- UbeCode Approval Workflow Database Migration
+-- IntentR Approval Workflow Database Migration
 -- This script adds approval workflow tables for capabilities and enablers
 
 -- Create approval_status enum type for clarity

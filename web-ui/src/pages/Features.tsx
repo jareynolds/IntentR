@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Alert, Button, AIPresetIndicator } from '../components';
+import { Card, Alert, Button, AIPresetIndicator, PageHeader } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -485,44 +485,26 @@ export const Features: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
       <AIPresetIndicator />
-
-      {/* Workspace Header */}
-      {currentWorkspace && (
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-      )}
-
       <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <div>
-            <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Feature Management</h1>
-            <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
-              SAWai Features - Deliverables that provide measurable business value
-            </p>
-          </div>
-          <Button variant="primary" onClick={handleCreateFeature}>
-            + Create Feature
-          </Button>
-        </div>
+        <PageHeader
+          title="Feature Management"
+          quickDescription="INTENT Features - Deliverables that provide measurable business value."
+          detailedDescription="In Intent-Centered and Engineering-Driven, Narration for Transformation (INTENT), features are services that fulfill stakeholder needs.
+Each feature includes a benefit hypothesis and acceptance criteria.
+With AI-assisted development, feature specifications become the blueprint for rapid implementation."
+          workspaceName={currentWorkspace?.name}
+          actions={
+            <Button variant="primary" onClick={handleCreateFeature}>
+              + Create Feature
+            </Button>
+          }
+        />
 
         {error && (
           <Alert type="error" style={{ marginBottom: '24px' }}>
             <strong>Error:</strong> {error}
           </Alert>
         )}
-
-        <Alert type="info" style={{ marginBottom: '24px' }}>
-          <strong>SAWai Features:</strong> In Scaled Agile With AI (SAWai), features are services that fulfill stakeholder needs.
-          Each feature includes a benefit hypothesis and acceptance criteria. With AI-assisted development, feature specifications become the blueprint for rapid implementation.
-        </Alert>
 
         {/* File-based Features Section */}
         {currentWorkspace?.projectFolder && (

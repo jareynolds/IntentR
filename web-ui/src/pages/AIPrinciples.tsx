@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { AIPresetIndicator } from '../components/AIPresetIndicator';
+import { AIPresetIndicator, PageHeader } from '../components';
 import { UIFrameworkIndicator } from '../components/UIFrameworkIndicator';
+import { WizardPageNavigation } from '../components/wizard';
 import { INTEGRATION_URL } from '../api/client';
 
 const presetDescriptions = [
@@ -161,28 +162,18 @@ export const AIPrinciples: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
+      <WizardPageNavigation />
       <AIPresetIndicator />
       <UIFrameworkIndicator />
-
-      {/* Workspace Header */}
-      {currentWorkspace && (
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-      )}
-
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-grey-900 mb-2">AI Governance & Principles</h2>
-        <p className="text-grey-600">
-          Configure AI governance framework
-        </p>
+      <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
+        <PageHeader
+          title="AI Governance & Principles"
+          quickDescription="Configure AI governance framework for your workspace."
+          detailedDescription="INTENT provides 5 levels of AI governance enforcement, from Advisory (Level 1) to Zero-Tolerance (Level 5).
+Each level defines how strictly AI agents must follow development rules and approval workflows.
+Select a preset that matches your project's risk profile and regulatory requirements."
+          workspaceName={currentWorkspace?.name}
+        />
       </div>
 
       {activationSuccess && (

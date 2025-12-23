@@ -1,5 +1,6 @@
 export { Login } from './Login';
 export { GoogleCallback } from './GoogleCallback';
+export { Welcome } from './Welcome';
 export { Dashboard } from './Dashboard';
 export { WorkspaceOverview } from './WorkspaceOverview';
 export { Ideation } from './Ideation';
@@ -30,3 +31,4 @@ export { ImplementationApproval } from './ImplementationApproval';
 export { Testing } from './Testing';
 export { TestingApproval } from './TestingApproval';
 export { StoryMap } from './StoryMap';
+export { LearnINTENT } from './LearnINTENT';

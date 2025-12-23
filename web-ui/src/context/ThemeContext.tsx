@@ -26,7 +26,7 @@ interface ThemeProviderProps {
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [currentTheme, setCurrentTheme] = useState<Theme>(() => {
     // Load theme from localStorage or use default
-    const savedThemeId = localStorage.getItem('ubecode-theme');
+    const savedThemeId = localStorage.getItem('intentr-theme');
     if (savedThemeId) {
       const savedTheme = availableThemes.find(t => t.id === savedThemeId);
       if (savedTheme) return savedTheme;
@@ -38,7 +38,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     // Apply theme colors to CSS variables
     applyThemeToDOM(currentTheme);
     // Save to localStorage
-    localStorage.setItem('ubecode-theme', currentTheme.id);
+    localStorage.setItem('intentr-theme', currentTheme.id);
   }, [currentTheme]);
 
   const setTheme = (themeId: string) => {

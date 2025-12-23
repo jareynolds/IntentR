@@ -1,6 +1,6 @@
-# UbeCode Manual Approval Workflow Analysis
+# IntentR Manual Approval Workflow Analysis
 
-**Project**: UbeCode - GoLang Microservices for SAWai-driven Development  
+**Project**: IntentR - GoLang Microservices for INTENT-driven Development  
 **Analysis Date**: 2025-12-01  
 **Scope**: Manual approval workflow implementation for capabilities/enablers
 
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-UbeCode currently has a well-structured microservices architecture with:
+IntentR currently has a well-structured microservices architecture with:
 - Working capability/enabler system (database-backed)
 - Role-based access control (RBAC) framework
 - Authentication system (JWT + OAuth2)
@@ -158,7 +158,7 @@ interface PageAccess {
   - `CreateOAuthUser()` - OAuth user creation
 
 #### Default User
-- Email: `admin@ubecode.local`
+- Email: `admin@intentr.local`
 - Password: `admin123` (bcrypt hash in init-db.sql)
 - Role: `admin`
 
@@ -495,7 +495,7 @@ export const approvalService = {
 - Complex implementation
 - Finest-grained control
 
-**Recommendation**: Use Option A for initial implementation. It's simpler, matches SAWai methodology, and can be extended later.
+**Recommendation**: Use Option A for initial implementation. It's simpler, matches INTENT methodology, and can be extended later.
 
 ### 4.2 Role vs. User-Specific Approval
 
@@ -742,7 +742,7 @@ For implementing approval workflow:
 
 ## Conclusion
 
-The UbeCode codebase is well-structured and ready for approval workflow integration. The existing authentication, authorization, and data models provide a solid foundation. A straightforward approval workflow can be implemented in 2-3 weeks of development with the phased approach outlined above.
+The IntentR codebase is well-structured and ready for approval workflow integration. The existing authentication, authorization, and data models provide a solid foundation. A straightforward approval workflow can be implemented in 2-3 weeks of development with the phased approach outlined above.
 
 The recommended approach is:
 1. Start with a simple binary approval model (pending → approved/rejected)

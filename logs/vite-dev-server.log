@@ -3,123 +3,351 @@
 > vite
 
 
-  VITE v7.2.2  ready in 146 ms
+  VITE v7.2.2  ready in 144 ms
 
   ➜  Local:   http://localhost:6175/
   ➜  Network: http://10.0.0.237:6175/
-7:51:36 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-7:51:36 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:01:15 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:01:25 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:26:51 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:27:14 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:27:30 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:32:05 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:36:13 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:41:19 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:41:34 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:49:49 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:50:08 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:56:50 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-8:57:08 AM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-9:01:39 AM [vite] (client) hmr update /src/components/Sidebar.tsx, /src/styles/main.css, /src/index.css
-9:01:47 AM [vite] (client) hmr update /src/components/Sidebar.tsx, /src/styles/main.css, /src/index.css
-10:36:42 AM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-10:36:48 AM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-10:36:54 AM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-10:55:38 AM [vite] (client) hmr update /src/components/Header.tsx, /src/styles/main.css, /src/index.css
-10:58:10 AM [vite] (client) hmr update /src/components/Header.tsx, /src/styles/main.css, /src/index.css
-11:00:32 AM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
-11:00:41 AM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
-11:01:15 AM [vite] (client) hmr update /src/pages/DefinitionApproval.tsx, /src/styles/main.css, /src/index.css
-11:01:24 AM [vite] (client) hmr update /src/pages/DefinitionApproval.tsx, /src/styles/main.css, /src/index.css
-11:01:47 AM [vite] (client) hmr update /src/pages/DesignApproval.tsx, /src/styles/main.css, /src/index.css
-11:13:48 AM [vite] (client) hmr update /src/pages/DesignApproval.tsx, /src/styles/main.css, /src/index.css
-11:14:00 AM [vite] (client) hmr update /src/pages/DesignApproval.tsx, /src/styles/main.css, /src/index.css
-11:14:10 AM [vite] (client) hmr update /src/pages/DesignApproval.tsx, /src/styles/main.css, /src/index.css
-11:14:32 AM [vite] (client) hmr update /src/pages/ImplementationApproval.tsx, /src/styles/main.css, /src/index.css
-11:14:44 AM [vite] (client) hmr update /src/pages/ImplementationApproval.tsx, /src/styles/main.css, /src/index.css
-11:14:56 AM [vite] (client) hmr update /src/pages/ImplementationApproval.tsx, /src/styles/main.css, /src/index.css
-11:15:07 AM [vite] (client) hmr update /src/pages/ImplementationApproval.tsx, /src/styles/main.css, /src/index.css
-11:16:33 AM [vite] (client) hmr update /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
-11:16:55 AM [vite] (client) hmr update /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
-11:17:07 AM [vite] (client) hmr update /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
-2:29:03 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:29:08 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:29:15 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:29:23 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:29:31 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:29:38 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:29:46 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:30:32 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:30:38 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:30:44 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:30:51 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:30:59 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:31:07 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:31:14 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-2:32:31 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
-2:32:46 PM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
-2:58:51 PM [vite] (client) hmr update /src/context/WorkspaceContext.tsx, /src/styles/main.css, /src/index.css
-2:58:51 PM [vite] (client) hmr invalidate /src/context/WorkspaceContext.tsx Could not Fast Refresh ("useWorkspace" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-2:58:51 PM [vite] (client) hmr update /src/App.tsx, /src/pages/UIStyles.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Dashboard.tsx, /src/pages/Analyze.tsx, /src/pages/Capabilities.tsx, /src/pages/Features.tsx, /src/pages/AIChat.tsx, /src/pages/Designs.tsx, /src/pages/Vision.tsx, /src/pages/Code.tsx, /src/pages/Ideation.tsx, /src/pages/Workspaces.tsx, /src/pages/Storyboard.tsx, /src/pages/Run.tsx, /src/pages/AIPrinciples.tsx, /src/pages/System.tsx, /src/pages/UIFramework.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/DesignApproval.tsx, /src/pages/DataCollection.tsx, /src/pages/UIDesigner.tsx, /src/pages/Enablers.tsx, /src/pages/DefinitionApproval.tsx, /src/components/WorkspaceSelector.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/Testing.tsx, /src/components/CapabilityForm.tsx, /src/components/WorkspaceHeader.tsx, /src/pages/TestingApproval.tsx, /src/components/UIFrameworkIndicator.tsx, /src/components/UIFrameworkProvider.tsx, /src/components/AIPresetIndicator.tsx
-2:58:52 PM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-2:58:52 PM [vite] (client) hmr update /src/App.tsx
-3:03:08 PM [vite] (client) hmr update /src/context/WorkspaceContext.tsx, /src/styles/main.css, /src/index.css
-3:03:08 PM [vite] (client) hmr invalidate /src/context/WorkspaceContext.tsx Could not Fast Refresh ("useWorkspace" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-3:03:08 PM [vite] (client) hmr update /src/App.tsx, /src/pages/UIStyles.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Dashboard.tsx, /src/pages/Analyze.tsx, /src/pages/Capabilities.tsx, /src/pages/Features.tsx, /src/pages/AIChat.tsx, /src/pages/Designs.tsx, /src/pages/Vision.tsx, /src/pages/Code.tsx, /src/pages/Ideation.tsx, /src/pages/Workspaces.tsx, /src/pages/Storyboard.tsx, /src/pages/Run.tsx, /src/pages/AIPrinciples.tsx, /src/pages/System.tsx, /src/pages/UIFramework.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/DesignApproval.tsx, /src/pages/DataCollection.tsx, /src/pages/UIDesigner.tsx, /src/pages/Enablers.tsx, /src/pages/DefinitionApproval.tsx, /src/components/WorkspaceSelector.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/Testing.tsx, /src/components/CapabilityForm.tsx, /src/components/WorkspaceHeader.tsx, /src/pages/TestingApproval.tsx, /src/components/UIFrameworkIndicator.tsx, /src/components/UIFrameworkProvider.tsx, /src/components/AIPresetIndicator.tsx
-3:03:08 PM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-3:03:08 PM [vite] (client) hmr update /src/App.tsx
-3:18:37 PM [vite] (client) hmr update /src/context/WorkspaceContext.tsx, /src/styles/main.css, /src/index.css
-3:18:37 PM [vite] (client) hmr invalidate /src/context/WorkspaceContext.tsx Could not Fast Refresh ("useWorkspace" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-3:18:37 PM [vite] (client) hmr update /src/App.tsx, /src/pages/UIStyles.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Dashboard.tsx, /src/pages/Analyze.tsx, /src/pages/Capabilities.tsx, /src/pages/Features.tsx, /src/pages/AIChat.tsx, /src/pages/Designs.tsx, /src/pages/Vision.tsx, /src/pages/Code.tsx, /src/pages/Ideation.tsx, /src/pages/Workspaces.tsx, /src/pages/Storyboard.tsx, /src/pages/Run.tsx, /src/pages/AIPrinciples.tsx, /src/pages/System.tsx, /src/pages/UIFramework.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/DesignApproval.tsx, /src/pages/DataCollection.tsx, /src/pages/UIDesigner.tsx, /src/pages/Enablers.tsx, /src/pages/DefinitionApproval.tsx, /src/components/WorkspaceSelector.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/Testing.tsx, /src/components/CapabilityForm.tsx, /src/components/WorkspaceHeader.tsx, /src/pages/TestingApproval.tsx, /src/components/UIFrameworkIndicator.tsx, /src/components/UIFrameworkProvider.tsx, /src/components/AIPresetIndicator.tsx
-3:18:38 PM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-3:18:38 PM [vite] (client) hmr update /src/App.tsx
-3:54:10 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
-3:54:10 PM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
-4:02:54 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-4:03:04 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-4:29:51 PM [vite] (client) hmr update /src/pages/Dashboard.tsx, /src/styles/main.css, /src/index.css
-4:29:51 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-4:29:51 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-4:29:51 PM [vite] (client) hmr update /src/pages/Workspaces.tsx, /src/styles/main.css, /src/index.css
-4:30:21 PM [vite] (client) hmr update /src/pages/Designs.tsx, /src/styles/main.css, /src/index.css
-4:30:46 PM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
-4:30:46 PM [vite] (client) hmr update /src/pages/DefinitionApproval.tsx, /src/styles/main.css, /src/index.css
-4:30:46 PM [vite] (client) hmr update /src/pages/DesignApproval.tsx, /src/styles/main.css, /src/index.css
-4:30:46 PM [vite] (client) hmr update /src/pages/ImplementationApproval.tsx, /src/styles/main.css, /src/index.css
-4:31:04 PM [vite] (client) hmr update /src/pages/DataCollection.tsx, /src/styles/main.css, /src/index.css
-4:31:04 PM [vite] (client) hmr update /src/pages/WorkspaceOverview.tsx, /src/styles/main.css, /src/index.css
-4:31:27 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css
-5:18:36 PM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-5:20:37 PM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-5:20:37 PM [vite] Internal server error: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Ideation.tsx: Unterminated JSX contents. (3784:7)
+10:20:28 AM [vite] (client) hmr update /src/pages/UIStyles.tsx, /src/styles/main.css, /src/index.css
+10:20:29 AM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+10:20:29 AM [vite] (client) hmr update /src/App.tsx, /src/pages/wizard/WizardDesign.tsx
+10:20:36 AM [vite] (client) hmr update /src/pages/UIStyles.tsx, /src/styles/main.css, /src/index.css
+10:20:36 AM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+10:20:36 AM [vite] (client) hmr update /src/App.tsx, /src/pages/wizard/WizardDesign.tsx
+10:20:51 AM [vite] (client) hmr update /src/pages/UIStyles.tsx, /src/styles/main.css, /src/index.css
+10:20:52 AM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+10:20:52 AM [vite] (client) hmr update /src/App.tsx, /src/pages/wizard/WizardDesign.tsx
+10:21:17 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css
+10:21:31 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css
+10:27:09 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Sidebar.tsx
+10:27:55 AM [vite] (client) hmr update /src/pages/UIStyles.tsx, /src/styles/main.css, /src/index.css
+10:27:56 AM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+10:27:56 AM [vite] (client) hmr update /src/App.tsx, /src/pages/wizard/WizardDesign.tsx
+10:28:06 AM [vite] (client) hmr update /src/pages/UIStyles.tsx, /src/styles/main.css, /src/index.css
+10:28:06 AM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+10:28:06 AM [vite] (client) hmr update /src/App.tsx, /src/pages/wizard/WizardDesign.tsx
+10:28:23 AM [vite] (client) hmr update /src/pages/UIStyles.tsx, /src/styles/main.css, /src/index.css
+10:28:23 AM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+10:28:23 AM [vite] (client) hmr update /src/App.tsx, /src/pages/wizard/WizardDesign.tsx
+10:54:22 AM [vite] (client) hmr update /src/pages/Welcome.tsx, /src/styles/main.css, /src/index.css
+1:20:45 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+1:33:34 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+1:44:15 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+2:21:49 PM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
+2:21:57 PM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
+2:22:03 PM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
+2:22:10 PM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
+2:22:17 PM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
+2:22:24 PM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
+2:22:31 PM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
+2:22:40 PM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
+2:23:22 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/StartPages/ConceptionStart.tsx
+2:23:31 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardConception.tsx
+2:23:51 PM [vite] (client) hmr update /src/pages/DefinitionApproval.tsx, /src/styles/main.css, /src/index.css
+2:23:52 PM [vite] (client) hmr update /src/pages/DefinitionApproval.tsx, /src/styles/main.css, /src/index.css
+2:25:47 PM [vite] (client) hmr update /src/pages/DefinitionApproval.tsx, /src/styles/main.css, /src/index.css
+2:26:21 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardDefinition.tsx
+2:26:21 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/StartPages/DefinitionStart.tsx
+2:26:54 PM [vite] (client) hmr update /src/pages/ImplementationApproval.tsx, /src/styles/main.css, /src/index.css
+2:26:54 PM [vite] (client) hmr update /src/pages/ImplementationApproval.tsx, /src/styles/main.css, /src/index.css
+2:26:54 PM [vite] (client) hmr update /src/pages/ImplementationApproval.tsx, /src/styles/main.css, /src/index.css
+2:26:54 PM [vite] (client) hmr update /src/pages/ImplementationApproval.tsx, /src/styles/main.css, /src/index.css
+2:27:16 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardImplementation.tsx
+2:27:16 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/StartPages/ImplementationStart.tsx
+2:27:45 PM [vite] (client) hmr update /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
+2:27:45 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardTesting.tsx
+2:27:45 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/StartPages/TestingStart.tsx
+2:27:46 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/StartPages/TestingStart.tsx
+2:28:19 PM [vite] (client) hmr update /src/context/WizardContext.tsx, /src/styles/main.css, /src/index.css
+2:28:19 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WorkspaceTypeStep.tsx
+2:28:20 PM [vite] (client) hmr invalidate /src/context/WizardContext.tsx Could not Fast Refresh ("WIZARD_FLOWS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+2:28:20 PM [vite] (client) hmr update /src/App.tsx, /src/components/wizard/WizardStepper.tsx, /src/components/wizard/WizardLayout.tsx, /src/components/wizard/WorkspaceTypeStep.tsx
+2:28:20 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WorkspaceTypeStep.tsx
+2:28:20 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WorkspaceTypeStep.tsx
+2:29:01 PM [vite] (client) hmr update /src/pages/Settings.tsx, /src/styles/main.css, /src/index.css
+2:29:01 PM [vite] (client) hmr update /src/pages/Code.tsx, /src/styles/main.css, /src/index.css
+2:29:30 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
+2:29:30 PM [vite] (client) hmr update /src/pages/Features.tsx, /src/styles/main.css, /src/index.css
+2:29:30 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
+2:37:20 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardStepper.tsx
+2:37:42 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardStepper.tsx
+2:37:55 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardStepper.tsx
+2:38:11 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardStepper.tsx
+2:42:10 PM [vite] (client) hmr update /src/context/WizardContext.tsx, /src/styles/main.css, /src/index.css
+2:42:10 PM [vite] (client) hmr invalidate /src/context/WizardContext.tsx Could not Fast Refresh (new export)
+2:42:10 PM [vite] (client) hmr update /src/App.tsx, /src/components/wizard/WizardStepper.tsx, /src/components/wizard/WizardLayout.tsx, /src/components/wizard/WorkspaceTypeStep.tsx
+2:42:27 PM [vite] (client) hmr update /src/context/WizardContext.tsx, /src/styles/main.css, /src/index.css
+2:42:27 PM [vite] (client) hmr invalidate /src/context/WizardContext.tsx Could not Fast Refresh ("SECTION_SUBPAGES" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+2:42:27 PM [vite] (client) hmr update /src/App.tsx, /src/components/wizard/WizardStepper.tsx, /src/components/wizard/WizardLayout.tsx, /src/components/wizard/WorkspaceTypeStep.tsx
+2:42:35 PM [vite] (client) hmr update /src/context/WizardContext.tsx, /src/styles/main.css, /src/index.css
+2:42:35 PM [vite] (client) hmr invalidate /src/context/WizardContext.tsx Could not Fast Refresh ("SECTION_SUBPAGES" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+2:42:35 PM [vite] (client) hmr update /src/App.tsx, /src/components/wizard/WizardStepper.tsx, /src/components/wizard/WizardLayout.tsx, /src/components/wizard/WorkspaceTypeStep.tsx
+2:42:52 PM [vite] (client) hmr update /src/context/WizardContext.tsx, /src/styles/main.css, /src/index.css
+2:42:52 PM [vite] (client) hmr invalidate /src/context/WizardContext.tsx Could not Fast Refresh ("SECTION_SUBPAGES" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+2:42:52 PM [vite] (client) hmr update /src/App.tsx, /src/components/wizard/WizardStepper.tsx, /src/components/wizard/WizardLayout.tsx, /src/components/wizard/WorkspaceTypeStep.tsx
+2:43:30 PM [vite] (client) hmr update /src/context/WizardContext.tsx, /src/styles/main.css, /src/index.css
+2:43:30 PM [vite] (client) hmr invalidate /src/context/WizardContext.tsx Could not Fast Refresh ("SECTION_SUBPAGES" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+2:43:30 PM [vite] (client) hmr update /src/App.tsx, /src/components/wizard/WizardStepper.tsx, /src/components/wizard/WizardLayout.tsx, /src/components/wizard/WorkspaceTypeStep.tsx
+2:43:39 PM [vite] (client) hmr update /src/context/WizardContext.tsx, /src/styles/main.css, /src/index.css
+2:43:39 PM [vite] (client) hmr invalidate /src/context/WizardContext.tsx Could not Fast Refresh ("SECTION_SUBPAGES" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+2:43:39 PM [vite] (client) hmr update /src/App.tsx, /src/components/wizard/WizardStepper.tsx, /src/components/wizard/WizardLayout.tsx, /src/components/wizard/WorkspaceTypeStep.tsx
+2:43:53 PM [vite] (client) hmr update /src/context/WizardContext.tsx, /src/styles/main.css, /src/index.css
+2:43:53 PM [vite] (client) hmr invalidate /src/context/WizardContext.tsx Could not Fast Refresh ("SECTION_SUBPAGES" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+2:43:53 PM [vite] (client) hmr update /src/App.tsx, /src/components/wizard/WizardStepper.tsx, /src/components/wizard/WizardLayout.tsx, /src/components/wizard/WorkspaceTypeStep.tsx
+2:44:22 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardLayout.tsx
+2:44:22 PM [vite] Internal server error: Failed to resolve import "./WizardSubpageStepper" from "src/components/wizard/WizardLayout.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/components/wizard/WizardLayout.tsx:4:37
+  4  |  import { useWizard } from "../../context/WizardContext";
+  5  |  import { WizardStepper } from "./WizardStepper";
+  6  |  import { WizardSubpageStepper } from "./WizardSubpageStepper";
+     |                                        ^
+  7  |  import { Button } from "../Button";
+  8  |  import { ConfirmDialog } from "../ConfirmDialog";
+      at TransformPluginContext._formatLog (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29618:43)
+      at TransformPluginContext.error (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29615:14)
+      at normalizeUrl (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27738:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27796:32
+      at async Promise.all (index 4)
+      at async TransformPluginContext.transform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27764:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29416:14)
+      at async loadAndTransform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:23287:26)
+      at async viteTransformMiddleware (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:25159:20)
+2:44:32 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardTestingStart.tsx, /src/pages/wizard/WizardDiscovery.tsx, /src/pages/wizard/WizardDesignStart.tsx, /src/pages/wizard/WizardDefinitionStart.tsx, /src/pages/wizard/WizardDiscoveryStart.tsx, /src/pages/wizard/WizardDesign.tsx, /src/pages/wizard/WizardConception.tsx, /src/pages/wizard/WizardTesting.tsx, /src/pages/wizard/WizardImplementationStart.tsx, /src/pages/wizard/WizardWorkspace.tsx, /src/pages/wizard/WizardDefinition.tsx, /src/pages/wizard/WizardImplementation.tsx, /src/pages/wizard/WizardConceptionStart.tsx
+2:44:32 PM [vite] (client) Pre-transform error: Failed to resolve import "./WizardSubpageStepper" from "src/components/wizard/WizardLayout.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/components/wizard/WizardLayout.tsx:4:37
+  4  |  import { useWizard } from "../../context/WizardContext";
+  5  |  import { WizardStepper } from "./WizardStepper";
+  6  |  import { WizardSubpageStepper } from "./WizardSubpageStepper";
+     |                                        ^
+  7  |  import { Button } from "../Button";
+  8  |  import { ConfirmDialog } from "../ConfirmDialog";
+2:44:32 PM [vite] Internal server error: Failed to resolve import "./WizardSubpageStepper" from "src/components/wizard/WizardLayout.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/components/wizard/WizardLayout.tsx:4:37
+  4  |  import { useWizard } from "../../context/WizardContext";
+  5  |  import { WizardStepper } from "./WizardStepper";
+  6  |  import { WizardSubpageStepper } from "./WizardSubpageStepper";
+     |                                        ^
+  7  |  import { Button } from "../Button";
+  8  |  import { ConfirmDialog } from "../ConfirmDialog";
+      at TransformPluginContext._formatLog (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29618:43)
+      at TransformPluginContext.error (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29615:14)
+      at normalizeUrl (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27738:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27796:32
+      at async Promise.all (index 4)
+      at async TransformPluginContext.transform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27764:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29416:14)
+      at async loadAndTransform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:23287:26)
+      at async viteTransformMiddleware (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:25159:20)
+2:44:51 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardTestingStart.tsx, /src/pages/wizard/WizardDiscovery.tsx, /src/pages/wizard/WizardDesignStart.tsx, /src/pages/wizard/WizardDefinitionStart.tsx, /src/pages/wizard/WizardDiscoveryStart.tsx, /src/pages/wizard/WizardDesign.tsx, /src/pages/wizard/WizardConception.tsx, /src/pages/wizard/WizardTesting.tsx, /src/pages/wizard/WizardImplementationStart.tsx, /src/pages/wizard/WizardWorkspace.tsx, /src/pages/wizard/WizardDefinition.tsx, /src/pages/wizard/WizardImplementation.tsx, /src/pages/wizard/WizardConceptionStart.tsx
+2:44:51 PM [vite] (client) Pre-transform error: Failed to resolve import "./WizardSubpageStepper" from "src/components/wizard/WizardLayout.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/components/wizard/WizardLayout.tsx:4:37
+  4  |  import { useWizard } from "../../context/WizardContext";
+  5  |  import { WizardStepper } from "./WizardStepper";
+  6  |  import { WizardSubpageStepper } from "./WizardSubpageStepper";
+     |                                        ^
+  7  |  import { Button } from "../Button";
+  8  |  import { ConfirmDialog } from "../ConfirmDialog";
+2:44:51 PM [vite] Internal server error: Failed to resolve import "./WizardSubpageStepper" from "src/components/wizard/WizardLayout.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/components/wizard/WizardLayout.tsx:4:37
+  4  |  import { useWizard } from "../../context/WizardContext";
+  5  |  import { WizardStepper } from "./WizardStepper";
+  6  |  import { WizardSubpageStepper } from "./WizardSubpageStepper";
+     |                                        ^
+  7  |  import { Button } from "../Button";
+  8  |  import { ConfirmDialog } from "../ConfirmDialog";
+      at TransformPluginContext._formatLog (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29618:43)
+      at TransformPluginContext.error (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29615:14)
+      at normalizeUrl (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27738:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27796:32
+      at async Promise.all (index 4)
+      at async TransformPluginContext.transform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27764:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29416:14)
+      at async loadAndTransform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:23287:26)
+      at async viteTransformMiddleware (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:25159:20)
+2:45:36 PM [vite] Internal server error: Failed to resolve import "./WizardSubpageStepper" from "src/components/wizard/WizardLayout.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/components/wizard/WizardLayout.tsx:4:37
+  4  |  import { useWizard } from "../../context/WizardContext";
+  5  |  import { WizardStepper } from "./WizardStepper";
+  6  |  import { WizardSubpageStepper } from "./WizardSubpageStepper";
+     |                                        ^
+  7  |  import { Button } from "../Button";
+  8  |  import { ConfirmDialog } from "../ConfirmDialog";
+      at TransformPluginContext._formatLog (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29618:43)
+      at TransformPluginContext.error (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29615:14)
+      at normalizeUrl (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27738:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27796:32
+      at async Promise.all (index 4)
+      at async TransformPluginContext.transform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27764:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29416:14)
+      at async loadAndTransform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:23287:26)
+      at async viteTransformMiddleware (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:25159:20)
+2:45:37 PM [vite] Internal server error: Failed to resolve import "./WizardSubpageStepper" from "src/components/wizard/WizardLayout.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/components/wizard/WizardLayout.tsx:4:37
+  4  |  import { useWizard } from "../../context/WizardContext";
+  5  |  import { WizardStepper } from "./WizardStepper";
+  6  |  import { WizardSubpageStepper } from "./WizardSubpageStepper";
+     |                                        ^
+  7  |  import { Button } from "../Button";
+  8  |  import { ConfirmDialog } from "../ConfirmDialog";
+      at TransformPluginContext._formatLog (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29618:43)
+      at TransformPluginContext.error (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29615:14)
+      at normalizeUrl (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27738:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27796:32
+      at async Promise.all (index 4)
+      at async TransformPluginContext.transform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:27764:4)
+      at async EnvironmentPluginContainer.transform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:29416:14)
+      at async loadAndTransform (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:23287:26)
+      at async viteTransformMiddleware (file:///Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/vite/dist/node/chunks/config.js:25159:20)
+2:46:23 PM [vite] (client) hmr update /src/pages/wizard/WizardTestingStart.tsx, /src/pages/wizard/WizardDiscovery.tsx, /src/pages/wizard/WizardDesignStart.tsx, /src/pages/wizard/WizardDefinitionStart.tsx, /src/pages/wizard/WizardDiscoveryStart.tsx, /src/pages/wizard/WizardDesign.tsx, /src/pages/wizard/WizardConception.tsx, /src/pages/wizard/WizardTesting.tsx, /src/pages/wizard/WizardImplementationStart.tsx, /src/pages/wizard/WizardWorkspace.tsx, /src/pages/wizard/WizardDefinition.tsx, /src/pages/wizard/WizardImplementation.tsx, /src/pages/wizard/WizardConceptionStart.tsx
+2:47:34 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardStepper.tsx
+2:47:45 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardStepper.tsx
+2:47:55 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardStepper.tsx
+2:48:01 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardStepper.tsx
+2:48:08 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardStepper.tsx
+2:48:13 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardStepper.tsx
+2:48:21 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardStepper.tsx
+2:48:27 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardStepper.tsx
+2:49:07 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+2:49:20 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Sidebar.tsx
+2:54:09 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+2:54:33 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardLayout.tsx
+2:54:53 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardLayout.tsx
+2:55:02 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardLayout.tsx
+3:02:47 PM [vite] (client) hmr update /src/pages/Welcome.tsx, /src/styles/main.css, /src/index.css
+3:02:47 PM [vite] (client) hmr update /src/pages/Login.tsx, /src/styles/main.css, /src/index.css
+3:06:32 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css
+3:06:32 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/ThemeContext.tsx
+3:06:32 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WorkspaceTypeStep.tsx
+3:06:32 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardLayout.tsx
+3:06:32 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/StartPages/DiscoveryStart.tsx
+3:06:32 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Header.tsx
+3:06:32 PM [vite] (client) hmr update /src/pages/Settings.tsx, /src/styles/main.css, /src/index.css
+3:06:32 PM [vite] (client) hmr invalidate /src/context/ThemeContext.tsx Could not Fast Refresh ("useTheme" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+3:06:32 PM [vite] (client) hmr update /src/App.tsx, /src/pages/Settings.tsx
+3:06:32 PM [vite] (client) hmr update /src/pages/Welcome.tsx, /src/styles/main.css, /src/index.css
+3:23:22 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css
+3:26:47 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardLayout.tsx
+3:29:53 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardWorkspace.tsx
+3:29:53 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardConceptionStart.tsx
+3:29:53 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardDefinitionStart.tsx
+3:29:53 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardDesignStart.tsx
+3:29:53 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardImplementationStart.tsx
+3:29:53 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardTestingStart.tsx
+3:29:53 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardDiscoveryStart.tsx
+3:39:07 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardLayout.tsx
+3:39:56 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Sidebar.tsx
+3:40:12 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Sidebar.tsx
+3:44:16 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/pages/wizard/WizardTestingStart.tsx, /src/pages/wizard/WizardDiscovery.tsx, /src/pages/wizard/WizardDesignStart.tsx, /src/pages/wizard/WizardDefinitionStart.tsx, /src/pages/wizard/WizardDiscoveryStart.tsx, /src/pages/wizard/WizardDesign.tsx, /src/pages/wizard/WizardConception.tsx, /src/pages/wizard/WizardTesting.tsx, /src/pages/wizard/WizardImplementationStart.tsx, /src/pages/wizard/WizardWorkspace.tsx, /src/pages/wizard/WizardDefinition.tsx, /src/pages/wizard/WizardImplementation.tsx, /src/pages/wizard/WizardConceptionStart.tsx
+3:45:04 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
+3:45:04 PM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
+3:45:04 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
+3:45:05 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
+3:45:05 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
+3:45:05 PM [vite] (client) hmr update /src/pages/Designs.tsx, /src/styles/main.css, /src/index.css
+3:45:42 PM [vite] (client) hmr update /src/pages/UIFramework.tsx, /src/styles/main.css, /src/index.css
+3:45:42 PM [vite] (client) hmr update /src/pages/UIStyles.tsx, /src/styles/main.css, /src/index.css
+3:45:42 PM [vite] (client) hmr update /src/pages/UIDesigner.tsx, /src/styles/main.css, /src/index.css
+3:45:42 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
+3:45:42 PM [vite] (client) hmr update /src/pages/System.tsx, /src/styles/main.css, /src/index.css
+3:45:42 PM [vite] (client) hmr update /src/pages/AIPrinciples.tsx, /src/styles/main.css, /src/index.css
+3:45:43 PM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+3:45:43 PM [vite] (client) hmr update /src/App.tsx, /src/pages/wizard/WizardDesign.tsx
+3:46:12 PM [vite] (client) hmr update /src/pages/Code.tsx, /src/styles/main.css, /src/index.css
+3:46:12 PM [vite] (client) hmr update /src/pages/Run.tsx, /src/styles/main.css, /src/index.css
+3:46:12 PM [vite] (client) hmr update /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
+3:46:12 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
+3:46:41 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
+3:46:41 PM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
+3:46:41 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
+3:46:41 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
+3:47:30 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
+3:47:30 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
+3:47:30 PM [vite] (client) hmr update /src/pages/Designs.tsx, /src/styles/main.css, /src/index.css
+3:47:30 PM [vite] (client) hmr update /src/pages/UIFramework.tsx, /src/styles/main.css, /src/index.css
+3:47:30 PM [vite] (client) hmr update /src/pages/UIStyles.tsx, /src/styles/main.css, /src/index.css
+3:47:30 PM [vite] (client) hmr update /src/pages/UIDesigner.tsx, /src/styles/main.css, /src/index.css
+3:47:30 PM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+3:47:30 PM [vite] (client) hmr update /src/App.tsx, /src/pages/wizard/WizardDesign.tsx
+3:48:01 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
+3:48:01 PM [vite] (client) hmr update /src/pages/System.tsx, /src/styles/main.css, /src/index.css
+3:48:01 PM [vite] (client) hmr update /src/pages/AIPrinciples.tsx, /src/styles/main.css, /src/index.css
+3:48:01 PM [vite] (client) hmr update /src/pages/Code.tsx, /src/styles/main.css, /src/index.css
+3:48:01 PM [vite] (client) hmr update /src/pages/Run.tsx, /src/styles/main.css, /src/index.css
+3:48:01 PM [vite] (client) hmr update /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
+5:35:21 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+5:36:39 PM [vite] (client) hmr update /src/pages/Welcome.tsx, /src/styles/main.css, /src/index.css
+5:45:45 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/StartPages/ConceptionStart.tsx
+5:45:53 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/StartPages/ConceptionStart.tsx
+6:57:08 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
+7:01:15 PM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
+7:01:25 PM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
+7:11:01 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Sidebar.tsx
+8:56:24 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+8:56:24 PM [vite] (client) hmr update /src/context/WizardContext.tsx, /src/styles/main.css, /src/index.css
+8:56:41 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
+8:57:11 PM [vite] (client) hmr update /src/pages/Designs.tsx, /src/styles/main.css, /src/index.css
+8:58:43 PM [vite] (client) hmr update /src/pages/Code.tsx, /src/styles/main.css, /src/index.css
+8:59:05 PM [vite] (client) hmr update /src/pages/Code.tsx, /src/styles/main.css, /src/index.css
+8:59:11 PM [vite] (client) hmr update /src/pages/Code.tsx, /src/styles/main.css, /src/index.css
+9:10:38 PM [vite] (client) hmr update /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
+9:10:54 PM [vite] (client) hmr update /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
+9:15:33 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Header.tsx
+9:15:47 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Header.tsx
+9:15:53 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Header.tsx
+9:16:00 PM [vite] (client) hmr update /src/pages/Welcome.tsx, /src/styles/main.css, /src/index.css
+9:16:11 PM [vite] (client) hmr update /src/pages/Welcome.tsx, /src/styles/main.css, /src/index.css
+9:16:24 PM [vite] (client) hmr update /src/pages/Welcome.tsx, /src/styles/main.css, /src/index.css
+9:16:32 PM [vite] (client) hmr update /src/pages/Welcome.tsx, /src/styles/main.css, /src/index.css
+9:16:38 PM [vite] (client) hmr update /src/pages/Welcome.tsx, /src/styles/main.css, /src/index.css
+9:16:57 PM [vite] (client) hmr update /src/App.tsx, /src/pages/Dashboard.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Designs.tsx, /src/pages/Features.tsx, /src/pages/Vision.tsx, /src/pages/Capabilities.tsx, /src/pages/Integrations.tsx, /src/pages/DefinitionApproval.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/Storyboard.tsx, /src/pages/Admin.tsx, /src/pages/Ideation.tsx, /src/pages/DataCollection.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/Settings.tsx, /src/pages/DesignApproval.tsx, /src/pages/Testing.tsx, /src/pages/TestingApproval.tsx, /src/pages/StoryMap.tsx, /src/components/ConfirmDialog.tsx, /src/pages/Enablers.tsx, /src/components/AcceptanceCriteriaSection.tsx, /src/styles/main.css, /src/index.css
+9:23:27 PM [vite] (client) hmr update /src/pages/Welcome.tsx, /src/styles/main.css, /src/index.css
+9:26:49 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+9:26:55 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+9:27:04 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+9:42:31 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/WizardLayout.tsx
+9:42:39 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/wizard/StartPages/StartPageLayout.tsx
+8:53:57 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css
+8:54:58 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css
+8:55:21 AM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+8:55:35 AM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+8:55:41 AM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+8:55:41 AM [vite] Internal server error: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/App.tsx: Expected corresponding JSX closing tag for <VersionControlProvider>. (369:14)
 
-  3782 |         />
-  3783 |       )}
-> 3784 |     </>
-       |        ^
-  3785 |   );
-  3786 | };
-  3787 |
+  367 |                   </CollaborationProvider>
+  368 |                 </UIFrameworkProvider>
+> 369 |               </WorkspaceProvider>
+      |               ^
+  370 |               </EnablerProvider>
+  371 |             </ApprovalProvider>
+  372 |           </RoleAccessProvider>
   Plugin: vite:react-babel
-  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Ideation.tsx:3784:7
-  3782 |          />
-  3783 |        )}
-  3784 |      </>
-       |         ^
-  3785 |    );
-  3786 |  };
+  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/App.tsx:369:14
+  367 |                    </CollaborationProvider>
+  368 |                  </UIFrameworkProvider>
+  369 |                </WorkspaceProvider>
+      |                ^
+  370 |                </EnablerProvider>
+  371 |              </ApprovalProvider>
       at constructor (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:367:19)
       at TypeScriptParserMixin.raise (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:6624:19)
-      at TypeScriptParserMixin.jsxReadToken (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4477:20)
-      at TypeScriptParserMixin.getTokenFromCode (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4803:12)
-      at TypeScriptParserMixin.getTokenFromCode (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10042:11)
-      at TypeScriptParserMixin.nextToken (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:5807:10)
-      at TypeScriptParserMixin.next (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:5717:10)
-      at TypeScriptParserMixin.eat (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:5721:12)
-      at TypeScriptParserMixin.jsxParseClosingElementAt (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4705:14)
-      at TypeScriptParserMixin.jsxParseElementAt (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4724:37)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4756:16)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4727:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4727:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4727:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4727:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4727:32)
+      at TypeScriptParserMixin.jsxParseElementAt (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4727:32)
       at TypeScriptParserMixin.jsxParseElementAt (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4727:32)
       at TypeScriptParserMixin.jsxParseElement (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4778:17)
       at TypeScriptParserMixin.parseExprAtom (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4788:19)
@@ -160,28 +388,143 @@
       at TypeScriptParserMixin.parseStatementLike (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12843:17)
       at TypeScriptParserMixin.parseStatementListItem (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12823:17)
       at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13392:61)
-5:20:48 PM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-5:20:57 PM [vite] (client) hmr update /src/pages/Ideation.tsx, /src/styles/main.css, /src/index.css
-6:12:09 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-6:12:21 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-6:13:11 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-6:13:11 PM [vite] Internal server error: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Storyboard.tsx: Identifier 'getStatusLabel' has already been declared. (1374:8)
+      at TypeScriptParserMixin.parseBlockBody (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13385:10)
+8:55:46 AM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+8:55:56 AM [vite] (client) hmr update /src/App.tsx, /src/pages/Dashboard.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Designs.tsx, /src/pages/Features.tsx, /src/pages/Vision.tsx, /src/pages/Capabilities.tsx, /src/pages/Integrations.tsx, /src/pages/DefinitionApproval.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/Storyboard.tsx, /src/pages/Admin.tsx, /src/pages/Ideation.tsx, /src/pages/DataCollection.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/Settings.tsx, /src/pages/DesignApproval.tsx, /src/pages/Testing.tsx, /src/pages/TestingApproval.tsx, /src/pages/StoryMap.tsx, /src/components/ConfirmDialog.tsx, /src/pages/Enablers.tsx, /src/components/AcceptanceCriteriaSection.tsx, /src/styles/main.css, /src/index.css
+8:56:09 AM [vite] (client) hmr update /src/pages/Settings.tsx, /src/styles/main.css, /src/index.css
+8:56:16 AM [vite] (client) hmr update /src/pages/Settings.tsx, /src/styles/main.css, /src/index.css
+8:56:58 AM [vite] (client) hmr update /src/pages/Settings.tsx, /src/styles/main.css, /src/index.css
+9:02:45 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/VersionHistoryDrawer.tsx
+10:17:10 AM [vite] (client) hmr update /src/App.tsx, /src/pages/Dashboard.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Designs.tsx, /src/pages/Features.tsx, /src/pages/Vision.tsx, /src/pages/Capabilities.tsx, /src/pages/Integrations.tsx, /src/pages/DefinitionApproval.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/Storyboard.tsx, /src/pages/Admin.tsx, /src/pages/Ideation.tsx, /src/pages/DataCollection.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/Settings.tsx, /src/pages/DesignApproval.tsx, /src/pages/Testing.tsx, /src/pages/TestingApproval.tsx, /src/pages/StoryMap.tsx, /src/components/ConfirmDialog.tsx, /src/pages/Enablers.tsx, /src/components/AcceptanceCriteriaSection.tsx, /src/styles/main.css, /src/index.css
+10:17:51 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css
+10:18:05 AM [vite] (client) hmr update /src/pages/Workspaces.tsx, /src/styles/main.css, /src/index.css
+10:18:15 AM [vite] (client) hmr update /src/pages/Workspaces.tsx, /src/styles/main.css, /src/index.css
+10:18:21 AM [vite] (client) hmr update /src/pages/Workspaces.tsx, /src/styles/main.css, /src/index.css
+10:18:41 AM [vite] (client) hmr update /src/pages/Workspaces.tsx, /src/styles/main.css, /src/index.css
+10:19:55 AM [vite] (client) hmr update /src/pages/Workspaces.tsx, /src/styles/main.css, /src/index.css
+10:20:01 AM [vite] (client) hmr update /src/pages/Workspaces.tsx, /src/styles/main.css, /src/index.css
+10:20:32 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/VersionControlContext.tsx
+10:20:32 AM [vite] (client) hmr invalidate /src/context/VersionControlContext.tsx Could not Fast Refresh ("default" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+10:20:32 AM [vite] (client) hmr update /src/App.tsx, /src/components/VersionControlPanel.tsx, /src/components/VersionHistoryDrawer.tsx, /src/pages/Settings.tsx
+10:20:37 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/VersionControlContext.tsx
+10:20:37 AM [vite] (client) hmr invalidate /src/context/VersionControlContext.tsx Could not Fast Refresh ("default" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+10:20:37 AM [vite] (client) hmr update /src/App.tsx, /src/components/VersionControlPanel.tsx, /src/components/VersionHistoryDrawer.tsx, /src/pages/Settings.tsx
+10:20:48 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/VersionControlContext.tsx
+10:20:48 AM [vite] (client) hmr invalidate /src/context/VersionControlContext.tsx Could not Fast Refresh ("default" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+10:20:48 AM [vite] (client) hmr update /src/App.tsx, /src/components/VersionControlPanel.tsx, /src/components/VersionHistoryDrawer.tsx, /src/pages/Settings.tsx
+10:20:55 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/VersionControlPanel.tsx
+10:39:46 AM [vite] (client) hmr update /src/pages/Settings.tsx, /src/styles/main.css, /src/index.css
+10:39:51 AM [vite] (client) hmr update /src/pages/Settings.tsx, /src/styles/main.css, /src/index.css
+10:40:20 AM [vite] (client) hmr update /src/pages/Settings.tsx, /src/styles/main.css, /src/index.css
+10:40:44 AM [vite] (client) hmr update /src/components/WorkspaceVersionControl.tsx, /src/styles/main.css, /src/index.css
+10:41:07 AM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+10:41:20 AM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+10:41:53 AM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+10:50:24 AM [vite] (client) hmr update /src/pages/Admin.tsx, /src/styles/main.css, /src/index.css
+10:50:29 AM [vite] (client) hmr update /src/pages/Admin.tsx, /src/styles/main.css, /src/index.css
+10:50:43 AM [vite] (client) hmr update /src/pages/Admin.tsx, /src/styles/main.css, /src/index.css
+10:50:48 AM [vite] (client) hmr update /src/pages/Admin.tsx, /src/styles/main.css, /src/index.css
+10:50:59 AM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+10:57:08 AM [vite] (client) hmr update /src/components/WorkspaceVersionControl.tsx, /src/styles/main.css, /src/index.css
+10:57:24 AM [vite] (client) hmr update /src/components/WorkspaceVersionControl.tsx, /src/styles/main.css, /src/index.css
+10:57:31 AM [vite] (client) hmr update /src/components/WorkspaceVersionControl.tsx, /src/styles/main.css, /src/index.css
+11:02:48 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css
+11:07:38 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/VersionControlContext.tsx
+11:07:38 AM [vite] (client) hmr invalidate /src/context/VersionControlContext.tsx Could not Fast Refresh ("default" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+11:07:38 AM [vite] (client) hmr update /src/App.tsx, /src/components/VersionControlPanel.tsx, /src/components/VersionHistoryDrawer.tsx
+11:07:47 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/VersionControlContext.tsx
+11:07:47 AM [vite] (client) hmr invalidate /src/context/VersionControlContext.tsx Could not Fast Refresh ("default" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+11:07:47 AM [vite] (client) hmr update /src/App.tsx, /src/components/VersionControlPanel.tsx, /src/components/VersionHistoryDrawer.tsx
+11:07:55 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/VersionControlContext.tsx
+11:07:55 AM [vite] (client) hmr invalidate /src/context/VersionControlContext.tsx Could not Fast Refresh ("default" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+11:07:55 AM [vite] (client) hmr update /src/App.tsx, /src/components/VersionControlPanel.tsx, /src/components/VersionHistoryDrawer.tsx
+11:08:14 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/VersionControlContext.tsx
+11:08:14 AM [vite] (client) hmr invalidate /src/context/VersionControlContext.tsx Could not Fast Refresh ("default" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+11:08:14 AM [vite] (client) hmr update /src/App.tsx, /src/components/VersionControlPanel.tsx, /src/components/VersionHistoryDrawer.tsx
+11:12:58 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/VersionControlContext.tsx
+11:12:58 AM [vite] (client) hmr invalidate /src/context/VersionControlContext.tsx Could not Fast Refresh ("default" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+11:12:58 AM [vite] (client) hmr update /src/App.tsx, /src/components/VersionControlPanel.tsx, /src/components/VersionHistoryDrawer.tsx
+11:13:35 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css
+11:14:00 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/VersionControlContext.tsx
+11:14:00 AM [vite] (client) hmr invalidate /src/context/VersionControlContext.tsx Could not Fast Refresh ("default" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+11:14:00 AM [vite] (client) hmr update /src/App.tsx, /src/components/VersionControlPanel.tsx, /src/components/VersionHistoryDrawer.tsx
+11:36:06 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css
+11:36:33 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/VersionControlContext.tsx
+11:36:33 AM [vite] (client) hmr invalidate /src/context/VersionControlContext.tsx Could not Fast Refresh ("default" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+11:36:33 AM [vite] (client) hmr update /src/App.tsx, /src/components/VersionControlPanel.tsx, /src/components/VersionHistoryDrawer.tsx
+11:42:04 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/VersionControlContext.tsx
+11:42:04 AM [vite] (client) hmr invalidate /src/context/VersionControlContext.tsx Could not Fast Refresh ("default" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+11:42:04 AM [vite] (client) hmr update /src/App.tsx, /src/components/VersionControlPanel.tsx, /src/components/VersionHistoryDrawer.tsx
+11:43:18 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/VersionControlContext.tsx
+11:43:18 AM [vite] (client) hmr invalidate /src/context/VersionControlContext.tsx Could not Fast Refresh ("default" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+11:43:18 AM [vite] (client) hmr update /src/App.tsx, /src/components/VersionControlPanel.tsx, /src/components/VersionHistoryDrawer.tsx
+12:02:08 PM [vite] (client) hmr update /src/App.tsx, /src/pages/Dashboard.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Designs.tsx, /src/pages/Features.tsx, /src/pages/Vision.tsx, /src/pages/Capabilities.tsx, /src/pages/Integrations.tsx, /src/pages/DefinitionApproval.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/Storyboard.tsx, /src/pages/Admin.tsx, /src/pages/Ideation.tsx, /src/pages/DataCollection.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/Settings.tsx, /src/pages/DesignApproval.tsx, /src/pages/Testing.tsx, /src/pages/TestingApproval.tsx, /src/pages/StoryMap.tsx, /src/components/ConfirmDialog.tsx, /src/pages/Enablers.tsx, /src/components/AcceptanceCriteriaSection.tsx, /src/styles/main.css, /src/index.css
+12:02:38 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
+12:02:46 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
+12:03:56 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
+12:04:46 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
+12:04:46 PM [vite] (client) hmr update /src/pages/Features.tsx, /src/styles/main.css, /src/index.css
+12:04:46 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
+12:04:46 PM [vite] (client) hmr update /src/pages/Settings.tsx, /src/styles/main.css, /src/index.css
+12:05:23 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
+12:05:23 PM [vite] (client) hmr update /src/pages/Features.tsx, /src/styles/main.css, /src/index.css
+12:05:23 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
+12:05:23 PM [vite] (client) hmr update /src/pages/Settings.tsx, /src/styles/main.css, /src/index.css
+12:06:14 PM [vite] (client) hmr update /src/pages/Designs.tsx, /src/styles/main.css, /src/index.css
+12:06:14 PM [vite] (client) hmr update /src/pages/Code.tsx, /src/styles/main.css, /src/index.css
+12:06:14 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+12:06:38 PM [vite] (client) hmr update /src/pages/Designs.tsx, /src/styles/main.css, /src/index.css
+12:06:38 PM [vite] (client) hmr update /src/pages/Code.tsx, /src/styles/main.css, /src/index.css
+12:06:38 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+12:07:34 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
+12:07:34 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
+12:07:50 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
+12:07:50 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
+12:08:30 PM [vite] (client) hmr update /src/pages/AIPrinciples.tsx, /src/styles/main.css, /src/index.css
+12:08:46 PM [vite] (client) hmr update /src/pages/AIPrinciples.tsx, /src/styles/main.css, /src/index.css
+12:09:06 PM [vite] (client) hmr update /src/pages/ConceptionApproval.tsx, /src/styles/main.css, /src/index.css
+12:09:48 PM [vite] (client) hmr update /src/pages/DefinitionApproval.tsx, /src/styles/main.css, /src/index.css
+12:09:48 PM [vite] (client) hmr update /src/pages/DesignApproval.tsx, /src/styles/main.css, /src/index.css
+12:09:48 PM [vite] (client) hmr update /src/pages/ImplementationApproval.tsx, /src/styles/main.css, /src/index.css
+12:09:48 PM [vite] (client) hmr update /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
+12:10:05 PM [vite] (client) hmr update /src/pages/DefinitionApproval.tsx, /src/styles/main.css, /src/index.css
+12:10:05 PM [vite] (client) hmr update /src/pages/DesignApproval.tsx, /src/styles/main.css, /src/index.css
+12:10:05 PM [vite] (client) hmr update /src/pages/ImplementationApproval.tsx, /src/styles/main.css, /src/index.css
+12:10:31 PM [vite] (client) hmr update /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
+12:17:14 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Sidebar.tsx
+12:17:37 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Sidebar.tsx
+12:18:08 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
+3:30:34 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Sidebar.tsx
+9:29:37 PM [vite] (client) hmr update /src/App.tsx, /src/pages/Dashboard.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Designs.tsx, /src/pages/Features.tsx, /src/pages/Vision.tsx, /src/pages/Capabilities.tsx, /src/pages/Integrations.tsx, /src/pages/DefinitionApproval.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/Storyboard.tsx, /src/pages/Admin.tsx, /src/pages/Ideation.tsx, /src/pages/DataCollection.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/Settings.tsx, /src/pages/DesignApproval.tsx, /src/pages/Testing.tsx, /src/pages/TestingApproval.tsx, /src/pages/StoryMap.tsx, /src/components/ConfirmDialog.tsx, /src/pages/Enablers.tsx, /src/components/AcceptanceCriteriaSection.tsx, /src/pages/Code.tsx, /src/pages/AIPrinciples.tsx, /src/styles/main.css, /src/index.css
+9:29:48 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+9:29:54 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+9:30:06 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+9:30:16 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+9:30:25 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+9:30:54 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+9:31:01 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+10:18:38 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/WorkspaceIntegrations.tsx
+10:20:16 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+10:20:51 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+10:21:27 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+10:22:01 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+10:22:01 PM [vite] Internal server error: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Integrations.tsx: Identifier 'mergeWithKnownRequirements' has already been declared. (349:8)
 
-  1372 |   };
-  1373 |
-> 1374 |   const getStatusLabel = (status: StoryCard['status']) => {
-       |         ^
-  1375 |     switch (status) {
-  1376 |       case 'completed': return 'Completed';
-  1377 |       case 'in-progress': return 'In Progress';
+  347 |
+  348 |   // Helper function to merge LLM analysis with known integration requirements
+> 349 |   const mergeWithKnownRequirements = (llmAnalysis: IntegrationAnalysis, integrationName: string): IntegrationAnalysis => {
+      |         ^
+  350 |     const knownReqs = KNOWN_INTEGRATION_REQUIREMENTS[integrationName];
+  351 |
+  352 |     if (!knownReqs) {
   Plugin: vite:react-babel
-  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Storyboard.tsx:1374:8
-  1372 |    };
-  1373 |  
-  1374 |    const getStatusLabel = (status: StoryCard['status']) => {
-       |          ^
-  1375 |      switch (status) {
-  1376 |        case 'completed': return 'Completed';
+  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Integrations.tsx:349:8
+  347 |  
+  348 |    // Helper function to merge LLM analysis with known integration requirements
+  349 |    const mergeWithKnownRequirements = (llmAnalysis: IntegrationAnalysis, integrationName: string): IntegrationAnalysis...
+      |          ^
+  350 |      const knownReqs = KNOWN_INTEGRATION_REQUIREMENTS[integrationName];
+  351 |  
       at constructor (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:367:19)
       at TypeScriptParserMixin.raise (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:6624:19)
       at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:1646:19)
@@ -232,419 +575,20 @@
       at TypeScriptParserMixin.parseExport (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13888:29)
       at TypeScriptParserMixin.parseExport (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9446:20)
       at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12954:27)
-6:13:28 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-6:13:28 PM [vite] Internal server error: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Storyboard.tsx: Identifier 'getStatusLabel' has already been declared. (1384:8)
-
-  1382 |   };
-  1383 |
-> 1384 |   const getStatusLabel = (status: StoryCard['status']) => {
-       |         ^
-  1385 |     switch (status) {
-  1386 |       case 'completed': return 'Completed';
-  1387 |       case 'in-progress': return 'In Progress';
-  Plugin: vite:react-babel
-  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Storyboard.tsx:1384:8
-  1382 |    };
-  1383 |  
-  1384 |    const getStatusLabel = (status: StoryCard['status']) => {
-       |          ^
-  1385 |      switch (status) {
-  1386 |        case 'completed': return 'Completed';
-      at constructor (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:367:19)
-      at TypeScriptParserMixin.raise (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:6624:19)
-      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:1646:19)
-      at TypeScriptScopeHandler.declareName (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:1612:12)
-      at TypeScriptScopeHandler.declareName (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4909:11)
-      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:7594:16)
-      at TypeScriptParserMixin.checkIdentifier (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:7590:12)
-      at TypeScriptParserMixin.checkLVal (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:7527:12)
-      at TypeScriptParserMixin.parseVarId (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13488:10)
-      at TypeScriptParserMixin.parseVarId (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9805:11)
-      at TypeScriptParserMixin.parseVar (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13459:12)
-      at TypeScriptParserMixin.parseVarStatement (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13306:10)
-      at TypeScriptParserMixin.parseVarStatement (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9469:31)
-      at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12927:23)
-      at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9569:18)
-      at TypeScriptParserMixin.parseStatementLike (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12843:17)
-      at TypeScriptParserMixin.parseStatementListItem (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12823:17)
-      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13392:61)
-      at TypeScriptParserMixin.parseBlockBody (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13385:10)
-      at TypeScriptParserMixin.parseBlock (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13373:10)
-      at TypeScriptParserMixin.parseFunctionBody (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12174:24)
-      at TypeScriptParserMixin.parseArrowExpression (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12149:10)
-      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11759:12)
-      at TypeScriptParserMixin.parseExprAtom (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11395:23)
-      at TypeScriptParserMixin.parseExprAtom (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4793:20)
-      at TypeScriptParserMixin.parseExprSubscripts (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11145:23)
-      at TypeScriptParserMixin.parseUpdate (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11130:21)
-      at TypeScriptParserMixin.parseMaybeUnary (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11110:23)
-      at TypeScriptParserMixin.parseMaybeUnary (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9890:18)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10963:61)
-      at TypeScriptParserMixin.parseExprOps (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10968:23)
-      at TypeScriptParserMixin.parseMaybeConditional (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10945:23)
-      at TypeScriptParserMixin.parseMaybeAssign (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10895:21)
-      at TypeScriptParserMixin.parseMaybeAssign (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9839:20)
-      at /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10864:39
-      at TypeScriptParserMixin.allowInAnd (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12495:16)
-      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10864:17)
-      at TypeScriptParserMixin.parseVar (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13460:91)
-      at TypeScriptParserMixin.parseVarStatement (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13306:10)
-      at TypeScriptParserMixin.parseVarStatement (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9469:31)
-      at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12927:23)
-      at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9569:18)
-      at TypeScriptParserMixin.parseStatementLike (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12843:17)
-      at TypeScriptParserMixin.parseStatementListItem (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12823:17)
-      at TypeScriptParserMixin.parseExportDeclaration (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:14010:17)
-      at TypeScriptParserMixin.parseExportDeclaration (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9690:85)
-      at TypeScriptParserMixin.maybeParseExportDeclaration (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13969:31)
-      at TypeScriptParserMixin.parseExport (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13888:29)
-      at TypeScriptParserMixin.parseExport (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9446:20)
-      at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12954:27)
-6:13:47 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-6:14:11 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-6:14:11 PM [vite] Internal server error: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Storyboard.tsx: Identifier 'getStatusLabel' has already been declared. (1384:8)
-
-  1382 |   };
-  1383 |
-> 1384 |   const getStatusLabel = (status: StoryCard['status']) => {
-       |         ^
-  1385 |     switch (status) {
-  1386 |       case 'completed': return 'Completed';
-  1387 |       case 'in-progress': return 'In Progress';
-  Plugin: vite:react-babel
-  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Storyboard.tsx:1384:8
-  1382 |    };
-  1383 |  
-  1384 |    const getStatusLabel = (status: StoryCard['status']) => {
-       |          ^
-  1385 |      switch (status) {
-  1386 |        case 'completed': return 'Completed';
-      at constructor (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:367:19)
-      at TypeScriptParserMixin.raise (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:6624:19)
-      at TypeScriptScopeHandler.checkRedeclarationInScope (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:1646:19)
-      at TypeScriptScopeHandler.declareName (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:1612:12)
-      at TypeScriptScopeHandler.declareName (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4909:11)
-      at TypeScriptParserMixin.declareNameFromIdentifier (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:7594:16)
-      at TypeScriptParserMixin.checkIdentifier (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:7590:12)
-      at TypeScriptParserMixin.checkLVal (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:7527:12)
-      at TypeScriptParserMixin.parseVarId (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13488:10)
-      at TypeScriptParserMixin.parseVarId (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9805:11)
-      at TypeScriptParserMixin.parseVar (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13459:12)
-      at TypeScriptParserMixin.parseVarStatement (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13306:10)
-      at TypeScriptParserMixin.parseVarStatement (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9469:31)
-      at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12927:23)
-      at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9569:18)
-      at TypeScriptParserMixin.parseStatementLike (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12843:17)
-      at TypeScriptParserMixin.parseStatementListItem (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12823:17)
-      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13392:61)
-      at TypeScriptParserMixin.parseBlockBody (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13385:10)
-      at TypeScriptParserMixin.parseBlock (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13373:10)
-      at TypeScriptParserMixin.parseFunctionBody (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12174:24)
-      at TypeScriptParserMixin.parseArrowExpression (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12149:10)
-      at TypeScriptParserMixin.parseParenAndDistinguishExpression (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11759:12)
-      at TypeScriptParserMixin.parseExprAtom (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11395:23)
-      at TypeScriptParserMixin.parseExprAtom (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4793:20)
-      at TypeScriptParserMixin.parseExprSubscripts (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11145:23)
-      at TypeScriptParserMixin.parseUpdate (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11130:21)
-      at TypeScriptParserMixin.parseMaybeUnary (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11110:23)
-      at TypeScriptParserMixin.parseMaybeUnary (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9890:18)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10963:61)
-      at TypeScriptParserMixin.parseExprOps (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10968:23)
-      at TypeScriptParserMixin.parseMaybeConditional (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10945:23)
-      at TypeScriptParserMixin.parseMaybeAssign (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10895:21)
-      at TypeScriptParserMixin.parseMaybeAssign (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9839:20)
-      at /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10864:39
-      at TypeScriptParserMixin.allowInAnd (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12495:16)
-      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10864:17)
-      at TypeScriptParserMixin.parseVar (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13460:91)
-      at TypeScriptParserMixin.parseVarStatement (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13306:10)
-      at TypeScriptParserMixin.parseVarStatement (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9469:31)
-      at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12927:23)
-      at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9569:18)
-      at TypeScriptParserMixin.parseStatementLike (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12843:17)
-      at TypeScriptParserMixin.parseStatementListItem (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12823:17)
-      at TypeScriptParserMixin.parseExportDeclaration (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:14010:17)
-      at TypeScriptParserMixin.parseExportDeclaration (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9690:85)
-      at TypeScriptParserMixin.maybeParseExportDeclaration (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13969:31)
-      at TypeScriptParserMixin.parseExport (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13888:29)
-      at TypeScriptParserMixin.parseExport (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9446:20)
-      at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12954:27)
-6:15:29 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-6:18:59 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-6:19:03 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-6:19:09 PM [vite] (client) hmr update /src/pages/Storyboard.tsx, /src/styles/main.css, /src/index.css
-6:24:46 PM [vite] (client) hmr update /src/pages/Vision.tsx, /src/styles/main.css, /src/index.css
-6:39:10 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-6:39:30 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-6:39:51 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-6:40:38 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-7:58:19 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-7:58:27 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-7:59:04 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-7:59:32 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:04:38 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:04:47 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:04:57 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:05:04 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:08:55 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:15:17 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:19:09 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:19:09 PM [vite] Internal server error: Transform failed with 1 error:
-/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Enablers.tsx:2143:7: ERROR: The character "}" is not valid inside a JSX element
-  Plugin: vite:esbuild
-  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Enablers.tsx:2143:0
-  
-  The character "}" is not valid inside a JSX element
-  2141 |            </div>
-  2142 |          </Card>
-  2143 |        )}
-       |         ^
-  2144 |  
-  2145 |        {/* Specification Files from ./specifications folder */}
-  
-      at failureErrorWithLog (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/esbuild/lib/main.js:1467:15)
-      at /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/esbuild/lib/main.js:736:50
-      at responseCallbacks.<computed> (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/esbuild/lib/main.js:603:9)
-      at handleIncomingPacket (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/esbuild/lib/main.js:658:12)
-      at Socket.readFromStdout (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/esbuild/lib/main.js:581:7)
-      at Socket.emit (node:events:524:28)
-      at addChunk (node:internal/streams/readable:561:12)
-      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
-      at Readable.push (node:internal/streams/readable:392:5)
-      at Pipe.onStreamRead (node:internal/stream_base_commons:191:23)
-8:19:22 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:19:22 PM [vite] Internal server error: Transform failed with 1 error:
-/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Enablers.tsx:2142:9: ERROR: The character "}" is not valid inside a JSX element
-  Plugin: vite:esbuild
-  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/Enablers.tsx:2142:0
-  
-  The character "}" is not valid inside a JSX element
-  2140 |            )}
-  2141 |            </div>
-  2142 |          )}
-       |           ^
-  2143 |          {fileEnablers.length === 0 &&
-  2144 |          <p className="text-body text-secondary" style={{ textAlign: 'center', padding: '20px' }}>
-  
-      at failureErrorWithLog (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/esbuild/lib/main.js:1467:15)
-      at /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/esbuild/lib/main.js:736:50
-      at responseCallbacks.<computed> (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/esbuild/lib/main.js:603:9)
-      at handleIncomingPacket (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/esbuild/lib/main.js:658:12)
-      at Socket.readFromStdout (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/esbuild/lib/main.js:581:7)
-      at Socket.emit (node:events:524:28)
-      at addChunk (node:internal/streams/readable:561:12)
-      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
-      at Readable.push (node:internal/streams/readable:392:5)
-      at Pipe.onStreamRead (node:internal/stream_base_commons:191:23)
-8:19:32 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:21:37 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:22:02 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:29:26 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-8:47:26 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
-8:48:27 PM [vite] (client) hmr update /src/components/Header.tsx, /src/styles/main.css, /src/index.css
-6:11:35 AM [vite] (client) hmr update /src/pages/Code.tsx, /src/styles/main.css, /src/index.css
-6:24:42 AM [vite] (client) hmr update /src/pages/Run.tsx, /src/styles/main.css, /src/index.css
-6:55:21 AM [vite] (client) hmr update /src/context/CollaborationContext.tsx, /src/context/AuthContext.tsx, /src/context/WorkspaceContext.tsx, /src/context/EnablerContext.tsx, /src/pages/UIStyles.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Dashboard.tsx, /src/pages/Analyze.tsx, /src/pages/Capabilities.tsx, /src/pages/Features.tsx, /src/pages/AIChat.tsx, /src/pages/Designs.tsx, /src/pages/Vision.tsx, /src/pages/Integrations.tsx, /src/pages/Code.tsx, /src/pages/Ideation.tsx, /src/pages/Workspaces.tsx, /src/pages/Storyboard.tsx, /src/pages/Run.tsx, /src/pages/AIPrinciples.tsx, /src/pages/System.tsx, /src/pages/UIFramework.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/DataCollection.tsx, /src/pages/UIDesigner.tsx, /src/pages/Enablers.tsx, /src/pages/DefinitionApproval.tsx, /src/pages/Admin.tsx, /src/components/FolderBrowser.tsx, /src/pages/Testing.tsx, /src/components/CapabilityForm.tsx, /src/components/AssetsPane.tsx, /src/components/WorkspaceIntegrations.tsx, /src/context/ApprovalContext.tsx, /src/components/ApprovalStatusBadge.tsx, /src/components/ApprovalSection.tsx, /src/components/AcceptanceCriteriaSection.tsx, /src/pages/DesignApproval.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
-6:55:21 AM [vite] (client) hmr invalidate /src/context/CollaborationContext.tsx Could not Fast Refresh ("useCollaboration" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:21 AM [vite] (client) hmr update /src/App.tsx, /src/pages/Ideation.tsx, /src/pages/Storyboard.tsx, /src/components/RemoteCursors.tsx
-6:55:21 AM [vite] (client) hmr invalidate /src/context/AuthContext.tsx Could not Fast Refresh ("useAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:21 AM [vite] (client) hmr update /src/App.tsx, /src/context/CollaborationContext.tsx, /src/context/RoleAccessContext.tsx, /src/context/ApprovalContext.tsx, /src/context/WorkspaceContext.tsx, /src/context/EnablerContext.tsx, /src/pages/Login.tsx, /src/pages/GoogleCallback.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Dashboard.tsx, /src/pages/Settings.tsx, /src/pages/Admin.tsx, /src/components/ProtectedRoute.tsx, /src/components/Header.tsx
-6:55:21 AM [vite] (client) hmr invalidate /src/context/WorkspaceContext.tsx Could not Fast Refresh ("useWorkspace" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:21 AM [vite] (client) hmr update /src/App.tsx, /src/pages/UIStyles.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Dashboard.tsx, /src/pages/Analyze.tsx, /src/pages/Capabilities.tsx, /src/pages/Features.tsx, /src/pages/AIChat.tsx, /src/pages/Designs.tsx, /src/pages/Vision.tsx, /src/pages/Code.tsx, /src/pages/Ideation.tsx, /src/pages/Workspaces.tsx, /src/pages/Storyboard.tsx, /src/pages/Run.tsx, /src/pages/AIPrinciples.tsx, /src/pages/System.tsx, /src/pages/UIFramework.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/DesignApproval.tsx, /src/pages/DataCollection.tsx, /src/pages/UIDesigner.tsx, /src/pages/Enablers.tsx, /src/pages/DefinitionApproval.tsx, /src/components/WorkspaceSelector.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/Testing.tsx, /src/components/CapabilityForm.tsx, /src/components/WorkspaceHeader.tsx, /src/pages/TestingApproval.tsx, /src/components/UIFrameworkIndicator.tsx, /src/components/UIFrameworkProvider.tsx, /src/components/AIPresetIndicator.tsx
-6:55:21 AM [vite] (client) hmr invalidate /src/context/EnablerContext.tsx Could not Fast Refresh ("useEnabler" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:21 AM [vite] (client) hmr update /src/App.tsx, /src/pages/Enablers.tsx
-6:55:21 AM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:21 AM [vite] (client) hmr update /src/App.tsx
-6:55:21 AM [vite] (client) hmr invalidate /src/context/ApprovalContext.tsx Could not Fast Refresh ("useApproval" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:21 AM [vite] (client) hmr update /src/App.tsx, /src/pages/Capabilities.tsx, /src/components/Sidebar.tsx, /src/components/ApprovalSection.tsx
-6:55:27 AM [vite] (client) hmr update /src/context/CollaborationContext.tsx, /src/context/AuthContext.tsx, /src/context/WorkspaceContext.tsx, /src/context/EnablerContext.tsx, /src/pages/UIStyles.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Dashboard.tsx, /src/pages/Analyze.tsx, /src/pages/Capabilities.tsx, /src/pages/Features.tsx, /src/pages/AIChat.tsx, /src/pages/Designs.tsx, /src/pages/Vision.tsx, /src/pages/Integrations.tsx, /src/pages/Code.tsx, /src/pages/Ideation.tsx, /src/pages/Workspaces.tsx, /src/pages/Storyboard.tsx, /src/pages/Run.tsx, /src/pages/AIPrinciples.tsx, /src/pages/System.tsx, /src/pages/UIFramework.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/DataCollection.tsx, /src/pages/UIDesigner.tsx, /src/pages/Enablers.tsx, /src/pages/DefinitionApproval.tsx, /src/pages/Admin.tsx, /src/components/FolderBrowser.tsx, /src/pages/Testing.tsx, /src/components/CapabilityForm.tsx, /src/components/AssetsPane.tsx, /src/components/WorkspaceIntegrations.tsx, /src/context/ApprovalContext.tsx, /src/components/ApprovalStatusBadge.tsx, /src/components/ApprovalSection.tsx, /src/components/AcceptanceCriteriaSection.tsx, /src/pages/DesignApproval.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
-6:55:27 AM [vite] (client) hmr invalidate /src/context/CollaborationContext.tsx Could not Fast Refresh ("useCollaboration" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:27 AM [vite] (client) hmr update /src/App.tsx, /src/pages/Ideation.tsx, /src/pages/Storyboard.tsx, /src/components/RemoteCursors.tsx
-6:55:27 AM [vite] (client) hmr invalidate /src/context/AuthContext.tsx Could not Fast Refresh ("useAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:27 AM [vite] (client) hmr update /src/App.tsx, /src/context/CollaborationContext.tsx, /src/context/RoleAccessContext.tsx, /src/context/ApprovalContext.tsx, /src/context/WorkspaceContext.tsx, /src/context/EnablerContext.tsx, /src/pages/Login.tsx, /src/pages/GoogleCallback.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Dashboard.tsx, /src/pages/Settings.tsx, /src/pages/Admin.tsx, /src/components/ProtectedRoute.tsx, /src/components/Header.tsx
-6:55:27 AM [vite] (client) hmr invalidate /src/context/WorkspaceContext.tsx Could not Fast Refresh ("useWorkspace" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:27 AM [vite] (client) hmr update /src/App.tsx, /src/pages/UIStyles.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Dashboard.tsx, /src/pages/Analyze.tsx, /src/pages/Capabilities.tsx, /src/pages/Features.tsx, /src/pages/AIChat.tsx, /src/pages/Designs.tsx, /src/pages/Vision.tsx, /src/pages/Code.tsx, /src/pages/Ideation.tsx, /src/pages/Workspaces.tsx, /src/pages/Storyboard.tsx, /src/pages/Run.tsx, /src/pages/AIPrinciples.tsx, /src/pages/System.tsx, /src/pages/UIFramework.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/DesignApproval.tsx, /src/pages/DataCollection.tsx, /src/pages/UIDesigner.tsx, /src/pages/Enablers.tsx, /src/pages/DefinitionApproval.tsx, /src/components/WorkspaceSelector.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/Testing.tsx, /src/components/CapabilityForm.tsx, /src/components/WorkspaceHeader.tsx, /src/pages/TestingApproval.tsx, /src/components/UIFrameworkIndicator.tsx, /src/components/UIFrameworkProvider.tsx, /src/components/AIPresetIndicator.tsx
-6:55:27 AM [vite] (client) hmr invalidate /src/context/EnablerContext.tsx Could not Fast Refresh ("useEnabler" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:27 AM [vite] (client) hmr update /src/App.tsx, /src/pages/Enablers.tsx
-6:55:27 AM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:27 AM [vite] (client) hmr update /src/App.tsx
-6:55:27 AM [vite] (client) hmr invalidate /src/context/ApprovalContext.tsx Could not Fast Refresh ("useApproval" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:27 AM [vite] (client) hmr update /src/App.tsx, /src/pages/Capabilities.tsx, /src/components/Sidebar.tsx, /src/components/ApprovalSection.tsx
-6:55:32 AM [vite] (client) hmr update /src/context/CollaborationContext.tsx, /src/context/AuthContext.tsx, /src/context/WorkspaceContext.tsx, /src/context/EnablerContext.tsx, /src/pages/UIStyles.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Dashboard.tsx, /src/pages/Analyze.tsx, /src/pages/Capabilities.tsx, /src/pages/Features.tsx, /src/pages/AIChat.tsx, /src/pages/Designs.tsx, /src/pages/Vision.tsx, /src/pages/Integrations.tsx, /src/pages/Code.tsx, /src/pages/Ideation.tsx, /src/pages/Workspaces.tsx, /src/pages/Storyboard.tsx, /src/pages/Run.tsx, /src/pages/AIPrinciples.tsx, /src/pages/System.tsx, /src/pages/UIFramework.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/DataCollection.tsx, /src/pages/UIDesigner.tsx, /src/pages/Enablers.tsx, /src/pages/DefinitionApproval.tsx, /src/pages/Admin.tsx, /src/components/FolderBrowser.tsx, /src/pages/Testing.tsx, /src/components/CapabilityForm.tsx, /src/components/AssetsPane.tsx, /src/components/WorkspaceIntegrations.tsx, /src/context/ApprovalContext.tsx, /src/components/ApprovalStatusBadge.tsx, /src/components/ApprovalSection.tsx, /src/components/AcceptanceCriteriaSection.tsx, /src/pages/DesignApproval.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/TestingApproval.tsx, /src/styles/main.css, /src/index.css
-6:55:32 AM [vite] (client) hmr invalidate /src/context/CollaborationContext.tsx Could not Fast Refresh ("useCollaboration" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:32 AM [vite] (client) hmr update /src/App.tsx, /src/pages/Ideation.tsx, /src/pages/Storyboard.tsx, /src/components/RemoteCursors.tsx
-6:55:32 AM [vite] (client) hmr invalidate /src/context/AuthContext.tsx Could not Fast Refresh ("useAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:32 AM [vite] (client) hmr update /src/App.tsx, /src/context/CollaborationContext.tsx, /src/context/RoleAccessContext.tsx, /src/context/ApprovalContext.tsx, /src/context/WorkspaceContext.tsx, /src/context/EnablerContext.tsx, /src/pages/Login.tsx, /src/pages/GoogleCallback.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Dashboard.tsx, /src/pages/Settings.tsx, /src/pages/Admin.tsx, /src/components/ProtectedRoute.tsx, /src/components/Header.tsx
-6:55:32 AM [vite] (client) hmr invalidate /src/context/WorkspaceContext.tsx Could not Fast Refresh ("useWorkspace" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:32 AM [vite] (client) hmr update /src/App.tsx, /src/pages/UIStyles.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Dashboard.tsx, /src/pages/Analyze.tsx, /src/pages/Capabilities.tsx, /src/pages/Features.tsx, /src/pages/AIChat.tsx, /src/pages/Designs.tsx, /src/pages/Vision.tsx, /src/pages/Code.tsx, /src/pages/Ideation.tsx, /src/pages/Workspaces.tsx, /src/pages/Storyboard.tsx, /src/pages/Run.tsx, /src/pages/AIPrinciples.tsx, /src/pages/System.tsx, /src/pages/UIFramework.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/DesignApproval.tsx, /src/pages/DataCollection.tsx, /src/pages/UIDesigner.tsx, /src/pages/Enablers.tsx, /src/pages/DefinitionApproval.tsx, /src/components/WorkspaceSelector.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/Testing.tsx, /src/components/CapabilityForm.tsx, /src/components/WorkspaceHeader.tsx, /src/pages/TestingApproval.tsx, /src/components/UIFrameworkIndicator.tsx, /src/components/UIFrameworkProvider.tsx, /src/components/AIPresetIndicator.tsx
-6:55:32 AM [vite] (client) hmr invalidate /src/context/EnablerContext.tsx Could not Fast Refresh ("useEnabler" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:32 AM [vite] (client) hmr update /src/App.tsx, /src/pages/Enablers.tsx
-6:55:32 AM [vite] (client) hmr invalidate /src/pages/UIStyles.tsx Could not Fast Refresh ("applyUIStyleToDOM" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:32 AM [vite] (client) hmr update /src/App.tsx
-6:55:32 AM [vite] (client) hmr invalidate /src/context/ApprovalContext.tsx Could not Fast Refresh ("useApproval" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
-6:55:32 AM [vite] (client) hmr update /src/App.tsx, /src/pages/Capabilities.tsx, /src/components/Sidebar.tsx, /src/components/ApprovalSection.tsx
-6:55:40 AM [vite] (client) hmr update /src/pages/Run.tsx, /src/styles/main.css, /src/index.css
-6:55:46 AM [vite] (client) hmr update /src/pages/Run.tsx, /src/styles/main.css, /src/index.css
-7:24:29 AM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-7:24:35 AM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-7:24:43 AM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-7:25:01 AM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-7:27:30 AM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-7:37:43 AM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-12:23:03 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-12:23:13 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-7:47:28 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
-7:50:24 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:12:00 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:12:14 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:12:29 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:17:44 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:17:50 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:17:56 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:18:05 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:24:05 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:24:16 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:24:41 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:24:54 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:25:10 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:25:21 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:25:34 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:28:12 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:28:45 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:28:53 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-8:34:58 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
-8:35:17 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
-8:35:25 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
-8:35:31 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
-8:44:22 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-8:44:28 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-8:44:37 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-8:45:08 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-8:45:19 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-8:47:30 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-8:47:36 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-8:47:44 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-8:47:51 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-8:48:07 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-8:56:23 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-8:56:33 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-8:59:04 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-8:59:10 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-8:59:25 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-8:59:37 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-8:59:48 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-9:02:17 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-9:02:35 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-9:02:45 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-9:03:05 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-9:03:15 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-9:06:54 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-9:08:33 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-9:08:41 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-9:24:29 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-9:24:42 PM [vite] (client) hmr update /src/pages/Capabilities.tsx, /src/styles/main.css, /src/index.css
-9:25:19 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-9:25:33 PM [vite] (client) hmr update /src/pages/Enablers.tsx, /src/styles/main.css, /src/index.css
-9:26:55 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:27:36 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:27:47 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:34:54 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:35:14 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:36:39 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:36:49 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:37:16 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:37:32 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:37:43 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:46:15 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:47:13 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:47:41 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:47:54 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:48:09 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:48:32 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:48:48 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:49:17 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
-9:51:48 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:52:16 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:52:30 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:52:45 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:52:45 PM [vite] Internal server error: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/StoryMap.tsx: Missing semicolon. (1203:15)
-
-  1201 |                   </span>
-  1202 |                 </div>
-> 1203 |               ))}
-       |                ^
-  1204 |             </div>
-  1205 |           </>
-  1206 |         )}
-  Plugin: vite:react-babel
-  File: /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/src/pages/StoryMap.tsx:1203:15
-  1201 |                    </span>
-  1202 |                  </div>
-  1203 |                ))}
-       |                 ^
-  1204 |              </div>
-  1205 |            </>
-      at constructor (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:367:19)
-      at TypeScriptParserMixin.raise (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:6624:19)
-      at TypeScriptParserMixin.semicolon (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:6920:10)
-      at TypeScriptParserMixin.parseReturnStatement (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13219:12)
-      at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12874:21)
-      at TypeScriptParserMixin.parseStatementContent (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9569:18)
-      at TypeScriptParserMixin.parseStatementLike (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12843:17)
-      at TypeScriptParserMixin.parseStatementListItem (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12823:17)
-      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13392:61)
-      at TypeScriptParserMixin.parseBlockBody (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13385:10)
-      at TypeScriptParserMixin.parseBlock (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:13373:10)
-      at TypeScriptParserMixin.parseFunctionBody (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12174:24)
-      at TypeScriptParserMixin.parseArrowExpression (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12149:10)
-      at TypeScriptParserMixin.parseExprAtom (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11504:25)
-      at TypeScriptParserMixin.parseExprAtom (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4793:20)
-      at TypeScriptParserMixin.parseExprSubscripts (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11145:23)
-      at TypeScriptParserMixin.parseUpdate (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11130:21)
-      at TypeScriptParserMixin.parseMaybeUnary (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11110:23)
-      at TypeScriptParserMixin.parseMaybeUnary (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9890:18)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10963:61)
-      at TypeScriptParserMixin.parseExprOps (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10968:23)
-      at TypeScriptParserMixin.parseMaybeConditional (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10945:23)
-      at TypeScriptParserMixin.parseMaybeAssign (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10895:21)
-      at TypeScriptParserMixin.parseMaybeAssign (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9839:20)
-      at /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10864:39
-      at TypeScriptParserMixin.allowInAnd (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12500:12)
-      at TypeScriptParserMixin.parseMaybeAssignAllowIn (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10864:17)
-      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12567:17)
-      at TypeScriptParserMixin.parseExprListItem (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12249:18)
-      at TypeScriptParserMixin.parseCallExpressionArguments (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11316:22)
-      at TypeScriptParserMixin.parseCoverCallAndAsyncArrowHead (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11250:29)
-      at TypeScriptParserMixin.parseSubscript (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11184:19)
-      at TypeScriptParserMixin.parseSubscript (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9329:18)
-      at TypeScriptParserMixin.parseSubscripts (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11158:19)
-      at TypeScriptParserMixin.parseExprSubscripts (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11149:17)
-      at TypeScriptParserMixin.parseUpdate (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11130:21)
-      at TypeScriptParserMixin.parseMaybeUnary (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:11110:23)
-      at TypeScriptParserMixin.parseMaybeUnary (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9890:18)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10963:61)
-      at TypeScriptParserMixin.parseExprOps (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10968:23)
-      at TypeScriptParserMixin.parseMaybeConditional (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10945:23)
-      at TypeScriptParserMixin.parseMaybeAssign (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10895:21)
-      at TypeScriptParserMixin.parseMaybeAssign (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:9839:20)
-      at TypeScriptParserMixin.parseExpressionBase (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10848:23)
-      at /Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10844:39
-      at TypeScriptParserMixin.allowInAnd (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:12500:12)
-      at TypeScriptParserMixin.parseExpression (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:10844:17)
-      at TypeScriptParserMixin.jsxParseExpressionContainer (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4661:31)
-      at TypeScriptParserMixin.jsxParseElementAt (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4740:36)
-      at TypeScriptParserMixin.jsxParseElementAt (/Users/jamesreynolds/Documents/Development/UbeCode/web-ui/node_modules/@babel/parser/lib/index.js:4727:32)
-9:52:57 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:55:38 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:56:03 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:56:09 PM [vite] (client) hmr update /src/pages/StoryMap.tsx, /src/styles/main.css, /src/index.css
-9:56:14 PM [vite] (client) hmr update /src/App.tsx, /src/styles/main.css, /src/index.css
-10:01:09 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-10:07:07 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-10:07:22 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-10:07:41 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-10:08:03 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-10:08:18 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-10:11:21 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-10:11:31 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
-10:11:46 PM [vite] (client) hmr update /src/pages/Testing.tsx, /src/styles/main.css, /src/index.css
+10:22:20 PM [vite] (client) hmr update /src/pages/Integrations.tsx, /src/styles/main.css, /src/index.css
+10:58:47 PM [vite] (client) hmr update /src/App.tsx, /src/pages/Dashboard.tsx, /src/pages/WorkspaceOverview.tsx, /src/pages/Designs.tsx, /src/pages/Features.tsx, /src/pages/Vision.tsx, /src/pages/Capabilities.tsx, /src/pages/Integrations.tsx, /src/pages/DefinitionApproval.tsx, /src/pages/ConceptionApproval.tsx, /src/pages/Storyboard.tsx, /src/pages/Admin.tsx, /src/pages/Ideation.tsx, /src/pages/DataCollection.tsx, /src/pages/ImplementationApproval.tsx, /src/pages/Settings.tsx, /src/pages/DesignApproval.tsx, /src/pages/Testing.tsx, /src/pages/TestingApproval.tsx, /src/pages/StoryMap.tsx, /src/components/ConfirmDialog.tsx, /src/pages/Enablers.tsx, /src/components/AcceptanceCriteriaSection.tsx, /src/pages/Code.tsx, /src/pages/AIPrinciples.tsx, /src/components/CreateIntegrationModal.tsx, /src/styles/main.css, /src/index.css
+10:59:32 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/WorkspaceIntegrations.tsx
+10:59:43 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/WorkspaceIntegrations.tsx
+10:59:59 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/WorkspaceIntegrations.tsx
+11:00:08 PM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/WorkspaceIntegrations.tsx
+12:07:16 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css
+12:07:16 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/context/ThemeContext.tsx
+12:07:16 AM [vite] (client) hmr update /src/context/ThemeContext.tsx, /src/styles/main.css, /src/index.css
+12:07:16 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css
+12:07:16 AM [vite] (client) hmr invalidate /src/context/ThemeContext.tsx Could not Fast Refresh ("useTheme" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:07:16 AM [vite] (client) hmr update /src/App.tsx, /src/pages/Settings.tsx
+12:15:08 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/GettingStartedWizard.tsx
+12:15:08 AM [vite] (client) hmr update /src/index.css, /src/styles/main.css, /src/pages/LearnINTENT.tsx
+12:15:36 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/GettingStartedWizard.tsx
+12:15:36 AM [vite] (client) hmr update /src/index.css, /src/styles/main.css, /src/pages/LearnINTENT.tsx
+12:16:28 AM [vite] (client) hmr update /src/styles/main.css, /src/index.css, /src/components/Sidebar.tsx

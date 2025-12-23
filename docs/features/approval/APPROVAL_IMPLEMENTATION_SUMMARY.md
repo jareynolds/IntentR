@@ -1,4 +1,4 @@
-# UbeCode Manual Approval Workflow - Implementation Summary
+# IntentR Manual Approval Workflow - Implementation Summary
 
 ## Quick Reference
 
@@ -375,10 +375,10 @@ Project is complete when:
 
 ## Resources
 
-**Within UbeCode Project**:
-- `/Users/jamesreynolds/Documents/Development/ubecode/APPROVAL_WORKFLOW_ANALYSIS.md` - Detailed analysis
-- `/Users/jamesreynolds/Documents/Development/ubecode/CLAUDE.md` - Project overview
-- `/Users/jamesreynolds/Documents/Development/ubecode/CODE_COMPLETE/SOFTWARE_DEVELOPMENT_PLAN.md` - Development guidelines
+**Within IntentR Project**:
+- `/Users/jamesreynolds/Documents/Development/intentr/APPROVAL_WORKFLOW_ANALYSIS.md` - Detailed analysis
+- `/Users/jamesreynolds/Documents/Development/intentr/CLAUDE.md` - Project overview
+- `/Users/jamesreynolds/Documents/Development/intentr/CODE_COMPLETE/SOFTWARE_DEVELOPMENT_PLAN.md` - Development guidelines
 
 **Code References**:
 - Existing repository pattern: `pkg/repository/capability_repository.go`

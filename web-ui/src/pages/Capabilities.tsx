@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Card, Alert, Button, CapabilityForm, AIPresetIndicator, AcceptanceCriteriaSection, ConfirmDialog } from '../components';
+import { Card, Alert, Button, CapabilityForm, AIPresetIndicator, AcceptanceCriteriaSection, ConfirmDialog, PageHeader } from '../components';
 import { ApprovalSection } from '../components/ApprovalSection';
 import { StageBadge, ApprovalStatusBadge } from '../components/ApprovalStatusBadge';
+import { WizardPageNavigation } from '../components/wizard';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useApproval } from '../context/ApprovalContext';
 import { INTEGRATION_URL } from '../api/client';
@@ -650,7 +651,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
     const sequenceNum = fileCapabilities.length + suggestions.indexOf(suggestion) + 1;
     const fileName = `${prefix}-${safeName}-${sequenceNum}.md`;
 
-    // Generate markdown content following SAWai Capability template
+    // Generate markdown content following INTENT Capability template
     let markdown = `# ${suggestion.name}\n\n`;
     markdown += `## Metadata\n`;
     markdown += `- **Name**: ${suggestion.name}\n`;
@@ -1170,43 +1171,28 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
 
   return (
     <div className="max-w-7xl mx-auto" style={{ padding: '16px' }}>
+      <WizardPageNavigation />
       <AIPresetIndicator />
-      {/* Workspace Header */}
-      {currentWorkspace && (
-        <div style={{
-          backgroundColor: 'var(--color-primary)',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }}>
-          <h4 className="text-title3" style={{ margin: 0, color: 'white' }}>
-            Workspace: {currentWorkspace.name}
-          </h4>
-        </div>
-      )}
       <div style={{ marginBottom: 'var(--spacing-6, 24px)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <div>
-            <h1 className="text-large-title" style={{ marginBottom: '8px' }}>Capability Management</h1>
-            <p className="text-body text-secondary" style={{ marginBottom: '16px' }}>
-              Track and manage SAWai capabilities - high-level business outcomes across your organization.
-            </p>
-          </div>
-          <Button variant="primary" onClick={handleCreate}>
-            + Create Capability
-          </Button>
-        </div>
+        <PageHeader
+          title="Capability Management"
+          quickDescription="Track and manage INTENT capabilities - high-level business outcomes across your organization."
+          detailedDescription="In Intent-Centered and Engineering-Driven, Narration for Transformation (INTENT), capabilities represent high-level business outcomes that contain multiple enablers.
+They integrate with design artifacts and AI-assisted development tools to accelerate delivery.
+Each capability should focus on delivering measurable business value and can be broken down into technical enablers that implement specific functionality."
+          workspaceName={currentWorkspace?.name}
+          actions={
+            <Button variant="primary" onClick={handleCreate}>
+              + Create Capability
+            </Button>
+          }
+        />
 
         {error && (
           <Alert type="error" style={{ marginBottom: '24px' }}>
             <strong>Error:</strong> {error}
           </Alert>
         )}
-
-        <Alert type="info" style={{ marginBottom: '24px' }}>
-          <strong>SAWai Capabilities:</strong> In Scaled Agile With AI (SAWai), capabilities represent high-level business outcomes
-          that contain multiple enablers. They integrate with design artifacts and AI-assisted development tools to accelerate delivery.
-        </Alert>
 
         {/* File-based Capabilities Section */}
         {currentWorkspace?.projectFolder && (

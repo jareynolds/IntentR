@@ -6,6 +6,7 @@ import { useCollaboration } from '../context/CollaborationContext';
 import RemoteCursors from '../components/RemoteCursors';
 import { AssetsPane } from '../components/AssetsPane';
 import { AIPresetIndicator, ConfirmDialog } from '../components';
+import { WizardPageNavigation } from '../components/wizard';
 import { INTEGRATION_URL, SPEC_URL } from '../api/client';
 
 export const Storyboard: React.FC = () => {
@@ -1389,6 +1390,7 @@ export const Storyboard: React.FC = () => {
 
   return (
     <div className="storyboard-page" style={{ padding: '16px' }}>
+      <WizardPageNavigation />
       <AIPresetIndicator />
       {/* Workspace Header */}
       {currentWorkspace && (

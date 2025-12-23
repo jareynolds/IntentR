@@ -1,9 +1,9 @@
-// UbeCode — Copyright © 2025 James Reynolds
+// IntentR — Copyright © 2025 James Reynolds
 //
-// This file is part of UbeCode.
+// This file is part of IntentR.
 // You may use this file under either:
 //   • The AGPLv3 Open Source License, OR
-//   • The UbeCode Commercial License
+//   • The IntentR Commercial License
 // See the LICENSE.AGPL and LICENSE.COMMERCIAL files for details.
 
 package main
@@ -17,9 +17,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jareynolds/ubecode/internal/auth"
-	"github.com/jareynolds/ubecode/pkg/database"
-	"github.com/jareynolds/ubecode/pkg/middleware"
+	"github.com/jareynolds/intentr/internal/auth"
+	"github.com/jareynolds/intentr/pkg/database"
+	"github.com/jareynolds/intentr/pkg/middleware"
 )
 
 func main() {

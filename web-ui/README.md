@@ -1,6 +1,6 @@
-# UbeCode Web UI
+# IntentR Web UI
 
-Modern React-based web interface for the UbeCode capability management platform, built with the Ford Design System.
+Modern React-based web interface for the IntentR capability management platform, built with the Ford Design System.
 
 ## Features
 
@@ -83,7 +83,7 @@ web-ui/
 ## Pages
 
 ### Dashboard
-- Overview of UbeCode platform
+- Overview of IntentR platform
 - Quick access cards to main features
 
 ### Capabilities

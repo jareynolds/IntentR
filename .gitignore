@@ -1,12 +1,24 @@
 # If you prefer the allow list template instead of the deny list, see community template:
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
+# macOS system files
+.DS_Store
+**/.DS_Store
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+
+# Built Go binaries at root
+/integration-service
+/claude-proxy
+/auth-service
+/design-service
+/capability-service
+/balut
 
 # Test binary, built with `go test -c`
 *.test
@@ -56,3 +68,17 @@ shared-workspace-server.log
 web-ui/node_modules/
 web-ui/dist/
 web-ui/.env
+
+# Runtime artifacts
+.pids/
+logs/*.log
+workspaces.db
+
+# Temporary/generated files
+*.tmp
+*.bak
+*~
+
+# Archived/legacy directories
+archived-specifications/
+archived-legacy/

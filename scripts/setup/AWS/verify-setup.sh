@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ################################################################################
-# UbeCode Setup Verification Script
+# IntentR Setup Verification Script
 ################################################################################
 # This script verifies that all components are properly installed and configured
 #
@@ -238,7 +238,7 @@ check_ports() {
         return 0
     else
         warning "Ports already in use: ${occupied_ports[*]}"
-        info "These ports are needed for UbeCode services"
+        info "These ports are needed for IntentR services"
         return 2
     fi
 }
@@ -298,7 +298,7 @@ display_next_steps() {
 ################################################################################
 
 main() {
-    log "Starting UbeCode setup verification..."
+    log "Starting IntentR setup verification..."
     echo ""
 
     log "Checking system dependencies..."

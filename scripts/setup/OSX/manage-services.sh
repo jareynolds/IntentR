@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ################################################################################
-# UbeCode Services Management Script for macOS
+# IntentR Services Management Script for macOS
 ################################################################################
-# This script provides convenient commands for managing UbeCode microservices
+# This script provides convenient commands for managing IntentR microservices
 #
 # Usage:
 #   ./manage-services.sh [command]
@@ -51,7 +51,7 @@ info() {
 # Show usage
 show_usage() {
     cat << EOF
-UbeCode Services Management Script (macOS)
+IntentR Services Management Script (macOS)
 
 Usage:
     ./manage-services.sh [command]
@@ -99,7 +99,7 @@ check_project_dir() {
 
 # Start services
 start_services() {
-    log "Starting UbeCode microservices..."
+    log "Starting IntentR microservices..."
     docker compose up -d
     log "Services started!"
     echo ""
@@ -108,14 +108,14 @@ start_services() {
 
 # Stop services
 stop_services() {
-    log "Stopping UbeCode microservices..."
+    log "Stopping IntentR microservices..."
     docker compose down
     log "Services stopped!"
 }
 
 # Restart services
 restart_services() {
-    log "Restarting UbeCode microservices..."
+    log "Restarting IntentR microservices..."
     docker compose restart
     log "Services restarted!"
     echo ""

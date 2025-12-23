@@ -5,6 +5,8 @@ import { Card } from '../components';
 import { Alert } from '../components/Alert';
 import { Button } from '../components/Button';
 import { RoleManagement } from '../components/RoleManagement';
+import { Settings } from './Settings';
+import { Integrations } from './Integrations';
 
 interface User {
   id: number;
@@ -51,7 +53,7 @@ const getRoleDisplayName = (role: string): string => {
 
 const Admin: React.FC = () => {
   const { user: currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState<'users' | 'roles'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'integrations' | 'settings'>('users');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -216,7 +218,8 @@ const Admin: React.FC = () => {
         display: 'flex',
         gap: '8px',
         borderBottom: '2px solid var(--color-grey-200)',
-        marginBottom: '24px'
+        marginBottom: '24px',
+        flexWrap: 'wrap'
       }}>
         <button
           onClick={() => setActiveTab('users')}
@@ -251,6 +254,40 @@ const Admin: React.FC = () => {
           }}
         >
           Role Management
+        </button>
+        <button
+          onClick={() => setActiveTab('integrations')}
+          style={{
+            padding: '12px 24px',
+            background: activeTab === 'integrations' ? 'var(--color-primary)' : 'transparent',
+            color: activeTab === 'integrations' ? 'white' : 'var(--color-grey-700)',
+            border: 'none',
+            borderRadius: '8px 8px 0 0',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            borderBottom: activeTab === 'integrations' ? '2px solid var(--color-primary)' : 'none',
+            marginBottom: '-2px'
+          }}
+        >
+          Integrations
+        </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          style={{
+            padding: '12px 24px',
+            background: activeTab === 'settings' ? 'var(--color-primary)' : 'transparent',
+            color: activeTab === 'settings' ? 'white' : 'var(--color-grey-700)',
+            border: 'none',
+            borderRadius: '8px 8px 0 0',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            borderBottom: activeTab === 'settings' ? '2px solid var(--color-primary)' : 'none',
+            marginBottom: '-2px'
+          }}
+        >
+          Settings
         </button>
       </div>
 
@@ -459,9 +496,13 @@ const Admin: React.FC = () => {
         </Card>
       )}
       </>
-    ) : (
+    ) : activeTab === 'roles' ? (
       <RoleManagement />
-    )}
+    ) : activeTab === 'integrations' ? (
+      <Integrations />
+    ) : activeTab === 'settings' ? (
+      <Settings />
+    ) : null}
 
       {/* Reset Password Modal */}
       {resetPasswordUser && (

@@ -1,4 +1,4 @@
-# UbeCode Enhanced Specifications Index
+# IntentR Enhanced Specifications Index
 
 **Generated**: November 24, 2025
 **Version**: 2.0 (Enhanced Organization)
@@ -22,7 +22,7 @@
 
 ## Overview
 
-This index catalogs all reverse-engineered specifications from the UbeCode application. Files have been reorganized with standardized naming conventions:
+This index catalogs all reverse-engineered specifications from the IntentR application. Files have been reorganized with standardized naming conventions:
 
 - **CAP-XXXXXX.md** - Business capabilities
 - **ENB-XXXXXX.md** - Technical enablers
@@ -94,7 +94,7 @@ This index catalogs all reverse-engineered specifications from the UbeCode appli
 
 ### CAP-471395: Container Orchestration
 **File**: [CAP-471395.md](./CAP-471395.md)
-**Component**: UbeCode Orchestrator
+**Component**: IntentR Orchestrator
 **Priority**: Medium
 **Status**: Implemented ✅
 **Analysis Review**: Not Required
@@ -157,14 +157,14 @@ This index catalogs all reverse-engineered specifications from the UbeCode appli
 **Status**: Implemented ✅
 **Analysis Review**: Not Required
 
-**Purpose**: Generic, LLM-agnostic system for intercepting, transforming, and forwarding LLM requests with automatic context injection and SAWai rule enforcement
+**Purpose**: Generic, LLM-agnostic system for intercepting, transforming, and forwarding LLM requests with automatic context injection and INTENT rule enforcement
 
 **Features**:
 - UbeCLI interactive shell with Claude CLI-like experience
 - Prework pipeline for prompt transformation
 - Automatic injection of CLAUDE.md and MAIN_SWDEV_PLAN.md
 - Pluggable LLM adapter architecture (Claude CLI, Claude API, OpenAI, Ollama)
-- SAWai approval workflow enforcement
+- INTENT approval workflow enforcement
 - Configuration via .ubecli.yaml
 
 **Enablers**: 5 enablers (ENB-759321 through ENB-759325)
@@ -795,4 +795,4 @@ UI Integration
 
 ---
 
-*This index was automatically generated during reverse engineering of the UbeCode application specifications. Files have been reorganized with standardized naming conventions for improved discoverability and maintainability.*
+*This index was automatically generated during reverse engineering of the IntentR application specifications. Files have been reorganized with standardized naming conventions for improved discoverability and maintainability.*

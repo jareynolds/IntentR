@@ -1,9 +1,9 @@
-// UbeCode — Copyright © 2025 James Reynolds
+// IntentR — Copyright © 2025 James Reynolds
 //
-// This file is part of UbeCode.
+// This file is part of IntentR.
 // You may use this file under either:
 //   • The AGPLv3 Open Source License, OR
-//   • The UbeCode Commercial License
+//   • The IntentR Commercial License
 // See the LICENSE.AGPL and LICENSE.COMMERCIAL files for details.
 
 package integration
@@ -121,6 +121,243 @@ func (h *Handler) HandleAnalyzeIntegration(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(analysis)
+}
+
+// TestConnectionRequest represents the request body for testing a connection
+type TestConnectionRequest struct {
+	BaseURL     string            `json:"base_url"`
+	Credentials map[string]string `json:"credentials"`
+}
+
+// TestConnectionResponse represents the response from a connection test
+type TestConnectionResponse struct {
+	Success         bool              `json:"success"`
+	StatusCode      int               `json:"status_code,omitempty"`
+	ErrorMessage    string            `json:"error_message,omitempty"`
+	ResponseHeaders map[string]string `json:"response_headers,omitempty"`
+	ResponseBody    string            `json:"response_body,omitempty"`
+}
+
+// HandleTestConnection handles POST /test-connection
+func (h *Handler) HandleTestConnection(w http.ResponseWriter, r *http.Request) {
+	var req TestConnectionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.BaseURL == "" {
+		http.Error(w, "base_url is required", http.StatusBadRequest)
+		return
+	}
+
+	// Create HTTP client with timeout
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	// Create request to test the URL
+	testReq, err := http.NewRequestWithContext(r.Context(), "GET", req.BaseURL, nil)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(TestConnectionResponse{
+			Success:      false,
+			ErrorMessage: fmt.Sprintf("Invalid URL: %v", err),
+		})
+		return
+	}
+
+	// Add credentials as headers if provided
+	for key, value := range req.Credentials {
+		// Map common credential field names to headers
+		switch strings.ToLower(key) {
+		case "api_key", "apikey", "api-key":
+			testReq.Header.Set("Authorization", "Bearer "+value)
+			testReq.Header.Set("X-API-Key", value)
+		case "bearer_token", "token", "access_token":
+			testReq.Header.Set("Authorization", "Bearer "+value)
+		case "username":
+			// Will be combined with password for Basic Auth
+			if pwd, ok := req.Credentials["password"]; ok {
+				auth := base64.StdEncoding.EncodeToString([]byte(value + ":" + pwd))
+				testReq.Header.Set("Authorization", "Basic "+auth)
+			}
+		default:
+			// For custom headers, add them directly
+			if strings.HasPrefix(strings.ToLower(key), "header_") {
+				headerName := strings.TrimPrefix(key, "header_")
+				testReq.Header.Set(headerName, value)
+			}
+		}
+	}
+
+	// Set common headers
+	testReq.Header.Set("User-Agent", "IntentR-Integration-Test/1.0")
+	testReq.Header.Set("Accept", "application/json")
+
+	// Make the request
+	resp, err := client.Do(testReq)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(TestConnectionResponse{
+			Success:      false,
+			ErrorMessage: fmt.Sprintf("Connection failed: %v", err),
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	// Read response body (limited to 10KB for safety)
+	bodyBytes, _ := io.ReadAll(io.LimitReader(resp.Body, 10240))
+	bodyStr := string(bodyBytes)
+
+	// Extract response headers
+	respHeaders := make(map[string]string)
+	for key, values := range resp.Header {
+		if len(values) > 0 {
+			respHeaders[key] = values[0]
+		}
+	}
+
+	// Determine if successful (2xx status codes)
+	success := resp.StatusCode >= 200 && resp.StatusCode < 300
+
+	response := TestConnectionResponse{
+		Success:         success,
+		StatusCode:      resp.StatusCode,
+		ResponseHeaders: respHeaders,
+		ResponseBody:    bodyStr,
+	}
+
+	if !success {
+		response.ErrorMessage = fmt.Sprintf("HTTP %d: %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// AnalyzeConnectionErrorRequest represents the request for analyzing connection errors
+type AnalyzeConnectionErrorRequest struct {
+	BaseURL          string                 `json:"base_url"`
+	IntegrationName  string                 `json:"integration_name"`
+	ConnectionResult map[string]interface{} `json:"connection_result"`
+	CurrentFields    []map[string]interface{} `json:"current_fields"`
+	CurrentValues    map[string]string      `json:"current_values"`
+	AnthropicKey     string                 `json:"anthropic_key"`
+}
+
+// AnalyzeConnectionErrorResponse represents the AI analysis of connection errors
+type AnalyzeConnectionErrorResponse struct {
+	Analysis        string                   `json:"analysis"`
+	AuthType        string                   `json:"auth_type"`
+	Description     string                   `json:"description"`
+	SuggestedFields []map[string]interface{} `json:"suggested_fields"`
+}
+
+// HandleAnalyzeConnectionError handles POST /analyze-connection-error
+func (h *Handler) HandleAnalyzeConnectionError(w http.ResponseWriter, r *http.Request) {
+	var req AnalyzeConnectionErrorRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.BaseURL == "" {
+		http.Error(w, "base_url is required", http.StatusBadRequest)
+		return
+	}
+
+	if req.AnthropicKey == "" {
+		http.Error(w, "anthropic_key is required", http.StatusBadRequest)
+		return
+	}
+
+	// Create Anthropic client
+	client := NewAnthropicClient(req.AnthropicKey)
+
+	// Build the prompt for analyzing the connection error
+	currentFieldsJSON, _ := json.MarshalIndent(req.CurrentFields, "", "  ")
+	connectionResultJSON, _ := json.MarshalIndent(req.ConnectionResult, "", "  ")
+
+	prompt := fmt.Sprintf(`You are an API integration expert. Analyze this failed API connection attempt and determine what authentication or configuration is needed.
+
+API Base URL: %s
+Integration Name: %s
+
+Connection Result:
+%s
+
+Current Fields Already Configured:
+%s
+
+Current Values Provided:
+%v
+
+Based on the error response, HTTP status code, and response headers/body, determine:
+1. What type of authentication this API likely requires (e.g., API Key, OAuth2, Basic Auth, Bearer Token, Custom Headers)
+2. What additional fields the user needs to provide
+3. A brief description of what this API does (if discernible)
+
+Respond with a JSON object in this exact format:
+{
+  "analysis": "Brief explanation of what went wrong and what's needed",
+  "auth_type": "The authentication type (e.g., 'API Key', 'OAuth2', 'Basic Auth', 'Bearer Token', 'Custom')",
+  "description": "Brief description of the API if identifiable",
+  "suggested_fields": [
+    {
+      "name": "field_name",
+      "type": "text|password|url|select",
+      "label": "Human readable label",
+      "description": "Help text for the user",
+      "required": true,
+      "placeholder": "Example value"
+    }
+  ]
+}
+
+Common patterns to look for:
+- 401 Unauthorized: Usually means authentication is required
+- 403 Forbidden: May need different permissions or specific headers
+- WWW-Authenticate header: Indicates required auth scheme
+- API key can go in: Authorization header, X-API-Key header, or query parameter
+
+Only suggest fields that are NOT already in the current fields list.
+Return ONLY the JSON object, no other text.`, req.BaseURL, req.IntegrationName, string(connectionResultJSON), string(currentFieldsJSON), req.CurrentValues)
+
+	// Call Claude to analyze
+	analysis, err := client.SendMessage(r.Context(), prompt)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("AI analysis failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Parse the JSON response from Claude
+	var response AnalyzeConnectionErrorResponse
+
+	// Clean the response - Claude might include markdown code blocks
+	cleanedAnalysis := strings.TrimSpace(analysis)
+	if strings.HasPrefix(cleanedAnalysis, "```json") {
+		cleanedAnalysis = strings.TrimPrefix(cleanedAnalysis, "```json")
+		cleanedAnalysis = strings.TrimSuffix(cleanedAnalysis, "```")
+		cleanedAnalysis = strings.TrimSpace(cleanedAnalysis)
+	} else if strings.HasPrefix(cleanedAnalysis, "```") {
+		cleanedAnalysis = strings.TrimPrefix(cleanedAnalysis, "```")
+		cleanedAnalysis = strings.TrimSuffix(cleanedAnalysis, "```")
+		cleanedAnalysis = strings.TrimSpace(cleanedAnalysis)
+	}
+
+	if err := json.Unmarshal([]byte(cleanedAnalysis), &response); err != nil {
+		// If parsing fails, return a basic response with the raw analysis
+		response = AnalyzeConnectionErrorResponse{
+			Analysis:        analysis,
+			AuthType:        "Unknown",
+			SuggestedFields: []map[string]interface{}{},
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 // HandleFetchResources handles POST /fetch-resources
@@ -3114,7 +3351,7 @@ func parseMarkdownCapabilities(filename, path, content string) []FileCapability 
 	}
 
 	// Determine which heading level to split on
-	// If there's exactly 1 # heading with ## subsections, this is a standard SAWai
+	// If there's exactly 1 # heading with ## subsections, this is a standard INTENT
 	// capability document (# Title, ## Metadata, ## Business Context, etc.) - treat as single capability
 	// If there are multiple # headings, split on # (multiple capabilities in one file)
 	// If there are NO # headings but multiple ## headings, split on ## (legacy format)
@@ -4577,11 +4814,11 @@ func (h *Handler) HandleAnalyzeCapabilities(w http.ResponseWriter, r *http.Reque
 		existingEnablersList = strings.Join(req.ExistingEnablers, ", ")
 	}
 
-	prompt := fmt.Sprintf(`You are an expert software architect using the SAWai (Scaled Agile With AI) methodology.
+	prompt := fmt.Sprintf(`You are an expert software architect using the INTENT (Scaled Agile With AI) methodology.
 
 Analyze the following capability documents and propose enablers for each capability.
 
-**Enabler Definition (SAWai):**
+**Enabler Definition (INTENT):**
 - Enablers are technical implementations that realize capabilities through specific functionality
 - Each enabler should map to actual code components, services, or modules
 - Enablers contain functional and non-functional requirements with testable acceptance criteria
@@ -5017,7 +5254,7 @@ func (h *Handler) HandleReadStoryboardFiles(w http.ResponseWriter, r *http.Reque
 	})
 }
 
-// ==================== EPIC FILES (SAWai Epics - Scaled Agile With AI) ====================
+// ==================== EPIC FILES (INTENT Epics - Scaled Agile With AI) ====================
 
 // FileEpic represents an epic parsed from a markdown file
 type FileEpic struct {
@@ -5339,7 +5576,7 @@ func (h *Handler) HandleDeleteEpic(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// ==================== THEME FILES (SAWai Strategic Themes) ====================
+// ==================== THEME FILES (INTENT Strategic Themes) ====================
 
 // FileTheme represents a theme parsed from a markdown file
 type FileTheme struct {
@@ -5692,7 +5929,7 @@ func (h *Handler) HandleDeleteTheme(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// ==================== FEATURE FILES (SAWai Features - FEAT-*.md) ====================
+// ==================== FEATURE FILES (INTENT Features - FEAT-*.md) ====================
 
 // FileFeature represents a feature parsed from a markdown file
 type FileFeature struct {
@@ -6388,4 +6625,320 @@ func hashString(s string) int {
 		h = -h
 	}
 	return h
+}
+
+// HandleFetchJiraEpics handles POST /fetch-jira-epics
+// Fetches all Epics (and Sagas) from a Jira project
+func (h *Handler) HandleFetchJiraEpics(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req FetchJiraEpicsRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	if req.ProjectKey == "" {
+		http.Error(w, "project_key is required", http.StatusBadRequest)
+		return
+	}
+
+	if req.Credentials == nil || len(req.Credentials) == 0 {
+		http.Error(w, "credentials are required", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := FetchJiraEpics(r.Context(), req)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to fetch Jira epics: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+// ImportJiraEpicsRequest is the request to import Jira Epics as Capabilities
+type ImportJiraEpicsRequest struct {
+	WorkspacePath string            `json:"workspace_path"`
+	ProjectKey    string            `json:"project_key"`
+	Epics         []JiraEpic        `json:"epics"`
+	Credentials   map[string]string `json:"credentials"`
+}
+
+// ImportJiraEpicsResponse is the response from importing Jira Epics
+type ImportJiraEpicsResponse struct {
+	Imported []struct {
+		JiraKey      string `json:"jira_key"`
+		CapabilityID string `json:"capability_id"`
+		Filename     string `json:"filename"`
+	} `json:"imported"`
+	Errors []struct {
+		JiraKey string `json:"jira_key"`
+		Error   string `json:"error"`
+	} `json:"errors"`
+	TotalImported int `json:"total_imported"`
+	TotalErrors   int `json:"total_errors"`
+}
+
+// HandleImportJiraEpics handles POST /import-jira-epics
+// Imports selected Jira Epics as Capability specification files
+func (h *Handler) HandleImportJiraEpics(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req ImportJiraEpicsRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	if req.WorkspacePath == "" {
+		http.Error(w, "workspace_path is required", http.StatusBadRequest)
+		return
+	}
+
+	if len(req.Epics) == 0 {
+		http.Error(w, "at least one epic is required", http.StatusBadRequest)
+		return
+	}
+
+	// Ensure definition directory exists
+	defsDir := filepath.Join(req.WorkspacePath, "definition")
+	if err := os.MkdirAll(defsDir, 0755); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to create definitions directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	response := ImportJiraEpicsResponse{
+		Imported: make([]struct {
+			JiraKey      string `json:"jira_key"`
+			CapabilityID string `json:"capability_id"`
+			Filename     string `json:"filename"`
+		}, 0),
+		Errors: make([]struct {
+			JiraKey string `json:"jira_key"`
+			Error   string `json:"error"`
+		}, 0),
+	}
+
+	for _, epic := range req.Epics {
+		// Generate a unique capability ID
+		capID := generateCapabilityID()
+
+		// Map Jira status to INTENT status
+		intentStatus := mapJiraStatusToINTENT(epic.Status)
+
+		// Map Jira priority to INTENT priority
+		intentPriority := mapJiraPriorityToINTENT(epic.Priority)
+
+		// Create capability markdown content
+		content := generateCapabilityMarkdown(capID, epic, intentStatus, intentPriority)
+
+		// Generate filename (format: CAP-XXXXXX.md)
+		filename := fmt.Sprintf("%s.md", capID)
+		filePath := filepath.Join(defsDir, filename)
+
+		// Check if file already exists
+		if _, err := os.Stat(filePath); err == nil {
+			response.Errors = append(response.Errors, struct {
+				JiraKey string `json:"jira_key"`
+				Error   string `json:"error"`
+			}{
+				JiraKey: epic.Key,
+				Error:   fmt.Sprintf("File already exists: %s", filename),
+			})
+			continue
+		}
+
+		// Write the file
+		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+			response.Errors = append(response.Errors, struct {
+				JiraKey string `json:"jira_key"`
+				Error   string `json:"error"`
+			}{
+				JiraKey: epic.Key,
+				Error:   fmt.Sprintf("Failed to write file: %v", err),
+			})
+			continue
+		}
+
+		response.Imported = append(response.Imported, struct {
+			JiraKey      string `json:"jira_key"`
+			CapabilityID string `json:"capability_id"`
+			Filename     string `json:"filename"`
+		}{
+			JiraKey:      epic.Key,
+			CapabilityID: capID,
+			Filename:     filename,
+		})
+	}
+
+	response.TotalImported = len(response.Imported)
+	response.TotalErrors = len(response.Errors)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// generateCapabilityID generates a unique CAP-XXXXXX ID
+func generateCapabilityID() string {
+	// Use timestamp + random component for uniqueness
+	now := time.Now()
+	timeComponent := now.UnixNano() % 10000
+	randomComponent := now.Nanosecond() % 100
+	combined := (int(timeComponent)*100 + randomComponent) % 1000000
+	return fmt.Sprintf("CAP-%06d", combined)
+}
+
+// mapJiraStatusToINTENT maps Jira status to INTENT capability status
+func mapJiraStatusToINTENT(jiraStatus string) string {
+	statusLower := strings.ToLower(jiraStatus)
+
+	switch {
+	case strings.Contains(statusLower, "done") || strings.Contains(statusLower, "complete"):
+		return "Implemented"
+	case strings.Contains(statusLower, "in progress") || strings.Contains(statusLower, "active"):
+		return "In Implementation"
+	case strings.Contains(statusLower, "review"):
+		return "Ready for Design"
+	case strings.Contains(statusLower, "backlog") || strings.Contains(statusLower, "to do"):
+		return "Ready for Analysis"
+	default:
+		return "In Draft"
+	}
+}
+
+// mapJiraPriorityToINTENT maps Jira priority to INTENT priority
+func mapJiraPriorityToINTENT(jiraPriority string) string {
+	priorityLower := strings.ToLower(jiraPriority)
+
+	switch {
+	case strings.Contains(priorityLower, "highest") || strings.Contains(priorityLower, "critical"):
+		return "Critical"
+	case strings.Contains(priorityLower, "high"):
+		return "High"
+	case strings.Contains(priorityLower, "low") || strings.Contains(priorityLower, "lowest"):
+		return "Low"
+	default:
+		return "Medium"
+	}
+}
+
+// generateCapabilityMarkdown generates the capability markdown content from a Jira Epic
+func generateCapabilityMarkdown(capID string, epic JiraEpic, status, priority string) string {
+	// Escape any markdown special characters in the description
+	description := strings.ReplaceAll(epic.Description, "\n", "\n\n")
+
+	// Format labels as comma-separated
+	labels := strings.Join(epic.Labels, ", ")
+	if labels == "" {
+		labels = "None"
+	}
+
+	return fmt.Sprintf(`# %s
+
+## Metadata
+- **Name**: %s
+- **Type**: Capability
+- **ID**: %s
+- **Owner**: Imported from Jira
+- **Status**: %s
+- **Approval**: Pending
+- **Priority**: %s
+- **Analysis Review**: Required
+- **Jira Key**: %s
+- **Jira URL**: %s
+- **Labels**: %s
+
+## Business Context
+
+### Problem Statement
+%s
+
+### Value Proposition
+[Define the value proposition for this capability]
+
+### Success Metrics
+- [Metric 1]
+- [Metric 2]
+
+## User Perspective
+
+### Primary Persona
+[Define the primary user persona]
+
+### User Journey (Before/After)
+**Before**: [Current experience]
+**After**: [Improved experience with this capability]
+
+### User Scenarios
+1. [Scenario 1]
+2. [Scenario 2]
+
+## Boundaries
+
+### In Scope
+- [What IS included]
+
+### Out of Scope
+- [What is NOT included]
+
+### Assumptions
+- Imported from Jira Epic: %s
+
+### Constraints
+- [Technical, business, or regulatory limits]
+
+## Enablers
+| ID | Name | Purpose | State |
+|----|------|---------|-------|
+| | | | |
+
+## Dependencies
+
+### Internal Upstream Dependency
+| Capability ID | Description |
+|---------------|-------------|
+| | |
+
+### Internal Downstream Impact
+| Capability ID | Description |
+|---------------|-------------|
+| | |
+
+## Acceptance Criteria
+- [ ] [Specific, testable criterion]
+
+## Technical Specifications (Template)
+
+### Capability Dependency Flow Diagram
+[To be defined during Design phase]
+
+## Design Artifacts
+- [Link to Figma/design files]
+
+## Approval History
+| Date | Stage | Decision | By | Feedback |
+|------|-------|----------|-----|----------|
+| %s | Import | Created | System | Imported from Jira Epic %s |
+`,
+		epic.Summary,                              // Title
+		epic.Summary,                              // Name in metadata
+		capID,                                     // ID
+		status,                                    // Status
+		priority,                                  // Priority
+		epic.Key,                                  // Jira Key
+		epic.URL,                                  // Jira URL
+		labels,                                    // Labels
+		description,                               // Problem Statement / Description
+		epic.Key,                                  // Assumptions - Jira Key reference
+		time.Now().Format("2006-01-02"),           // Approval History date
+		epic.Key,                                  // Approval History - Jira key
+	)
 }
