@@ -5,7 +5,6 @@ import { useWorkspace } from '../context/WorkspaceContext';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { GettingStartedWizard } from '../components/GettingStartedWizard';
-import { OnboardingProgress } from '../components/OnboardingProgress';
 
 interface StartAction {
   id: string;
@@ -177,11 +176,6 @@ export const Welcome: React.FC = () => {
             <p>Innovate Faster</p>
           </div>
         </div>
-      </div>
-
-      {/* Onboarding Progress Cards */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <OnboardingProgress onShowTutorial={() => setShowTutorial(true)} />
       </div>
 
       <div className="welcome-content">
