@@ -60,17 +60,17 @@ export const SystemStart: React.FC = () => {
 
   return (
     <StartPageLayout
-      title="System Phase"
-      subtitle="Architecting the solution"
+      title="UI Design Phase"
+      subtitle="Designing the user interface"
       description={[
-        'The System phase is where technical architecture takes form. You\'ll create the detailed specifications that guide implementation, including API designs, data models, and system interactions.',
-        'During this phase, you will design API endpoints with request/response schemas, create data models and database schemas, define component interactions and flows, and document sequence diagrams and state machines.',
-        'Good design documentation serves as the contract between specification and implementation. It enables AI to generate accurate code and helps teams stay aligned.',
+        'The UI Design phase is where your application\'s visual identity takes form. You\'ll configure UI frameworks, define styles, and manage design assets that guide implementation.',
+        'During this phase, you will set up your UI framework and component library, define color schemes, typography, and styling conventions, import and manage design assets from tools like Figma, and create visual specifications for your interface.',
+        'Good UI design documentation ensures consistency across your application and enables AI to generate accurate, visually coherent code.',
       ]}
       highlights={highlights}
       illustration={illustration}
       onBegin={handleBegin}
-      beginLabel="Begin System"
+      beginLabel="Begin UI Design"
       showSkip={true}
       onSkip={handleSkip}
       accentColor="indigo"

@@ -45,7 +45,7 @@ const DISPLAY_STEPS = [
   { id: 'workspace', name: 'Workspace' },
   { id: 'intent', name: 'Intent' },
   { id: 'specification', name: 'Specification' },
-  { id: 'system', name: 'System' },
+  { id: 'system', name: 'UI Design' },
   { id: 'control-loop', name: 'Control Loop' },
   { id: 'implementation', name: 'Implementation' },
 ];

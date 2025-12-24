@@ -172,7 +172,7 @@
         },
         {
           "id": "system",
-          "name": "System",
+          "name": "UI Design",
           "index": 2,
           "route": "/wizard/implementation",
           "tab": "system"

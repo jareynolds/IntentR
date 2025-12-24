@@ -18,7 +18,7 @@ const DEFAULT_PAGES: Omit<PageAccess, 'accessLevel'>[] = [
       { pageName: 'Designs', path: '/designs' },
       { pageName: 'Ideation', path: '/ideation' },
       { pageName: 'Storyboard', path: '/storyboard' },
-      { pageName: 'System', path: '/system' },
+      { pageName: 'UI Design', path: '/system' },
       { pageName: 'Capabilities', path: '/capabilities' },
       { pageName: 'AI Principles', path: '/ai-principles' },
       { pageName: 'UI Framework', path: '/ui-framework' },
@@ -59,7 +59,7 @@ const DEFAULT_ROLE_DEFINITIONS: RoleDefinition[] = [
       accessLevel: page.pageName === 'Admin Panel' ? 'hidden' : 'view' as AccessLevel,
       subPages: page.subPages?.map(sub => ({
         ...sub,
-        accessLevel: ['Capabilities', 'System'].includes(sub.pageName) ? 'edit' : 'view' as AccessLevel
+        accessLevel: ['Capabilities', 'UI Design'].includes(sub.pageName) ? 'edit' : 'view' as AccessLevel
       }))
     }))
   },
@@ -72,7 +72,7 @@ const DEFAULT_ROLE_DEFINITIONS: RoleDefinition[] = [
                    ['Integrations', 'Settings'].includes(page.pageName) ? 'edit' : 'view' as AccessLevel,
       subPages: page.subPages?.map(sub => ({
         ...sub,
-        accessLevel: ['System', 'Integrations'].includes(sub.pageName) ? 'edit' : 'view' as AccessLevel
+        accessLevel: ['UI Design', 'Integrations'].includes(sub.pageName) ? 'edit' : 'view' as AccessLevel
       }))
     }))
   },

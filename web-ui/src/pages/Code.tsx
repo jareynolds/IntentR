@@ -98,7 +98,7 @@ export const Code: React.FC = () => {
       { key: `conception-approved-${currentWorkspace.id}`, name: 'Intent' },
       { key: `definition-approved-${currentWorkspace.id}`, name: 'Specification' },
       { key: `design-approved-${currentWorkspace.id}`, name: 'Specification (Design)' },
-      { key: `implementation-approved-${currentWorkspace.id}`, name: 'System' },
+      { key: `implementation-approved-${currentWorkspace.id}`, name: 'UI Design' },
       { key: `phaseApprovals_${currentWorkspace.id}_testing`, name: 'Control Loop' },
     ];
 

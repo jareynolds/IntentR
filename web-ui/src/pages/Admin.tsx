@@ -27,7 +27,7 @@ const AVAILABLE_STEPS: WizardStepConfig[] = [
   { id: 'workspace', name: 'Workspace', description: 'Select your project type and workspace', icon: '◰' },
   { id: 'intent', name: 'Intent', description: 'Capture ideas, stories, and user journeys', icon: '◇' },
   { id: 'specification', name: 'Specification', description: 'Define capabilities and enablers', icon: '☰' },
-  { id: 'system', name: 'System', description: 'Configure UI framework, styles, and design assets', icon: '⚙' },
+  { id: 'system', name: 'UI Design', description: 'Configure UI framework, styles, and design assets', icon: '⚙' },
   { id: 'control-loop', name: 'Control Loop', description: 'Validate test scenarios and acceptance criteria', icon: '✓' },
   { id: 'implementation', name: 'Implementation', description: 'Build, test, and deploy your application', icon: '▶' },
   { id: 'discovery', name: 'Discovery', description: 'Analyze and document existing code', icon: '🔍' },

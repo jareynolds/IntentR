@@ -11,7 +11,7 @@ export const WizardSystem: React.FC = () => {
     <WizardLayout>
       <div className="wizard-system">
         <div className="wizard-system-header">
-          <h2>System Phase</h2>
+          <h2>UI Design Phase</h2>
           <p>Create UI assets, select frameworks, and define styles for your application.</p>
         </div>
 

@@ -132,7 +132,7 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
   },
   system: {
     id: 'system',
-    name: 'System',
+    name: 'UI Design',
     description: 'Configure UI framework, styles, and design assets',
     icon: '⚙',
   },
@@ -319,10 +319,17 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [customFlows, setCustomFlows] = useState<Record<WizardFlowType, string[]>>(() => loadCustomWizardFlows());
   const [customSubpages, setCustomSubpages] = useState<Record<string, string[]>>(() => loadCustomWizardSubpages());
 
+  // Flow type state - must be declared before workspace loading effect
+  const [flowType, setFlowTypeState] = useState<WizardFlowType | null>(() => {
+    const saved = localStorage.getItem('wizard_flow_type');
+    return saved as WizardFlowType | null;
+  });
+
   // Load flows from workspace when workspace changes OR when workspace flows are updated
   useEffect(() => {
     console.log('[WizardContext] Workspace load effect triggered');
     console.log('[WizardContext] currentWorkspace:', currentWorkspace?.id, currentWorkspace?.name);
+    console.log('[WizardContext] currentWorkspace.workspaceType:', currentWorkspace?.workspaceType);
     console.log('[WizardContext] currentWorkspace.wizardFlows:', currentWorkspace?.wizardFlows);
     console.log('[WizardContext] prevWorkspaceIdRef:', prevWorkspaceIdRef.current);
 
@@ -337,6 +344,19 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     if (isWorkspaceSwitch) {
       console.log('[WizardContext] Workspace ID changed, loading flows from workspace');
       prevWorkspaceIdRef.current = currentWorkspace.id;
+
+      // IMPORTANT: Sync flowType from workspace's workspaceType when switching workspaces
+      // This ensures the sidebar and wizard show the correct flow for the workspace
+      const workspaceFlowType = currentWorkspace.workspaceType as WizardFlowType | undefined;
+      if (workspaceFlowType && ['new', 'refactor', 'enhance', 'reverse-engineer'].includes(workspaceFlowType)) {
+        console.log('[WizardContext] Setting flowType from workspace.workspaceType:', workspaceFlowType);
+        setFlowTypeState(workspaceFlowType);
+        localStorage.setItem('wizard_flow_type', workspaceFlowType);
+      } else {
+        console.log('[WizardContext] No valid workspaceType, defaulting flowType to "new"');
+        setFlowTypeState('new');
+        localStorage.setItem('wizard_flow_type', 'new');
+      }
     } else {
       console.log('[WizardContext] Same workspace ID - checking if flows were updated in workspace');
     }
@@ -370,7 +390,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
         subpages: currentWorkspace.wizardSubpages || DEFAULT_SECTION_SUBPAGE_IDS,
       }
     }));
-  }, [currentWorkspace?.id, currentWorkspace?.wizardFlows, currentWorkspace?.wizardSubpages]);
+  }, [currentWorkspace?.id, currentWorkspace?.workspaceType, currentWorkspace?.wizardFlows, currentWorkspace?.wizardSubpages]);
 
   // State
   const [isWizardMode, setIsWizardMode] = useState<boolean>(() => {
@@ -378,10 +398,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     return saved === 'true';
   });
 
-  const [flowType, setFlowTypeState] = useState<WizardFlowType | null>(() => {
-    const saved = localStorage.getItem('wizard_flow_type');
-    return saved as WizardFlowType | null;
-  });
+  // Note: flowType state is declared earlier (before workspace loading effect)
 
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(() => {
     const saved = localStorage.getItem('wizard_current_step');

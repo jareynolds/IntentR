@@ -148,8 +148,8 @@
     },
     {
       "id": "system",
-      "name": "System",
-      "description": "Document existing technical designs",
+      "name": "UI Design",
+      "description": "Configure UI framework, styles, and design assets",
       "index": 3,
       "route": "/wizard/system",
       "startRoute": "/wizard/system/start",
@@ -165,7 +165,7 @@
         },
         {
           "id": "system",
-          "name": "System",
+          "name": "UI Design",
           "index": 1,
           "route": "/wizard/system",
           "tab": "system"
@@ -248,7 +248,7 @@
         },
         {
           "id": "system",
-          "name": "System",
+          "name": "UI Design",
           "index": 2,
           "route": "/wizard/implementation",
           "tab": "system"

@@ -669,8 +669,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
           width: 22px;
           height: 22px;
           border-radius: 6px;
-          background: var(--color-systemGray5);
-          color: var(--sidebar-foreground, var(--color-label));
+          background: white;
+          color: black;
           font-size: 14px;
           font-weight: 500;
           flex-shrink: 0;

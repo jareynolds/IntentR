@@ -12,8 +12,8 @@ export const WizardImplementation: React.FC = () => {
     <WizardLayout>
       <div className="wizard-implementation">
         <div className="wizard-implementation-header">
-          <h2>System Phase</h2>
-          <p>Configure your system, generate code with AI, test scenarios, and run your application.</p>
+          <h2>Implementation Phase</h2>
+          <p>Configure your UI design, generate code with AI, and run your application.</p>
         </div>
 
         <div className="wizard-implementation-tabs">
@@ -21,7 +21,7 @@ export const WizardImplementation: React.FC = () => {
             className={`wizard-tab ${activeTab === 'system' ? 'wizard-tab--active' : ''}`}
             onClick={() => setActiveTab('system')}
           >
-            System
+            UI Design
           </button>
           <button
             className={`wizard-tab ${activeTab === 'ai' ? 'wizard-tab--active' : ''}`}
