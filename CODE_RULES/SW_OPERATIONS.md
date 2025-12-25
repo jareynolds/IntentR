@@ -1,20 +1,43 @@
-# MAIN SOFTWARE DEVELOPMENT PLAN
-**Version**: 1.0.0
-**Last Updated**: December 2, 2025
-**Framework**: INTENT (Scaled Agile With AI)
+# SOFTWARE DEVELOPMENT OPERATIONS GUIDE
+**Version**: 2.0.0
+**Last Updated**: December 24, 2025
+**Governed By**: INTENT Philosophy (see [INTENT.md](./INTENT.md))
 **Author**: Development Team
 
 ---
 
 ## Overview
 
-This document is the **single source of truth** for all software development activities. It consolidates the INTENT methodology, AI agent development workflows, and implementation best practices into one comprehensive guide.
+This document provides **operational procedures** for AI-assisted software development. It defines processes, workflows, and AI agent instructions that implement the INTENT Framework.
 
-**INTENT (Scaled Agile With AI)** is a streamlined agile methodology optimized for AI-assisted software development. It adapts traditional scaled agile principles to leverage AI tools effectively, emphasizing specification quality over heavy process ceremony.
+### Document Hierarchy
 
-**Key Insight**: AI amplifies delivery speed. When AI can accelerate implementation, the bottleneck shifts to specification quality. INTENT invests effort where it matters most.
+```
+INTENT.md (Philosophy, Principles, Framework, Governance)
+    │
+    └── SW_OPERATIONS.md (This Document)
+            │
+            ├── Processes (Capability/Enabler Development Plans)
+            ├── Workflows (Discovery, Design, Implementation)
+            ├── AI Agent Instructions (Code Editing Standards)
+            └── Policies (AI Principles Presets)
+```
 
-**Core Philosophy**: No Epics. Capabilities and Enablers are sufficient when well-specified. AI can handle the implementation complexity that traditionally required Epic-level grouping.
+### Relationship to INTENT
+
+| Layer | Document | Purpose |
+|-------|----------|---------|
+| **Philosophy** | INTENT.md | What we believe about engineering in the AI age |
+| **Framework** | INTENT.md | The lifecycle: Intent → Specification → System → Control-Loop → Evolution |
+| **Governance** | INTENT.md | How we maintain intent over time (Control Loop, Intent Drift) |
+| **Process** | SW_OPERATIONS.md | How to do the work (this document) |
+| **Policy** | ACTIVE_AI_PRINCIPLES.md | AI enforcement rules |
+
+### Key Principle
+
+> INTENT governs methodology. This document provides processes that operate UNDER INTENT governance, not as a replacement for it.
+
+**Core Insight**: Ambiguity is expensive. These operational procedures ensure that human intent is captured precisely and preserved through AI-assisted derivation.
 
 ---
 
@@ -38,7 +61,7 @@ There are 5 levels of AI governance enforcement, selectable via the AI Principle
 
 1. When a workspace is activated:
    - `CLAUDE.md` is copied from the project root to `{workspace}/CLAUDE.md`
-   - `MAIN_SWDEV_PLAN.md` is copied from `CODE_RULES/` to `{workspace}/CODE_RULES/MAIN_SWDEV_PLAN.md`
+   - `SW_OPERATIONS.md` is copied from `CODE_RULES/` to `{workspace}/CODE_RULES/SW_OPERATIONS.md`
 2. When you select an AI Policy level in the AI Principles page, the corresponding preset is copied to `{workspace}/CODE_RULES/ACTIVE_AI_PRINCIPLES.md`
 3. AI agents reference `CODE_RULES/ACTIVE_AI_PRINCIPLES.md` for governance rules specific to that workspace
 
@@ -99,7 +122,7 @@ After making ANY code edit, AI agents MUST:
 
 0. [AI Code Editing Standards](#ai-code-editing-standards) ← **NEW: Prevents careless AI mistakes**
 1. [Core Principles](#core-principles)
-2. [INTENT Hierarchy](#sawai-hierarchy)
+2. [INTENT Hierarchy](#intent-hierarchy)
 3. [Development Lifecycle](#development-lifecycle)
 4. [Strategic Themes](#strategic-themes)
 5. [Capabilities](#capabilities)
@@ -110,17 +133,17 @@ After making ANY code edit, AI agents MUST:
 10. [Capability Development Plan](#capability-development-plan)
 11. [Enabler Development Plan](#enabler-development-plan)
 12. [Development Phases](#development-phases)
-13. [Testing Framework](#testing-framework)
+13. [Testing Framework](#testing-framework) → See [TESTING.md](./TESTING.md)
 14. [AI-Assisted Development Guidelines](#ai-assisted-development-guidelines)
-15. [Technology Stack](#technology-stack)
+15. [Technology Stack](#technology-stack) → See [TECH_STACK.md](./TECH_STACK.md)
 16. [Standards and Conventions](#standards-and-conventions)
-17. [Document Templates](#document-templates)
+17. [Document Templates](#document-templates) → See [TEMPLATES.md](./TEMPLATES.md)
 18. [Best Practices](#best-practices)
 19. [Quick Reference](#quick-reference)
 
 ---
 
-# PART 1: SAWAI METHODOLOGY
+# PART 1: OPERATIONAL PRINCIPLES
 
 ## Core Principles
 
@@ -510,12 +533,12 @@ Since AI amplifies delivery speed:
 
 **For Discovery (Documentation Only):**
 ```
-Claude, stay strictly within your current working directory and its subdirectories. Read the MAIN_SWDEV_PLAN.md, perform DISCOVERY within this boundary only, and create specifications documentation without IMPLEMENTING anything. No parent directory access allowed. STOP IMMEDIATELY if you attempt to read files outside the current directory tree.
+Claude, stay strictly within your current working directory and its subdirectories. Read the SW_OPERATIONS.md and INTENT.md, perform DISCOVERY within this boundary only, and create specifications documentation without IMPLEMENTING anything. No parent directory access allowed. STOP IMMEDIATELY if you attempt to read files outside the current directory tree.
 ```
 
 **For Implementation (After Discovery Complete):**
 ```
-Claude, please read the MAIN_SWDEV_PLAN.md in the specifications folder (following the development plan exactly) and develop the application which is specified in the specifications folder.
+Claude, please read the SW_OPERATIONS.md and INTENT.md in the CODE_RULES folder (following the development plan exactly) and develop the application which is specified in the specifications folder.
 ```
 
 ### Critical Warning - Discovery Limitations
@@ -581,7 +604,7 @@ Identify capabilities following the Capability Discovery Rules above.
 Identify enablers following the Enabler Discovery Rules above.
 
 #### Phase 4: Document Creation
-1. Create `specifications/` directory relative to MAIN_SWDEV_PLAN.md
+1. Create `specifications/` directory relative to SW_OPERATIONS.md
 2. Create capability files first: `{numeric-id}-capability.md`
 3. Create enabler files in same directory: `{numeric-id}-enabler.md`
 4. Ensure proper metadata relationships between capabilities and enablers
@@ -1235,246 +1258,15 @@ Accepted
 
 # PART 4: TESTING FRAMEWORK
 
-## Gherkin Syntax Overview
+**See**: [TESTING.md](./TESTING.md) for the complete testing framework documentation.
 
-Gherkin is a Business Readable, Domain Specific Language that describes software behavior without detailing implementation. It serves as both documentation and automated test specification.
-
-### Core Keywords
-
-| Keyword | Purpose | Example |
-|---------|---------|---------|
-| `Feature` | High-level description of a software feature | `Feature: User Authentication` |
-| `Scenario` | Concrete example of business rule | `Scenario: Successful login with valid credentials` |
-| `Given` | Precondition/context setup | `Given a registered user exists` |
-| `When` | Action/event that triggers behavior | `When the user enters valid credentials` |
-| `Then` | Expected outcome/assertion | `Then the user should be logged in` |
-| `And` | Additional step (continues previous keyword) | `And a session token should be created` |
-| `But` | Negative additional step | `But no error message should appear` |
-| `Background` | Steps run before each scenario | Common setup steps |
-| `Scenario Outline` | Template with variable examples | Data-driven testing |
-| `Examples` | Data table for Scenario Outline | Test data variations |
-
-### Gherkin Best Practices
-1. **Write scenarios from user perspective** - Focus on business value, not technical implementation
-2. **Keep scenarios independent** - Each scenario should be executable in isolation
-3. **Use declarative style** - Describe WHAT, not HOW
-4. **One behavior per scenario** - Single assertion focus
-5. **Use meaningful data** - Realistic examples over generic placeholders
-
-### Example Gherkin Feature
-
-```gherkin
-@TST-123456
-Feature: User Login
-  As a registered user
-  I want to log into the application
-  So that I can access my personalized dashboard
-
-  Background:
-    Given the application is running
-    And the database is available
-
-  @TS-456789 @critical @smoke
-  Scenario: Successful login with valid credentials
-    Given a registered user with email "user@example.com"
-    And the user has password "SecurePass123"
-    When the user navigates to the login page
-    And the user enters email "user@example.com"
-    And the user enters password "SecurePass123"
-    And the user clicks the login button
-    Then the user should be redirected to the dashboard
-    And a welcome message should display "Welcome back!"
-    And a session token should be created
-
-  @TS-456790 @critical
-  Scenario: Failed login with invalid password
-    Given a registered user with email "user@example.com"
-    When the user attempts to login with password "WrongPassword"
-    Then an error message should display "Invalid credentials"
-    And the user should remain on the login page
-    But no session token should be created
-
-  @TS-456791
-  Scenario Outline: Login validation rules
-    Given a user on the login page
-    When the user enters email "<email>"
-    And the user enters password "<password>"
-    And the user clicks login
-    Then the system should respond with "<result>"
-
-    Examples:
-      | email              | password      | result                    |
-      | invalid-email      | ValidPass123  | Invalid email format      |
-      | user@example.com   | short         | Password too short        |
-      | user@example.com   | ValidPass123  | Login successful          |
-      |                    | ValidPass123  | Email is required         |
-```
-
-## Test Scenario ID Format
-
-### ID Structure
-- **Format**: `TS-XXXXXX` (6-digit unique identifier)
-- **Prefix**: `TS` = Test Scenario
-- **Suite Format**: `TST-XXXXXX` (6-digit unique identifier)
-- **Prefix**: `TST` = Test Suite
-
-### Tagging Convention
-| Tag Type | Format | Example | Purpose |
-|----------|--------|---------|---------|
-| Scenario ID | `@TS-XXXXXX` | `@TS-456789` | Unique scenario identifier |
-| Suite ID | `@TST-XXXXXX` | `@TST-123456` | Test suite grouping |
-| Requirement Link | `@FR-XXXXXX` or `@NFR-XXXXXX` | `@FR-789012` | Traceability to requirements |
-| Priority | `@critical`, `@high`, `@medium`, `@low` | `@critical` | Execution priority |
-| Test Type | `@smoke`, `@regression`, `@integration`, `@e2e` | `@smoke` | Test classification |
-| Automation | `@automated`, `@manual`, `@pending` | `@automated` | Automation status |
-
-## Test Status Values
-
-### Test Scenario Status Flow
-```
-Draft → Ready for Execution → In Execution → Passed/Failed/Blocked → Verified
-```
-
-| Status | Description | Allowed Transitions |
-|--------|-------------|---------------------|
-| `Draft` | Scenario being written | → Ready for Execution |
-| `Ready for Execution` | Scenario approved for testing | → In Execution |
-| `In Execution` | Currently being executed | → Passed, Failed, Blocked |
-| `Passed` | All steps successful | → Verified, Ready for Execution (re-test) |
-| `Failed` | One or more steps failed | → Ready for Execution (after fix) |
-| `Blocked` | Cannot execute due to blocker | → Ready for Execution (after unblock) |
-| `Verified` | Passed and stakeholder verified | Terminal state |
-
-## Test Coverage Requirements
-
-### Coverage Metrics
-| Metric | Definition | Target |
-|--------|------------|--------|
-| Requirement Coverage | % of requirements with at least one test scenario | 100% |
-| Scenario Pass Rate | % of executed scenarios that passed | ≥ 80% |
-| Critical Scenario Pass Rate | % of @critical scenarios that passed | 100% |
-| Automation Rate | % of scenarios that are automated | ≥ 70% |
-
-### Coverage Calculation
-```
-Requirement Coverage = (Requirements with Tests / Total Requirements) × 100
-Scenario Pass Rate = (Passed Scenarios / Executed Scenarios) × 100
-```
-
-## Framework Integration
-
-### Supported Test Frameworks
-
-| Language | Framework | Gherkin Support |
-|----------|-----------|-----------------|
-| Go | godog | Native Gherkin |
-| JavaScript/TypeScript | Cucumber.js | Native Gherkin |
-| React | Jest + Cucumber | Via jest-cucumber |
-| Python | Behave | Native Gherkin |
-| Java | Cucumber-JVM | Native Gherkin |
-
-### Go Integration Example (godog)
-
-```go
-package testing
-
-import (
-    "github.com/cucumber/godog"
-)
-
-type loginContext struct {
-    user     *User
-    response *Response
-    err      error
-}
-
-func (ctx *loginContext) aRegisteredUserWithEmail(email string) error {
-    ctx.user = &User{Email: email}
-    return nil
-}
-
-func (ctx *loginContext) theUserAttemptsToLoginWithPassword(password string) error {
-    ctx.response, ctx.err = authService.Login(ctx.user.Email, password)
-    return nil
-}
-
-func (ctx *loginContext) theUserShouldBeLoggedIn() error {
-    if ctx.response == nil || !ctx.response.Success {
-        return fmt.Errorf("expected successful login")
-    }
-    return nil
-}
-
-func InitializeScenario(ctx *godog.ScenarioContext) {
-    lc := &loginContext{}
-
-    ctx.Step(`^a registered user with email "([^"]*)"$`, lc.aRegisteredUserWithEmail)
-    ctx.Step(`^the user attempts to login with password "([^"]*)"$`, lc.theUserAttemptsToLoginWithPassword)
-    ctx.Step(`^the user should be logged in$`, lc.theUserShouldBeLoggedIn)
-}
-```
-
-### React/TypeScript Integration Example (jest-cucumber)
-
-```typescript
-import { defineFeature, loadFeature } from 'jest-cucumber';
-import { render, screen, fireEvent } from '@testing-library/react';
-import LoginPage from '../pages/LoginPage';
-
-const feature = loadFeature('./features/login.feature');
-
-defineFeature(feature, (test) => {
-  test('Successful login with valid credentials', ({ given, when, then, and }) => {
-    given('a registered user with email "user@example.com"', () => {
-      // Setup mock user in test database
-    });
-
-    when('the user navigates to the login page', () => {
-      render(<LoginPage />);
-    });
-
-    and(/^the user enters email "(.*)"$/, (email: string) => {
-      fireEvent.change(screen.getByLabelText('Email'), { target: { value: email } });
-    });
-
-    and(/^the user enters password "(.*)"$/, (password: string) => {
-      fireEvent.change(screen.getByLabelText('Password'), { target: { value: password } });
-    });
-
-    and('the user clicks the login button', () => {
-      fireEvent.click(screen.getByRole('button', { name: /login/i }));
-    });
-
-    then('the user should be redirected to the dashboard', async () => {
-      expect(await screen.findByText('Dashboard')).toBeInTheDocument();
-    });
-  });
-});
-```
-
-### Running Tests
-
-```bash
-# Run all Go tests
-go test ./...
-
-# Run Gherkin/BDD tests with godog
-go test -v ./internal/testing/... -godog.format=pretty
-
-# Run with coverage
-go test -cover ./...
-
-# Run specific tags
-go test ./... -godog.tags=@smoke
-go test ./... -godog.tags=@critical
-
-# Run React/TypeScript tests with jest-cucumber
-npm test -- --testPathPattern=steps
-
-# Generate coverage report
-go test -coverprofile=coverage.out ./...
-go tool cover -html=coverage.out
-```
+This section covers:
+- Gherkin syntax and best practices
+- Test Scenario ID formats (TS-XXXXXX, TST-XXXXXX)
+- Test status values and workflow
+- Coverage requirements and metrics
+- Framework integration (godog, jest-cucumber, Cucumber.js)
+- Running tests
 
 ---
 
@@ -1548,57 +1340,14 @@ AI-generated code should pass through:
 
 # PART 6: TECHNOLOGY STACK
 
-## Core Technologies
+**See**: [TECH_STACK.md](./TECH_STACK.md) for the complete technology stack documentation.
 
-### Backend
-- **Language**: Go 1.21+
-- **Web Framework**: net/http (standard library) or gin-gonic/gin
-- **Database**: PostgreSQL, MongoDB (depending on service needs)
-- **ORM**: GORM or sqlx
-- **Migration**: golang-migrate
-
-### Frontend
-- **Framework**: React 18+
-- **Language**: TypeScript
-- **Build Tool**: Vite
-- **Styling**: CSS with CSS Variables, Tailwind CSS
-- **State Management**: React Context
-
-### Containerization
-- **Container Runtime**: Docker
-- **Image Base**: golang:1.21-alpine
-- **Orchestration**: Docker Compose (dev), Kubernetes (prod)
-
-### External Integrations
-- **Figma API**: REST API integration for design assets
-- **Client Library**: Custom Go client
-
-### Development Tools
-- **Version Control**: Git
-- **CI/CD**: GitHub Actions
-- **Code Quality**: golangci-lint
-- **Testing**: Go testing package, testify
-- **Documentation**: godoc, Swagger/OpenAPI
-
-### Recommended Libraries
-
-```go
-// HTTP routing
-"github.com/gorilla/mux"
-
-// Configuration
-"github.com/kelseyhightower/envconfig"
-
-// Logging
-"go.uber.org/zap"
-
-// Testing
-"github.com/stretchr/testify"
-
-// Database
-"github.com/jmoiron/sqlx"
-"gorm.io/gorm"
-```
+This section covers:
+- Backend technologies (Go, PostgreSQL)
+- Frontend technologies (React, TypeScript, Vite)
+- Containerization (Docker, Kubernetes)
+- External integrations (Figma API)
+- Development tools and recommended libraries
 
 ---
 
@@ -1616,7 +1365,7 @@ AI-generated code should pass through:
 
 ### ID Generation Algorithm (Standalone)
 
-For projects without running Anvil server, use this algorithm:
+For projects without a running INTENT server, use this algorithm:
 
 ```javascript
 function generateSemiUniqueNumber() {
@@ -1665,7 +1414,7 @@ function generateUniqueId(prefix) {
 
 ```
 project-root/
-├── MAIN_SWDEV_PLAN.md (this file)
+├── SW_OPERATIONS.md (this file)
 ├── specifications/
 │   ├── 123456-capability.md        # User Management Capability
 │   ├── 654321-enabler.md          # Login System Enabler (child of 123456)
@@ -1735,318 +1484,11 @@ Elements that are **driving** should be named as **verbs** or **action phrases**
 
 # PART 8: DOCUMENT TEMPLATES
 
-## Capability Template
-
-```markdown
-# [Capability Name]
-
-## Metadata
-- **Name**: [Business Function Name]
-- **Type**: Capability
-- **System**: [System Name]
-- **Component**: [Component Name]
-- **ID**: CAP-XXXXXX
-- **Owner**: [Team/Person]
-- **Status**: [Current State]
-- **Approval**: Not Approved
-- **Priority**: [High/Medium/Low]
-- **Analysis Review**: [Required/Not Required]
-
-## Business Context
-
-### Problem Statement
-[What specific problem does this capability solve? Be concrete.]
-
-### Value Proposition
-[Why does this matter to users/business? Quantify if possible.]
-
-### Success Metrics
-- [Metric 1: e.g., "Reduce login time by 50%"]
-- [Metric 2: e.g., "Support 10,000 concurrent users"]
-
-## User Perspective
-
-### Primary Persona
-[Who benefits most from this capability?]
-
-### User Journey (Before/After)
-**Before**: [Current painful experience]
-**After**: [Improved experience with this capability]
-
-### User Scenarios
-1. **Scenario 1**: [Concrete example with specific inputs/outputs]
-2. **Scenario 2**: [Another concrete example]
-3. **Scenario 3**: [Edge case scenario]
-
-## Boundaries
-
-### In Scope
-- [Explicitly what IS included]
-
-### Out of Scope
-- [Explicitly what is NOT included]
-
-### Assumptions
-- [What we're assuming to be true]
-
-### Constraints
-- [Technical, business, or regulatory limits]
-
-## Enablers
-| ID | Name | Purpose | State |
-|----|------|---------|-------|
-| ENB-XXXXXX | [Name] | [One-line purpose] | [state] |
-
-## Dependencies
-
-### Internal Upstream Dependency
-| Capability ID | Description |
-|---------------|-------------|
-| | |
-
-### Internal Downstream Impact
-| Capability ID | Description |
-|---------------|-------------|
-| | |
-
-## Acceptance Criteria
-- [ ] [Specific, testable criterion with verification method]
-- [ ] [Another criterion]
-
-## Technical Specifications (Template)
-
-### Capability Dependency Flow Diagram
-```mermaid
-flowchart TD
-    %% Current Capability
-    CURRENT["Current Capability<br/>Primary Business Function<br/>🎯"]
-
-    %% Internal Capabilities (Same Organization)
-    INT1["Supporting Capability A<br/>Core Service<br/>⚙️"]
-    INT2["Supporting Capability B<br/>Data Management<br/>📊"]
-
-    %% External Capabilities (Different Organization)
-    EXT1["External Capability A<br/>Third-party Service<br/>🌐"]
-
-    %% Dependencies Flow
-    INT1 --> CURRENT
-    CURRENT --> INT2
-    EXT1 --> CURRENT
-
-    %% Styling
-    classDef current fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
-    classDef internal fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
-    classDef external fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-
-    class CURRENT current
-    class INT1,INT2 internal
-    class EXT1 external
-```
-
-## Design Artifacts
-- [Link to Figma/design files]
-- [Link to wireframes]
-
-## Approval History
-| Date | Stage | Decision | By | Feedback |
-|------|-------|----------|-----|----------|
-```
-
----
-
-## Enabler Template
-
-```markdown
-# [Enabler Name]
-
-## Metadata
-- **Name**: [Enabler Name]
-- **Type**: Enabler
-- **ID**: ENB-XXXXXX
-- **Capability ID**: CAP-XXXXXX
-- **Owner**: Product Team
-- **Status**: In Draft
-- **Approval**: Not Approved
-- **Priority**: High
-- **Analysis Review**: Required
-- **Code Review**: Not Required
-
-## Technical Context
-
-### Purpose
-[One paragraph: what this enabler does technically]
-
-### Architecture Fit
-[How does this fit into the existing system architecture?]
-
-### Existing Patterns to Follow
-- [Pattern 1: e.g., "Use repository pattern from /internal/auth/repository.go"]
-- [Pattern 2: e.g., "Follow error handling style in /pkg/errors"]
-
-## Functional Requirements
-| ID | Name | Requirement | Status | Priority | Approval |
-|----|------|-------------|--------|----------|----------|
-| FR-XXXXXX | [Name] | [Requirement Description] | [Status] | [Priority] | [Approval] |
-
-## Non-Functional Requirements
-| ID | Name | Requirement | Type | Status | Priority | Approval |
-|----|------|-------------|------|--------|----------|----------|
-| NFR-XXXXXX | [Name] | [Requirement Description] | [Type] | [Status] | [Priority] | [Approval] |
-
-## Technical Specifications (Template)
-
-### Enabler Dependency Flow Diagram
-```mermaid
-flowchart TD
-    ENB_XXXXXX["ENB-XXXXXX<br/>[Enabler Name]<br/>📡"]
-
-    %% Add your dependency flows here
-
-    classDef enabler fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    class ENB_XXXXXX enabler
-```
-
-### API Technical Specifications (if applicable)
-| API Type | Operation | Channel / Endpoint | Description | Request Payload | Response Data |
-|----------|-----------|-------------------|-------------|-----------------|---------------|
-| | | | | | |
-
-### Data Models
-```mermaid
-erDiagram
-    Entity {
-        string id PK
-        string name
-        string description
-    }
-
-    %% Add relationships and more entities here
-```
-
-### Class Diagrams
-```mermaid
-classDiagram
-    class ENB_XXXXXX_Class {
-        +String property
-        +method() void
-    }
-
-    %% Add more classes and relationships here
-```
-
-### Sequence Diagrams
-```mermaid
-sequenceDiagram
-    participant A as Actor
-    participant S as System
-
-    A->>S: Request
-    S-->>A: Response
-
-    %% Add more interactions here
-```
-
-### Dataflow Diagrams
-```mermaid
-flowchart TD
-    Input[Input Data] --> Process[Process]
-    Process --> Output[Output Data]
-
-    %% Add your dataflow diagrams here
-```
-
-### State Diagrams
-```mermaid
-stateDiagram-v2
-    [*] --> Initial
-    Initial --> Processing
-    Processing --> Complete
-    Complete --> [*]
-
-    %% Add more states and transitions here
-```
-
-## Edge Cases and Error Handling
-| Scenario | Expected Behavior | Test Case |
-|----------|-------------------|-----------|
-| Null input | Return 400 error | `test_null_input()` |
-| Duplicate entry | Return 409 conflict | `test_duplicate()` |
-
-## External Dependencies
-[External dependencies, APIs, services]
-
-## Acceptance Scenarios (Gherkin)
-
-### Test Suite: TST-XXXXXX - [Enabler Name] Tests
-
-```gherkin
-@TST-XXXXXX
-Feature: [Enabler Name]
-  As a [user role]
-  I want to [action/goal]
-  So that [business value/outcome]
-
-  Background:
-    Given [common preconditions]
-
-  @TS-XXXXXX @FR-XXXXXX @critical
-  Scenario: [Scenario Name]
-    Given [precondition]
-    When [action]
-    Then [expected outcome]
-    And [additional assertion]
-
-  @TS-XXXXXX @FR-XXXXXX
-  Scenario Outline: [Parameterized Scenario Name]
-    Given [precondition with "<variable>"]
-    When [action with "<variable>"]
-    Then [expected "<result>"]
-
-    Examples:
-      | variable | result |
-      | value1   | outcome1 |
-      | value2   | outcome2 |
-```
-
-### Test Scenario Summary
-| Scenario ID | Name | Requirement | Priority | Status | Automation |
-|-------------|------|-------------|----------|--------|------------|
-| TS-XXXXXX | [Scenario Name] | FR-XXXXXX | Critical | Draft | Pending |
-
-## Test Architecture
-- **Framework**: [Jest/Vitest/godog/Cucumber.js]
-- **Coverage Target**: [80%+]
-- **Test Types**: [Unit, Integration, E2E]
-- **Step Definition Location**: [path/to/steps]
-- **Feature File Location**: [path/to/features]
-
-## Testing Strategy
-
-### Unit Testing
-- [Component/function level tests]
-
-### Integration Testing
-- [Service integration tests]
-
-### End-to-End Testing
-- [User journey tests]
-
-## Implementation Hints
-
-### Suggested Approach
-[High-level approach recommendation]
-
-### Known Gotchas
-- [Gotcha 1]
-- [Gotcha 2]
-
-### Reference Implementations
-- [Link to similar code in codebase]
-
-## Approval History
-| Date | Stage | Decision | By | Feedback |
-|------|-------|----------|-----|----------|
-```
+**See**: [TEMPLATES.md](./TEMPLATES.md) for the complete document templates.
+
+This section contains templates for:
+- **Capability Template**: Business context, user perspective, boundaries, enablers, dependencies, acceptance criteria
+- **Enabler Template**: Technical context, requirements (FR/NFR), technical specifications, diagrams, testing strategy
 
 ---
 

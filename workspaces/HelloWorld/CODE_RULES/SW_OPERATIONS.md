@@ -1568,7 +1568,7 @@ AI-generated code should pass through:
 
 ### ID Generation Algorithm (Standalone)
 
-For projects without running Anvil server, use this algorithm:
+For projects without a running INTENT server, use this algorithm:
 
 ```javascript
 function generateSemiUniqueNumber() {

@@ -2,11 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## MANDATORY: Development Plan Compliance
+## MANDATORY: INTENT Compliance
 
-**You MUST follow the MAIN_SWDEV_PLAN.md for ALL development activities in this project.**
+**You MUST follow the INTENT philosophy and SW_OPERATIONS.md for ALL development activities.**
 
-@./CODE_RULES/MAIN_SWDEV_PLAN.md
+### Reference Documents
+@./CODE_RULES/INTENT.md (Philosophy, Principles, Framework, Governance)
+@./CODE_RULES/SW_OPERATIONS.md (Operational Procedures)
 
 **Automatic Behaviors:**
 1. **For any new feature/capability work**: Follow the Capability Development Plan (Tasks 1-4)
@@ -19,12 +21,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **If the user asks you to build, implement, or develop something, you MUST:**
 1. Check if specifications exist in the `specifications/` folder
 2. If not, ask if they want Discovery mode first
-3. Follow the appropriate workflow from MAIN_SWDEV_PLAN.md
+3. Follow the appropriate workflow from SW_OPERATIONS.md
 4. Create/update capability and enabler documents as required
 
 ## Project Overview
 
-IntentR is a GoLang microservices application for design-driven development using the INTENT (Scaled Agile With AI) methodology. It integrates with Figma and provides capability-driven software development workflows.
+IntentR is a GoLang microservices application for design-driven development. It is the reference platform for the **INTENT** (Intent-Centered, Engineering-Driven Notation for Transformation) philosophy. IntentR captures intent, enforces specifications, orchestrates AI-driven derivation, and preserves intent across change.
 
 ## Quick Start Commands
 
@@ -224,19 +226,23 @@ tail -f logs/*.log
 
 ## Development Methodology
 
-This project uses the **INTENT (Scaled Agile With AI)** methodology. See the MANDATORY section at the top of this file for the primary reference (MAIN_SWDEV_PLAN.md).
+This project is governed by **INTENT** (Intent-Centered, Engineering-Driven Notation for Transformation). See the MANDATORY section at the top of this file for primary references.
+
+**INTENT Lifecycle:**
+Intent → Specification → UI-Design → Implementation → Control-Loop → Evolution
 
 **Key Concepts:**
+- **Philosophy:** Human intent is the highest-value input; AI is a derivation engine, not trusted blindly
 - **Hierarchy:** Component → Capability → Enabler → Requirement (no Epics)
-- **5-Stage Enabler Workflow:** Analysis → Design → Implementation → Testing → Done
-- **4-Stage Capability Workflow:** Specification → Definition → Design → Execution
-- **Human-in-the-Loop:** Manual approval required at each stage gate
+- **Control-Loop:** Continuous validation of derived systems against declared intent
+- **Intent Drift:** The failure mode where systems evolve away from their original meaning
+- **Human-in-the-Loop:** Humans approve derivations at each stage gate
 - **Discovery Mode:** For documenting existing code without modification
 - **BDD/Gherkin Testing:** Test scenarios linked to requirements
 
 **Supporting References:**
-- `CODE_RULES/INTENT.md` - INTENT methodology overview
-- `CODE_RULES/CODE_COMPLETE.md` - Implementation best practices
+- `CODE_RULES/INTENT.md` - INTENT Philosophy, Principles, Framework, Governance
+- `CODE_RULES/SW_OPERATIONS.md` - Operational procedures and workflows
 
 ## Approval Workflow
 
