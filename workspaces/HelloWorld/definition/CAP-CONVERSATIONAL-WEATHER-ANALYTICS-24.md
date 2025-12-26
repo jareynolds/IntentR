@@ -2,6 +2,10 @@
 
 **Status:** Implemented
 
+## Metadata
+- **ID**: CAP-024
+- **Type**: Capability
+
 **Description:** Processes and interprets user weather queries to provide meaningful insights and responses, bridging natural language questions with weather data analysis and AI-generated answers
 
 **Storyboard Reference:** display prompt results

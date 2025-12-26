@@ -77,23 +77,16 @@ export const SpecificationApproval: React.FC = () => {
   const [rejectionComment, setRejectionComment] = useState('');
 
   // Load specification phase items
+  // Re-run when dbCapabilities or dbEnablers change (e.g., after editing on Capabilities/Enablers pages)
   useEffect(() => {
     if (currentWorkspace?.projectFolder) {
       loadSpecificationItems();
-      loadItemApprovals();
     }
-  }, [currentWorkspace?.projectFolder]);
+  }, [currentWorkspace?.projectFolder, dbCapabilities, dbEnablers]);
 
-  const loadItemApprovals = async () => {
-    if (!currentWorkspace?.id) return;
-
-    // Load item approvals from localStorage only
-    // Phase approval now comes from database via usePhaseApprovals hook
-    const stored = localStorage.getItem(`specification-item-approvals-${currentWorkspace.id}`);
-    if (stored) {
-      setItemApprovals(JSON.parse(stored));
-    }
-  };
+  // NOTE: localStorage for item approvals is no longer used - database is single source of truth
+  // The loadItemApprovals function has been removed. Approval status now comes from
+  // dbCapabilities and dbEnablers via EntityStateContext.
 
   const saveItemApprovals = (approvals: ItemApprovalStatus) => {
     if (!currentWorkspace?.id) return;
@@ -148,27 +141,56 @@ export const SpecificationApproval: React.FC = () => {
         parentCapabilityId: e.capabilityId || e.fields?.['Parent Capability'] || e.fields?.['Capability'], // CAP-XXXXXX
       }));
 
-      // Apply saved approval statuses
-      const storedApprovals = localStorage.getItem(`specification-item-approvals-${currentWorkspace.id}`);
-      const approvals: ItemApprovalStatus = storedApprovals ? JSON.parse(storedApprovals) : {};
-
-      const applyApprovalStatus = (items: SpecificationItem[]) => {
+      // Apply approval statuses from DATABASE (single source of truth)
+      // No longer using localStorage - database is the only source of truth
+      const applyCapabilityApprovalStatus = (items: SpecificationItem[]) => {
         return items.map(item => {
-          const approval = approvals[item.id];
-          if (approval) {
+          // Get state from database via dbCapabilities cache
+          const dbState = item.entityId ? dbCapabilities.get(item.entityId) : null;
+          if (dbState) {
+            // Map database approval_status to SpecificationItem status
+            let status: 'approved' | 'rejected' | 'draft' = 'draft';
+            if (dbState.approval_status === 'approved') {
+              status = 'approved';
+            } else if (dbState.approval_status === 'rejected') {
+              status = 'rejected';
+            }
             return {
               ...item,
-              status: approval.status,
-              rejectionComment: approval.comment,
-              reviewedAt: approval.reviewedAt,
+              status,
+              rejectionComment: dbState.rejection_comment,
+              reviewedAt: dbState.updated_at,
             };
           }
           return item;
         });
       };
 
-      const updatedCapabilityItems = applyApprovalStatus(capabilityItems);
-      const updatedEnablerItems = applyApprovalStatus(enablerItems);
+      const applyEnablerApprovalStatus = (items: SpecificationItem[]) => {
+        return items.map(item => {
+          // Get state from database via dbEnablers cache
+          const dbState = item.entityId ? dbEnablers.get(item.entityId) : null;
+          if (dbState) {
+            // Map database approval_status to SpecificationItem status
+            let status: 'approved' | 'rejected' | 'draft' = 'draft';
+            if (dbState.approval_status === 'approved') {
+              status = 'approved';
+            } else if (dbState.approval_status === 'rejected') {
+              status = 'rejected';
+            }
+            return {
+              ...item,
+              status,
+              rejectionComment: dbState.rejection_comment,
+              reviewedAt: dbState.updated_at,
+            };
+          }
+          return item;
+        });
+      };
+
+      const updatedCapabilityItems = applyCapabilityApprovalStatus(capabilityItems);
+      const updatedEnablerItems = applyEnablerApprovalStatus(enablerItems);
 
       setPhaseStatus({
         capabilities: {

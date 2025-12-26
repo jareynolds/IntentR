@@ -7,6 +7,7 @@ import { useWorkspace } from '../context/WorkspaceContext';
 import { useApproval } from '../context/ApprovalContext';
 import { useEntityState } from '../context/EntityStateContext';
 import { INTEGRATION_URL } from '../api/client';
+import { ReadOnlyStateFields } from '../components/ReadOnlyStateFields';
 import type {
   Capability,
   CapabilityWithDetails,
@@ -69,8 +70,19 @@ export const Capabilities: React.FC = () => {
   const [editFormData, setEditFormData] = useState({
     name: '',
     description: '',
-    content: '',
     storyboardReference: '',
+    // New structured fields
+    valueProposition: '',
+    primaryPersona: '',
+    successMetrics: '',
+    acceptanceCriteria: '',
+    userScenarios: '',
+    inScope: '',
+    outOfScope: '',
+    upstreamDependencies: '',
+    downstreamDependencies: '',
+    // Legacy content field (for backwards compatibility)
+    content: '',
     // INTENT State Model - 4 dimensions
     // New capabilities: active lifecycle, specification stage, in_progress status
     lifecycle_state: 'active',
@@ -465,9 +477,21 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
 
     setEditFormData({
       name: cap.name,
-      description: cap.description,
-      content: cap.content,
+      // Description can come from cap.description (inline format) or cap.fields['Description'] (section format)
+      description: cap.description || cap.fields?.['Description'] || '',
       storyboardReference: storyboardRef,
+      // Structured fields from markdown
+      valueProposition: cap.fields?.['Value Proposition'] || '',
+      primaryPersona: cap.fields?.['Primary Persona'] || '',
+      successMetrics: cap.fields?.['Success Metrics'] || '',
+      acceptanceCriteria: cap.fields?.['Acceptance Criteria'] || '',
+      userScenarios: cap.fields?.['User Scenarios'] || '',
+      inScope: cap.fields?.['In Scope'] || '',
+      outOfScope: cap.fields?.['Out of Scope'] || '',
+      upstreamDependencies: cap.fields?.['Upstream Dependencies'] || '',
+      downstreamDependencies: cap.fields?.['Downstream Dependencies'] || '',
+      // Legacy content (for any unstructured content)
+      content: cap.content,
       // INTENT State Model - 4 dimensions from DATABASE
       lifecycle_state: lifecycleState,
       workflow_stage: workflowStage,
@@ -494,6 +518,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
     setSavingCapability(true);
     try {
       // Save content to markdown file (NO state fields - state is stored in database only)
+      const capabilityId = selectedFileCapability.capabilityId || selectedFileCapability.fields?.['ID'] || '';
       const response = await fetch(`${INTEGRATION_URL}/save-capability`, {
         method: 'POST',
         headers: {
@@ -501,18 +526,38 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
         },
         body: JSON.stringify({
           path: selectedFileCapability.path,
+          capabilityId: capabilityId, // Include ID to preserve in metadata
           name: editFormData.name,
           description: editFormData.description,
-          content: editFormData.content,
           storyboardReference: editFormData.storyboardReference,
+          // Structured fields
+          valueProposition: editFormData.valueProposition,
+          primaryPersona: editFormData.primaryPersona,
+          successMetrics: editFormData.successMetrics,
+          acceptanceCriteria: editFormData.acceptanceCriteria,
+          userScenarios: editFormData.userScenarios,
+          inScope: editFormData.inScope,
+          outOfScope: editFormData.outOfScope,
+          upstreamDependencies: editFormData.upstreamDependencies,
+          downstreamDependencies: editFormData.downstreamDependencies,
+          // Legacy content field
+          content: editFormData.content,
           // NOTE: State fields are NOT sent to markdown - database is single source of truth
         }),
       });
 
       if (response.ok) {
         // Save state to DATABASE via EntityStateContext (single source of truth for state)
-        const capabilityId = selectedFileCapability.capabilityId || selectedFileCapability.fields?.['ID'] || '';
+        // Note: capabilityId is already defined above for the markdown save
         if (capabilityId && currentWorkspace?.name) {
+          // AUTO-RESET: If item was blocked or rejected and user edited it, reset to in_progress/pending
+          let stageStatusToSave = editFormData.stage_status;
+          let approvalStatusToSave = editFormData.approval_status;
+          if (editFormData.stage_status === 'blocked' || editFormData.approval_status === 'rejected') {
+            stageStatusToSave = 'in_progress';
+            approvalStatusToSave = 'pending';
+          }
+
           try {
             await syncCapability({
               capability_id: capabilityId,
@@ -522,11 +567,11 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
               storyboard_reference: editFormData.storyboardReference,
               workspace_id: currentWorkspace.name, // Must use .name to match EntityStateContext queries
               file_path: selectedFileCapability.path,
-              // INTENT State Model - saved to DATABASE only
+              // INTENT State Model - saved to DATABASE only (with auto-reset if blocked)
               lifecycle_state: editFormData.lifecycle_state as 'draft' | 'active' | 'implemented' | 'maintained' | 'retired',
               workflow_stage: editFormData.workflow_stage as 'intent' | 'specification' | 'ui_design' | 'implementation' | 'control_loop',
-              stage_status: editFormData.stage_status as 'in_progress' | 'ready_for_approval' | 'approved' | 'blocked',
-              approval_status: editFormData.approval_status as 'pending' | 'approved' | 'rejected',
+              stage_status: stageStatusToSave as 'in_progress' | 'ready_for_approval' | 'approved' | 'blocked',
+              approval_status: approvalStatusToSave as 'pending' | 'approved' | 'rejected',
             });
           } catch (syncErr) {
             console.warn('Failed to sync capability state to database:', syncErr);
@@ -571,9 +616,21 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
 
       setEditFormData({
         name: selectedFileCapability.name,
-        description: selectedFileCapability.description,
-        content: selectedFileCapability.content,
+        // Description can come from cap.description (inline format) or cap.fields['Description'] (section format)
+        description: selectedFileCapability.description || selectedFileCapability.fields?.['Description'] || '',
         storyboardReference: storyboardRef,
+        // Structured fields from markdown
+        valueProposition: selectedFileCapability.fields?.['Value Proposition'] || '',
+        primaryPersona: selectedFileCapability.fields?.['Primary Persona'] || '',
+        successMetrics: selectedFileCapability.fields?.['Success Metrics'] || '',
+        acceptanceCriteria: selectedFileCapability.fields?.['Acceptance Criteria'] || '',
+        userScenarios: selectedFileCapability.fields?.['User Scenarios'] || '',
+        inScope: selectedFileCapability.fields?.['In Scope'] || '',
+        outOfScope: selectedFileCapability.fields?.['Out of Scope'] || '',
+        upstreamDependencies: selectedFileCapability.fields?.['Upstream Dependencies'] || '',
+        downstreamDependencies: selectedFileCapability.fields?.['Downstream Dependencies'] || '',
+        // Legacy content
+        content: selectedFileCapability.content,
         // INTENT State Model - 4 dimensions from DATABASE
         lifecycle_state: lifecycleState,
         workflow_stage: workflowStage,
@@ -892,6 +949,20 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
     }
   };
 
+  // Get color based on approval_status
+  const getApprovalStatusColor = (approvalStatus: string) => {
+    switch (approvalStatus.toLowerCase()) {
+      case 'pending':
+        return { bg: 'rgba(255, 149, 0, 0.1)', color: 'var(--color-systemOrange)', icon: '⏳' };
+      case 'approved':
+        return { bg: 'rgba(76, 217, 100, 0.1)', color: 'var(--color-systemGreen)', icon: '✅' };
+      case 'rejected':
+        return { bg: 'rgba(255, 59, 48, 0.1)', color: 'var(--color-systemRed)', icon: '❌' };
+      default:
+        return { bg: 'rgba(255, 149, 0, 0.1)', color: 'var(--color-systemOrange)', icon: '⏳' };
+    }
+  };
+
   // Legacy function for backward compatibility - maps old status to new stage_status colors
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -919,11 +990,11 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
   };
 
   // Filter and search logic
-  // Helper to get stage_status for a capability from the database
-  const getCapabilityStageStatusForFilter = (cap: FileCapability): string => {
+  // Helper to get approval_status for a capability from the database
+  const getCapabilityApprovalStatusForFilter = (cap: FileCapability): string => {
     const capId = cap.fields?.['ID'] || cap.filename?.replace(/\.md$/, '') || '';
     const dbCap = dbCapabilities.get(capId);
-    return dbCap?.stage_status || 'in_progress'; // Default to in_progress if not in DB
+    return dbCap?.approval_status || 'pending'; // Default to pending if not in DB
   };
 
   const filterCapabilities = (caps: FileCapability[]) => {
@@ -934,9 +1005,9 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
         cap.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         cap.filename?.toLowerCase().includes(searchQuery.toLowerCase());
 
-      // Stage status filter (from database - single source of truth)
-      const capStageStatus = getCapabilityStageStatusForFilter(cap);
-      const matchesStatus = statusFilter === 'all' || capStageStatus === statusFilter;
+      // Approval status filter (from database - single source of truth)
+      const capApprovalStatus = getCapabilityApprovalStatusForFilter(cap);
+      const matchesStatus = statusFilter === 'all' || capApprovalStatus === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
@@ -966,27 +1037,24 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
     });
   };
 
-  // Group capabilities by status, sorted by storyboard flow order within each group
-  // Group capabilities by INTENT State Model stage_status (from database)
-  const groupByStageStatus = (caps: FileCapability[]) => {
+  // Group capabilities by approval_status, sorted by storyboard flow order within each group
+  const groupByApprovalStatus = (caps: FileCapability[]) => {
     const groups: Record<string, FileCapability[]> = {
-      'In Progress': [],
-      'Ready for Approval': [],
+      'Pending': [],
       'Approved': [],
-      'Blocked': [],
+      'Rejected': [],
     };
 
-    // Map stage_status values to display names
-    const stageStatusToDisplay: Record<string, string> = {
-      'in_progress': 'In Progress',
-      'ready_for_approval': 'Ready for Approval',
+    // Map approval_status values to display names
+    const approvalStatusToDisplay: Record<string, string> = {
+      'pending': 'Pending',
       'approved': 'Approved',
-      'blocked': 'Blocked',
+      'rejected': 'Rejected',
     };
 
     caps.forEach(cap => {
-      const stageStatus = getCapabilityStageStatusForFilter(cap);
-      const displayStatus = stageStatusToDisplay[stageStatus] || 'In Progress';
+      const approvalStatus = getCapabilityApprovalStatusForFilter(cap);
+      const displayStatus = approvalStatusToDisplay[approvalStatus] || 'Pending';
       groups[displayStatus].push(cap);
     });
 
@@ -1000,21 +1068,13 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
 
   // Get filtered capabilities
   const filteredCapabilities = filterCapabilities(fileCapabilities);
-  const groupedCapabilities = groupByStageStatus(filteredCapabilities);
+  const groupedCapabilities = groupByApprovalStatus(filteredCapabilities);
 
-  // Calculate summary counts based on INTENT State Model stage_status from database
-  // Helper to get stage_status for a capability from the database
-  const getCapabilityStageStatus = (cap: FileCapability): string => {
-    const capId = cap.fields?.['ID'] || cap.filename?.replace(/\.md$/, '') || '';
-    const dbCap = dbCapabilities.get(capId);
-    return dbCap?.stage_status || 'in_progress'; // Default to in_progress if not in DB
-  };
-
+  // Calculate summary counts based on approval_status from database
   const summaryCounts = {
-    inProgress: fileCapabilities.filter(c => getCapabilityStageStatus(c) === 'in_progress').length,
-    readyForApproval: fileCapabilities.filter(c => getCapabilityStageStatus(c) === 'ready_for_approval').length,
-    approved: fileCapabilities.filter(c => getCapabilityStageStatus(c) === 'approved').length,
-    blocked: fileCapabilities.filter(c => getCapabilityStageStatus(c) === 'blocked').length,
+    pending: fileCapabilities.filter(c => getCapabilityApprovalStatusForFilter(c) === 'pending').length,
+    approved: fileCapabilities.filter(c => getCapabilityApprovalStatusForFilter(c) === 'approved').length,
+    rejected: fileCapabilities.filter(c => getCapabilityApprovalStatusForFilter(c) === 'rejected').length,
     total: fileCapabilities.length,
   };
 
@@ -1323,10 +1383,10 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
               </Card>
             ) : (
               <>
-                {/* Summary Dashboard - INTENT State Model: Stage Status */}
+                {/* Summary Dashboard - Approval Status */}
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
                   gap: '12px',
                   marginBottom: '24px'
                 }}>
@@ -1338,20 +1398,12 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                       📊 Total
                     </div>
                   </Card>
-                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('in_progress')}>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemBlue)' }}>
-                      {summaryCounts.inProgress}
-                    </div>
-                    <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
-                      ✏️ In Progress
-                    </div>
-                  </Card>
-                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('ready_for_approval')}>
+                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('pending')}>
                     <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemOrange)' }}>
-                      {summaryCounts.readyForApproval}
+                      {summaryCounts.pending}
                     </div>
                     <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
-                      👀 Ready for Approval
+                      ⏳ Pending
                     </div>
                   </Card>
                   <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('approved')}>
@@ -1362,12 +1414,12 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                       ✅ Approved
                     </div>
                   </Card>
-                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('blocked')}>
+                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('rejected')}>
                     <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemRed)' }}>
-                      {summaryCounts.blocked}
+                      {summaryCounts.rejected}
                     </div>
                     <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
-                      🚫 Blocked
+                      ❌ Rejected
                     </div>
                   </Card>
                 </div>
@@ -1400,11 +1452,10 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                       minWidth: '180px',
                     }}
                   >
-                    <option value="all">All Stage Statuses</option>
-                    <option value="in_progress">✏️ In Progress</option>
-                    <option value="ready_for_approval">👀 Ready for Approval</option>
+                    <option value="all">All Approval Statuses</option>
+                    <option value="pending">⏳ Pending</option>
                     <option value="approved">✅ Approved</option>
-                    <option value="blocked">🚫 Blocked</option>
+                    <option value="rejected">❌ Rejected</option>
                   </select>
                   {(searchQuery || statusFilter !== 'all') && (
                     <Button
@@ -1433,20 +1484,19 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                     {Object.entries(groupedCapabilities).map(([displayStatus, caps]) => {
                       if (caps.length === 0) return null;
 
-                      // Map display status to stage_status for colors
-                      const displayToStageStatus: Record<string, string> = {
-                        'In Progress': 'in_progress',
-                        'Ready for Approval': 'ready_for_approval',
+                      // Map display status to approval_status for colors
+                      const displayToApprovalStatus: Record<string, string> = {
+                        'Pending': 'pending',
                         'Approved': 'approved',
-                        'Blocked': 'blocked',
+                        'Rejected': 'rejected',
                       };
-                      const stageStatus = displayToStageStatus[displayStatus] || 'in_progress';
-                      const stageStatusColors = getStageStatusColor(stageStatus);
+                      const approvalStatus = displayToApprovalStatus[displayStatus] || 'pending';
+                      const approvalStatusColors = getApprovalStatusColor(approvalStatus);
                       const isCollapsed = collapsedSections[displayStatus];
 
                       return (
                         <div key={displayStatus}>
-                          {/* Stage Status Section Header */}
+                          {/* Approval Status Section Header */}
                           <div
                             onClick={() => toggleSection(displayStatus)}
                             style={{
@@ -1454,7 +1504,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                               justifyContent: 'space-between',
                               alignItems: 'center',
                               padding: '12px 16px',
-                              backgroundColor: stageStatusColors.bg,
+                              backgroundColor: approvalStatusColors.bg,
                               borderRadius: '8px',
                               cursor: 'pointer',
                               marginBottom: isCollapsed ? '0' : '12px',
@@ -1465,8 +1515,8 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                               <span style={{ fontSize: '18px' }}>
                                 {isCollapsed ? '▶' : '▼'}
                               </span>
-                              <span style={{ fontSize: '16px' }}>{stageStatusColors.icon}</span>
-                              <h4 className="text-headline" style={{ margin: 0, color: stageStatusColors.color }}>
+                              <span style={{ fontSize: '16px' }}>{approvalStatusColors.icon}</span>
+                              <h4 className="text-headline" style={{ margin: 0, color: approvalStatusColors.color }}>
                                 {displayStatus}
                               </h4>
                               <span style={{
@@ -1475,7 +1525,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                                 fontWeight: 600,
                                 borderRadius: '12px',
                                 backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                                color: stageStatusColors.color,
+                                color: approvalStatusColors.color,
                               }}>
                                 {caps.length}
                               </span>
@@ -1760,7 +1810,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
             zIndex: 1000,
             padding: '20px',
           }}>
-            <Card style={{ maxWidth: '800px', maxHeight: '80vh', overflow: 'auto', width: '100%' }}>
+            <Card style={{ maxWidth: '1000px', maxHeight: '90vh', overflow: 'auto', width: '100%' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
                 <h2 className="text-title1">
                   {isEditingFileCapability ? 'Edit Capability' : (selectedFileCapability.name || selectedFileCapability.filename)}
@@ -1775,7 +1825,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                         setSelectedFileCapability(null);
                         setIsEditingFileCapability(false);
                       }}>
-                        Close
+                        Cancel
                       </Button>
                     </>
                   ) : (
@@ -1805,8 +1855,9 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
               {isEditingFileCapability ? (
                 /* Edit Form */
                 <div>
+                  {/* Name */}
                   <div style={{ marginBottom: '16px' }}>
-                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Name</label>
+                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Name *</label>
                     <input
                       type="text"
                       value={editFormData.name}
@@ -1816,106 +1867,25 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                     />
                   </div>
 
-                  {/* INTENT State Model - 4 Dimensions */}
-                  <div style={{
-                    marginBottom: '16px',
-                    padding: '16px',
-                    border: '1px solid var(--color-separator)',
-                    borderRadius: '12px',
-                    backgroundColor: 'var(--color-secondarySystemBackground)'
-                  }}>
-                    <h4 className="text-subheadline" style={{ marginBottom: '12px' }}>INTENT State Model</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      {/* Lifecycle State */}
-                      <div>
-                        <label className="text-caption1" style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Lifecycle State</label>
-                        <select
-                          value={editFormData.lifecycle_state}
-                          onChange={(e) => setEditFormData({ ...editFormData, lifecycle_state: e.target.value })}
-                          className="input"
-                          style={{ width: '100%' }}
-                        >
-                          <option value="draft">Draft</option>
-                          <option value="active">Active</option>
-                          <option value="implemented">Implemented</option>
-                          <option value="maintained">Maintained</option>
-                          <option value="retired">Retired</option>
-                        </select>
-                      </div>
-
-                      {/* Workflow Stage */}
-                      <div>
-                        <label className="text-caption1" style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Workflow Stage</label>
-                        <select
-                          value={editFormData.workflow_stage}
-                          onChange={(e) => setEditFormData({ ...editFormData, workflow_stage: e.target.value })}
-                          className="input"
-                          disabled={editFormData.lifecycle_state !== 'active'}
-                          style={{ width: '100%', opacity: editFormData.lifecycle_state !== 'active' ? 0.6 : 1 }}
-                        >
-                          <option value="intent">Intent</option>
-                          <option value="specification">Specification</option>
-                          <option value="ui_design">UI-Design</option>
-                          <option value="implementation">Implementation</option>
-                          <option value="control_loop">Control-Loop</option>
-                        </select>
-                      </div>
-
-                      {/* Stage Status */}
-                      <div>
-                        <label className="text-caption1" style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Stage Status</label>
-                        <select
-                          value={editFormData.stage_status}
-                          onChange={(e) => setEditFormData({ ...editFormData, stage_status: e.target.value })}
-                          className="input"
-                          disabled={editFormData.lifecycle_state !== 'active'}
-                          style={{ width: '100%', opacity: editFormData.lifecycle_state !== 'active' ? 0.6 : 1 }}
-                        >
-                          <option value="in_progress">In Progress</option>
-                          <option value="ready_for_approval">Ready for Approval</option>
-                          <option value="approved">Approved</option>
-                          <option value="blocked">Blocked</option>
-                        </select>
-                      </div>
-
-                      {/* Approval Status */}
-                      <div>
-                        <label className="text-caption1" style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Approval Status</label>
-                        <select
-                          value={editFormData.approval_status}
-                          onChange={(e) => {
-                            const newApprovalStatus = e.target.value;
-                            // Auto-set stage_status based on approval status
-                            let newStageStatus = editFormData.stage_status;
-                            if (newApprovalStatus === 'approved') {
-                              newStageStatus = 'approved';
-                            } else if (newApprovalStatus === 'rejected') {
-                              newStageStatus = 'blocked';
-                            }
-                            setEditFormData({ ...editFormData, approval_status: newApprovalStatus, stage_status: newStageStatus });
-                          }}
-                          className="input"
-                          style={{ width: '100%' }}
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="approved">Approved</option>
-                          <option value="rejected">Rejected</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
+                  {/* Approval Status - Editable dropdown */}
                   <div style={{ marginBottom: '16px' }}>
-                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Description</label>
-                    <textarea
-                      value={editFormData.description}
-                      onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Approval Status</label>
+                    <select
+                      value={editFormData.approval_status}
+                      onChange={(e) => setEditFormData({ ...editFormData, approval_status: e.target.value })}
                       className="input"
-                      rows={3}
                       style={{ width: '100%' }}
-                    />
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="approved">Approved</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                    <p className="text-footnote text-secondary" style={{ marginTop: '4px' }}>
+                      Current approval status for this capability
+                    </p>
                   </div>
 
+                  {/* Storyboard Reference */}
                   <div style={{ marginBottom: '16px' }}>
                     <label className="text-subheadline" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                       Storyboard Reference
@@ -1934,7 +1904,6 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                       value={editFormData.storyboardReference}
                       onChange={(e) => {
                         setEditFormData({ ...editFormData, storyboardReference: e.target.value });
-                        // If user manually changes, clear the confirmation requirement
                         if (e.target.value !== suggestedStoryboard) {
                           setStoryboardNeedsConfirmation(false);
                         }
@@ -1982,23 +1951,217 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                     </p>
                   </div>
 
+                  {/* Description */}
                   <div style={{ marginBottom: '16px' }}>
-                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Additional Content</label>
+                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Description</label>
+                    <textarea
+                      value={editFormData.description}
+                      onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                      className="input"
+                      rows={3}
+                      style={{ width: '100%' }}
+                      placeholder="Brief description of what this capability provides..."
+                    />
+                  </div>
+
+                  {/* Value Proposition */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Value Proposition</label>
+                    <textarea
+                      value={editFormData.valueProposition}
+                      onChange={(e) => setEditFormData({ ...editFormData, valueProposition: e.target.value })}
+                      className="input"
+                      rows={2}
+                      style={{ width: '100%' }}
+                      placeholder="What value does this capability deliver to users or the business?"
+                    />
+                  </div>
+
+                  {/* Primary Persona */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Primary Persona</label>
+                    <input
+                      type="text"
+                      value={editFormData.primaryPersona}
+                      onChange={(e) => setEditFormData({ ...editFormData, primaryPersona: e.target.value })}
+                      className="input"
+                      style={{ width: '100%' }}
+                      placeholder="e.g., End User, Administrator, Developer..."
+                    />
+                  </div>
+
+                  {/* Success Metrics */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Success Metrics</label>
+                    <textarea
+                      value={editFormData.successMetrics}
+                      onChange={(e) => setEditFormData({ ...editFormData, successMetrics: e.target.value })}
+                      className="input"
+                      rows={3}
+                      style={{ width: '100%' }}
+                      placeholder="How will success be measured? (one per line)"
+                    />
+                  </div>
+
+                  {/* Acceptance Criteria */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Acceptance Criteria</label>
+                    <textarea
+                      value={editFormData.acceptanceCriteria}
+                      onChange={(e) => setEditFormData({ ...editFormData, acceptanceCriteria: e.target.value })}
+                      className="input"
+                      rows={4}
+                      style={{ width: '100%' }}
+                      placeholder="What conditions must be met for this capability to be considered complete? (one per line)"
+                    />
+                  </div>
+
+                  {/* User Scenarios */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>User Scenarios</label>
+                    <textarea
+                      value={editFormData.userScenarios}
+                      onChange={(e) => setEditFormData({ ...editFormData, userScenarios: e.target.value })}
+                      className="input"
+                      rows={4}
+                      style={{ width: '100%' }}
+                      placeholder="Describe typical user scenarios or use cases..."
+                    />
+                  </div>
+
+                  {/* Boundaries Section */}
+                  <div style={{ marginBottom: '16px', padding: '16px', backgroundColor: 'var(--color-tertiarySystemBackground)', borderRadius: '8px' }}>
+                    <h4 className="text-headline" style={{ marginBottom: '16px' }}>Boundaries</h4>
+
+                    {/* In Scope */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>In Scope</label>
+                      <textarea
+                        value={editFormData.inScope}
+                        onChange={(e) => setEditFormData({ ...editFormData, inScope: e.target.value })}
+                        className="input"
+                        rows={3}
+                        style={{ width: '100%' }}
+                        placeholder="What is explicitly included in this capability? (one per line)"
+                      />
+                    </div>
+
+                    {/* Out of Scope */}
+                    <div>
+                      <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Out of Scope</label>
+                      <textarea
+                        value={editFormData.outOfScope}
+                        onChange={(e) => setEditFormData({ ...editFormData, outOfScope: e.target.value })}
+                        className="input"
+                        rows={3}
+                        style={{ width: '100%' }}
+                        placeholder="What is explicitly excluded from this capability? (one per line)"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Dependencies Section */}
+                  <div style={{ marginBottom: '16px', padding: '16px', backgroundColor: 'var(--color-tertiarySystemBackground)', borderRadius: '8px' }}>
+                    <h4 className="text-headline" style={{ marginBottom: '16px' }}>Dependencies</h4>
+
+                    {/* Upstream Dependencies */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Upstream Dependencies</label>
+                      <textarea
+                        value={editFormData.upstreamDependencies}
+                        onChange={(e) => setEditFormData({ ...editFormData, upstreamDependencies: e.target.value })}
+                        className="input"
+                        rows={2}
+                        style={{ width: '100%' }}
+                        placeholder="What does this capability depend on? (CAP-IDs or names, one per line)"
+                      />
+                    </div>
+
+                    {/* Downstream Dependencies */}
+                    <div>
+                      <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Downstream Dependencies</label>
+                      <textarea
+                        value={editFormData.downstreamDependencies}
+                        onChange={(e) => setEditFormData({ ...editFormData, downstreamDependencies: e.target.value })}
+                        className="input"
+                        rows={2}
+                        style={{ width: '100%' }}
+                        placeholder="What depends on this capability? (CAP-IDs or names, one per line)"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Associated Enablers - Read Only */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Associated Enablers</label>
+                    <div style={{
+                      padding: '12px',
+                      backgroundColor: 'var(--color-tertiarySystemBackground)',
+                      borderRadius: '8px',
+                      border: '1px solid var(--color-separator)'
+                    }}>
+                      {(() => {
+                        const capId = selectedFileCapability?.capabilityId || selectedFileCapability?.fields?.['ID'] || '';
+                        const associatedEnablers = fileEnablers.filter(e =>
+                          e.capabilityId === capId ||
+                          e.fields?.['Capability ID'] === capId ||
+                          e.fields?.['Parent Capability'] === capId
+                        );
+
+                        if (associatedEnablers.length === 0) {
+                          return (
+                            <p className="text-footnote text-secondary" style={{ margin: 0 }}>
+                              No enablers linked to this capability yet. Create enablers from the Enablers page.
+                            </p>
+                          );
+                        }
+
+                        return (
+                          <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                            {associatedEnablers.map(e => (
+                              <li key={e.enablerId} className="text-body" style={{ marginBottom: '4px' }}>
+                                <strong>{e.enablerId}</strong>: {e.name}
+                              </li>
+                            ))}
+                          </ul>
+                        );
+                      })()}
+                    </div>
+                    <p className="text-footnote text-secondary" style={{ marginTop: '4px' }}>
+                      Enablers are managed from the Enablers page
+                    </p>
+                  </div>
+
+                  {/* Additional Content (legacy) */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Additional Notes</label>
                     <textarea
                       value={editFormData.content}
                       onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
                       className="input"
-                      rows={10}
+                      rows={4}
                       style={{ width: '100%', fontFamily: 'monospace', fontSize: '12px' }}
+                      placeholder="Any additional notes or content..."
                     />
                   </div>
 
-                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                    <Button variant="secondary" onClick={handleCancelEdit}>
+                  {/* INTENT State - Read Only (change via Phase Approval page) */}
+                  <ReadOnlyStateFields
+                    lifecycleState={editFormData.lifecycle_state}
+                    workflowStage={editFormData.workflow_stage}
+                    stageStatus={editFormData.stage_status}
+                    approvalStatus={editFormData.approval_status}
+                  />
+
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
+                    <Button variant="secondary" onClick={() => {
+                      setSelectedFileCapability(null);
+                      setIsEditingFileCapability(false);
+                    }}>
                       Cancel
                     </Button>
                     <Button variant="primary" onClick={handleSaveFileCapability} disabled={savingCapability}>
-                      {savingCapability ? 'Saving...' : 'Save Changes'}
+                      {savingCapability ? 'Saving...' : 'Save'}
                     </Button>
                   </div>
                 </div>

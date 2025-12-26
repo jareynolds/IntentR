@@ -7,6 +7,7 @@ import { useEntityState } from '../context/EntityStateContext';
 import RemoteCursors from '../components/RemoteCursors';
 import { AssetsPane } from '../components/AssetsPane';
 import { ConfirmDialog, PageLayout } from '../components';
+import { ReadOnlyStateFields } from '../components/ReadOnlyStateFields';
 import { INTEGRATION_URL, SPEC_URL } from '../api/client';
 
 export const Storyboard: React.FC = () => {
@@ -1490,10 +1491,23 @@ export const Storyboard: React.FC = () => {
     const existingCard = cards.find(c => c.id === editingCardId);
     if (!existingCard) return;
 
-    // Update local state
+    // AUTO-RESET: If item was blocked and user edited it, reset to in_progress/pending
+    let stageStatusToSave = cardFormData.stage_status;
+    let approvalStatusToSave = cardFormData.approval_status;
+    if (cardFormData.stage_status === 'blocked') {
+      stageStatusToSave = 'in_progress';
+      approvalStatusToSave = 'pending';
+    }
+
+    // Update local state with potentially reset status
+    const updatedFormData = {
+      ...cardFormData,
+      stage_status: stageStatusToSave,
+      approval_status: approvalStatusToSave,
+    };
     setCards(prevCards => prevCards.map(card =>
       card.id === editingCardId
-        ? { ...card, ...cardFormData, ideationCardId: cardFormData.ideationCardId || undefined }
+        ? { ...card, ...updatedFormData, ideationCardId: updatedFormData.ideationCardId || undefined }
         : card
     ));
 
@@ -1510,8 +1524,8 @@ export const Storyboard: React.FC = () => {
         file_path: existingCard.sourceFileName,
         lifecycle_state: cardFormData.lifecycle_state,
         workflow_stage: cardFormData.workflow_stage,
-        stage_status: cardFormData.stage_status,
-        approval_status: cardFormData.approval_status,
+        stage_status: stageStatusToSave,
+        approval_status: approvalStatusToSave,
       };
       try {
         await syncStoryCard(syncPayload);
@@ -2178,89 +2192,6 @@ Cards can be linked to ideation content and later analyzed to generate capabilit
               </div>
             </div>
 
-            {/* INTENT State Model - 4 Dimensions */}
-            <div style={{
-              padding: '16px',
-              background: 'var(--color-systemGray6)',
-              borderRadius: '12px',
-              marginBottom: '16px'
-            }}>
-              <h4 className="text-headline" style={{ marginBottom: '12px' }}>INTENT State</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label htmlFor="card-lifecycle" className="label">Lifecycle State</label>
-                  <select
-                    id="card-lifecycle"
-                    value={cardFormData.lifecycle_state}
-                    onChange={(e) => setCardFormData({ ...cardFormData, lifecycle_state: e.target.value as StoryCardLifecycleState })}
-                    className="input"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="active">Active</option>
-                    <option value="implemented">Implemented</option>
-                    <option value="maintained">Maintained</option>
-                    <option value="retired">Retired</option>
-                  </select>
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label htmlFor="card-workflow" className="label">Workflow Stage</label>
-                  <select
-                    id="card-workflow"
-                    value={cardFormData.workflow_stage}
-                    onChange={(e) => setCardFormData({ ...cardFormData, workflow_stage: e.target.value as StoryCardWorkflowStage })}
-                    disabled={cardFormData.lifecycle_state !== 'active'}
-                    className="input"
-                    style={{ opacity: cardFormData.lifecycle_state !== 'active' ? 0.6 : 1 }}
-                  >
-                    <option value="intent">Intent</option>
-                    <option value="specification">Specification</option>
-                    <option value="ui_design">UI Design</option>
-                    <option value="implementation">Implementation</option>
-                    <option value="control_loop">Control Loop</option>
-                  </select>
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label htmlFor="card-stage-status" className="label">Stage Status</label>
-                  <select
-                    id="card-stage-status"
-                    value={cardFormData.stage_status}
-                    onChange={(e) => setCardFormData({ ...cardFormData, stage_status: e.target.value as StoryCardStageStatus })}
-                    disabled={cardFormData.lifecycle_state !== 'active'}
-                    className="input"
-                    style={{ opacity: cardFormData.lifecycle_state !== 'active' ? 0.6 : 1 }}
-                  >
-                    <option value="in_progress">In Progress</option>
-                    <option value="ready_for_approval">Ready for Approval</option>
-                    <option value="approved">Approved</option>
-                    <option value="blocked">Blocked</option>
-                  </select>
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label htmlFor="card-approval" className="label">Approval Status</label>
-                  <select
-                    id="card-approval"
-                    value={cardFormData.approval_status}
-                    onChange={(e) => {
-                      const newApprovalStatus = e.target.value as StoryCardApprovalStatus;
-                      // Auto-set stage_status based on approval status
-                      let newStageStatus = cardFormData.stage_status;
-                      if (newApprovalStatus === 'approved') {
-                        newStageStatus = 'approved';
-                      } else if (newApprovalStatus === 'rejected') {
-                        newStageStatus = 'blocked';
-                      }
-                      setCardFormData({ ...cardFormData, approval_status: newApprovalStatus, stage_status: newStageStatus });
-                    }}
-                    className="input"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
             <div className="form-group">
               <label className="label">Ideation Tags</label>
               {getAllIdeationTags().length === 0 ? (
@@ -2341,6 +2272,14 @@ Cards can be linked to ideation content and later analyzed to generate capabilit
                 </p>
               )}
             </div>
+
+            {/* INTENT State - Read Only (change via Phase Approval page) */}
+            <ReadOnlyStateFields
+              lifecycleState={cardFormData.lifecycle_state}
+              workflowStage={cardFormData.workflow_stage}
+              stageStatus={cardFormData.stage_status}
+              approvalStatus={cardFormData.approval_status}
+            />
 
             <div className="modal-actions">
               <Button variant="outline" onClick={() => {

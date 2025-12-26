@@ -2488,17 +2488,28 @@ func parseMarkdownEnabler(filename, path, content string) FileEnabler {
 
 // SaveCapabilityRequest represents the request to save a capability file
 type SaveCapabilityRequest struct {
-	Path               string `json:"path"`
-	Name               string `json:"name"`
-	Description        string `json:"description"`
-	Status             string `json:"status"` // Legacy field for backward compatibility
-	Content            string `json:"content"`
-	StoryboardReference string `json:"storyboardReference"`
+	Path                   string `json:"path"`
+	CapabilityID           string `json:"capabilityId"` // Preserve ID in metadata
+	Name                   string `json:"name"`
+	Description            string `json:"description"`
+	Status                 string `json:"status"` // Legacy field for backward compatibility
+	Content                string `json:"content"`
+	StoryboardReference    string `json:"storyboardReference"`
+	// Structured capability fields
+	ValueProposition       string `json:"valueProposition"`
+	PrimaryPersona         string `json:"primaryPersona"`
+	SuccessMetrics         string `json:"successMetrics"`
+	AcceptanceCriteria     string `json:"acceptanceCriteria"`
+	UserScenarios          string `json:"userScenarios"`
+	InScope                string `json:"inScope"`
+	OutOfScope             string `json:"outOfScope"`
+	UpstreamDependencies   string `json:"upstreamDependencies"`
+	DownstreamDependencies string `json:"downstreamDependencies"`
 	// INTENT State Model - 4 dimensions
-	LifecycleState     string `json:"lifecycle_state"`
-	WorkflowStage      string `json:"workflow_stage"`
-	StageStatus        string `json:"stage_status"`
-	ApprovalStatus     string `json:"approval_status"`
+	LifecycleState         string `json:"lifecycle_state"`
+	WorkflowStage          string `json:"workflow_stage"`
+	StageStatus            string `json:"stage_status"`
+	ApprovalStatus         string `json:"approval_status"`
 }
 
 // UpdateCapabilityStoryboardRequest represents the request to update a capability's storyboard reference
@@ -2520,17 +2531,8 @@ func (h *Handler) HandleUpdateCapabilityStoryboard(w http.ResponseWriter, r *htt
 		return
 	}
 
-	// Handle path translation for Docker environments
-	filePath := req.Path
-	if idx := strings.Index(filePath, "workspaces/"); idx != -1 {
-		relativePath := filePath[idx:]
-		cwd, err := os.Getwd()
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
-			return
-		}
-		filePath = filepath.Join(cwd, relativePath)
-	}
+	// Translate host path to container path if running in Docker
+	filePath := translatePathForDocker(req.Path)
 
 	// Read existing file content
 	existingContent, err := os.ReadFile(filePath)
@@ -2632,17 +2634,8 @@ func (h *Handler) HandleUpdateEnablerCapability(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	// Handle path translation for Docker environments
-	filePath := req.Path
-	if idx := strings.Index(filePath, "workspaces/"); idx != -1 {
-		relativePath := filePath[idx:]
-		cwd, err := os.Getwd()
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
-			return
-		}
-		filePath = filepath.Join(cwd, relativePath)
-	}
+	// Translate host path to container path if running in Docker
+	filePath := translatePathForDocker(req.Path)
 
 	// Read existing file content
 	existingContent, err := os.ReadFile(filePath)
@@ -2705,54 +2698,232 @@ func (h *Handler) HandleUpdateEnablerCapability(w http.ResponseWriter, r *http.R
 	})
 }
 
+// translatePathForDocker converts host filesystem paths to Docker container paths
+// This is needed when running in Docker because the container mounts volumes at different paths
+func translatePathForDocker(hostPath string) string {
+	// Look for common patterns in the path and translate to container paths
+	// Host: /Users/.../Intentr/workspaces/... -> Container: /root/workspaces/...
+	// Host: /Users/.../Intentr/AI_Principles/... -> Container: /root/AI_Principles/...
+	// Host: /Users/.../Intentr/CODE_RULES/... -> Container: /root/CODE_RULES/...
+
+	pathMappings := []struct {
+		hostPattern      string
+		containerPrefix  string
+	}{
+		{"/workspaces/", "/root/workspaces/"},
+		{"/AI_Principles/", "/root/AI_Principles/"},
+		{"/CODE_RULES/", "/root/CODE_RULES/"},
+	}
+
+	for _, mapping := range pathMappings {
+		if idx := strings.Index(hostPath, mapping.hostPattern); idx != -1 {
+			// Extract the path after the pattern and prepend container prefix
+			relativePath := hostPath[idx+len(mapping.hostPattern):]
+			translatedPath := mapping.containerPrefix + relativePath
+			log.Printf("translatePathForDocker: Translated %s -> %s", hostPath, translatedPath)
+			return translatedPath
+		}
+	}
+
+	// No translation needed - return original path
+	return hostPath
+}
+
 // HandleSaveCapability handles POST /save-capability
 func (h *Handler) HandleSaveCapability(w http.ResponseWriter, r *http.Request) {
 	var req SaveCapabilityRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("HandleSaveCapability: Failed to decode request: %v", err)
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
+	log.Printf("HandleSaveCapability: Saving capability - Path: %s, Name: %s, ID: %s", req.Path, req.Name, req.CapabilityID)
+
+	// Translate host path to container path if running in Docker
+	req.Path = translatePathForDocker(req.Path)
+	log.Printf("HandleSaveCapability: Using path: %s", req.Path)
+
 	if req.Path == "" {
+		log.Printf("HandleSaveCapability: Path is empty")
 		http.Error(w, "path is required", http.StatusBadRequest)
 		return
 	}
 
-	// Build the markdown content
+	// Build the markdown content following INTENT Capability template
 	var content strings.Builder
 	content.WriteString(fmt.Sprintf("# %s\n\n", req.Name))
 
-	// Write metadata section with INTENT State Model
+	// Write metadata section
 	content.WriteString("## Metadata\n\n")
-
-	if req.Description != "" {
-		content.WriteString(fmt.Sprintf("- **Description**: %s\n", req.Description))
+	if req.CapabilityID != "" {
+		content.WriteString(fmt.Sprintf("- **ID**: %s\n", req.CapabilityID))
 	}
-
+	content.WriteString(fmt.Sprintf("- **Name**: %s\n", req.Name))
+	content.WriteString("- **Type**: Capability\n")
 	if req.StoryboardReference != "" {
 		content.WriteString(fmt.Sprintf("- **Storyboard Reference**: %s\n", req.StoryboardReference))
 	}
+	if req.PrimaryPersona != "" {
+		content.WriteString(fmt.Sprintf("- **Primary Persona**: %s\n", req.PrimaryPersona))
+	}
+	content.WriteString("\n")
 
 	// NOTE: State fields (lifecycle_state, workflow_stage, stage_status, approval_status)
 	// are stored in the DATABASE only, not in markdown files.
 	// The database is the single source of truth for state.
 
-	content.WriteString("\n")
-
-	// Append any additional content, but strip existing metadata to avoid duplication
-	if req.Content != "" {
-		cleanedContent := stripMetadataFromContent(req.Content)
-		if cleanedContent != "" {
-			content.WriteString(cleanedContent)
-		}
+	// Business Context section
+	content.WriteString("## Business Context\n\n")
+	content.WriteString("### Description\n")
+	if req.Description != "" {
+		content.WriteString(req.Description + "\n\n")
+	} else {
+		content.WriteString("_No description provided._\n\n")
 	}
 
+	content.WriteString("### Value Proposition\n")
+	if req.ValueProposition != "" {
+		content.WriteString(req.ValueProposition + "\n\n")
+	} else {
+		content.WriteString("_Define the value this capability delivers._\n\n")
+	}
+
+	content.WriteString("### Success Metrics\n")
+	if req.SuccessMetrics != "" {
+		// Split by newlines and format as list items
+		metrics := strings.Split(strings.TrimSpace(req.SuccessMetrics), "\n")
+		for _, metric := range metrics {
+			metric = strings.TrimSpace(metric)
+			if metric != "" {
+				if !strings.HasPrefix(metric, "-") && !strings.HasPrefix(metric, "*") {
+					content.WriteString("- " + metric + "\n")
+				} else {
+					content.WriteString(metric + "\n")
+				}
+			}
+		}
+		content.WriteString("\n")
+	} else {
+		content.WriteString("- _Define success metrics_\n\n")
+	}
+
+	// User Perspective section
+	content.WriteString("## User Perspective\n\n")
+	content.WriteString("### User Scenarios\n")
+	if req.UserScenarios != "" {
+		content.WriteString(req.UserScenarios + "\n\n")
+	} else {
+		content.WriteString("_Define user scenarios._\n\n")
+	}
+
+	// Boundaries section
+	content.WriteString("## Boundaries\n\n")
+	content.WriteString("### In Scope\n")
+	if req.InScope != "" {
+		lines := strings.Split(strings.TrimSpace(req.InScope), "\n")
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line != "" {
+				if !strings.HasPrefix(line, "-") && !strings.HasPrefix(line, "*") {
+					content.WriteString("- " + line + "\n")
+				} else {
+					content.WriteString(line + "\n")
+				}
+			}
+		}
+		content.WriteString("\n")
+	} else {
+		content.WriteString("- _Define what is included_\n\n")
+	}
+
+	content.WriteString("### Out of Scope\n")
+	if req.OutOfScope != "" {
+		lines := strings.Split(strings.TrimSpace(req.OutOfScope), "\n")
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line != "" {
+				if !strings.HasPrefix(line, "-") && !strings.HasPrefix(line, "*") {
+					content.WriteString("- " + line + "\n")
+				} else {
+					content.WriteString(line + "\n")
+				}
+			}
+		}
+		content.WriteString("\n")
+	} else {
+		content.WriteString("- _Define what is excluded_\n\n")
+	}
+
+	// Dependencies section
+	content.WriteString("## Dependencies\n\n")
+	content.WriteString("### Upstream Dependencies\n")
+	if req.UpstreamDependencies != "" {
+		lines := strings.Split(strings.TrimSpace(req.UpstreamDependencies), "\n")
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line != "" {
+				if !strings.HasPrefix(line, "-") && !strings.HasPrefix(line, "*") {
+					content.WriteString("- " + line + "\n")
+				} else {
+					content.WriteString(line + "\n")
+				}
+			}
+		}
+		content.WriteString("\n")
+	} else {
+		content.WriteString("- _None defined_\n\n")
+	}
+
+	content.WriteString("### Downstream Dependencies\n")
+	if req.DownstreamDependencies != "" {
+		lines := strings.Split(strings.TrimSpace(req.DownstreamDependencies), "\n")
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line != "" {
+				if !strings.HasPrefix(line, "-") && !strings.HasPrefix(line, "*") {
+					content.WriteString("- " + line + "\n")
+				} else {
+					content.WriteString(line + "\n")
+				}
+			}
+		}
+		content.WriteString("\n")
+	} else {
+		content.WriteString("- _None defined_\n\n")
+	}
+
+	// Acceptance Criteria section
+	content.WriteString("## Acceptance Criteria\n")
+	if req.AcceptanceCriteria != "" {
+		lines := strings.Split(strings.TrimSpace(req.AcceptanceCriteria), "\n")
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line != "" {
+				if !strings.HasPrefix(line, "-") && !strings.HasPrefix(line, "[") {
+					content.WriteString("- [ ] " + line + "\n")
+				} else {
+					content.WriteString(line + "\n")
+				}
+			}
+		}
+		content.WriteString("\n")
+	} else {
+		content.WriteString("- [ ] _Define acceptance criteria_\n\n")
+	}
+
+	// Note: We don't append req.Content here anymore - all structured fields
+	// are already written above. Appending req.Content caused duplicate sections.
+
 	// Write to file
+	log.Printf("HandleSaveCapability: Writing %d bytes to %s", len(content.String()), req.Path)
 	if err := os.WriteFile(req.Path, []byte(content.String()), 0644); err != nil {
+		log.Printf("HandleSaveCapability: Failed to write file: %v", err)
 		http.Error(w, fmt.Sprintf("failed to save file: %v", err), http.StatusInternalServerError)
 		return
 	}
 
+	log.Printf("HandleSaveCapability: Successfully saved capability to %s", req.Path)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
@@ -2778,19 +2949,8 @@ func (h *Handler) HandleDeleteCapability(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Handle path translation for Docker environments
-	filePath := req.Path
-
-	// If path contains "workspaces/", extract the relative part and resolve from cwd
-	if idx := strings.Index(filePath, "workspaces/"); idx != -1 {
-		relativePath := filePath[idx:]
-		cwd, err := os.Getwd()
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
-			return
-		}
-		filePath = filepath.Join(cwd, relativePath)
-	}
+	// Translate host path to container path if running in Docker
+	filePath := translatePathForDocker(req.Path)
 
 	// Verify file exists
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
@@ -2830,19 +2990,8 @@ func (h *Handler) HandleDeleteEnabler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Handle path translation for Docker environments
-	filePath := req.Path
-
-	// If path contains "workspaces/", extract the relative part and resolve from cwd
-	if idx := strings.Index(filePath, "workspaces/"); idx != -1 {
-		relativePath := filePath[idx:]
-		cwd, err := os.Getwd()
-		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
-			return
-		}
-		filePath = filepath.Join(cwd, relativePath)
-	}
+	// Translate host path to container path if running in Docker
+	filePath := translatePathForDocker(req.Path)
 
 	// Verify file exists
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
@@ -3532,6 +3681,22 @@ func parseSingleCapability(filename, path, content, name string) FileCapability 
 			continue
 		}
 
+		// Look for Primary Persona field
+		if strings.HasPrefix(trimmedLineLower, "**primary persona:**") || strings.HasPrefix(trimmedLineLower, "**primary persona**:") ||
+			strings.HasPrefix(trimmedLineLower, "primary persona:") ||
+			strings.HasPrefix(trimmedLineLower, "- **primary persona**:") || strings.HasPrefix(trimmedLineLower, "- **primary persona:**") {
+			persona := trimmedLine
+			persona = strings.TrimPrefix(persona, "- ")
+			for _, prefix := range []string{"**Primary Persona:**", "**primary persona:**", "**Primary Persona**:", "**primary persona**:", "Primary Persona:", "primary persona:"} {
+				if strings.HasPrefix(persona, prefix) {
+					persona = strings.TrimPrefix(persona, prefix)
+					break
+				}
+			}
+			cap.Fields["Primary Persona"] = strings.TrimSpace(persona)
+			continue
+		}
+
 		// NOTE: INTENT State Model fields (lifecycle_state, workflow_stage, stage_status, approval_status)
 		// are NOT parsed from markdown. They are stored in the DATABASE only.
 
@@ -3547,6 +3712,13 @@ func parseSingleCapability(filename, path, content, name string) FileCapability 
 	// Save last section
 	if currentSection != "" && len(sectionContent) > 0 {
 		cap.Fields[currentSection] = strings.TrimSpace(strings.Join(sectionContent, "\n"))
+	}
+
+	// If Description wasn't set from inline format, try to get it from Fields
+	if cap.Description == "" {
+		if desc, ok := cap.Fields["Description"]; ok && desc != "" {
+			cap.Description = desc
+		}
 	}
 
 	// Default name from filename if not found

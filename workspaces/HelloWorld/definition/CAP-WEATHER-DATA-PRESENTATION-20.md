@@ -2,6 +2,10 @@
 
 **Status:** Implemented
 
+## Metadata
+- **ID**: CAP-020
+- **Type**: Capability
+
 **Description:** Display the results of the openweather API on the screen
 
 **Storyboard Reference:** display weather data on screen

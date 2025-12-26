@@ -173,7 +173,7 @@ export const Welcome: React.FC = () => {
           </svg>
           <div className="logo-text">
             <h1>Welcome to Intentr</h1>
-            <p>Innovate Faster</p>
+            <p>Innovate Faster with Integrity</p>
           </div>
         </div>
       </div>

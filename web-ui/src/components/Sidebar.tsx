@@ -289,10 +289,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
           width: 256px;
           background: var(--sidebar-background, var(--color-systemBackground));
           border-right: 1px solid var(--sidebar-border-color, var(--color-systemGray5));
-          height: calc(100vh - 73px);
+          height: calc(100vh - 82px);
           padding: var(--spacing-4, 16px) 0;
           position: fixed;
-          top: 73px;
+          top: 82px;
           left: 0;
           overflow-y: auto;
           z-index: 100;

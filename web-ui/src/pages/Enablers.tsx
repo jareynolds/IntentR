@@ -5,6 +5,7 @@ import { useEnabler } from '../context/EnablerContext';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useEntityState } from '../context/EntityStateContext';
 import { INTEGRATION_URL } from '../api/client';
+import { ReadOnlyStateFields } from '../components/ReadOnlyStateFields';
 
 // File-based capability from workspace definition folder
 interface FileCapability {
@@ -901,6 +902,14 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
           if (capabilityDbId === 0) {
             console.warn('Could not determine parent capability database ID, enabler state sync skipped. capId:', capId, 'formCapabilityId:', formCapabilityId);
           } else {
+            // AUTO-RESET: If item was blocked and user edited it, reset to in_progress/pending
+            let stageStatusToSave = enablerFormData.stage_status || 'in_progress';
+            let approvalStatusToSave = enablerFormData.approval_status || 'pending';
+            if (enablerFormData.stage_status === 'blocked') {
+              stageStatusToSave = 'in_progress';
+              approvalStatusToSave = 'pending';
+            }
+
             await syncEnabler({
               enabler_id: enablerFormData.enabler_id,
               capability_id: capabilityDbId, // Use the database ID, not the string ID
@@ -911,11 +920,11 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
               priority: enablerFormData.priority || 'medium',
               workspace_id: currentWorkspace.name, // Must use .name to match EntityStateContext queries
               file_path: editingFileEnabler?.path || `${currentWorkspace.projectFolder}/definition/${fileName}`,
-              // INTENT State Model - saved to DATABASE only
+              // INTENT State Model - saved to DATABASE only (with auto-reset if blocked)
               lifecycle_state: (enablerFormData.lifecycle_state || 'draft') as 'draft' | 'active' | 'implemented' | 'maintained' | 'retired',
               workflow_stage: (enablerFormData.workflow_stage || 'intent') as 'intent' | 'specification' | 'ui_design' | 'implementation' | 'control_loop',
-              stage_status: (enablerFormData.stage_status || 'in_progress') as 'in_progress' | 'ready_for_approval' | 'approved' | 'blocked',
-              approval_status: (enablerFormData.approval_status || 'pending') as 'pending' | 'approved' | 'rejected',
+              stage_status: stageStatusToSave as 'in_progress' | 'ready_for_approval' | 'approved' | 'blocked',
+              approval_status: approvalStatusToSave as 'pending' | 'approved' | 'rejected',
             });
           }
         } catch (syncErr) {
@@ -1638,106 +1647,6 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
 
           </div>
 
-          {/* INTENT State Model - 4 Dimensions */}
-          <div style={{
-            marginTop: '16px',
-            padding: '16px',
-            border: '1px solid var(--color-separator)',
-            borderRadius: '12px',
-            backgroundColor: 'var(--color-secondarySystemBackground)'
-          }}>
-            <h4 className="text-subheadline" style={{ marginBottom: '12px' }}>INTENT State Model</h4>
-            <p className="text-caption1 text-secondary" style={{ marginBottom: '12px' }}>
-              Track through lifecycle using 4 independent dimensions.
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              {/* Lifecycle State */}
-              <div>
-                <label className="text-caption1" style={{ fontWeight: 500 }}>Lifecycle State</label>
-                <select
-                  className="input"
-                  value={enablerFormData.lifecycle_state || 'draft'}
-                  onChange={(e) => setEnablerFormData({ ...enablerFormData, lifecycle_state: e.target.value as LifecycleState })}
-                  style={{ width: '100%', marginTop: '4px' }}
-                >
-                  <option value="draft">Draft</option>
-                  <option value="active">Active</option>
-                  <option value="implemented">Implemented</option>
-                  <option value="maintained">Maintained</option>
-                  <option value="retired">Retired</option>
-                </select>
-              </div>
-
-              {/* Workflow Stage */}
-              <div>
-                <label className="text-caption1" style={{ fontWeight: 500 }}>Workflow Stage</label>
-                <select
-                  className="input"
-                  value={enablerFormData.workflow_stage || 'intent'}
-                  onChange={(e) => setEnablerFormData({ ...enablerFormData, workflow_stage: e.target.value as WorkflowStage })}
-                  disabled={enablerFormData.lifecycle_state !== 'active'}
-                  style={{
-                    width: '100%',
-                    marginTop: '4px',
-                    opacity: enablerFormData.lifecycle_state !== 'active' ? 0.6 : 1
-                  }}
-                >
-                  <option value="intent">Intent</option>
-                  <option value="specification">Specification</option>
-                  <option value="ui_design">UI-Design</option>
-                  <option value="implementation">Implementation</option>
-                  <option value="control_loop">Control-Loop</option>
-                </select>
-              </div>
-
-              {/* Stage Status */}
-              <div>
-                <label className="text-caption1" style={{ fontWeight: 500 }}>Stage Status</label>
-                <select
-                  className="input"
-                  value={enablerFormData.stage_status || 'in_progress'}
-                  onChange={(e) => setEnablerFormData({ ...enablerFormData, stage_status: e.target.value as StageStatus })}
-                  disabled={enablerFormData.lifecycle_state !== 'active'}
-                  style={{
-                    width: '100%',
-                    marginTop: '4px',
-                    opacity: enablerFormData.lifecycle_state !== 'active' ? 0.6 : 1
-                  }}
-                >
-                  <option value="in_progress">In Progress</option>
-                  <option value="ready_for_approval">Ready for Approval</option>
-                  <option value="approved">Approved</option>
-                  <option value="blocked">Blocked</option>
-                </select>
-              </div>
-
-              {/* Approval Status */}
-              <div>
-                <label className="text-caption1" style={{ fontWeight: 500 }}>Approval Status</label>
-                <select
-                  className="input"
-                  value={enablerFormData.approval_status || 'pending'}
-                  onChange={(e) => {
-                    const newApprovalStatus = e.target.value as ApprovalStatus;
-                    // Auto-set stage_status based on approval status
-                    let newStageStatus = enablerFormData.stage_status;
-                    if (newApprovalStatus === 'approved') {
-                      newStageStatus = 'approved';
-                    } else if (newApprovalStatus === 'rejected') {
-                      newStageStatus = 'blocked';
-                    }
-                    setEnablerFormData({ ...enablerFormData, approval_status: newApprovalStatus, stage_status: newStageStatus });
-                  }}
-                  style={{ width: '100%', marginTop: '4px' }}
-                >
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
           {/* Requirements Section */}
           <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--color-separator)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -1867,7 +1776,15 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+        {/* INTENT State - Read Only (change via Phase Approval page) */}
+        <ReadOnlyStateFields
+          lifecycleState={enablerFormData.lifecycle_state || 'draft'}
+          workflowStage={enablerFormData.workflow_stage || 'intent'}
+          stageStatus={enablerFormData.stage_status || 'in_progress'}
+          approvalStatus={enablerFormData.approval_status || 'pending'}
+        />
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}>
           <Button variant="secondary" onClick={() => {
             setShowEnablerForm(false);
             setEditingFileEnabler(null);

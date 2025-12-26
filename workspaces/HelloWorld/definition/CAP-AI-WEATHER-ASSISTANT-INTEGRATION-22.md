@@ -2,6 +2,10 @@
 
 **Status:** Implemented
 
+## Metadata
+- **ID**: CAP-022
+- **Type**: Capability
+
 **Description:** Enables natural language interaction with weather data through OpenWeather's AI capabilities, allowing users to ask complex weather questions and receive intelligent, contextual responses beyond basic weather data display
 
 **Storyboard Reference:** send prompt data to openweather API

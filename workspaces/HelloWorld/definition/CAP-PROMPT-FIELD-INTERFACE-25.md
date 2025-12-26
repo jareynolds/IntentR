@@ -1,24 +1,25 @@
-# External Weather API Integration
+# Prompt Field Interface
 
 **Status:** Implemented
 
-**Storyboard Reference:** send prompt data to openweather API
+**Storyboard Reference:** Provide Prompt field
 
 ## Metadata
-- **ID**: CAP-018
+- **ID**: CAP-025
 - **Type**: Capability
 - **Generated**: 12/18/2025, 8:44:52 PM
 
-- **Storyboard Reference**: send prompt data to openweather API
+- **Storyboard Reference**: Provide Prompt field
 ## Description
 _Add description for this capability._
 
 ## Upstream Dependencies
-- AI-Powered Weather Interaction
-- Prompt Field Interface
+- Weather Query Intelligence
+- Location Services
 
 ## Downstream Impacts
-- Weather Data Retrieval
+- Send Prompt Data to OpenWeather API
+- External Weather API Integration
 
 ## Implementation Notes
 _Add implementation notes here._

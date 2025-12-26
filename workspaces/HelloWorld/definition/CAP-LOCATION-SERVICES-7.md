@@ -2,10 +2,8 @@
 
 ## Metadata
 
+- **Description**: the geographic location of cities needs to have a default number of cities that it starts out with and also have a city that it displays weather always by default when the applicaiton starts.
 - **Storyboard Reference**: read default location
-
-## Description
-_Add description for this capability._
 
 ## Downstream Impacts
 - Prompt Field Interface

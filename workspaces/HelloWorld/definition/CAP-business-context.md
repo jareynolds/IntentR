@@ -1,15 +1,44 @@
 # OpenWeather API integration
 
-**Status:** Implemented
+## Metadata
 
-**Description:** Provides seamless integration with external weather services to retrieve current weather information. This capability handles API authentication, data transformation, error handling, and ensures reliable weather data delivery from third-party services like OpenWeatherMap.
+- **ID**: CAP-business-context
+- **Name**: OpenWeather API integration
+- **Type**: Capability
+- **Storyboard Reference**: pull weather data
 
-**Storyboard Reference:** pull weather data
+## Business Context
+
+### Description
+This capability enables the application to integrate with the OpenWeather API to retrieve weather data.
 
 ### Value Proposition
-Directly derived from STORY-PULL-WEATHER-DATA which specifies using OpenWeatherMap APIs, and supports the strategic theme STRAT-DEMONSTRATE-HOW-PROMPT-WEATHER-CAPABILITIES-WORK-2 for prompt weather capabilities.
+_Define the value this capability delivers._efsadadsfsaf
 
 ### Success Metrics
-- API response time under 2 seconds
-- Weather data retrieval success rate above 99%
-- API error handling coverage
+- _Define success metrics_
+
+## User Perspective
+
+### User Scenarios
+_Define user scenarios._
+
+## Boundaries
+
+### In Scope
+- _Define what is included_
+
+### Out of Scope
+- _Define what is excluded_
+
+## Dependencies
+
+### Upstream Dependencies
+- _None defined_
+
+### Downstream Dependencies
+- _None defined_
+
+## Acceptance Criteria
+- [ ] _Define acceptance criteria_
+

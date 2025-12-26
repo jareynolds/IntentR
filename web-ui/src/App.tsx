@@ -243,7 +243,7 @@ function AppContent() {
 
   return (
     <div className="app">
-      <Header title="Intentr" subtitle="Innovate Faster" />
+      <Header title="Intentr" subtitle="Innovate Faster with Integrity" />
       <div className="app-layout">
         <Sidebar items={sidebarItems} />
         <UIFrameworkIndicator />

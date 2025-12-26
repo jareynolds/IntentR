@@ -2,12 +2,11 @@
 
 ## Metadata
 
+- **Description**: Delivers a cohesive navigation system that allows users to seamlessly move between different functional areas of the weather application. This capability provides intuitive user interface elements, clear navigation pathways, and consistent user experience patterns that enable users to efficiently access weather data display, AI prompting, and city selection features.
 - **Storyboard Reference**: Navigation
 
 ## Business Context
 
-### Problem Statement
-Delivers a cohesive navigation system that allows users to seamlessly move between different functional areas of the weather application. This capability provides intuitive user interface elements, clear navigation pathways, and consistent user experience patterns that enable users to efficiently access weather data display, AI prompting, and city selection features.
 
 ### Value Proposition
 Derived from STORY-NAVIGATION which describes 'the navigation in the ui lets the user pick from multiple areas on the web-page in which they can navigate to and take action on to run that portion of the other capabilities'. This connects the various user stories and provides the foundation for user interaction with all other features.
