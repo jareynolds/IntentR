@@ -27,10 +27,11 @@ import (
 )
 
 type Server struct {
-	capRepo      *repository.CapabilityRepository
-	approvalRepo *repository.ApprovalRepository
-	enablerRepo  *repository.EnablerRepository
-	criteriaRepo *repository.AcceptanceCriteriaRepository
+	capRepo         *repository.CapabilityRepository
+	approvalRepo    *repository.ApprovalRepository
+	enablerRepo     *repository.EnablerRepository
+	criteriaRepo    *repository.AcceptanceCriteriaRepository
+	entityStateRepo *repository.EntityStateRepository
 }
 
 func main() {
@@ -70,10 +71,11 @@ func main() {
 	}
 
 	server := &Server{
-		capRepo:      repository.NewCapabilityRepository(db.DB),
-		approvalRepo: repository.NewApprovalRepository(db.DB),
-		enablerRepo:  repository.NewEnablerRepository(db.DB),
-		criteriaRepo: repository.NewAcceptanceCriteriaRepository(db.DB),
+		capRepo:         repository.NewCapabilityRepository(db.DB),
+		approvalRepo:    repository.NewApprovalRepository(db.DB),
+		enablerRepo:     repository.NewEnablerRepository(db.DB),
+		criteriaRepo:    repository.NewAcceptanceCriteriaRepository(db.DB),
+		entityStateRepo: repository.NewEntityStateRepository(db.DB),
 	}
 
 	mux := http.NewServeMux()
@@ -234,6 +236,57 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	}))
 	mux.HandleFunc("OPTIONS /capabilities/{id}/audit-log", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	// Entity State endpoints (INTENT State Model)
+	mux.HandleFunc("GET /state/workspace/{workspaceId}", corsMiddleware(server.handleGetWorkspaceState))
+	mux.HandleFunc("OPTIONS /state/workspace/{workspaceId}", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	mux.HandleFunc("GET /state/capability/{capabilityId}", corsMiddleware(server.handleGetCapabilityState))
+	mux.HandleFunc("PUT /state/capability/{capabilityId}", corsMiddleware(server.handleUpdateCapabilityState))
+	mux.HandleFunc("OPTIONS /state/capability/{capabilityId}", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	mux.HandleFunc("GET /state/enabler/{enablerId}", corsMiddleware(server.handleGetEnablerState))
+	mux.HandleFunc("PUT /state/enabler/{enablerId}", corsMiddleware(server.handleUpdateEnablerState))
+	mux.HandleFunc("OPTIONS /state/enabler/{enablerId}", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	mux.HandleFunc("GET /state/storycard/{cardId}", corsMiddleware(server.handleGetStoryCardState))
+	mux.HandleFunc("PUT /state/storycard/{cardId}", corsMiddleware(server.handleUpdateStoryCardState))
+	mux.HandleFunc("POST /state/storycard", corsMiddleware(server.handleCreateStoryCard))
+	mux.HandleFunc("OPTIONS /state/storycard/{cardId}", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	mux.HandleFunc("OPTIONS /state/storycard", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	mux.HandleFunc("GET /state/history/{entityType}/{entityId}", corsMiddleware(server.handleGetStateHistory))
+	mux.HandleFunc("OPTIONS /state/history/{entityType}/{entityId}", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	mux.HandleFunc("POST /state/capability/sync", corsMiddleware(server.handleSyncCapabilityFromFile))
+	mux.HandleFunc("OPTIONS /state/capability/sync", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	mux.HandleFunc("POST /state/enabler/sync", corsMiddleware(server.handleSyncEnablerFromFile))
+	mux.HandleFunc("OPTIONS /state/enabler/sync", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	mux.HandleFunc("POST /state/storycard/sync", corsMiddleware(server.handleSyncStoryCardFromFile))
+	mux.HandleFunc("OPTIONS /state/storycard/sync", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	// Export/Import endpoints for workspace portability
+	mux.HandleFunc("GET /state/export/{workspaceId}", corsMiddleware(server.handleExportWorkspaceState))
+	mux.HandleFunc("OPTIONS /state/export/{workspaceId}", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	mux.HandleFunc("POST /state/import/{workspaceId}", corsMiddleware(server.handleImportWorkspaceState))
+	mux.HandleFunc("OPTIONS /state/import/{workspaceId}", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -1134,4 +1187,389 @@ func (s *Server) handleCreateEnablerCriteria(w http.ResponseWriter, r *http.Requ
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(criteria)
+}
+
+// =====================================================
+// Entity State Handlers (INTENT State Model)
+// =====================================================
+
+func (s *Server) handleGetWorkspaceState(w http.ResponseWriter, r *http.Request) {
+	workspaceID := r.PathValue("workspaceId")
+	if workspaceID == "" {
+		http.Error(w, "Workspace ID is required", http.StatusBadRequest)
+		return
+	}
+
+	state, err := s.entityStateRepo.GetAllStateByWorkspace(workspaceID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get workspace state: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(state)
+}
+
+func (s *Server) handleGetCapabilityState(w http.ResponseWriter, r *http.Request) {
+	capabilityID := r.PathValue("capabilityId")
+	if capabilityID == "" {
+		http.Error(w, "Capability ID is required", http.StatusBadRequest)
+		return
+	}
+
+	state, err := s.entityStateRepo.GetCapabilityState(capabilityID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get capability state: %v", err), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(state)
+}
+
+func (s *Server) handleUpdateCapabilityState(w http.ResponseWriter, r *http.Request) {
+	capabilityID := r.PathValue("capabilityId")
+	if capabilityID == "" {
+		http.Error(w, "Capability ID is required", http.StatusBadRequest)
+		return
+	}
+
+	var req models.UpdateEntityStateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	userID := 1 // Default user ID
+
+	state, err := s.entityStateRepo.UpdateCapabilityState(capabilityID, req, &userID)
+	if err != nil {
+		// Check if it's an optimistic lock error
+		if _, ok := err.(*models.OptimisticLockError); ok {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+		http.Error(w, fmt.Sprintf("Failed to update capability state: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(state)
+}
+
+func (s *Server) handleGetEnablerState(w http.ResponseWriter, r *http.Request) {
+	enablerID := r.PathValue("enablerId")
+	if enablerID == "" {
+		http.Error(w, "Enabler ID is required", http.StatusBadRequest)
+		return
+	}
+
+	state, err := s.entityStateRepo.GetEnablerState(enablerID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get enabler state: %v", err), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(state)
+}
+
+func (s *Server) handleUpdateEnablerState(w http.ResponseWriter, r *http.Request) {
+	enablerID := r.PathValue("enablerId")
+	if enablerID == "" {
+		http.Error(w, "Enabler ID is required", http.StatusBadRequest)
+		return
+	}
+
+	var req models.UpdateEntityStateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	userID := 1 // Default user ID
+
+	state, err := s.entityStateRepo.UpdateEnablerState(enablerID, req, &userID)
+	if err != nil {
+		if _, ok := err.(*models.OptimisticLockError); ok {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+		http.Error(w, fmt.Sprintf("Failed to update enabler state: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(state)
+}
+
+func (s *Server) handleGetStoryCardState(w http.ResponseWriter, r *http.Request) {
+	cardID := r.PathValue("cardId")
+	if cardID == "" {
+		http.Error(w, "Card ID is required", http.StatusBadRequest)
+		return
+	}
+
+	state, err := s.entityStateRepo.GetStoryCardState(cardID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get story card state: %v", err), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(state)
+}
+
+func (s *Server) handleUpdateStoryCardState(w http.ResponseWriter, r *http.Request) {
+	cardID := r.PathValue("cardId")
+	if cardID == "" {
+		http.Error(w, "Card ID is required", http.StatusBadRequest)
+		return
+	}
+
+	var req models.UpdateEntityStateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	userID := 1 // Default user ID
+
+	state, err := s.entityStateRepo.UpdateStoryCardState(cardID, req, &userID)
+	if err != nil {
+		if _, ok := err.(*models.OptimisticLockError); ok {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+		http.Error(w, fmt.Sprintf("Failed to update story card state: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(state)
+}
+
+func (s *Server) handleCreateStoryCard(w http.ResponseWriter, r *http.Request) {
+	var req models.CreateStoryCardRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	userID := 1 // Default user ID
+
+	card, err := s.entityStateRepo.CreateStoryCard(req, &userID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to create story card: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(card)
+}
+
+func (s *Server) handleGetStateHistory(w http.ResponseWriter, r *http.Request) {
+	entityType := r.PathValue("entityType")
+	entityID := r.PathValue("entityId")
+
+	if entityType == "" || entityID == "" {
+		http.Error(w, "Entity type and ID are required", http.StatusBadRequest)
+		return
+	}
+
+	limitStr := r.URL.Query().Get("limit")
+	limit := 50 // Default limit
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			limit = l
+		}
+	}
+
+	history, err := s.entityStateRepo.GetStateChangeHistory(entityType, entityID, limit)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get state history: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"entity_type": entityType,
+		"entity_id":   entityID,
+		"history":     history,
+	})
+}
+
+func (s *Server) handleSyncCapabilityFromFile(w http.ResponseWriter, r *http.Request) {
+	var cap models.Capability
+	if err := json.NewDecoder(r.Body).Decode(&cap); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	userID := 1 // Default user ID
+
+	result, err := s.entityStateRepo.UpsertCapabilityFromFile(cap, &userID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to sync capability: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func (s *Server) handleSyncEnablerFromFile(w http.ResponseWriter, r *http.Request) {
+	var enabler models.Enabler
+	if err := json.NewDecoder(r.Body).Decode(&enabler); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	userID := 1 // Default user ID
+
+	result, err := s.entityStateRepo.UpsertEnablerFromFile(enabler, &userID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to sync enabler: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func (s *Server) handleSyncStoryCardFromFile(w http.ResponseWriter, r *http.Request) {
+	var storyCard models.StoryCard
+	if err := json.NewDecoder(r.Body).Decode(&storyCard); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	userID := 1 // Default user ID
+
+	result, err := s.entityStateRepo.UpsertStoryCard(storyCard, &userID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to sync story card: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+// WorkspaceStateExport represents the exported state of a workspace
+type WorkspaceStateExport struct {
+	Version      string                `json:"version"`
+	ExportedAt   time.Time             `json:"exported_at"`
+	WorkspaceID  string                `json:"workspace_id"`
+	Capabilities []models.Capability   `json:"capabilities"`
+	Enablers     []models.Enabler      `json:"enablers"`
+	StoryCards   []models.StoryCard    `json:"story_cards"`
+	StateChanges []models.EntityStateChange `json:"state_changes,omitempty"`
+}
+
+func (s *Server) handleExportWorkspaceState(w http.ResponseWriter, r *http.Request) {
+	workspaceID := r.PathValue("workspaceId")
+	if workspaceID == "" {
+		http.Error(w, "Workspace ID is required", http.StatusBadRequest)
+		return
+	}
+
+	// Get all entity states for the workspace
+	bulkState, err := s.entityStateRepo.GetAllStateByWorkspace(workspaceID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get workspace state: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Include state change history (optional, limited)
+	includeHistory := r.URL.Query().Get("include_history") == "true"
+	var stateChanges []models.EntityStateChange
+	if includeHistory {
+		// Get recent state changes for all entities in workspace
+		// This is a simplified approach - you could make it more comprehensive
+		stateChanges = []models.EntityStateChange{}
+	}
+
+	export := WorkspaceStateExport{
+		Version:      "1.0",
+		ExportedAt:   time.Now(),
+		WorkspaceID:  workspaceID,
+		Capabilities: bulkState.Capabilities,
+		Enablers:     bulkState.Enablers,
+		StoryCards:   bulkState.StoryCards,
+		StateChanges: stateChanges,
+	}
+
+	// Set headers for download
+	filename := fmt.Sprintf("workspace_%s_state_%s.json", workspaceID, time.Now().Format("2006-01-02"))
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", "  ")
+	encoder.Encode(export)
+}
+
+func (s *Server) handleImportWorkspaceState(w http.ResponseWriter, r *http.Request) {
+	workspaceID := r.PathValue("workspaceId")
+	if workspaceID == "" {
+		http.Error(w, "Workspace ID is required", http.StatusBadRequest)
+		return
+	}
+
+	var importData WorkspaceStateExport
+	if err := json.NewDecoder(r.Body).Decode(&importData); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid import data: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	userID := 1 // Default user ID
+
+	// Import capabilities
+	importedCaps := 0
+	for _, cap := range importData.Capabilities {
+		cap.WorkspaceID = workspaceID // Override with target workspace
+		_, err := s.entityStateRepo.UpsertCapabilityFromFile(cap, &userID)
+		if err != nil {
+			log.Printf("Warning: Failed to import capability %s: %v", cap.CapabilityID, err)
+			continue
+		}
+		importedCaps++
+	}
+
+	// Import enablers
+	importedEnbs := 0
+	for _, enb := range importData.Enablers {
+		enb.WorkspaceID = workspaceID // Override with target workspace
+		_, err := s.entityStateRepo.UpsertEnablerFromFile(enb, &userID)
+		if err != nil {
+			log.Printf("Warning: Failed to import enabler %s: %v", enb.EnablerID, err)
+			continue
+		}
+		importedEnbs++
+	}
+
+	// Import story cards
+	importedCards := 0
+	for _, card := range importData.StoryCards {
+		card.WorkspaceID = workspaceID // Override with target workspace
+		_, err := s.entityStateRepo.UpsertStoryCard(card, &userID)
+		if err != nil {
+			log.Printf("Warning: Failed to import story card %s: %v", card.CardID, err)
+			continue
+		}
+		importedCards++
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"imported": map[string]int{
+			"capabilities": importedCaps,
+			"enablers":     importedEnbs,
+			"story_cards":  importedCards,
+		},
+		"workspace_id": workspaceID,
+	})
 }

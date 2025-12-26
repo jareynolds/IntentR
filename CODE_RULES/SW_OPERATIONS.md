@@ -1,24 +1,32 @@
 # SOFTWARE DEVELOPMENT OPERATIONS GUIDE
-**Version**: 2.0.0
+**Version**: 3.0.0
 **Last Updated**: December 24, 2025
 **Governed By**: INTENT Philosophy (see [INTENT.md](./INTENT.md))
+**State Model**: See [STATE_MODEL.md](./STATE_MODEL.md) for unified state tracking
 **Author**: Development Team
 
 ---
 
 ## Overview
 
-This document provides **operational procedures** for AI-assisted software development. It defines processes, workflows, and AI agent instructions that implement the INTENT Framework.
+This document provides **operational procedures** for AI-assisted software development. It defines activity types, development plans, and AI agent instructions that implement the INTENT Framework.
 
 ### Document Hierarchy
 
 ```
 INTENT.md (Philosophy, Principles, Framework, Governance)
     │
+    ├── STATE_MODEL.md (Unified State Tracking)
+    │       │
+    │       ├── Lifecycle States (Draft, Active, Implemented, Maintained, Retired)
+    │       ├── Workflow Stages (Intent, Specification, UI-Design, Implementation, Control-Loop)
+    │       ├── Stage Status (In Progress, Ready for Approval, Approved, Blocked)
+    │       └── Approval Status (Pending, Approved, Rejected)
+    │
     └── SW_OPERATIONS.md (This Document)
             │
-            ├── Processes (Capability/Enabler Development Plans)
-            ├── Workflows (Discovery, Design, Implementation)
+            ├── Development Plans (Capability, Enabler)
+            ├── Activity Types (Discovery, Analysis, Design, etc.)
             ├── AI Agent Instructions (Code Editing Standards)
             └── Policies (AI Principles Presets)
 ```
@@ -28,7 +36,8 @@ INTENT.md (Philosophy, Principles, Framework, Governance)
 | Layer | Document | Purpose |
 |-------|----------|---------|
 | **Philosophy** | INTENT.md | What we believe about engineering in the AI age |
-| **Framework** | INTENT.md | The lifecycle: Intent → Specification → System → Control-Loop → Evolution |
+| **Framework** | INTENT.md | The lifecycle: Intent → Specification → UI-Design → Implementation → Control-Loop → Evolution |
+| **State Model** | STATE_MODEL.md | Unified state tracking (Lifecycle, Stages, Status) |
 | **Governance** | INTENT.md | How we maintain intent over time (Control Loop, Intent Drift) |
 | **Process** | SW_OPERATIONS.md | How to do the work (this document) |
 | **Policy** | ACTIVE_AI_PRINCIPLES.md | AI enforcement rules |
@@ -120,26 +129,25 @@ After making ANY code edit, AI agents MUST:
 
 ## Table of Contents
 
-0. [AI Code Editing Standards](#ai-code-editing-standards) ← **NEW: Prevents careless AI mistakes**
+0. [AI Code Editing Standards](#ai-code-editing-standards) ← **Prevents careless AI mistakes**
 1. [Core Principles](#core-principles)
 2. [INTENT Hierarchy](#intent-hierarchy)
-3. [Development Lifecycle](#development-lifecycle)
+3. [Workflow Stages and State Model](#workflow-stages-and-state-model) ← **UNIFIED: 5 stages aligned with INTENT**
 4. [Strategic Themes](#strategic-themes)
 5. [Capabilities](#capabilities)
 6. [Enablers](#enablers)
-7. [Capability Workflow](#capability-workflow)
-8. [WSJF Prioritization](#wsjf-prioritization)
-9. [Discovery Phase](#discovery-phase)
-10. [Capability Development Plan](#capability-development-plan)
-11. [Enabler Development Plan](#enabler-development-plan)
-12. [Development Phases](#development-phases)
-13. [Testing Framework](#testing-framework) → See [TESTING.md](./TESTING.md)
-14. [AI-Assisted Development Guidelines](#ai-assisted-development-guidelines)
-15. [Technology Stack](#technology-stack) → See [TECH_STACK.md](./TECH_STACK.md)
-16. [Standards and Conventions](#standards-and-conventions)
-17. [Document Templates](#document-templates) → See [TEMPLATES.md](./TEMPLATES.md)
-18. [Best Practices](#best-practices)
-19. [Quick Reference](#quick-reference)
+7. [WSJF Prioritization](#wsjf-prioritization)
+8. [Discovery Activity](#discovery-activity)
+9. [Capability Development Plan](#capability-development-plan)
+10. [Enabler Development Plan](#enabler-development-plan)
+11. [Development Activity Types](#development-activity-types) ← **Renamed from Phases**
+12. [Testing Framework](#testing-framework) → See [TESTING.md](./TESTING.md)
+13. [AI-Assisted Development Guidelines](#ai-assisted-development-guidelines)
+14. [Technology Stack](#technology-stack) → See [TECH_STACK.md](./TECH_STACK.md)
+15. [Standards and Conventions](#standards-and-conventions)
+16. [Document Templates](#document-templates) → See [TEMPLATES.md](./TEMPLATES.md)
+17. [Best Practices](#best-practices)
+18. [Quick Reference](#quick-reference)
 
 ---
 
@@ -237,34 +245,63 @@ With AI-assisted development:
 
 ---
 
-## Development Lifecycle
+## Workflow Stages and State Model
 
-### Phase Overview
+**Reference**: See [STATE_MODEL.md](./STATE_MODEL.md) for complete state model documentation.
 
-The development lifecycle follows these phases:
+### The Unified State Model
 
-1. **Discovery** - Analyze existing systems and create documentation
-2. **Design** - Define the solution architecture and interfaces
-3. **Analysis** - Evaluate requirements and constraints
-4. **Implementation** - Build the solution
-5. **Testing** - Verify functionality and quality
-6. **Refactoring** - Improve code quality and design
-7. **Reverse-to-Design** - Update design documentation from code
-8. **Retirement** - Decommission obsolete components
+The INTENT Framework uses a unified state model with four orthogonal dimensions:
 
-### INTENT Development Workflow
+| Dimension | Purpose | Values |
+|-----------|---------|--------|
+| **Lifecycle State** | Where is this in its overall life? | Draft, Active, Implemented, Maintained, Retired |
+| **Workflow Stage** | Which of the 5 stages is it in? | Intent, Specification, UI-Design, Implementation, Control-Loop |
+| **Stage Status** | Progress within current stage | In Progress, Ready for Approval, Approved, Blocked |
+| **Approval Status** | Authorization decision | Pending, Approved, Rejected |
+
+### The 5 Workflow Stages
+
+These stages align with the INTENT Lifecycle and the application:
+
+```
+Intent → Specification → UI-Design → Implementation → Control-Loop
+  │           │              │             │              │
+  ▼           ▼              ▼             ▼              ▼
+[WHY]      [WHAT]         [HOW]        [BUILD]       [VALIDATE]
+  │           │              │             │              │
+  ▼           ▼              ▼             ▼              ▼
+[APPROVE]  [APPROVE]     [APPROVE]     [APPROVE]     [COMPLETE]
+```
+
+| Stage | Focus | Key Question | Deliverables |
+|-------|-------|--------------|--------------|
+| **Intent** | WHY | Why are we doing this? | Vision, goals, constraints, success criteria |
+| **Specification** | WHAT | What are we building? | Requirements, enablers, scope boundaries |
+| **UI-Design** | HOW | How will it look and work? | Visual designs, API contracts, data models |
+| **Implementation** | BUILD | Does it work correctly? | Code, tests, integrations |
+| **Control-Loop** | VALIDATE | Does it match intent? | Validation results, metrics, acceptance |
+
+### INTENT Development Hierarchy
 
 ```
 Strategic Theme → Component → Capability → Enabler → Requirement
 ```
 
-**Capability Workflow Stages:**
-```
-Specification → Definition → Design → Execution
-      │              │           │          │
-      ▼              ▼           ▼          ▼
-  [APPROVE]      [APPROVE]   [APPROVE]  [COMPLETE]
-```
+### Development Activity Types
+
+**Note**: These are activities you perform, not stages you track. See [Development Activity Types](#development-activity-types) for details.
+
+| Activity | When Used | Workflow Stages |
+|----------|-----------|-----------------|
+| Discovery | Analyzing existing code | Intent, Specification |
+| Analysis | Evaluating requirements | Intent, Specification |
+| Design | Creating technical specs | UI-Design |
+| Implementation | Writing code | Implementation |
+| Testing | Verifying functionality | Implementation, Control-Loop |
+| Refactoring | Improving code quality | Implementation |
+| Reverse-to-Design | Updating docs from code | Control-Loop (triggers Evolution) |
+| Retirement | Decommissioning | Lifecycle exit |
 
 ---
 
@@ -370,66 +407,74 @@ Enablers are the technical implementations that realize capabilities. This is wh
 
 ---
 
-## Capability Workflow
+## Capability Workflow (Stage Details)
 
-INTENT uses a streamlined four-stage workflow for capabilities:
+**Reference**: For the unified state model, see [STATE_MODEL.md](./STATE_MODEL.md).
+
+The 5 workflow stages align with the INTENT Lifecycle. Each stage requires human approval before advancing.
 
 ```
-Specification → Definition → Design → Execution
-      │              │           │          │
-      ▼              ▼           ▼          ▼
-  [APPROVE]      [APPROVE]   [APPROVE]  [COMPLETE]
+Intent → Specification → UI-Design → Implementation → Control-Loop
+  │           │              │             │              │
+  ▼           ▼              ▼             ▼              ▼
+[WHY]      [WHAT]         [HOW]        [BUILD]       [VALIDATE]
+  │           │              │             │              │
+  ▼           ▼              ▼             ▼              ▼
+[APPROVE]  [APPROVE]     [APPROVE]     [APPROVE]     [COMPLETE]
 ```
 
-### Stage 1: Specification
-**Focus**: Define WHAT and WHY
+### Stage 1: Intent
+**Focus**: WHY - Define vision and goals
 
 **Activities:**
-- Identify business capabilities needed
-- Document business value and success criteria
+- Identify business need or opportunity
+- Define vision, goals, and success criteria
+- Specify constraints and non-goals
 - Identify stakeholders and users
+
+**AI Role**: Assist in capturing intent, drafting vision statements, suggesting success criteria.
+
+**Human Role**: Validate business value, define goals, approve intent.
+
+**Exit Criteria:**
+- [ ] Vision statement documented
+- [ ] Goals clearly articulated
+- [ ] Constraints and non-goals defined
+- [ ] Stakeholders identified
+- [ ] Success metrics defined
+- [ ] **HUMAN APPROVAL OBTAINED**
+
+### Stage 2: Specification
+**Focus**: WHAT - Define requirements and enablers
+
+**Activities:**
+- Define functional and non-functional requirements
+- Break capability into enablers
+- Identify dependencies and integration points
 - Define scope boundaries (in/out)
 - Create user scenarios with concrete examples
 
-**AI Role**: Assist in identifying capabilities, drafting specifications, suggesting success criteria.
-
-**Human Role**: Validate business value, approve capability definitions.
-
-**Exit Criteria:**
-- [ ] Problem statement clearly articulated
-- [ ] User scenarios documented with examples
-- [ ] Scope boundaries defined
-- [ ] Success metrics identified
-- [ ] **HUMAN APPROVAL OBTAINED**
-
-### Stage 2: Definition
-**Focus**: Define HOW (high-level) - Enabler identification
-
-**Activities:**
-- Break capability into enablers
-- Identify technical dependencies
-- Define integration points
-- Estimate complexity
-
-**AI Role**: Suggest enabler breakdown, identify dependencies, create initial enabler specs with examples.
+**AI Role**: Suggest enabler breakdown, identify dependencies, create initial specs with examples.
 
 **Human Role**: Validate technical approach, approve enabler definitions.
 
 **Exit Criteria:**
 - [ ] All enablers identified
+- [ ] Requirements defined with examples
 - [ ] Dependencies mapped
-- [ ] Technical approach validated
+- [ ] Scope boundaries explicit
 - [ ] **HUMAN APPROVAL OBTAINED**
 
-### Stage 3: Design
-**Focus**: Define HOW (detailed) - AI specification review
+### Stage 3: UI-Design
+**Focus**: HOW - Visual and technical design
 
 **Activities:**
+- Create visual designs (wireframes, mockups)
+- Define UX flows and interactions
 - Design APIs with request/response examples
 - Create data models with constraints
-- Design component interactions
 - **AI reviews specifications for ambiguities**
-- Document edge cases
+- Document edge cases and error handling
 
 **AI Role**: Generate detailed technical specs, identify gaps, suggest improvements.
 
@@ -444,31 +489,54 @@ Specification → Definition → Design → Execution
 - [ ] Performance requirements are testable
 
 **Exit Criteria:**
-- [ ] Technical specifications complete
+- [ ] Visual designs complete (if applicable)
 - [ ] APIs defined with examples
 - [ ] Data models documented
 - [ ] AI review completed - no ambiguities
 - [ ] **HUMAN APPROVAL OBTAINED**
 
-### Stage 4: Execution
-**Focus**: BUILD and TEST
+### Stage 4: Implementation
+**Focus**: BUILD - Implement and test
 
 **Activities:**
 - Implement code following design specs
-- Write and run tests
+- Write unit and integration tests
 - Integrate with existing systems
-- Validate against acceptance criteria
+- Deploy to target environment
 
 **AI Role**: Generate code, write tests, assist with debugging.
 
-**Human Role**: Review code, validate functionality, approve completion.
+**Human Role**: Review code, validate functionality, approve implementation.
 
 **Exit Criteria:**
 - [ ] Code implemented and working
-- [ ] Tests passing
+- [ ] Tests passing (unit, integration)
 - [ ] Integration verified
+- [ ] Deployed to target environment
+- [ ] **HUMAN APPROVAL OBTAINED**
+
+### Stage 5: Control-Loop
+**Focus**: VALIDATE - Verify against intent
+
+**Activities:**
+- Verify implementation matches original intent
+- Run acceptance tests
+- Validate against success metrics
+- Check for intent drift
+- Obtain stakeholder sign-off
+- Set up monitoring and alerting
+
+**AI Role**: Assist with validation tests, generate metrics reports.
+
+**Human Role**: Validate against intent, approve completion, stakeholder sign-off.
+
+**Exit Criteria:**
+- [ ] Implementation validated against intent
 - [ ] Acceptance criteria met
-- [ ] **HUMAN APPROVAL TO MARK COMPLETE**
+- [ ] Success metrics baseline established
+- [ ] Monitoring in place
+- [ ] Stakeholder sign-off obtained
+- [ ] **MARKED COMPLETE**
 
 ---
 
@@ -971,9 +1039,13 @@ Same as Capability Development Plan:
 
 ---
 
-# PART 3: DEVELOPMENT PHASES
+# PART 3: DEVELOPMENT ACTIVITY TYPES
 
-## Design Phase
+**Note**: These are activities you perform at various workflow stages, not stages to track. Activities describe WHAT you do; stages describe WHERE you are.
+
+---
+
+## Design Activity
 
 ### Objectives
 - Define clear boundaries between services
@@ -1022,7 +1094,7 @@ All design artifacts should be stored in:
 
 ---
 
-## Analysis Phase
+## Analysis Activity
 
 ### Objectives
 - Validate requirements against business goals
@@ -1061,7 +1133,7 @@ Create a risk register:
 
 ---
 
-## Implementation Phase
+## Implementation Activity
 
 ### Objectives
 - Write clean, maintainable code
@@ -1135,7 +1207,7 @@ func ProcessRequest(ctx context.Context, data Data) error {
 
 ---
 
-## Refactoring Phase
+## Refactoring Activity
 
 ### Objectives
 - Improve code quality without changing behavior
@@ -1170,7 +1242,7 @@ Common code smells:
 
 ---
 
-## Reverse-to-Design Phase
+## Reverse-to-Design Activity
 
 ### Objectives
 - Ensure documentation reflects actual implementation
@@ -1215,7 +1287,7 @@ Accepted
 
 ---
 
-## Retirement Phase
+## Retirement Activity
 
 ### Objectives
 - Safely decommission obsolete services
@@ -1588,27 +1660,41 @@ Types: feat, fix, docs, style, refactor, test, chore
 
 # QUICK REFERENCE
 
-## Workflow Summary
+## Workflow Stages
 
 ```
-Specification → Definition → Design → Execution
-      │              │           │          │
-      ▼              ▼           ▼          ▼
-  [APPROVE]      [APPROVE]   [APPROVE]  [COMPLETE]
+Intent → Specification → UI-Design → Implementation → Control-Loop
+  │           │              │             │              │
+  ▼           ▼              ▼             ▼              ▼
+[WHY]      [WHAT]         [HOW]        [BUILD]       [VALIDATE]
+  │           │              │             │              │
+  ▼           ▼              ▼             ▼              ▼
+[APPROVE]  [APPROVE]     [APPROVE]     [APPROVE]     [COMPLETE]
 ```
 
-## State Reference
+## State Model Reference
 
-| State | Can Transition To |
-|-------|-------------------|
-| draft | pending_approval |
-| pending_approval | approved, rejected |
-| approved | in_progress |
-| in_progress | completed, blocked, skipped |
-| rejected | draft (for revision) |
-| blocked | in_progress (when unblocked), skipped |
-| completed | (terminal) |
-| skipped | (terminal) |
+**See**: [STATE_MODEL.md](./STATE_MODEL.md) for complete state documentation.
+
+| Dimension | Values |
+|-----------|--------|
+| **Lifecycle State** | Draft, Active, Implemented, Maintained, Retired |
+| **Workflow Stage** | Intent, Specification, UI-Design, Implementation, Control-Loop |
+| **Stage Status** | In Progress, Ready for Approval, Approved, Blocked |
+| **Approval Status** | Pending, Approved, Rejected |
+
+## Activity Types
+
+| Activity | When Used |
+|----------|-----------|
+| Discovery | Analyzing existing code |
+| Analysis | Evaluating requirements |
+| Design | Creating technical specs |
+| Implementation | Writing code |
+| Testing | Verifying functionality |
+| Refactoring | Improving code quality |
+| Reverse-to-Design | Updating docs from code |
+| Retirement | Decommissioning |
 
 ## WSJF Formula
 
@@ -1637,14 +1723,13 @@ Strategic Theme → Component → Capability → Enabler → Requirement
 3. **ALWAYS** provide clear error messages with recovery options
 4. **MAY** skip elements with justification and approval
 5. **MUST** document all decisions and state changes
-6. **MUST** review specifications for ambiguities before requesting approval in Design stage
+6. **MUST** review specifications for ambiguities before requesting approval in UI-Design stage
 7. **MUST** include input/output examples in all requirements
 8. **MUST** document edge cases before implementation
 
 ---
 
-**Document Version**: 1.0.0
+**Document Version**: 3.0.0
 **Framework**: INTENT (Scaled Agile With AI)
-**Last Updated**: December 2, 2025
+**Last Updated**: December 24, 2025
 **Maintained By**: Development Team
-- 1. the readme is fine how it is - don't change it. #2 but the system uses port 6175 so plese fix the CLAUDE.md. #3 Fix the quick start section

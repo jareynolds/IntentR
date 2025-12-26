@@ -9,8 +9,8 @@
   "selectedUIFramework": "darkblue",
   "ownerId": "admin@intentr.local",
   "ownerName": "System Administrator",
-  "isShared": true,
+  "isShared": false,
   "createdAt": "2025-12-24T00:44:28.694Z",
-  "updatedAt": "2025-12-24T19:03:15.476Z",
+  "updatedAt": "2025-12-26T01:16:22.473Z",
   "version": "1.0"
 }

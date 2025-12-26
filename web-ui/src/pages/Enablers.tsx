@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Card, Alert, Button, ConfirmDialog, PageLayout } from '../components';
 import { useEnabler } from '../context/EnablerContext';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { useEntityState } from '../context/EntityStateContext';
 import { INTEGRATION_URL } from '../api/client';
 
 // File-based capability from workspace definition folder
@@ -11,6 +12,7 @@ interface FileCapability {
   path: string;
   name: string;
   description: string;
+  purpose?: string;
   status: string;
   capabilityId: string;
   storyboardReference?: string;
@@ -28,6 +30,8 @@ interface FileEnabler {
   priority: string;
   capabilityId: string;
   enablerId: string;
+  // INTENT State Model - 4 dimensions (from fields parsing)
+  fields?: Record<string, string>;
 }
 import {
   type Enabler,
@@ -41,6 +45,10 @@ import {
   type RequirementType,
   type RequirementPriority,
   type EnablerSpecification,
+  type LifecycleState,
+  type WorkflowStage,
+  type StageStatus,
+  type ApprovalStatus,
   getEnablerStatusDisplayName,
   getEnablerStatusColor,
   getRequirementTypeDisplayName,
@@ -93,6 +101,7 @@ export const Enablers: React.FC = () => {
   } = useEnabler();
 
   const { currentWorkspace } = useWorkspace();
+  const { enablers: dbEnablers, syncEnabler, fetchEnablerState, capabilities: dbCapabilities, syncCapability } = useEntityState();
   const [searchParams, setSearchParams] = useSearchParams();
   const [capabilities, setCapabilities] = useState<FileCapability[]>([]);
   const [loadingCapabilities, setLoadingCapabilities] = useState(false);
@@ -165,7 +174,12 @@ export const Enablers: React.FC = () => {
     purpose: '',
     owner: '',
     priority: 'medium',
-    status: 'In Draft',
+    // INTENT State Model - 4 dimensions
+    // New enablers: active lifecycle, specification stage, in_progress status
+    lifecycle_state: 'active',
+    workflow_stage: 'specification',
+    stage_status: 'in_progress',
+    approval_status: 'pending',
   });
 
   // Inline requirements for enabler creation
@@ -323,6 +337,7 @@ export const Enablers: React.FC = () => {
               path: cap.path,
               name: cap.name || cap.filename.replace(/\.md$/, ''),
               description: cap.description || '',
+              purpose: cap.purpose || cap.fields?.['Purpose'] || '',
               status: cap.status || '',
               capabilityId: cap.fields?.['ID'] || cap.filename.replace(/\.md$/, ''),
               storyboardReference: storyboardRef,
@@ -382,6 +397,8 @@ export const Enablers: React.FC = () => {
             priority: enb.priority || 'medium',
             capabilityId: enb.capabilityId || '',
             enablerId: enb.enablerId || enb.filename.replace(/\.md$/, ''),
+            // Include fields for INTENT State Model dimensions
+            fields: enb.fields || {},
           }));
         setFileEnablers(enbs);
         return enbs;
@@ -415,6 +432,12 @@ export const Enablers: React.FC = () => {
       purpose: '',
       owner: '',
       priority: 'medium',
+      // INTENT State Model - 4 dimensions
+      // New enablers: active lifecycle, specification stage, in_progress status
+      lifecycle_state: 'active',
+      workflow_stage: 'specification',
+      stage_status: 'in_progress',
+      approval_status: 'pending',
     });
     setInlineRequirements([]); // Reset inline requirements
     setShowEnablerForm(true);
@@ -430,7 +453,44 @@ export const Enablers: React.FC = () => {
     setCapabilityNeedsConfirmation(false);
 
     // Set the capability ID for the form dropdown (NOT the main filter)
-    setFormCapabilityId(enabler.capabilityId || null);
+    // If the stored capabilityId is actually a name (not an ID like CAP-xxx), find the actual capability
+    let capIdToSet = enabler.capabilityId || null;
+    if (capIdToSet && !capIdToSet.startsWith('CAP-')) {
+      // The stored value might be a capability name, find the matching capability by name
+      const matchingCap = capabilities.find(c =>
+        c.name === capIdToSet ||
+        c.name?.toLowerCase() === capIdToSet?.toLowerCase()
+      );
+      if (matchingCap?.capabilityId) {
+        capIdToSet = matchingCap.capabilityId;
+        console.log('Resolved capability name to ID:', enabler.capabilityId, '->', capIdToSet);
+      }
+    }
+    setFormCapabilityId(capIdToSet);
+
+    // Get INTENT State Model dimensions from DATABASE (single source of truth)
+    const enablerId = enabler.enablerId || enabler.fields?.['ID'] || '';
+    let lifecycleState = 'draft';
+    let workflowStage = 'intent';
+    let stageStatus = 'in_progress';
+    let approvalStatus = 'pending';
+
+    if (enablerId) {
+      // Try to get state from cached dbEnablers first
+      let dbState = dbEnablers.get(enablerId);
+
+      // If not in cache, fetch from database
+      if (!dbState) {
+        dbState = await fetchEnablerState(enablerId) || undefined;
+      }
+
+      if (dbState) {
+        lifecycleState = dbState.lifecycle_state || 'draft';
+        workflowStage = dbState.workflow_stage || 'intent';
+        stageStatus = dbState.stage_status || 'in_progress';
+        approvalStatus = dbState.approval_status || 'pending';
+      }
+    }
 
     // Populate form with existing enabler data
     setEnablerFormData({
@@ -440,6 +500,11 @@ export const Enablers: React.FC = () => {
       purpose: enabler.purpose || '',
       owner: enabler.owner || '',
       priority: (enabler.priority as any) || 'medium',
+      // INTENT State Model - 4 dimensions from DATABASE
+      lifecycle_state: lifecycleState as LifecycleState,
+      workflow_stage: workflowStage as WorkflowStage,
+      stage_status: stageStatus as StageStatus,
+      approval_status: approvalStatus as ApprovalStatus,
     });
 
     // Try to load requirements from the file
@@ -609,7 +674,11 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
       purpose: enabler.purpose || '',
       owner: enabler.owner || '',
       priority: enabler.priority,
-      status: enabler.status || 'In Draft',
+      // INTENT State Model - 4 dimensions
+      lifecycle_state: enabler.lifecycle_state || 'draft',
+      workflow_stage: enabler.workflow_stage || 'intent',
+      stage_status: enabler.stage_status || 'in_progress',
+      approval_status: enabler.approval_status || 'pending',
     });
     setShowEnablerForm(true);
   };
@@ -705,19 +774,26 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
         fileName = `${enablerFormData.enabler_id}-${nameSlug}.md`;
       }
 
-      // Find the capability name for reference
-      const capability = capabilities.find(c => c.capabilityId === formCapabilityId);
+      // Find the capability name for reference - search by both ID and name
+      const capability = capabilities.find(c =>
+        c.capabilityId === formCapabilityId ||
+        c.name === formCapabilityId ||
+        c.name?.toLowerCase() === formCapabilityId?.toLowerCase()
+      );
       const capabilityName = capability?.name || formCapabilityId || 'Unknown';
+      const capabilityId = capability?.capabilityId || formCapabilityId || '';
 
-      // Generate markdown content
+      // Generate markdown content (NO state fields - state is stored in database only)
       let markdown = `# ${enablerFormData.name}\n\n`;
       markdown += `## Metadata\n`;
       markdown += `- **ID**: ${enablerFormData.enabler_id}\n`;
       markdown += `- **Type**: Enabler\n`;
-      markdown += `- **Capability**: ${capabilityName} (${formCapabilityId})\n`;
+      markdown += `- **Capability ID**: ${capabilityId}\n`;  // Store the actual capability ID for reliable parsing
+      markdown += `- **Capability**: ${capabilityName}\n`;
       markdown += `- **Owner**: ${enablerFormData.owner || 'Not specified'}\n`;
       markdown += `- **Priority**: ${enablerFormData.priority || 'medium'}\n`;
-      markdown += `- **Status**: ${enablerFormData.status || 'In Draft'}\n`;
+      // NOTE: State fields (lifecycle_state, workflow_stage, stage_status, approval_status)
+      // are NOT written to markdown - database is the single source of truth
       markdown += `- **Created**: ${new Date().toLocaleString()}\n\n`;
 
       if (enablerFormData.purpose) {
@@ -770,6 +846,88 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText || 'Failed to save enabler');
+      }
+
+      // Save state to DATABASE via EntityStateContext (single source of truth for state)
+      if (currentWorkspace?.id && enablerFormData.enabler_id) {
+        try {
+          // Find the parent capability - check both capabilityId formats
+          console.log('Looking for capability with formCapabilityId:', formCapabilityId);
+          console.log('Available capabilities:', capabilities.map(c => ({ id: c.capabilityId, name: c.name })));
+
+          const capability = capabilities.find(c =>
+            c.capabilityId === formCapabilityId ||
+            c.name === formCapabilityId ||  // Match by capability name too
+            c.name?.toLowerCase() === formCapabilityId?.toLowerCase()  // Case-insensitive name match
+          );
+          console.log('Found capability:', capability);
+
+          // IMPORTANT: We need the database ID of the capability, not the string capability_id
+          // First, check if the capability is already in the database cache
+          let capabilityDbId = 0;
+          const capId = capability?.capabilityId || capability?.fields?.['ID'] || capability?.fields?.['Capability ID'];
+
+          if (capId) {
+            console.log('Checking database for capability:', capId);
+            const dbCap = dbCapabilities.get(capId);
+            console.log('Database capability found:', dbCap);
+
+            if (dbCap?.id) {
+              capabilityDbId = dbCap.id;
+              console.log('Using cached database ID:', capabilityDbId);
+            } else {
+              // Capability not in database yet - sync it first to satisfy FK constraint
+              console.log('Parent capability not in database, syncing first:', capId);
+              const syncedCap = await syncCapability({
+                capability_id: capId,
+                name: capability?.name || 'Unknown',
+                description: capability?.description || '',
+                purpose: capability?.purpose || '',
+                storyboard_reference: capability?.storyboardReference || '',
+                workspace_id: currentWorkspace.id,
+                file_path: capability?.path || '',
+                lifecycle_state: 'draft',
+                workflow_stage: 'intent',
+                stage_status: 'in_progress',
+                approval_status: 'pending',
+              });
+              console.log('Synced capability result:', syncedCap);
+              if (syncedCap?.id) {
+                capabilityDbId = syncedCap.id;
+                console.log('Parent capability synced with database ID:', capabilityDbId);
+              } else {
+                console.error('syncCapability returned but without id:', syncedCap);
+              }
+            }
+          } else {
+            console.log('No capability ID found in capability object');
+          }
+
+          if (capabilityDbId === 0) {
+            console.warn('Could not determine parent capability database ID, enabler state sync skipped. capId:', capId, 'formCapabilityId:', formCapabilityId);
+          } else {
+            await syncEnabler({
+              enabler_id: enablerFormData.enabler_id,
+              capability_id: capabilityDbId, // Use the database ID, not the string ID
+              name: enablerFormData.name,
+              description: enablerFormData.purpose || '',
+              purpose: enablerFormData.purpose || '',
+              owner: enablerFormData.owner || '',
+              priority: enablerFormData.priority || 'medium',
+              workspace_id: currentWorkspace.id,
+              file_path: editingFileEnabler?.path || `${currentWorkspace.projectFolder}/definition/${fileName}`,
+              // INTENT State Model - saved to DATABASE only
+              lifecycle_state: (enablerFormData.lifecycle_state || 'draft') as 'draft' | 'active' | 'implemented' | 'maintained' | 'retired',
+              workflow_stage: (enablerFormData.workflow_stage || 'intent') as 'intent' | 'specification' | 'ui_design' | 'implementation' | 'control_loop',
+              stage_status: (enablerFormData.stage_status || 'in_progress') as 'in_progress' | 'ready_for_approval' | 'approved' | 'blocked',
+              approval_status: (enablerFormData.approval_status || 'pending') as 'pending' | 'approved' | 'rejected',
+            });
+          }
+        } catch (syncErr) {
+          console.warn('Failed to sync enabler state to database:', syncErr);
+          alert('Failed to save state to database. Please try again.');
+          return; // Don't proceed if state save fails - state is critical
+        }
       }
 
       setShowEnablerForm(false);
@@ -1483,25 +1641,105 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
               </select>
             </div>
 
-            <div>
-              <label className="text-subheadline">Status</label>
-              <select
-                className="input"
-                value={enablerFormData.status || 'In Draft'}
-                onChange={(e) => setEnablerFormData({ ...enablerFormData, status: e.target.value })}
-                style={{ width: '100%', marginTop: '4px' }}
-              >
-                <option value="In Draft">In Draft</option>
-                <option value="Ready for Analysis">Ready for Analysis</option>
-                <option value="In Analysis">In Analysis</option>
-                <option value="Ready for Design">Ready for Design</option>
-                <option value="In Design">In Design</option>
-                <option value="Ready for Implementation">Ready for Implementation</option>
-                <option value="In Implementation">In Implementation</option>
-                <option value="Implemented">Implemented</option>
-                <option value="Ready for Refactor">Ready for Refactor</option>
-                <option value="Ready for Retirement">Ready for Retirement</option>
-              </select>
+          </div>
+
+          {/* INTENT State Model - 4 Dimensions */}
+          <div style={{
+            marginTop: '16px',
+            padding: '16px',
+            border: '1px solid var(--color-separator)',
+            borderRadius: '12px',
+            backgroundColor: 'var(--color-secondarySystemBackground)'
+          }}>
+            <h4 className="text-subheadline" style={{ marginBottom: '12px' }}>INTENT State Model</h4>
+            <p className="text-caption1 text-secondary" style={{ marginBottom: '12px' }}>
+              Track through lifecycle using 4 independent dimensions.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {/* Lifecycle State */}
+              <div>
+                <label className="text-caption1" style={{ fontWeight: 500 }}>Lifecycle State</label>
+                <select
+                  className="input"
+                  value={enablerFormData.lifecycle_state || 'draft'}
+                  onChange={(e) => setEnablerFormData({ ...enablerFormData, lifecycle_state: e.target.value as LifecycleState })}
+                  style={{ width: '100%', marginTop: '4px' }}
+                >
+                  <option value="draft">Draft</option>
+                  <option value="active">Active</option>
+                  <option value="implemented">Implemented</option>
+                  <option value="maintained">Maintained</option>
+                  <option value="retired">Retired</option>
+                </select>
+              </div>
+
+              {/* Workflow Stage */}
+              <div>
+                <label className="text-caption1" style={{ fontWeight: 500 }}>Workflow Stage</label>
+                <select
+                  className="input"
+                  value={enablerFormData.workflow_stage || 'intent'}
+                  onChange={(e) => setEnablerFormData({ ...enablerFormData, workflow_stage: e.target.value as WorkflowStage })}
+                  disabled={enablerFormData.lifecycle_state !== 'active'}
+                  style={{
+                    width: '100%',
+                    marginTop: '4px',
+                    opacity: enablerFormData.lifecycle_state !== 'active' ? 0.6 : 1
+                  }}
+                >
+                  <option value="intent">Intent</option>
+                  <option value="specification">Specification</option>
+                  <option value="ui_design">UI-Design</option>
+                  <option value="implementation">Implementation</option>
+                  <option value="control_loop">Control-Loop</option>
+                </select>
+              </div>
+
+              {/* Stage Status */}
+              <div>
+                <label className="text-caption1" style={{ fontWeight: 500 }}>Stage Status</label>
+                <select
+                  className="input"
+                  value={enablerFormData.stage_status || 'in_progress'}
+                  onChange={(e) => setEnablerFormData({ ...enablerFormData, stage_status: e.target.value as StageStatus })}
+                  disabled={enablerFormData.lifecycle_state !== 'active'}
+                  style={{
+                    width: '100%',
+                    marginTop: '4px',
+                    opacity: enablerFormData.lifecycle_state !== 'active' ? 0.6 : 1
+                  }}
+                >
+                  <option value="in_progress">In Progress</option>
+                  <option value="ready_for_approval">Ready for Approval</option>
+                  <option value="approved">Approved</option>
+                  <option value="blocked">Blocked</option>
+                </select>
+              </div>
+
+              {/* Approval Status */}
+              <div>
+                <label className="text-caption1" style={{ fontWeight: 500 }}>Approval Status</label>
+                <select
+                  className="input"
+                  value={enablerFormData.approval_status || 'pending'}
+                  onChange={(e) => {
+                    const newApprovalStatus = e.target.value as ApprovalStatus;
+                    // Auto-set stage_status based on approval status
+                    let newStageStatus = enablerFormData.stage_status;
+                    if (newApprovalStatus === 'approved') {
+                      newStageStatus = 'approved';
+                    } else if (newApprovalStatus === 'rejected') {
+                      newStageStatus = 'blocked';
+                    }
+                    setEnablerFormData({ ...enablerFormData, approval_status: newApprovalStatus, stage_status: newStageStatus });
+                  }}
+                  style={{ width: '100%', marginTop: '4px' }}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -1989,38 +2227,75 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label className="text-subheadline">Status</label>
+                <label className="text-subheadline">Lifecycle State</label>
                 <select
                   className="input"
-                  value={editingSpecification.status}
-                  onChange={(e) => setEditingSpecification({ ...editingSpecification, status: e.target.value })}
+                  value={editingSpecification.lifecycle_state || 'draft'}
+                  onChange={(e) => setEditingSpecification({ ...editingSpecification, lifecycle_state: e.target.value })}
                   style={{ width: '100%', marginTop: '4px' }}
                 >
-                  <option value="In Draft">In Draft</option>
-                  <option value="Ready for Analysis">Ready for Analysis</option>
-                  <option value="In Analysis">In Analysis</option>
-                  <option value="Ready for Design">Ready for Design</option>
-                  <option value="In Design">In Design</option>
-                  <option value="Ready for Implementation">Ready for Implementation</option>
-                  <option value="In Implementation">In Implementation</option>
-                  <option value="Implemented">Implemented</option>
-                  <option value="Ready for Refactor">Ready for Refactor</option>
-                  <option value="Ready for Retirement">Ready for Retirement</option>
+                  <option value="draft">Draft</option>
+                  <option value="active">Active</option>
+                  <option value="implemented">Implemented</option>
+                  <option value="maintained">Maintained</option>
+                  <option value="retired">Retired</option>
                 </select>
               </div>
 
               <div>
-                <label className="text-subheadline">Approval</label>
+                <label className="text-subheadline">Workflow Stage</label>
                 <select
                   className="input"
-                  value={editingSpecification.approval}
-                  onChange={(e) => setEditingSpecification({ ...editingSpecification, approval: e.target.value })}
+                  value={editingSpecification.workflow_stage || 'intent'}
+                  onChange={(e) => setEditingSpecification({ ...editingSpecification, workflow_stage: e.target.value })}
                   style={{ width: '100%', marginTop: '4px' }}
                 >
-                  <option value="Pending">Pending</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Rejected">Rejected</option>
-                  <option value="Not Approved">Not Approved</option>
+                  <option value="intent">Intent</option>
+                  <option value="specification">Specification</option>
+                  <option value="ui_design">UI-Design</option>
+                  <option value="implementation">Implementation</option>
+                  <option value="control_loop">Control-Loop</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div>
+                <label className="text-subheadline">Stage Status</label>
+                <select
+                  className="input"
+                  value={editingSpecification.stage_status || 'in_progress'}
+                  onChange={(e) => setEditingSpecification({ ...editingSpecification, stage_status: e.target.value })}
+                  style={{ width: '100%', marginTop: '4px' }}
+                >
+                  <option value="in_progress">In Progress</option>
+                  <option value="ready_for_approval">Ready for Approval</option>
+                  <option value="approved">Approved</option>
+                  <option value="blocked">Blocked</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-subheadline">Approval Status</label>
+                <select
+                  className="input"
+                  value={editingSpecification.approval_status || 'pending'}
+                  onChange={(e) => {
+                    const newApprovalStatus = e.target.value;
+                    // Auto-set stage_status based on approval status
+                    let newStageStatus = editingSpecification.stage_status;
+                    if (newApprovalStatus === 'approved') {
+                      newStageStatus = 'approved';
+                    } else if (newApprovalStatus === 'rejected') {
+                      newStageStatus = 'blocked';
+                    }
+                    setEditingSpecification({ ...editingSpecification, approval_status: newApprovalStatus, stage_status: newStageStatus });
+                  }}
+                  style={{ width: '100%', marginTop: '4px' }}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
                 </select>
               </div>
             </div>

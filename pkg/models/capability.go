@@ -15,17 +15,28 @@ type Capability struct {
 	ID                  int       `json:"id"`
 	CapabilityID        string    `json:"capability_id"`
 	Name                string    `json:"name"`
-	Status              string    `json:"status"`
+	Status              string    `json:"status"` // Legacy field
 	Description         string    `json:"description"`
 	Purpose             string    `json:"purpose"`
 	StoryboardReference string    `json:"storyboard_reference"`
 	CreatedAt           time.Time `json:"created_at"`
 	UpdatedAt           time.Time `json:"updated_at"`
 	CreatedBy           *int      `json:"created_by"`
+	UpdatedBy           *int      `json:"updated_by,omitempty"`
 	IsActive            bool      `json:"is_active"`
-	// Approval workflow fields
-	WorkflowStage  *string `json:"workflow_stage,omitempty"`
-	ApprovalStatus *string `json:"approval_status,omitempty"`
+
+	// INTENT State Model - 4 dimensions
+	LifecycleState string `json:"lifecycle_state"` // draft, active, implemented, maintained, retired
+	WorkflowStage  string `json:"workflow_stage"`  // intent, specification, ui_design, implementation, control_loop
+	StageStatus    string `json:"stage_status"`    // in_progress, ready_for_approval, approved, blocked
+	ApprovalStatus string `json:"approval_status"` // pending, approved, rejected
+
+	// Concurrency control
+	Version int `json:"version"`
+
+	// Workspace tracking
+	WorkspaceID string `json:"workspace_id,omitempty"`
+	FilePath    string `json:"file_path,omitempty"`
 }
 
 // CapabilityDependency represents a dependency relationship between capabilities
@@ -84,13 +95,32 @@ type CreateAssetRequest struct {
 
 // UpdateCapabilityRequest represents the request to update a capability
 type UpdateCapabilityRequest struct {
-	Name                   *string              `json:"name,omitempty"`
-	Status                 *string              `json:"status,omitempty"`
-	Description            *string              `json:"description,omitempty"`
-	Purpose                *string              `json:"purpose,omitempty"`
-	StoryboardReference    *string              `json:"storyboard_reference,omitempty"`
-	UpstreamDependencies   *[]int               `json:"upstream_dependencies,omitempty"`
-	DownstreamDependencies *[]int               `json:"downstream_dependencies,omitempty"`
+	Name                   *string               `json:"name,omitempty"`
+	Status                 *string               `json:"status,omitempty"`
+	Description            *string               `json:"description,omitempty"`
+	Purpose                *string               `json:"purpose,omitempty"`
+	StoryboardReference    *string               `json:"storyboard_reference,omitempty"`
+	UpstreamDependencies   *[]int                `json:"upstream_dependencies,omitempty"`
+	DownstreamDependencies *[]int                `json:"downstream_dependencies,omitempty"`
 	Assets                 *[]CreateAssetRequest `json:"assets,omitempty"`
-	IsActive               *bool                `json:"is_active,omitempty"`
+	IsActive               *bool                 `json:"is_active,omitempty"`
+
+	// INTENT State Model - 4 dimensions
+	LifecycleState *string `json:"lifecycle_state,omitempty"`
+	WorkflowStage  *string `json:"workflow_stage,omitempty"`
+	StageStatus    *string `json:"stage_status,omitempty"`
+	ApprovalStatus *string `json:"approval_status,omitempty"`
+
+	// Optimistic concurrency - required for updates
+	Version *int `json:"version,omitempty"`
+}
+
+// UpdateEntityStateRequest is a lightweight request for updating just state fields
+type UpdateEntityStateRequest struct {
+	LifecycleState *string `json:"lifecycle_state,omitempty"`
+	WorkflowStage  *string `json:"workflow_stage,omitempty"`
+	StageStatus    *string `json:"stage_status,omitempty"`
+	ApprovalStatus *string `json:"approval_status,omitempty"`
+	Version        int     `json:"version"` // Required for optimistic locking
+	ChangeReason   string  `json:"change_reason,omitempty"`
 }

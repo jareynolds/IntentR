@@ -1,14 +1,8 @@
 # User Interface Navigation and Experience
 
 ## Metadata
-- **Name**: User Interface Navigation and Experience
-- **Type**: Capability
-- **Status**: Ready for Analysis
-- **Approval**: Pending
-- **Priority**: Medium
-- **Analysis Review**: Required
-- **Generated**: 12/22/2025, 11:01:10 AM
-- **Source**: Capability-Driven Architecture Map Analysis
+
+- **Storyboard Reference**: Navigation
 
 ## Business Context
 

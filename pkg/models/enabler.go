@@ -19,19 +19,32 @@ type Enabler struct {
 	EnablerID              string          `json:"enabler_id"`
 	CapabilityID           int             `json:"capability_id"`
 	Name                   string          `json:"name"`
+	Description            string          `json:"description,omitempty"`
 	Purpose                *string         `json:"purpose,omitempty"`
 	Owner                  *string         `json:"owner,omitempty"`
 	Status                 string          `json:"status"`
-	ApprovalStatus         string          `json:"approval_status"`
-	WorkflowStage          string          `json:"workflow_stage"`
 	Priority               string          `json:"priority"`
 	AnalysisReviewRequired bool            `json:"analysis_review_required"`
 	CodeReviewRequired     bool            `json:"code_review_required"`
 	TechnicalSpecs         json.RawMessage `json:"technical_specs,omitempty"`
 	CreatedBy              *int            `json:"created_by,omitempty"`
+	UpdatedBy              *int            `json:"updated_by,omitempty"`
 	CreatedAt              time.Time       `json:"created_at"`
 	UpdatedAt              time.Time       `json:"updated_at"`
 	IsActive               bool            `json:"is_active"`
+
+	// INTENT State Model - 4 dimensions
+	LifecycleState string `json:"lifecycle_state"`
+	WorkflowStage  string `json:"workflow_stage"`
+	StageStatus    string `json:"stage_status"`
+	ApprovalStatus string `json:"approval_status"`
+
+	// Concurrency control
+	Version int `json:"version"`
+
+	// Workspace tracking
+	WorkspaceID string `json:"workspace_id,omitempty"`
+	FilePath    string `json:"file_path,omitempty"`
 }
 
 // EnablerWithDetails includes the enabler with all related data
@@ -80,27 +93,38 @@ type CreateEnablerRequest struct {
 	EnablerID              string          `json:"enabler_id"`
 	CapabilityID           int             `json:"capability_id"`
 	Name                   string          `json:"name"`
+	Description            string          `json:"description,omitempty"`
 	Purpose                string          `json:"purpose"`
 	Owner                  string          `json:"owner"`
 	Priority               string          `json:"priority"`
 	AnalysisReviewRequired bool            `json:"analysis_review_required"`
 	CodeReviewRequired     bool            `json:"code_review_required"`
 	TechnicalSpecs         json.RawMessage `json:"technical_specs,omitempty"`
+	WorkspaceID            string          `json:"workspace_id,omitempty"`
+	FilePath               string          `json:"file_path,omitempty"`
+	LifecycleState         string          `json:"lifecycle_state,omitempty"`
+	WorkflowStage          string          `json:"workflow_stage,omitempty"`
+	StageStatus            string          `json:"stage_status,omitempty"`
+	ApprovalStatus         string          `json:"approval_status,omitempty"`
 }
 
 // UpdateEnablerRequest represents the request to update an enabler
 type UpdateEnablerRequest struct {
-	Name                   *string          `json:"name,omitempty"`
-	Purpose                *string          `json:"purpose,omitempty"`
-	Owner                  *string          `json:"owner,omitempty"`
-	Status                 *string          `json:"status,omitempty"`
-	ApprovalStatus         *string          `json:"approval_status,omitempty"`
-	WorkflowStage          *string          `json:"workflow_stage,omitempty"`
-	Priority               *string          `json:"priority,omitempty"`
-	AnalysisReviewRequired *bool            `json:"analysis_review_required,omitempty"`
-	CodeReviewRequired     *bool            `json:"code_review_required,omitempty"`
-	TechnicalSpecs         json.RawMessage  `json:"technical_specs,omitempty"`
-	IsActive               *bool            `json:"is_active,omitempty"`
+	Name                   *string         `json:"name,omitempty"`
+	Description            *string         `json:"description,omitempty"`
+	Purpose                *string         `json:"purpose,omitempty"`
+	Owner                  *string         `json:"owner,omitempty"`
+	Status                 *string         `json:"status,omitempty"`
+	Priority               *string         `json:"priority,omitempty"`
+	AnalysisReviewRequired *bool           `json:"analysis_review_required,omitempty"`
+	CodeReviewRequired     *bool           `json:"code_review_required,omitempty"`
+	TechnicalSpecs         json.RawMessage `json:"technical_specs,omitempty"`
+	IsActive               *bool           `json:"is_active,omitempty"`
+	LifecycleState         *string         `json:"lifecycle_state,omitempty"`
+	WorkflowStage          *string         `json:"workflow_stage,omitempty"`
+	StageStatus            *string         `json:"stage_status,omitempty"`
+	ApprovalStatus         *string         `json:"approval_status,omitempty"`
+	Version                *int            `json:"version,omitempty"`
 }
 
 // Enabler status constants
@@ -130,3 +154,13 @@ func ValidEnablerStatuses() []string {
 		EnablerStatusDeprecated,
 	}
 }
+
+// Implement EntityState interface for Enabler
+func (e *Enabler) GetEntityType() EntityType { return EntityTypeEnablerState }
+func (e *Enabler) GetEntityID() string       { return e.EnablerID }
+func (e *Enabler) GetLifecycleState() string { return e.LifecycleState }
+func (e *Enabler) GetWorkflowStage() string  { return e.WorkflowStage }
+func (e *Enabler) GetStageStatus() string    { return e.StageStatus }
+func (e *Enabler) GetApprovalStatus() string { return e.ApprovalStatus }
+func (e *Enabler) GetVersion() int           { return e.Version }
+func (e *Enabler) GetWorkspaceID() string    { return e.WorkspaceID }

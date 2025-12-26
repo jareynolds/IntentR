@@ -27,6 +27,21 @@ interface GridUpdate {
   timestamp: number;
 }
 
+interface EntityStateUpdate {
+  userId: string;
+  user: User;
+  entityType: 'capability' | 'enabler' | 'story_card';
+  entityId: string;
+  newState: {
+    lifecycle_state?: string;
+    workflow_stage?: string;
+    stage_status?: string;
+    approval_status?: string;
+  };
+  version: number;
+  timestamp: number;
+}
+
 interface CollaborationContextType {
   isConnected: boolean;
   activeUsers: User[];
@@ -36,6 +51,14 @@ interface CollaborationContextType {
   updateCursor: (x: number, y: number, page: string) => void;
   broadcastGridUpdate: (page: string, updateType: string, data: any) => void;
   onGridUpdate: (callback: (update: GridUpdate) => void) => () => void;
+  // Entity state collaboration
+  broadcastEntityStateUpdate: (
+    entityType: 'capability' | 'enabler' | 'story_card',
+    entityId: string,
+    newState: EntityStateUpdate['newState'],
+    version: number
+  ) => void;
+  onEntityStateUpdate: (callback: (update: EntityStateUpdate) => void) => () => void;
 }
 
 const CollaborationContext = createContext<CollaborationContextType | undefined>(undefined);
@@ -56,6 +79,7 @@ export const CollaborationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [cursors, setCursors] = useState<Map<string, CursorPosition>>(new Map());
   const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string | null>(null);
   const gridUpdateCallbacks = useRef<Set<(update: GridUpdate) => void>>(new Set());
+  const entityStateCallbacks = useRef<Set<(update: EntityStateUpdate) => void>>(new Set());
 
   // Initialize socket connection
   useEffect(() => {
@@ -125,6 +149,12 @@ export const CollaborationProvider: React.FC<{ children: React.ReactNode }> = ({
       gridUpdateCallbacks.current.forEach(callback => callback(update));
     });
 
+    newSocket.on('entity-state-change', (update: EntityStateUpdate) => {
+      console.log('Entity state update received:', update);
+      // Notify all registered callbacks
+      entityStateCallbacks.current.forEach(callback => callback(update));
+    });
+
     setSocket(newSocket);
 
     return () => {
@@ -184,6 +214,32 @@ export const CollaborationProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, []);
 
+  const broadcastEntityStateUpdate = useCallback((
+    entityType: 'capability' | 'enabler' | 'story_card',
+    entityId: string,
+    newState: EntityStateUpdate['newState'],
+    version: number
+  ) => {
+    if (!socket || !currentWorkspaceId) return;
+
+    socket.emit('entity-state-update', {
+      workspaceId: currentWorkspaceId,
+      entityType,
+      entityId,
+      newState,
+      version
+    });
+  }, [socket, currentWorkspaceId]);
+
+  const onEntityStateUpdate = useCallback((callback: (update: EntityStateUpdate) => void) => {
+    entityStateCallbacks.current.add(callback);
+
+    // Return cleanup function
+    return () => {
+      entityStateCallbacks.current.delete(callback);
+    };
+  }, []);
+
   const value: CollaborationContextType = {
     isConnected,
     activeUsers,
@@ -192,7 +248,9 @@ export const CollaborationProvider: React.FC<{ children: React.ReactNode }> = ({
     leaveWorkspace,
     updateCursor,
     broadcastGridUpdate,
-    onGridUpdate
+    onGridUpdate,
+    broadcastEntityStateUpdate,
+    onEntityStateUpdate
   };
 
   return (
@@ -201,3 +259,6 @@ export const CollaborationProvider: React.FC<{ children: React.ReactNode }> = ({
     </CollaborationContext.Provider>
   );
 };
+
+// Export types for use in other contexts
+export type { EntityStateUpdate };

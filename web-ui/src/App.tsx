@@ -36,6 +36,7 @@ import {
   type WizardFlowType,
 } from './context/WizardContext';
 import { VersionControlProvider } from './context/VersionControlContext';
+import { EntityStateProvider } from './context/EntityStateContext';
 import { VersionControlPanel, VersionHistoryDrawer } from './components';
 import './styles/main.css';
 
@@ -320,6 +321,7 @@ function App() {
                 <VersionControlProvider>
                 <UIFrameworkProvider>
                   <CollaborationProvider>
+                    <EntityStateProvider>
                     <Router>
                       <WizardProvider>
                     <Routes>
@@ -360,6 +362,7 @@ function App() {
                   </Routes>
                       </WizardProvider>
                     </Router>
+                  </EntityStateProvider>
                   </CollaborationProvider>
                 </UIFrameworkProvider>
                 </VersionControlProvider>

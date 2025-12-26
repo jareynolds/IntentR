@@ -1,14 +1,8 @@
 # Visual Weather Data Presentation
 
 ## Metadata
-- **Name**: Visual Weather Data Presentation
-- **Type**: Capability
-- **Status**: Ready for Analysis
-- **Approval**: Pending
-- **Priority**: Medium
-- **Analysis Review**: Required
-- **Generated**: 12/22/2025, 11:01:12 AM
-- **Source**: Capability-Driven Architecture Map Analysis
+
+- **Storyboard Reference**: display weather data on screen
 
 ## Business Context
 

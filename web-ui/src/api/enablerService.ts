@@ -1,37 +1,46 @@
 import { capabilityClient, apiRequest, SPEC_URL } from './client';
 
 // ========================
-// Enabler Types
+// INTENT State Model Types (aligned with STATE_MODEL.md)
 // ========================
 
-export type EnablerStatus =
+// Lifecycle State - Where is this in its overall life?
+export type LifecycleState =
   | 'draft'
-  | 'ready_for_analysis'
-  | 'in_analysis'
-  | 'ready_for_design'
-  | 'in_design'
-  | 'ready_for_implementation'
-  | 'in_implementation'
+  | 'active'
   | 'implemented'
-  | 'ready_for_refactor'
-  | 'ready_for_retirement';
+  | 'maintained'
+  | 'retired';
 
-export type EnablerApprovalStatus =
-  | 'draft'
+// Workflow Stage - Which of the 5 stages is it in? (only when lifecycle_state = 'active')
+export type WorkflowStage =
+  | 'intent'
+  | 'specification'
+  | 'ui_design'
+  | 'implementation'
+  | 'control_loop';
+
+// Stage Status - Progress within current stage
+export type StageStatus =
+  | 'in_progress'
+  | 'ready_for_approval'
+  | 'approved'
+  | 'blocked';
+
+// Approval Status - Authorization decision
+export type ApprovalStatus =
   | 'pending'
   | 'approved'
   | 'rejected';
-
-export type WorkflowStage =
-  | 'specification'
-  | 'definition'
-  | 'design'
-  | 'execution';
 
 export type Priority =
   | 'high'
   | 'medium'
   | 'low';
+
+// Legacy type aliases for backward compatibility during migration
+export type EnablerStatus = LifecycleState;
+export type EnablerApprovalStatus = ApprovalStatus;
 
 export interface Enabler {
   id: number;
@@ -40,9 +49,12 @@ export interface Enabler {
   name: string;
   purpose?: string;
   owner?: string;
-  status: EnablerStatus;
-  approval_status: EnablerApprovalStatus;
+  // INTENT State Model - 4 dimensions
+  lifecycle_state: LifecycleState;
   workflow_stage: WorkflowStage;
+  stage_status: StageStatus;
+  approval_status: ApprovalStatus;
+  // Other fields
   priority: Priority;
   analysis_review_required: boolean;
   code_review_required: boolean;
@@ -53,6 +65,8 @@ export interface Enabler {
   is_active: boolean;
   // Resolved names for display
   capability_name?: string;
+  // Legacy field for backward compatibility
+  status?: EnablerStatus;
 }
 
 export interface EnablerWithDetails extends Enabler {
@@ -85,15 +99,23 @@ export interface CreateEnablerRequest {
   analysis_review_required?: boolean;
   code_review_required?: boolean;
   technical_specs?: Record<string, unknown>;
+  // INTENT State Model - 4 dimensions
+  lifecycle_state?: LifecycleState;
+  workflow_stage?: WorkflowStage;
+  stage_status?: StageStatus;
+  approval_status?: ApprovalStatus;
 }
 
 export interface UpdateEnablerRequest {
   name?: string;
   purpose?: string;
   owner?: string;
-  status?: EnablerStatus;
-  approval_status?: EnablerApprovalStatus;
+  // INTENT State Model - 4 dimensions
+  lifecycle_state?: LifecycleState;
   workflow_stage?: WorkflowStage;
+  stage_status?: StageStatus;
+  approval_status?: ApprovalStatus;
+  // Other fields
   priority?: Priority;
   analysis_review_required?: boolean;
   code_review_required?: boolean;
@@ -122,15 +144,10 @@ export type RequirementPriority =
   | 'could_have'
   | 'wont_have';
 
-export type RequirementStatus =
-  | 'draft'
-  | 'ready_for_design'
-  | 'in_design'
-  | 'ready_for_implementation'
-  | 'in_implementation'
-  | 'implemented'
-  | 'verified'
-  | 'rejected';
+// Requirements use a simplified state model (they exist within an Enabler's workflow)
+// They track stage_status and approval_status, inheriting workflow_stage from parent Enabler
+export type RequirementStatus = StageStatus | 'implemented' | 'verified';
+export type RequirementApprovalStatus = ApprovalStatus;
 
 export interface EnablerRequirement {
   id: number;

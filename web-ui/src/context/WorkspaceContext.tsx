@@ -6,6 +6,12 @@ import type { PageLayoutConfig } from '../components/PageLayout';
 
 const SHARED_WORKSPACE_API = `${WORKSPACE_URL}/api`;
 
+// INTENT State Model types for StoryCard
+export type StoryCardLifecycleState = 'draft' | 'active' | 'implemented' | 'maintained' | 'retired';
+export type StoryCardWorkflowStage = 'intent' | 'specification' | 'ui_design' | 'implementation' | 'control_loop';
+export type StoryCardStageStatus = 'in_progress' | 'ready_for_approval' | 'approved' | 'blocked';
+export type StoryCardApprovalStatus = 'pending' | 'approved' | 'rejected';
+
 export interface StoryCard {
   id: string;
   title: string;
@@ -13,7 +19,13 @@ export interface StoryCard {
   imageUrl: string;
   x: number;
   y: number;
-  status: 'pending' | 'in-progress' | 'completed';
+  // INTENT State Model - 4 dimensions
+  lifecycle_state: StoryCardLifecycleState;
+  workflow_stage: StoryCardWorkflowStage;
+  stage_status: StoryCardStageStatus;
+  approval_status: StoryCardApprovalStatus;
+  // Legacy field for backward compatibility (deprecated)
+  status?: 'pending' | 'in-progress' | 'completed';
   ideationTags: string[];
   ideationCardId?: string; // Link to ideation card by ID
   sourceFileName?: string; // Original filename if loaded from specifications

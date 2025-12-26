@@ -2458,6 +2458,9 @@ func parseMarkdownEnabler(filename, path, content string) FileEnabler {
 			enabler.Fields["Capability ID"] = enabler.CapabilityID
 			continue
 		}
+
+		// NOTE: INTENT State Model fields (lifecycle_state, workflow_stage, stage_status, approval_status)
+		// are NOT parsed from markdown. They are stored in the DATABASE only.
 	}
 
 	// Extract purpose from ## Purpose section
@@ -2488,9 +2491,14 @@ type SaveCapabilityRequest struct {
 	Path               string `json:"path"`
 	Name               string `json:"name"`
 	Description        string `json:"description"`
-	Status             string `json:"status"`
+	Status             string `json:"status"` // Legacy field for backward compatibility
 	Content            string `json:"content"`
 	StoryboardReference string `json:"storyboardReference"`
+	// INTENT State Model - 4 dimensions
+	LifecycleState     string `json:"lifecycle_state"`
+	WorkflowStage      string `json:"workflow_stage"`
+	StageStatus        string `json:"stage_status"`
+	ApprovalStatus     string `json:"approval_status"`
 }
 
 // UpdateCapabilityStoryboardRequest represents the request to update a capability's storyboard reference
@@ -2714,20 +2722,24 @@ func (h *Handler) HandleSaveCapability(w http.ResponseWriter, r *http.Request) {
 	var content strings.Builder
 	content.WriteString(fmt.Sprintf("# %s\n\n", req.Name))
 
-	if req.Status != "" {
-		content.WriteString(fmt.Sprintf("**Status:** %s\n\n", req.Status))
-	}
+	// Write metadata section with INTENT State Model
+	content.WriteString("## Metadata\n\n")
 
 	if req.Description != "" {
-		content.WriteString(fmt.Sprintf("**Description:** %s\n\n", req.Description))
+		content.WriteString(fmt.Sprintf("- **Description**: %s\n", req.Description))
 	}
 
 	if req.StoryboardReference != "" {
-		content.WriteString(fmt.Sprintf("**Storyboard Reference:** %s\n\n", req.StoryboardReference))
+		content.WriteString(fmt.Sprintf("- **Storyboard Reference**: %s\n", req.StoryboardReference))
 	}
 
-	// Append any additional content, but strip existing Status and Description lines
-	// to avoid duplication
+	// NOTE: State fields (lifecycle_state, workflow_stage, stage_status, approval_status)
+	// are stored in the DATABASE only, not in markdown files.
+	// The database is the single source of truth for state.
+
+	content.WriteString("\n")
+
+	// Append any additional content, but strip existing metadata to avoid duplication
 	if req.Content != "" {
 		cleanedContent := stripMetadataFromContent(req.Content)
 		if cleanedContent != "" {
@@ -3520,6 +3532,9 @@ func parseSingleCapability(filename, path, content, name string) FileCapability 
 			continue
 		}
 
+		// NOTE: INTENT State Model fields (lifecycle_state, workflow_stage, stage_status, approval_status)
+		// are NOT parsed from markdown. They are stored in the DATABASE only.
+
 		// Add line to current section content
 		if currentSection != "" {
 			sectionContent = append(sectionContent, line)
@@ -3551,17 +3566,34 @@ func parseSingleCapability(filename, path, content, name string) FileCapability 
 	return cap
 }
 
-// stripMetadataFromContent removes Status and Description lines from content
+// stripMetadataFromContent removes Status, Description, and INTENT State Model lines from content
 // to prevent duplication when saving
 func stripMetadataFromContent(content string) string {
 	lines := strings.Split(content, "\n")
 	var filteredLines []string
+	inMetadataSection := false
 
 	for _, line := range lines {
 		trimmedLine := strings.TrimSpace(line)
 		trimmedLineLower := strings.ToLower(trimmedLine)
 
-		// Skip status lines
+		// Track if we're in the Metadata section
+		if trimmedLine == "## Metadata" {
+			inMetadataSection = true
+			continue
+		}
+
+		// Exit metadata section when we hit another ## heading
+		if strings.HasPrefix(trimmedLine, "## ") && trimmedLine != "## Metadata" {
+			inMetadataSection = false
+		}
+
+		// Skip all lines in metadata section (they will be regenerated)
+		if inMetadataSection {
+			continue
+		}
+
+		// Skip status lines (legacy)
 		if strings.HasPrefix(trimmedLineLower, "**status:**") ||
 			strings.HasPrefix(trimmedLineLower, "**status**:") ||
 			strings.HasPrefix(trimmedLineLower, "status:") ||
@@ -3573,7 +3605,9 @@ func stripMetadataFromContent(content string) string {
 		// Skip description lines
 		if strings.HasPrefix(trimmedLineLower, "**description:**") ||
 			strings.HasPrefix(trimmedLineLower, "**description**:") ||
-			strings.HasPrefix(trimmedLineLower, "description:") {
+			strings.HasPrefix(trimmedLineLower, "description:") ||
+			strings.HasPrefix(trimmedLineLower, "- **description**:") ||
+			strings.HasPrefix(trimmedLineLower, "- **description:**") {
 			continue
 		}
 
@@ -3583,6 +3617,24 @@ func stripMetadataFromContent(content string) string {
 			strings.HasPrefix(trimmedLineLower, "storyboard reference:") ||
 			strings.HasPrefix(trimmedLineLower, "- **storyboard reference**:") ||
 			strings.HasPrefix(trimmedLineLower, "- **storyboard reference:**") {
+			continue
+		}
+
+		// Skip INTENT State Model fields
+		if strings.HasPrefix(trimmedLineLower, "**lifecycle state**:") ||
+			strings.HasPrefix(trimmedLineLower, "- **lifecycle state**:") {
+			continue
+		}
+		if strings.HasPrefix(trimmedLineLower, "**workflow stage**:") ||
+			strings.HasPrefix(trimmedLineLower, "- **workflow stage**:") {
+			continue
+		}
+		if strings.HasPrefix(trimmedLineLower, "**stage status**:") ||
+			strings.HasPrefix(trimmedLineLower, "- **stage status**:") {
+			continue
+		}
+		if strings.HasPrefix(trimmedLineLower, "**approval status**:") ||
+			strings.HasPrefix(trimmedLineLower, "- **approval status**:") {
 			continue
 		}
 

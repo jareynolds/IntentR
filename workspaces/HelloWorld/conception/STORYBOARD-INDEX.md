@@ -2,7 +2,7 @@
 
 ## Metadata
 - **Workspace**: HelloWorldWeather
-- **Generated**: 12/24/2025, 8:28:45 AM
+- **Generated**: 12/25/2025, 5:16:56 PM
 - **Total Cards**: 60
 - **Total Connections**: 9
 
@@ -13,63 +13,63 @@ flowchart TD
     card1765943031022["✓ display prompt results"]
     card1765937186735["✓ display weather data on screen"]
     card1766171921085["⟳ Enter City"]
-    card1765937824816["✓ Environment"]
+    card1765937824816["⟳ Environment"]
     card1766171779671["✓ Navigation"]
     card1765940802459["✓ Provide Prompt field"]
-    card1765937126217["✓ pull weather data"]
+    card1765937126217["⟳ pull weather data"]
     card1765937281984["✓ read default location"]
     card1765942941837["✓ send prompt data to openweather API"]
-    card1765937081415["✓ start app"]
+    card1765937081415["○ start app"]
     card1765943031022["✓ display prompt results"]
     card1765937186735["✓ display weather data on screen"]
     card1766171921085["⟳ Enter City"]
-    card1765937824816["✓ Environment"]
+    card1765937824816["⟳ Environment"]
     card1766171779671["✓ Navigation"]
     card1765940802459["✓ Provide Prompt field"]
-    card1765937126217["✓ pull weather data"]
+    card1765937126217["⟳ pull weather data"]
     card1765937281984["✓ read default location"]
     card1765942941837["✓ send prompt data to openweather API"]
-    card1765937081415["✓ start app"]
+    card1765937081415["○ start app"]
     card1765943031022["✓ display prompt results"]
     card1765937186735["✓ display weather data on screen"]
     card1766171921085["⟳ Enter City"]
-    card1765937824816["✓ Environment"]
+    card1765937824816["⟳ Environment"]
     card1766171779671["✓ Navigation"]
     card1765940802459["✓ Provide Prompt field"]
-    card1765937126217["✓ pull weather data"]
+    card1765937126217["⟳ pull weather data"]
     card1765937281984["✓ read default location"]
     card1765942941837["✓ send prompt data to openweather API"]
-    card1765937081415["✓ start app"]
+    card1765937081415["○ start app"]
     card1765943031022["✓ display prompt results"]
     card1765937186735["✓ display weather data on screen"]
     card1766171921085["⟳ Enter City"]
-    card1765937824816["✓ Environment"]
+    card1765937824816["⟳ Environment"]
     card1766171779671["✓ Navigation"]
     card1765940802459["✓ Provide Prompt field"]
-    card1765937126217["✓ pull weather data"]
+    card1765937126217["⟳ pull weather data"]
     card1765937281984["✓ read default location"]
     card1765942941837["✓ send prompt data to openweather API"]
-    card1765937081415["✓ start app"]
+    card1765937081415["○ start app"]
     card1765943031022["✓ display prompt results"]
     card1765937186735["✓ display weather data on screen"]
     card1766171921085["⟳ Enter City"]
-    card1765937824816["✓ Environment"]
+    card1765937824816["⟳ Environment"]
     card1766171779671["✓ Navigation"]
     card1765940802459["✓ Provide Prompt field"]
-    card1765937126217["✓ pull weather data"]
+    card1765937126217["⟳ pull weather data"]
     card1765937281984["✓ read default location"]
     card1765942941837["✓ send prompt data to openweather API"]
-    card1765937081415["✓ start app"]
+    card1765937081415["○ start app"]
     card1765943031022["✓ display prompt results"]
     card1765937186735["✓ display weather data on screen"]
     card1766171921085["⟳ Enter City"]
-    card1765937824816["✓ Environment"]
+    card1765937824816["⟳ Environment"]
     card1766171779671["✓ Navigation"]
     card1765940802459["✓ Provide Prompt field"]
-    card1765937126217["✓ pull weather data"]
+    card1765937126217["⟳ pull weather data"]
     card1765937281984["✓ read default location"]
     card1765942941837["✓ send prompt data to openweather API"]
-    card1765937081415["✓ start app"]
+    card1765937081415["○ start app"]
     card1765937824816 --> card1765937081415
     card1765937081415 --> card1765937281984
     card1765937281984 --> card1765937126217
@@ -83,68 +83,68 @@ flowchart TD
 
 ## Story Cards
 
-| # | Title | Status | X | Y | File | Dependencies |
-|---|-------|--------|---|---|------|-------------|
-| 1 | [display prompt results](./STORY-DISPLAY-PROMPT-RESULTS.md) | Completed | 1624 | 654 | STORY-DISPLAY-PROMPT-RESULTS.md | 1 |
-| 2 | [display weather data on screen](./STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md) | Completed | 615 | 282 | STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md | 2 |
-| 3 | [Enter City](./STORY-ENTER-CITY.md) | In Progress | 96 | 1061 | STORY-ENTER-CITY.md | 1 |
-| 4 | [Environment](./STORY-ENVIRONMENT.md) | Completed | 139 | 10 | STORY-ENVIRONMENT.md | 1 |
-| 5 | [Navigation](./STORY-NAVIGATION.md) | Completed | 97 | 652 | STORY-NAVIGATION.md | 3 |
-| 6 | [Provide Prompt field](./STORY-PROVIDE-PROMPT-FIELD.md) | Completed | 673 | 665 | STORY-PROVIDE-PROMPT-FIELD.md | 2 |
-| 7 | [pull weather data](./STORY-PULL-WEATHER-DATA.md) | Completed | 129 | 303 | STORY-PULL-WEATHER-DATA.md | 2 |
-| 8 | [read default location](./STORY-READ-DEFAULT-LOCATION.md) | Completed | 955 | 6 | STORY-READ-DEFAULT-LOCATION.md | 2 |
-| 9 | [send prompt data to openweather API](./STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md) | Completed | 1152 | 651 | STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md | 2 |
-| 10 | [start app](./STORY-START-APP.md) | Completed | 549 | 20 | STORY-START-APP.md | 2 |
-| 11 | [display prompt results](./STORY-DISPLAY-PROMPT-RESULTS.md) | Completed | 1624 | 654 | STORY-DISPLAY-PROMPT-RESULTS.md | 1 |
-| 12 | [display weather data on screen](./STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md) | Completed | 615 | 282 | STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md | 2 |
-| 13 | [Enter City](./STORY-ENTER-CITY.md) | In Progress | 96 | 1061 | STORY-ENTER-CITY.md | 1 |
-| 14 | [Environment](./STORY-ENVIRONMENT.md) | Completed | 139 | 10 | STORY-ENVIRONMENT.md | 1 |
-| 15 | [Navigation](./STORY-NAVIGATION.md) | Completed | 97 | 652 | STORY-NAVIGATION.md | 3 |
-| 16 | [Provide Prompt field](./STORY-PROVIDE-PROMPT-FIELD.md) | Completed | 673 | 665 | STORY-PROVIDE-PROMPT-FIELD.md | 2 |
-| 17 | [pull weather data](./STORY-PULL-WEATHER-DATA.md) | Completed | 129 | 303 | STORY-PULL-WEATHER-DATA.md | 2 |
-| 18 | [read default location](./STORY-READ-DEFAULT-LOCATION.md) | Completed | 955 | 6 | STORY-READ-DEFAULT-LOCATION.md | 2 |
-| 19 | [send prompt data to openweather API](./STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md) | Completed | 1152 | 651 | STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md | 2 |
-| 20 | [start app](./STORY-START-APP.md) | Completed | 549 | 20 | STORY-START-APP.md | 2 |
-| 21 | [display prompt results](./STORY-DISPLAY-PROMPT-RESULTS.md) | Completed | 1624 | 654 | STORY-DISPLAY-PROMPT-RESULTS.md | 1 |
-| 22 | [display weather data on screen](./STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md) | Completed | 615 | 282 | STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md | 2 |
-| 23 | [Enter City](./STORY-ENTER-CITY.md) | In Progress | 96 | 1061 | STORY-ENTER-CITY.md | 1 |
-| 24 | [Environment](./STORY-ENVIRONMENT.md) | Completed | 139 | 10 | STORY-ENVIRONMENT.md | 1 |
-| 25 | [Navigation](./STORY-NAVIGATION.md) | Completed | 97 | 652 | STORY-NAVIGATION.md | 3 |
-| 26 | [Provide Prompt field](./STORY-PROVIDE-PROMPT-FIELD.md) | Completed | 673 | 665 | STORY-PROVIDE-PROMPT-FIELD.md | 2 |
-| 27 | [pull weather data](./STORY-PULL-WEATHER-DATA.md) | Completed | 129 | 303 | STORY-PULL-WEATHER-DATA.md | 2 |
-| 28 | [read default location](./STORY-READ-DEFAULT-LOCATION.md) | Completed | 955 | 6 | STORY-READ-DEFAULT-LOCATION.md | 2 |
-| 29 | [send prompt data to openweather API](./STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md) | Completed | 1152 | 651 | STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md | 2 |
-| 30 | [start app](./STORY-START-APP.md) | Completed | 549 | 20 | STORY-START-APP.md | 2 |
-| 31 | [display prompt results](./STORY-DISPLAY-PROMPT-RESULTS.md) | Completed | 1624 | 654 | STORY-DISPLAY-PROMPT-RESULTS.md | 1 |
-| 32 | [display weather data on screen](./STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md) | Completed | 615 | 282 | STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md | 2 |
-| 33 | [Enter City](./STORY-ENTER-CITY.md) | In Progress | 96 | 1061 | STORY-ENTER-CITY.md | 1 |
-| 34 | [Environment](./STORY-ENVIRONMENT.md) | Completed | 139 | 10 | STORY-ENVIRONMENT.md | 1 |
-| 35 | [Navigation](./STORY-NAVIGATION.md) | Completed | 97 | 652 | STORY-NAVIGATION.md | 3 |
-| 36 | [Provide Prompt field](./STORY-PROVIDE-PROMPT-FIELD.md) | Completed | 673 | 665 | STORY-PROVIDE-PROMPT-FIELD.md | 2 |
-| 37 | [pull weather data](./STORY-PULL-WEATHER-DATA.md) | Completed | 129 | 303 | STORY-PULL-WEATHER-DATA.md | 2 |
-| 38 | [read default location](./STORY-READ-DEFAULT-LOCATION.md) | Completed | 955 | 6 | STORY-READ-DEFAULT-LOCATION.md | 2 |
-| 39 | [send prompt data to openweather API](./STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md) | Completed | 1152 | 651 | STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md | 2 |
-| 40 | [start app](./STORY-START-APP.md) | Completed | 549 | 20 | STORY-START-APP.md | 2 |
-| 41 | [display prompt results](./STORY-DISPLAY-PROMPT-RESULTS.md) | Completed | 1624 | 654 | STORY-DISPLAY-PROMPT-RESULTS.md | 1 |
-| 42 | [display weather data on screen](./STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md) | Completed | 615 | 282 | STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md | 2 |
-| 43 | [Enter City](./STORY-ENTER-CITY.md) | In Progress | 96 | 1061 | STORY-ENTER-CITY.md | 1 |
-| 44 | [Environment](./STORY-ENVIRONMENT.md) | Completed | 139 | 10 | STORY-ENVIRONMENT.md | 1 |
-| 45 | [Navigation](./STORY-NAVIGATION.md) | Completed | 97 | 652 | STORY-NAVIGATION.md | 3 |
-| 46 | [Provide Prompt field](./STORY-PROVIDE-PROMPT-FIELD.md) | Completed | 673 | 665 | STORY-PROVIDE-PROMPT-FIELD.md | 2 |
-| 47 | [pull weather data](./STORY-PULL-WEATHER-DATA.md) | Completed | 129 | 303 | STORY-PULL-WEATHER-DATA.md | 2 |
-| 48 | [read default location](./STORY-READ-DEFAULT-LOCATION.md) | Completed | 955 | 6 | STORY-READ-DEFAULT-LOCATION.md | 2 |
-| 49 | [send prompt data to openweather API](./STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md) | Completed | 1152 | 651 | STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md | 2 |
-| 50 | [start app](./STORY-START-APP.md) | Completed | 549 | 20 | STORY-START-APP.md | 2 |
-| 51 | [display prompt results](./STORY-DISPLAY-PROMPT-RESULTS.md) | Completed | 1624 | 654 | STORY-DISPLAY-PROMPT-RESULTS.md | 1 |
-| 52 | [display weather data on screen](./STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md) | Completed | 615 | 282 | STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md | 2 |
-| 53 | [Enter City](./STORY-ENTER-CITY.md) | In Progress | 96 | 1061 | STORY-ENTER-CITY.md | 1 |
-| 54 | [Environment](./STORY-ENVIRONMENT.md) | Completed | 139 | 10 | STORY-ENVIRONMENT.md | 1 |
-| 55 | [Navigation](./STORY-NAVIGATION.md) | Completed | 97 | 652 | STORY-NAVIGATION.md | 3 |
-| 56 | [Provide Prompt field](./STORY-PROVIDE-PROMPT-FIELD.md) | Completed | 673 | 665 | STORY-PROVIDE-PROMPT-FIELD.md | 2 |
-| 57 | [pull weather data](./STORY-PULL-WEATHER-DATA.md) | Completed | 129 | 303 | STORY-PULL-WEATHER-DATA.md | 2 |
-| 58 | [read default location](./STORY-READ-DEFAULT-LOCATION.md) | Completed | 955 | 6 | STORY-READ-DEFAULT-LOCATION.md | 2 |
-| 59 | [send prompt data to openweather API](./STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md) | Completed | 1152 | 651 | STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md | 2 |
-| 60 | [start app](./STORY-START-APP.md) | Completed | 549 | 20 | STORY-START-APP.md | 2 |
+| # | Title | Lifecycle | X | Y | File | Dependencies |
+|---|-------|-----------|---|---|------|-------------|
+| 1 | [display prompt results](./STORY-DISPLAY-PROMPT-RESULTS.md) | Implemented | 1624 | 654 | STORY-DISPLAY-PROMPT-RESULTS.md | 1 |
+| 2 | [display weather data on screen](./STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md) | Implemented | 615 | 282 | STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md | 2 |
+| 3 | [Enter City](./STORY-ENTER-CITY.md) | Active | 96 | 1061 | STORY-ENTER-CITY.md | 1 |
+| 4 | [Environment](./STORY-ENVIRONMENT.md) | Active | 139 | 10 | STORY-ENVIRONMENT.md | 1 |
+| 5 | [Navigation](./STORY-NAVIGATION.md) | Implemented | 97 | 652 | STORY-NAVIGATION.md | 3 |
+| 6 | [Provide Prompt field](./STORY-PROVIDE-PROMPT-FIELD.md) | Implemented | 673 | 665 | STORY-PROVIDE-PROMPT-FIELD.md | 2 |
+| 7 | [pull weather data](./STORY-PULL-WEATHER-DATA.md) | Active | 129 | 303 | STORY-PULL-WEATHER-DATA.md | 2 |
+| 8 | [read default location](./STORY-READ-DEFAULT-LOCATION.md) | Implemented | 955 | 6 | STORY-READ-DEFAULT-LOCATION.md | 2 |
+| 9 | [send prompt data to openweather API](./STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md) | Implemented | 1152 | 651 | STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md | 2 |
+| 10 | [start app](./STORY-START-APP.md) | Draft | 549 | 20 | STORY-START-APP.md | 2 |
+| 11 | [display prompt results](./STORY-DISPLAY-PROMPT-RESULTS.md) | Implemented | 1624 | 654 | STORY-DISPLAY-PROMPT-RESULTS.md | 1 |
+| 12 | [display weather data on screen](./STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md) | Implemented | 615 | 282 | STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md | 2 |
+| 13 | [Enter City](./STORY-ENTER-CITY.md) | Active | 96 | 1061 | STORY-ENTER-CITY.md | 1 |
+| 14 | [Environment](./STORY-ENVIRONMENT.md) | Active | 139 | 10 | STORY-ENVIRONMENT.md | 1 |
+| 15 | [Navigation](./STORY-NAVIGATION.md) | Implemented | 97 | 652 | STORY-NAVIGATION.md | 3 |
+| 16 | [Provide Prompt field](./STORY-PROVIDE-PROMPT-FIELD.md) | Implemented | 673 | 665 | STORY-PROVIDE-PROMPT-FIELD.md | 2 |
+| 17 | [pull weather data](./STORY-PULL-WEATHER-DATA.md) | Active | 129 | 303 | STORY-PULL-WEATHER-DATA.md | 2 |
+| 18 | [read default location](./STORY-READ-DEFAULT-LOCATION.md) | Implemented | 955 | 6 | STORY-READ-DEFAULT-LOCATION.md | 2 |
+| 19 | [send prompt data to openweather API](./STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md) | Implemented | 1152 | 651 | STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md | 2 |
+| 20 | [start app](./STORY-START-APP.md) | Draft | 549 | 20 | STORY-START-APP.md | 2 |
+| 21 | [display prompt results](./STORY-DISPLAY-PROMPT-RESULTS.md) | Implemented | 1624 | 654 | STORY-DISPLAY-PROMPT-RESULTS.md | 1 |
+| 22 | [display weather data on screen](./STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md) | Implemented | 615 | 282 | STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md | 2 |
+| 23 | [Enter City](./STORY-ENTER-CITY.md) | Active | 96 | 1061 | STORY-ENTER-CITY.md | 1 |
+| 24 | [Environment](./STORY-ENVIRONMENT.md) | Active | 139 | 10 | STORY-ENVIRONMENT.md | 1 |
+| 25 | [Navigation](./STORY-NAVIGATION.md) | Implemented | 97 | 652 | STORY-NAVIGATION.md | 3 |
+| 26 | [Provide Prompt field](./STORY-PROVIDE-PROMPT-FIELD.md) | Implemented | 673 | 665 | STORY-PROVIDE-PROMPT-FIELD.md | 2 |
+| 27 | [pull weather data](./STORY-PULL-WEATHER-DATA.md) | Active | 129 | 303 | STORY-PULL-WEATHER-DATA.md | 2 |
+| 28 | [read default location](./STORY-READ-DEFAULT-LOCATION.md) | Implemented | 955 | 6 | STORY-READ-DEFAULT-LOCATION.md | 2 |
+| 29 | [send prompt data to openweather API](./STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md) | Implemented | 1152 | 651 | STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md | 2 |
+| 30 | [start app](./STORY-START-APP.md) | Draft | 549 | 20 | STORY-START-APP.md | 2 |
+| 31 | [display prompt results](./STORY-DISPLAY-PROMPT-RESULTS.md) | Implemented | 1624 | 654 | STORY-DISPLAY-PROMPT-RESULTS.md | 1 |
+| 32 | [display weather data on screen](./STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md) | Implemented | 615 | 282 | STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md | 2 |
+| 33 | [Enter City](./STORY-ENTER-CITY.md) | Active | 96 | 1061 | STORY-ENTER-CITY.md | 1 |
+| 34 | [Environment](./STORY-ENVIRONMENT.md) | Active | 139 | 10 | STORY-ENVIRONMENT.md | 1 |
+| 35 | [Navigation](./STORY-NAVIGATION.md) | Implemented | 97 | 652 | STORY-NAVIGATION.md | 3 |
+| 36 | [Provide Prompt field](./STORY-PROVIDE-PROMPT-FIELD.md) | Implemented | 673 | 665 | STORY-PROVIDE-PROMPT-FIELD.md | 2 |
+| 37 | [pull weather data](./STORY-PULL-WEATHER-DATA.md) | Active | 129 | 303 | STORY-PULL-WEATHER-DATA.md | 2 |
+| 38 | [read default location](./STORY-READ-DEFAULT-LOCATION.md) | Implemented | 955 | 6 | STORY-READ-DEFAULT-LOCATION.md | 2 |
+| 39 | [send prompt data to openweather API](./STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md) | Implemented | 1152 | 651 | STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md | 2 |
+| 40 | [start app](./STORY-START-APP.md) | Draft | 549 | 20 | STORY-START-APP.md | 2 |
+| 41 | [display prompt results](./STORY-DISPLAY-PROMPT-RESULTS.md) | Implemented | 1624 | 654 | STORY-DISPLAY-PROMPT-RESULTS.md | 1 |
+| 42 | [display weather data on screen](./STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md) | Implemented | 615 | 282 | STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md | 2 |
+| 43 | [Enter City](./STORY-ENTER-CITY.md) | Active | 96 | 1061 | STORY-ENTER-CITY.md | 1 |
+| 44 | [Environment](./STORY-ENVIRONMENT.md) | Active | 139 | 10 | STORY-ENVIRONMENT.md | 1 |
+| 45 | [Navigation](./STORY-NAVIGATION.md) | Implemented | 97 | 652 | STORY-NAVIGATION.md | 3 |
+| 46 | [Provide Prompt field](./STORY-PROVIDE-PROMPT-FIELD.md) | Implemented | 673 | 665 | STORY-PROVIDE-PROMPT-FIELD.md | 2 |
+| 47 | [pull weather data](./STORY-PULL-WEATHER-DATA.md) | Active | 129 | 303 | STORY-PULL-WEATHER-DATA.md | 2 |
+| 48 | [read default location](./STORY-READ-DEFAULT-LOCATION.md) | Implemented | 955 | 6 | STORY-READ-DEFAULT-LOCATION.md | 2 |
+| 49 | [send prompt data to openweather API](./STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md) | Implemented | 1152 | 651 | STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md | 2 |
+| 50 | [start app](./STORY-START-APP.md) | Draft | 549 | 20 | STORY-START-APP.md | 2 |
+| 51 | [display prompt results](./STORY-DISPLAY-PROMPT-RESULTS.md) | Implemented | 1624 | 654 | STORY-DISPLAY-PROMPT-RESULTS.md | 1 |
+| 52 | [display weather data on screen](./STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md) | Implemented | 615 | 282 | STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md | 2 |
+| 53 | [Enter City](./STORY-ENTER-CITY.md) | Active | 96 | 1061 | STORY-ENTER-CITY.md | 1 |
+| 54 | [Environment](./STORY-ENVIRONMENT.md) | Active | 139 | 10 | STORY-ENVIRONMENT.md | 1 |
+| 55 | [Navigation](./STORY-NAVIGATION.md) | Implemented | 97 | 652 | STORY-NAVIGATION.md | 3 |
+| 56 | [Provide Prompt field](./STORY-PROVIDE-PROMPT-FIELD.md) | Implemented | 673 | 665 | STORY-PROVIDE-PROMPT-FIELD.md | 2 |
+| 57 | [pull weather data](./STORY-PULL-WEATHER-DATA.md) | Active | 129 | 303 | STORY-PULL-WEATHER-DATA.md | 2 |
+| 58 | [read default location](./STORY-READ-DEFAULT-LOCATION.md) | Implemented | 955 | 6 | STORY-READ-DEFAULT-LOCATION.md | 2 |
+| 59 | [send prompt data to openweather API](./STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md) | Implemented | 1152 | 651 | STORY-SEND-PROMPT-DATA-TO-OPENWEATHER-API.md | 2 |
+| 60 | [start app](./STORY-START-APP.md) | Draft | 549 | 20 | STORY-START-APP.md | 2 |
 
 ## Connections Data
 
@@ -162,65 +162,65 @@ flowchart TD
 
 ## Card Positions Data
 
-| Card ID | Title | X | Y | Status |
-|---------|-------|---|---|--------|
-| card-1765943031022 | display prompt results | 1624 | 654 | completed |
-| card-1765937186735 | display weather data on screen | 615 | 282 | completed |
-| card-1766171921085 | Enter City | 96 | 1061 | in-progress |
-| card-1765937824816 | Environment | 139 | 10 | completed |
-| card-1766171779671 | Navigation | 97 | 652 | completed |
-| card-1765940802459 | Provide Prompt field | 673 | 665 | completed |
-| card-1765937126217 | pull weather data | 129 | 303 | completed |
-| card-1765937281984 | read default location | 955 | 6 | completed |
-| card-1765942941837 | send prompt data to openweather API | 1152 | 651 | completed |
-| card-1765937081415 | start app | 549 | 20 | completed |
-| card-1765943031022 | display prompt results | 1624 | 654 | completed |
-| card-1765937186735 | display weather data on screen | 615 | 282 | completed |
-| card-1766171921085 | Enter City | 96 | 1061 | in-progress |
-| card-1765937824816 | Environment | 139 | 10 | completed |
-| card-1766171779671 | Navigation | 97 | 652 | completed |
-| card-1765940802459 | Provide Prompt field | 673 | 665 | completed |
-| card-1765937126217 | pull weather data | 129 | 303 | completed |
-| card-1765937281984 | read default location | 955 | 6 | completed |
-| card-1765942941837 | send prompt data to openweather API | 1152 | 651 | completed |
-| card-1765937081415 | start app | 549 | 20 | completed |
-| card-1765943031022 | display prompt results | 1624 | 654 | completed |
-| card-1765937186735 | display weather data on screen | 615 | 282 | completed |
-| card-1766171921085 | Enter City | 96 | 1061 | in-progress |
-| card-1765937824816 | Environment | 139 | 10 | completed |
-| card-1766171779671 | Navigation | 97 | 652 | completed |
-| card-1765940802459 | Provide Prompt field | 673 | 665 | completed |
-| card-1765937126217 | pull weather data | 129 | 303 | completed |
-| card-1765937281984 | read default location | 955 | 6 | completed |
-| card-1765942941837 | send prompt data to openweather API | 1152 | 651 | completed |
-| card-1765937081415 | start app | 549 | 20 | completed |
-| card-1765943031022 | display prompt results | 1624 | 654 | completed |
-| card-1765937186735 | display weather data on screen | 615 | 282 | completed |
-| card-1766171921085 | Enter City | 96 | 1061 | in-progress |
-| card-1765937824816 | Environment | 139 | 10 | completed |
-| card-1766171779671 | Navigation | 97 | 652 | completed |
-| card-1765940802459 | Provide Prompt field | 673 | 665 | completed |
-| card-1765937126217 | pull weather data | 129 | 303 | completed |
-| card-1765937281984 | read default location | 955 | 6 | completed |
-| card-1765942941837 | send prompt data to openweather API | 1152 | 651 | completed |
-| card-1765937081415 | start app | 549 | 20 | completed |
-| card-1765943031022 | display prompt results | 1624 | 654 | completed |
-| card-1765937186735 | display weather data on screen | 615 | 282 | completed |
-| card-1766171921085 | Enter City | 96 | 1061 | in-progress |
-| card-1765937824816 | Environment | 139 | 10 | completed |
-| card-1766171779671 | Navigation | 97 | 652 | completed |
-| card-1765940802459 | Provide Prompt field | 673 | 665 | completed |
-| card-1765937126217 | pull weather data | 129 | 303 | completed |
-| card-1765937281984 | read default location | 955 | 6 | completed |
-| card-1765942941837 | send prompt data to openweather API | 1152 | 651 | completed |
-| card-1765937081415 | start app | 549 | 20 | completed |
-| card-1765943031022 | display prompt results | 1624 | 654 | completed |
-| card-1765937186735 | display weather data on screen | 615 | 282 | completed |
-| card-1766171921085 | Enter City | 96 | 1061 | in-progress |
-| card-1765937824816 | Environment | 139 | 10 | completed |
-| card-1766171779671 | Navigation | 97 | 652 | completed |
-| card-1765940802459 | Provide Prompt field | 673 | 665 | completed |
-| card-1765937126217 | pull weather data | 129 | 303 | completed |
-| card-1765937281984 | read default location | 955 | 6 | completed |
-| card-1765942941837 | send prompt data to openweather API | 1152 | 651 | completed |
-| card-1765937081415 | start app | 549 | 20 | completed |
+| Card ID | Title | X | Y | Lifecycle |
+|---------|-------|---|---|----------|
+| card-1765943031022 | display prompt results | 1624 | 654 | draft |
+| card-1765937186735 | display weather data on screen | 615 | 282 | draft |
+| card-1766171921085 | Enter City | 96 | 1061 | draft |
+| card-1765937824816 | Environment | 139 | 10 | active |
+| card-1766171779671 | Navigation | 97 | 652 | draft |
+| card-1765940802459 | Provide Prompt field | 673 | 665 | draft |
+| card-1765937126217 | pull weather data | 129 | 303 | active |
+| card-1765937281984 | read default location | 955 | 6 | draft |
+| card-1765942941837 | send prompt data to openweather API | 1152 | 651 | draft |
+| card-1765937081415 | start app | 549 | 20 | draft |
+| card-1765943031022 | display prompt results | 1624 | 654 | draft |
+| card-1765937186735 | display weather data on screen | 615 | 282 | draft |
+| card-1766171921085 | Enter City | 96 | 1061 | draft |
+| card-1765937824816 | Environment | 139 | 10 | active |
+| card-1766171779671 | Navigation | 97 | 652 | draft |
+| card-1765940802459 | Provide Prompt field | 673 | 665 | draft |
+| card-1765937126217 | pull weather data | 129 | 303 | active |
+| card-1765937281984 | read default location | 955 | 6 | draft |
+| card-1765942941837 | send prompt data to openweather API | 1152 | 651 | draft |
+| card-1765937081415 | start app | 549 | 20 | draft |
+| card-1765943031022 | display prompt results | 1624 | 654 | draft |
+| card-1765937186735 | display weather data on screen | 615 | 282 | draft |
+| card-1766171921085 | Enter City | 96 | 1061 | draft |
+| card-1765937824816 | Environment | 139 | 10 | active |
+| card-1766171779671 | Navigation | 97 | 652 | draft |
+| card-1765940802459 | Provide Prompt field | 673 | 665 | draft |
+| card-1765937126217 | pull weather data | 129 | 303 | active |
+| card-1765937281984 | read default location | 955 | 6 | draft |
+| card-1765942941837 | send prompt data to openweather API | 1152 | 651 | draft |
+| card-1765937081415 | start app | 549 | 20 | draft |
+| card-1765943031022 | display prompt results | 1624 | 654 | draft |
+| card-1765937186735 | display weather data on screen | 615 | 282 | draft |
+| card-1766171921085 | Enter City | 96 | 1061 | draft |
+| card-1765937824816 | Environment | 139 | 10 | active |
+| card-1766171779671 | Navigation | 97 | 652 | draft |
+| card-1765940802459 | Provide Prompt field | 673 | 665 | draft |
+| card-1765937126217 | pull weather data | 129 | 303 | active |
+| card-1765937281984 | read default location | 955 | 6 | draft |
+| card-1765942941837 | send prompt data to openweather API | 1152 | 651 | draft |
+| card-1765937081415 | start app | 549 | 20 | draft |
+| card-1765943031022 | display prompt results | 1624 | 654 | draft |
+| card-1765937186735 | display weather data on screen | 615 | 282 | draft |
+| card-1766171921085 | Enter City | 96 | 1061 | draft |
+| card-1765937824816 | Environment | 139 | 10 | active |
+| card-1766171779671 | Navigation | 97 | 652 | draft |
+| card-1765940802459 | Provide Prompt field | 673 | 665 | draft |
+| card-1765937126217 | pull weather data | 129 | 303 | active |
+| card-1765937281984 | read default location | 955 | 6 | draft |
+| card-1765942941837 | send prompt data to openweather API | 1152 | 651 | draft |
+| card-1765937081415 | start app | 549 | 20 | draft |
+| card-1765943031022 | display prompt results | 1624 | 654 | draft |
+| card-1765937186735 | display weather data on screen | 615 | 282 | draft |
+| card-1766171921085 | Enter City | 96 | 1061 | draft |
+| card-1765937824816 | Environment | 139 | 10 | active |
+| card-1766171779671 | Navigation | 97 | 652 | draft |
+| card-1765940802459 | Provide Prompt field | 673 | 665 | draft |
+| card-1765937126217 | pull weather data | 129 | 303 | active |
+| card-1765937281984 | read default location | 955 | 6 | draft |
+| card-1765942941837 | send prompt data to openweather API | 1152 | 651 | draft |
+| card-1765937081415 | start app | 549 | 20 | draft |

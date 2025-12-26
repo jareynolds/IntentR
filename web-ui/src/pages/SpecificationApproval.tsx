@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { useEntityState } from '../context/EntityStateContext';
 import { INTEGRATION_URL } from '../api/client';
+import {
+  type LifecycleState,
+  type WorkflowStage,
+  type ApprovalStatus,
+  type StageStatus,
+} from '../api/entityStateService';
 
 interface SpecificationItem {
   id: string;
@@ -15,6 +22,8 @@ interface SpecificationItem {
   reviewedAt?: string;
   rejectionComment?: string;
   path?: string;
+  entityId?: string; // CAP-XXXXXX or ENB-XXXXXX for database sync
+  parentCapabilityId?: string; // For enablers: the parent CAP-XXXXXX
 }
 
 interface PhaseStatus {
@@ -33,6 +42,13 @@ interface ItemApprovalStatus {
 export const SpecificationApproval: React.FC = () => {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
+  const {
+    capabilities: dbCapabilities,
+    enablers: dbEnablers,
+    syncCapability,
+    syncEnabler,
+    refreshWorkspaceState
+  } = useEntityState();
   const [loading, setLoading] = useState(false);
   const [phaseStatus, setPhaseStatus] = useState<PhaseStatus>({
     capabilities: { total: 0, approved: 0, rejected: 0, items: [] },
@@ -179,6 +195,7 @@ export const SpecificationApproval: React.FC = () => {
         description: c.description,
         lastModified: c.lastModified,
         path: c.path,
+        entityId: c.capabilityId || c.fields?.['ID'] || c.filename?.replace(/\.md$/, ''), // CAP-XXXXXX
       }));
 
       // Load enabler items
@@ -196,6 +213,8 @@ export const SpecificationApproval: React.FC = () => {
         description: e.description,
         lastModified: e.lastModified,
         path: e.path,
+        entityId: e.enablerId || e.fields?.['ID'] || e.filename?.replace(/\.md$/, ''), // ENB-XXXXXX
+        parentCapabilityId: e.capabilityId || e.fields?.['Parent Capability'] || e.fields?.['Capability'], // CAP-XXXXXX
       }));
 
       // Apply saved approval statuses
@@ -249,7 +268,81 @@ export const SpecificationApproval: React.FC = () => {
     }
   };
 
-  const handleApproveItem = (item: SpecificationItem) => {
+  // Update the source markdown file with new approval status
+  const updateSourceFile = async (item: SpecificationItem, approvalStatus: 'approved' | 'rejected' | 'pending') => {
+    if (!currentWorkspace?.projectFolder || !item.path) return;
+
+    try {
+      // Read the current file content
+      const readResponse = await fetch(`${INTEGRATION_URL}/read-file`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filePath: item.path }),
+      });
+
+      if (!readResponse.ok) {
+        console.error('Failed to read source file:', item.path);
+        return;
+      }
+
+      const data = await readResponse.json();
+      let content = data.content || '';
+
+      // Determine new stage_status based on approval_status
+      const newStageStatus = approvalStatus === 'approved' ? 'approved' :
+                             approvalStatus === 'rejected' ? 'blocked' : 'in_progress';
+
+      // Update or add Approval Status in metadata
+      if (content.includes('**Approval Status**:')) {
+        content = content.replace(
+          /\*\*Approval Status\*\*:\s*\S+/,
+          `**Approval Status**: ${approvalStatus}`
+        );
+      } else if (content.includes('## Metadata')) {
+        // Add after metadata section header
+        content = content.replace(
+          /(## Metadata\n)/,
+          `$1- **Approval Status**: ${approvalStatus}\n`
+        );
+      }
+
+      // Update or add Stage Status in metadata
+      if (content.includes('**Stage Status**:')) {
+        content = content.replace(
+          /\*\*Stage Status\*\*:\s*\S+/,
+          `**Stage Status**: ${newStageStatus}`
+        );
+      } else if (content.includes('## Metadata')) {
+        content = content.replace(
+          /(## Metadata\n)/,
+          `$1- **Stage Status**: ${newStageStatus}\n`
+        );
+      }
+
+      // Get the filename from the path
+      const fileName = item.path.split('/').pop() || item.id;
+      const subfolder = item.type === 'capability' ? 'specifications' : 'specifications';
+
+      // Save the updated content
+      await fetch(`${INTEGRATION_URL}/save-specifications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+          files: [{
+            fileName: `${subfolder}/${fileName}`,
+            content: content,
+          }],
+        }),
+      });
+
+      console.log(`Updated source file ${item.path} with approval_status: ${approvalStatus}, stage_status: ${newStageStatus}`);
+    } catch (err) {
+      console.error('Failed to update source file:', err);
+    }
+  };
+
+  const handleApproveItem = async (item: SpecificationItem) => {
     const newApprovals = {
       ...itemApprovals,
       [item.id]: {
@@ -259,6 +352,66 @@ export const SpecificationApproval: React.FC = () => {
     };
     saveItemApprovals(newApprovals);
     updateItemStatus(item, 'approved');
+
+    // Also update the source file
+    await updateSourceFile(item, 'approved');
+
+    // Sync approval status to database (single source of truth)
+    // BUSINESS RULE (see STATE_MODEL.md "Automatic State Transitions on Approval"):
+    // On APPROVE: Set all 4 dimensions - lifecycle_state, workflow_stage, stage_status, approval_status
+    // These transitions are atomic and mandatory.
+    // Use syncCapability/syncEnabler which does UPSERT (creates if not exists, updates if exists)
+    // NOTE: Use currentWorkspace.name (not .id) for consistency with EntityStateContext.refreshWorkspaceState
+    if (item.entityId && currentWorkspace?.name) {
+      try {
+        if (item.type === 'capability') {
+          const result = await syncCapability({
+            capability_id: item.entityId,
+            name: item.name,
+            workspace_id: currentWorkspace.name,
+            lifecycle_state: 'active' as LifecycleState,       // REQUIRED: entity is now active in workflow
+            workflow_stage: 'specification' as WorkflowStage,  // REQUIRED: this is the Specification phase
+            stage_status: 'approved' as StageStatus,           // REQUIRED: stage work complete
+            approval_status: 'approved' as ApprovalStatus,     // REQUIRED: authorization granted
+          });
+          console.log(`Synced capability ${item.entityId} approval to database (all 4 dimensions):`, result);
+        } else if (item.type === 'enabler') {
+          // BUSINESS RULE (see STATE_MODEL.md "Automatic State Transitions on Approval"):
+          // On APPROVE: Set all 4 dimensions - lifecycle_state, workflow_stage, stage_status, approval_status
+
+          // Look up parent capability's database ID if available
+          let parentDbId: number | undefined;
+          if (item.parentCapabilityId) {
+            const parentCap = dbCapabilities.get(item.parentCapabilityId);
+            if (parentCap) {
+              parentDbId = parentCap.id;
+            }
+          }
+
+          const syncData: Record<string, unknown> = {
+            enabler_id: item.entityId,
+            name: item.name,
+            workspace_id: currentWorkspace.name,
+            lifecycle_state: 'active' as LifecycleState,       // REQUIRED: entity is now active in workflow
+            workflow_stage: 'specification' as WorkflowStage,  // REQUIRED: this is the Specification phase
+            stage_status: 'approved' as StageStatus,           // REQUIRED: stage work complete
+            approval_status: 'approved' as ApprovalStatus,     // REQUIRED: authorization granted
+          };
+
+          // Only include capability_id if we found the parent's database ID
+          if (parentDbId) {
+            syncData.capability_id = parentDbId;
+          }
+
+          const result = await syncEnabler(syncData as Partial<import('../api/entityStateService').EnablerState>);
+          console.log(`Synced enabler ${item.entityId} approval to database:`, result);
+        }
+        // Refresh the workspace state to get updated data
+        await refreshWorkspaceState();
+      } catch (err) {
+        console.error('Failed to sync approval to database:', err);
+      }
+    }
   };
 
   const handleRejectItem = (item: SpecificationItem) => {
@@ -266,19 +419,77 @@ export const SpecificationApproval: React.FC = () => {
     setRejectionComment('');
   };
 
-  const confirmRejectItem = () => {
+  const confirmRejectItem = async () => {
     if (!rejectionModal.item) return;
 
+    const item = rejectionModal.item;
     const newApprovals = {
       ...itemApprovals,
-      [rejectionModal.item.id]: {
+      [item.id]: {
         status: 'rejected' as const,
         comment: rejectionComment,
         reviewedAt: new Date().toISOString(),
       },
     };
     saveItemApprovals(newApprovals);
-    updateItemStatus(rejectionModal.item, 'rejected', rejectionComment);
+    updateItemStatus(item, 'rejected', rejectionComment);
+
+    // Also update the source file
+    await updateSourceFile(item, 'rejected');
+
+    // Sync rejection status to database (single source of truth)
+    // BUSINESS RULE (see STATE_MODEL.md "Automatic State Transitions on Approval"):
+    // On REJECT: Set all 4 dimensions - lifecycle_state, workflow_stage, stage_status, approval_status
+    // These transitions are atomic and mandatory.
+    // Use syncCapability/syncEnabler which does UPSERT (creates if not exists, updates if exists)
+    // NOTE: Use currentWorkspace.name (not .id) for consistency with EntityStateContext.refreshWorkspaceState
+    if (item.entityId && currentWorkspace?.name) {
+      try {
+        if (item.type === 'capability') {
+          const result = await syncCapability({
+            capability_id: item.entityId,
+            name: item.name,
+            workspace_id: currentWorkspace.name,
+            lifecycle_state: 'active' as LifecycleState,       // REQUIRED: entity remains in workflow but blocked
+            workflow_stage: 'specification' as WorkflowStage,  // REQUIRED: this is the Specification phase
+            stage_status: 'blocked' as StageStatus,            // REQUIRED: cannot proceed until resolved
+            approval_status: 'rejected' as ApprovalStatus,     // REQUIRED: authorization denied
+          });
+          console.log(`Synced capability ${item.entityId} rejection to database (all 4 dimensions):`, result);
+        } else if (item.type === 'enabler') {
+          // Look up parent capability's database ID if available
+          let parentDbId: number | undefined;
+          if (item.parentCapabilityId) {
+            const parentCap = dbCapabilities.get(item.parentCapabilityId);
+            if (parentCap) {
+              parentDbId = parentCap.id;
+            }
+          }
+
+          const syncData: Record<string, unknown> = {
+            enabler_id: item.entityId,
+            name: item.name,
+            workspace_id: currentWorkspace.name,
+            lifecycle_state: 'active' as LifecycleState,       // REQUIRED: entity remains in workflow but blocked
+            workflow_stage: 'specification' as WorkflowStage,  // REQUIRED: this is the Specification phase
+            stage_status: 'blocked' as StageStatus,            // REQUIRED: cannot proceed until resolved
+            approval_status: 'rejected' as ApprovalStatus,     // REQUIRED: authorization denied
+          };
+
+          if (parentDbId) {
+            syncData.capability_id = parentDbId;
+          }
+
+          const result = await syncEnabler(syncData as Partial<import('../api/entityStateService').EnablerState>);
+          console.log(`Synced enabler ${item.entityId} rejection to database:`, result);
+        }
+        // Refresh the workspace state to get updated data
+        await refreshWorkspaceState();
+      } catch (err) {
+        console.error('Failed to sync rejection to database:', err);
+      }
+    }
+
     setRejectionModal({ isOpen: false, item: null });
     setRejectionComment('');
   };
@@ -305,10 +516,71 @@ export const SpecificationApproval: React.FC = () => {
     });
   };
 
-  const handleResetItemStatus = (item: SpecificationItem) => {
+  const handleResetItemStatus = async (item: SpecificationItem) => {
     const newApprovals = { ...itemApprovals };
     delete newApprovals[item.id];
     saveItemApprovals(newApprovals);
+
+    // Also update the source file back to pending
+    await updateSourceFile(item, 'pending');
+
+    // Sync reset status to database (single source of truth)
+    // BUSINESS RULE (see STATE_MODEL.md "Automatic State Transitions on Approval"):
+    // On RESET: Only stage_status changes to 'in_progress'
+    // lifecycle_state and workflow_stage remain unchanged.
+    // Use syncCapability/syncEnabler which does UPSERT (creates if not exists, updates if exists)
+    // NOTE: Use currentWorkspace.name (not .id) for consistency with EntityStateContext.refreshWorkspaceState
+    if (item.entityId && currentWorkspace?.name) {
+      try {
+        if (item.type === 'capability') {
+          // Get existing state to preserve lifecycle_state and workflow_stage
+          const dbCap = dbCapabilities.get(item.entityId);
+          const result = await syncCapability({
+            capability_id: item.entityId,
+            name: item.name,
+            workspace_id: currentWorkspace.name,
+            lifecycle_state: dbCap?.lifecycle_state || 'active' as LifecycleState,
+            workflow_stage: dbCap?.workflow_stage || 'specification' as WorkflowStage,
+            stage_status: 'in_progress' as StageStatus, // REQUIRED: only stage_status changes on reset
+            approval_status: 'pending' as ApprovalStatus,
+          });
+          console.log(`Synced capability ${item.entityId} reset to database (stage_status only):`, result);
+        } else if (item.type === 'enabler') {
+          // Get existing state to preserve lifecycle_state and workflow_stage
+          const dbEnb = dbEnablers.get(item.entityId);
+
+          // Look up parent capability's database ID if available
+          let parentDbId: number | undefined;
+          if (item.parentCapabilityId) {
+            const parentCap = dbCapabilities.get(item.parentCapabilityId);
+            if (parentCap) {
+              parentDbId = parentCap.id;
+            }
+          }
+
+          const syncData: Record<string, unknown> = {
+            enabler_id: item.entityId,
+            name: item.name,
+            workspace_id: currentWorkspace.name,
+            lifecycle_state: dbEnb?.lifecycle_state || 'active' as LifecycleState,
+            workflow_stage: dbEnb?.workflow_stage || 'specification' as WorkflowStage,
+            stage_status: 'in_progress' as StageStatus, // REQUIRED: stage_status reset
+            approval_status: 'pending' as ApprovalStatus, // REQUIRED: approval_status reset
+          };
+
+          if (parentDbId) {
+            syncData.capability_id = parentDbId;
+          }
+
+          const result = await syncEnabler(syncData as Partial<import('../api/entityStateService').EnablerState>);
+          console.log(`Synced enabler ${item.entityId} reset to database:`, result);
+        }
+        // Refresh the workspace state to get updated data
+        await refreshWorkspaceState();
+      } catch (err) {
+        console.error('Failed to sync reset to database:', err);
+      }
+    }
 
     setPhaseStatus(prev => {
       const sectionKey = item.type === 'capability' ? 'capabilities' : 'enablers';

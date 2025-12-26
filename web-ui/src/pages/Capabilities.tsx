@@ -5,13 +5,15 @@ import { ApprovalSection } from '../components/ApprovalSection';
 import { StageBadge, ApprovalStatusBadge } from '../components/ApprovalStatusBadge';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useApproval } from '../context/ApprovalContext';
+import { useEntityState } from '../context/EntityStateContext';
 import { INTEGRATION_URL } from '../api/client';
 import type {
   Capability,
   CapabilityWithDetails,
 } from '../api/services';
 import { capabilityService } from '../api/services';
-import type { WorkflowStage } from '../api/approvalService';
+import type { WorkflowStage as ApprovalWorkflowStage } from '../api/approvalService';
+import type { LifecycleState, WorkflowStage, StageStatus, ApprovalStatus } from '../api/enablerService';
 
 interface FileCapability {
   filename: string;
@@ -50,6 +52,7 @@ interface StoryboardCard {
 export const Capabilities: React.FC = () => {
   const { currentWorkspace } = useWorkspace();
   const { pendingCount } = useApproval();
+  const { capabilities: dbCapabilities, syncCapability, updateCapability, fetchCapabilityState } = useEntityState();
   const [searchParams, setSearchParams] = useSearchParams();
   const [capabilities, setCapabilities] = useState<Capability[]>([]);
   const [loading, setLoading] = useState(false);
@@ -66,9 +69,14 @@ export const Capabilities: React.FC = () => {
   const [editFormData, setEditFormData] = useState({
     name: '',
     description: '',
-    status: '',
     content: '',
     storyboardReference: '',
+    // INTENT State Model - 4 dimensions
+    // New capabilities: active lifecycle, specification stage, in_progress status
+    lifecycle_state: 'active',
+    workflow_stage: 'specification',
+    stage_status: 'in_progress',
+    approval_status: 'pending',
   });
   const [savingCapability, setSavingCapability] = useState(false);
   const [deletingCapability, setDeletingCapability] = useState(false);
@@ -422,7 +430,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
     });
   };
 
-  const handleEditFileCapability = (cap: FileCapability) => {
+  const handleEditFileCapability = async (cap: FileCapability) => {
     // Get storyboard reference from fields
     const storyboardRef = cap.fields?.['Storyboard Reference'] || '';
 
@@ -431,12 +439,40 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
     setStoryboardNeedsConfirmation(false);
     setIsStoryboardSuggesting(false);
 
+    // Get INTENT State Model dimensions from DATABASE (single source of truth)
+    const capabilityId = cap.capabilityId || cap.fields?.['ID'] || '';
+    let lifecycleState = 'draft';
+    let workflowStage = 'intent';
+    let stageStatus = 'in_progress';
+    let approvalStatus = 'pending';
+
+    if (capabilityId) {
+      // Try to get state from cached dbCapabilities first
+      let dbState = dbCapabilities.get(capabilityId);
+
+      // If not in cache, fetch from database
+      if (!dbState) {
+        dbState = await fetchCapabilityState(capabilityId) || undefined;
+      }
+
+      if (dbState) {
+        lifecycleState = dbState.lifecycle_state || 'draft';
+        workflowStage = dbState.workflow_stage || 'intent';
+        stageStatus = dbState.stage_status || 'in_progress';
+        approvalStatus = dbState.approval_status || 'pending';
+      }
+    }
+
     setEditFormData({
       name: cap.name,
       description: cap.description,
-      status: cap.status,
       content: cap.content,
       storyboardReference: storyboardRef,
+      // INTENT State Model - 4 dimensions from DATABASE
+      lifecycle_state: lifecycleState,
+      workflow_stage: workflowStage,
+      stage_status: stageStatus,
+      approval_status: approvalStatus,
     });
     setIsEditingFileCapability(true);
 
@@ -457,6 +493,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
 
     setSavingCapability(true);
     try {
+      // Save content to markdown file (NO state fields - state is stored in database only)
       const response = await fetch(`${INTEGRATION_URL}/save-capability`, {
         method: 'POST',
         headers: {
@@ -466,13 +503,38 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
           path: selectedFileCapability.path,
           name: editFormData.name,
           description: editFormData.description,
-          status: editFormData.status,
           content: editFormData.content,
           storyboardReference: editFormData.storyboardReference,
+          // NOTE: State fields are NOT sent to markdown - database is single source of truth
         }),
       });
 
       if (response.ok) {
+        // Save state to DATABASE via EntityStateContext (single source of truth for state)
+        const capabilityId = selectedFileCapability.capabilityId || selectedFileCapability.fields?.['ID'] || '';
+        if (capabilityId && currentWorkspace?.id) {
+          try {
+            await syncCapability({
+              capability_id: capabilityId,
+              name: editFormData.name,
+              description: editFormData.description,
+              purpose: selectedFileCapability.fields?.['Purpose'] || '',
+              storyboard_reference: editFormData.storyboardReference,
+              workspace_id: currentWorkspace.id,
+              file_path: selectedFileCapability.path,
+              // INTENT State Model - saved to DATABASE only
+              lifecycle_state: editFormData.lifecycle_state as 'draft' | 'active' | 'implemented' | 'maintained' | 'retired',
+              workflow_stage: editFormData.workflow_stage as 'intent' | 'specification' | 'ui_design' | 'implementation' | 'control_loop',
+              stage_status: editFormData.stage_status as 'in_progress' | 'ready_for_approval' | 'approved' | 'blocked',
+              approval_status: editFormData.approval_status as 'pending' | 'approved' | 'rejected',
+            });
+          } catch (syncErr) {
+            console.warn('Failed to sync capability state to database:', syncErr);
+            setError('Failed to save state to database. Please try again.');
+            return; // Don't proceed if state save fails
+          }
+        }
+
         // Refresh the list
         await fetchFileCapabilities();
         setIsEditingFileCapability(false);
@@ -497,12 +559,26 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
 
     if (selectedFileCapability) {
       const storyboardRef = selectedFileCapability.fields?.['Storyboard Reference'] || '';
+
+      // Get INTENT State Model dimensions from DATABASE (single source of truth)
+      const capabilityId = selectedFileCapability.capabilityId || selectedFileCapability.fields?.['ID'] || '';
+      const dbState = capabilityId ? dbCapabilities.get(capabilityId) : undefined;
+
+      const lifecycleState = dbState?.lifecycle_state || 'draft';
+      const workflowStage = dbState?.workflow_stage || 'intent';
+      const stageStatus = dbState?.stage_status || 'in_progress';
+      const approvalStatus = dbState?.approval_status || 'pending';
+
       setEditFormData({
         name: selectedFileCapability.name,
         description: selectedFileCapability.description,
-        status: selectedFileCapability.status,
         content: selectedFileCapability.content,
         storyboardReference: storyboardRef,
+        // INTENT State Model - 4 dimensions from DATABASE
+        lifecycle_state: lifecycleState,
+        workflow_stage: workflowStage,
+        stage_status: stageStatus,
+        approval_status: approvalStatus,
       });
     }
   };
@@ -800,13 +876,30 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
     setSelectedCapability(undefined);
   };
 
+  // Get color based on INTENT State Model stage_status
+  const getStageStatusColor = (stageStatus: string) => {
+    switch (stageStatus.toLowerCase()) {
+      case 'in_progress':
+        return { bg: 'rgba(0, 122, 255, 0.1)', color: 'var(--color-systemBlue)', icon: '✏️' };
+      case 'ready_for_approval':
+        return { bg: 'rgba(255, 149, 0, 0.1)', color: 'var(--color-systemOrange)', icon: '👀' };
+      case 'approved':
+        return { bg: 'rgba(76, 217, 100, 0.1)', color: 'var(--color-systemGreen)', icon: '✅' };
+      case 'blocked':
+        return { bg: 'rgba(255, 59, 48, 0.1)', color: 'var(--color-systemRed)', icon: '🚫' };
+      default:
+        return { bg: 'rgba(0, 122, 255, 0.1)', color: 'var(--color-systemBlue)', icon: '✏️' };
+    }
+  };
+
+  // Legacy function for backward compatibility - maps old status to new stage_status colors
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'implemented':
         return { bg: 'rgba(76, 217, 100, 0.1)', color: 'var(--color-systemGreen)' };
       case 'in_progress':
       case 'in progress':
-        return { bg: 'rgba(255, 204, 0, 0.1)', color: 'var(--color-systemYellow)' };
+        return { bg: 'rgba(0, 122, 255, 0.1)', color: 'var(--color-systemBlue)' };
       case 'planned':
         return { bg: 'rgba(0, 122, 255, 0.1)', color: 'var(--color-systemBlue)' };
       case 'deprecated':
@@ -826,6 +919,13 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
   };
 
   // Filter and search logic
+  // Helper to get stage_status for a capability from the database
+  const getCapabilityStageStatusForFilter = (cap: FileCapability): string => {
+    const capId = cap.fields?.['ID'] || cap.filename?.replace(/\.md$/, '') || '';
+    const dbCap = dbCapabilities.get(capId);
+    return dbCap?.stage_status || 'in_progress'; // Default to in_progress if not in DB
+  };
+
   const filterCapabilities = (caps: FileCapability[]) => {
     return caps.filter(cap => {
       // Search filter
@@ -834,10 +934,9 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
         cap.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         cap.filename?.toLowerCase().includes(searchQuery.toLowerCase());
 
-      // Status filter
-      const matchesStatus = statusFilter === 'all' ||
-        (statusFilter === 'not specified' && (!cap.status || cap.status.trim() === '')) ||
-        cap.status?.toLowerCase() === statusFilter.toLowerCase();
+      // Stage status filter (from database - single source of truth)
+      const capStageStatus = getCapabilityStageStatusForFilter(cap);
+      const matchesStatus = statusFilter === 'all' || capStageStatus === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
@@ -868,26 +967,27 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
   };
 
   // Group capabilities by status, sorted by storyboard flow order within each group
-  const groupByStatus = (caps: FileCapability[]) => {
+  // Group capabilities by INTENT State Model stage_status (from database)
+  const groupByStageStatus = (caps: FileCapability[]) => {
     const groups: Record<string, FileCapability[]> = {
-      'Not Specified': [],
-      'Planned': [],
       'In Progress': [],
-      'Implemented': [],
-      'Deprecated': [],
+      'Ready for Approval': [],
+      'Approved': [],
+      'Blocked': [],
+    };
+
+    // Map stage_status values to display names
+    const stageStatusToDisplay: Record<string, string> = {
+      'in_progress': 'In Progress',
+      'ready_for_approval': 'Ready for Approval',
+      'approved': 'Approved',
+      'blocked': 'Blocked',
     };
 
     caps.forEach(cap => {
-      if (!cap.status || cap.status.trim() === '') {
-        groups['Not Specified'].push(cap);
-      } else {
-        const status = formatStatus(cap.status);
-        if (groups[status]) {
-          groups[status].push(cap);
-        } else {
-          groups['Planned'].push(cap);
-        }
-      }
+      const stageStatus = getCapabilityStageStatusForFilter(cap);
+      const displayStatus = stageStatusToDisplay[stageStatus] || 'In Progress';
+      groups[displayStatus].push(cap);
     });
 
     // Sort each group by storyboard flow order
@@ -900,15 +1000,21 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
 
   // Get filtered capabilities
   const filteredCapabilities = filterCapabilities(fileCapabilities);
-  const groupedCapabilities = groupByStatus(filteredCapabilities);
+  const groupedCapabilities = groupByStageStatus(filteredCapabilities);
 
-  // Calculate summary counts
+  // Calculate summary counts based on INTENT State Model stage_status from database
+  // Helper to get stage_status for a capability from the database
+  const getCapabilityStageStatus = (cap: FileCapability): string => {
+    const capId = cap.fields?.['ID'] || cap.filename?.replace(/\.md$/, '') || '';
+    const dbCap = dbCapabilities.get(capId);
+    return dbCap?.stage_status || 'in_progress'; // Default to in_progress if not in DB
+  };
+
   const summaryCounts = {
-    notSpecified: fileCapabilities.filter(c => !c.status || c.status.trim() === '').length,
-    planned: fileCapabilities.filter(c => c.status?.toLowerCase() === 'planned').length,
-    inProgress: fileCapabilities.filter(c => c.status?.toLowerCase() === 'in progress' || c.status?.toLowerCase() === 'in_progress').length,
-    implemented: fileCapabilities.filter(c => c.status?.toLowerCase() === 'implemented').length,
-    deprecated: fileCapabilities.filter(c => c.status?.toLowerCase() === 'deprecated').length,
+    inProgress: fileCapabilities.filter(c => getCapabilityStageStatus(c) === 'in_progress').length,
+    readyForApproval: fileCapabilities.filter(c => getCapabilityStageStatus(c) === 'ready_for_approval').length,
+    approved: fileCapabilities.filter(c => getCapabilityStageStatus(c) === 'approved').length,
+    blocked: fileCapabilities.filter(c => getCapabilityStageStatus(c) === 'blocked').length,
     total: fileCapabilities.length,
   };
 
@@ -1217,59 +1323,51 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
               </Card>
             ) : (
               <>
-                {/* Summary Dashboard */}
+                {/* Summary Dashboard - INTENT State Model: Stage Status */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
                   gap: '12px',
                   marginBottom: '24px'
                 }}>
-                  <Card style={{ padding: '16px', textAlign: 'center' }}>
+                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('all')}>
                     <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-label)' }}>
                       {summaryCounts.total}
                     </div>
                     <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
-                      Total
+                      📊 Total
                     </div>
                   </Card>
-                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('not specified')}>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemGray)' }}>
-                      {summaryCounts.notSpecified}
-                    </div>
-                    <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
-                      ❓ Not Specified
-                    </div>
-                  </Card>
-                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('planned')}>
+                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('in_progress')}>
                     <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemBlue)' }}>
-                      {summaryCounts.planned}
-                    </div>
-                    <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
-                      📋 Planned
-                    </div>
-                  </Card>
-                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('in progress')}>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemYellow)' }}>
                       {summaryCounts.inProgress}
                     </div>
                     <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
-                      ⚙️ In Progress
+                      ✏️ In Progress
                     </div>
                   </Card>
-                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('implemented')}>
+                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('ready_for_approval')}>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemOrange)' }}>
+                      {summaryCounts.readyForApproval}
+                    </div>
+                    <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
+                      👀 Ready for Approval
+                    </div>
+                  </Card>
+                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('approved')}>
                     <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemGreen)' }}>
-                      {summaryCounts.implemented}
+                      {summaryCounts.approved}
                     </div>
                     <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
-                      ✅ Implemented
+                      ✅ Approved
                     </div>
                   </Card>
-                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('deprecated')}>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemGray)' }}>
-                      {summaryCounts.deprecated}
+                  <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('blocked')}>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemRed)' }}>
+                      {summaryCounts.blocked}
                     </div>
                     <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
-                      ⚠️ Deprecated
+                      🚫 Blocked
                     </div>
                   </Card>
                 </div>
@@ -1299,15 +1397,14 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                       fontSize: '14px',
                       borderRadius: '8px',
                       border: '1px solid var(--color-separator)',
-                      minWidth: '150px',
+                      minWidth: '180px',
                     }}
                   >
-                    <option value="all">All Statuses</option>
-                    <option value="not specified">Not Specified</option>
-                    <option value="planned">Planned</option>
-                    <option value="in progress">In Progress</option>
-                    <option value="implemented">Implemented</option>
-                    <option value="deprecated">Deprecated</option>
+                    <option value="all">All Stage Statuses</option>
+                    <option value="in_progress">✏️ In Progress</option>
+                    <option value="ready_for_approval">👀 Ready for Approval</option>
+                    <option value="approved">✅ Approved</option>
+                    <option value="blocked">🚫 Blocked</option>
                   </select>
                   {(searchQuery || statusFilter !== 'all') && (
                     <Button
@@ -1333,23 +1430,31 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                   </Card>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    {Object.entries(groupedCapabilities).map(([status, caps]) => {
+                    {Object.entries(groupedCapabilities).map(([displayStatus, caps]) => {
                       if (caps.length === 0) return null;
 
-                      const statusColors = getStatusColor(status);
-                      const isCollapsed = collapsedSections[status];
+                      // Map display status to stage_status for colors
+                      const displayToStageStatus: Record<string, string> = {
+                        'In Progress': 'in_progress',
+                        'Ready for Approval': 'ready_for_approval',
+                        'Approved': 'approved',
+                        'Blocked': 'blocked',
+                      };
+                      const stageStatus = displayToStageStatus[displayStatus] || 'in_progress';
+                      const stageStatusColors = getStageStatusColor(stageStatus);
+                      const isCollapsed = collapsedSections[displayStatus];
 
                       return (
-                        <div key={status}>
-                          {/* Status Section Header */}
+                        <div key={displayStatus}>
+                          {/* Stage Status Section Header */}
                           <div
-                            onClick={() => toggleSection(status)}
+                            onClick={() => toggleSection(displayStatus)}
                             style={{
                               display: 'flex',
                               justifyContent: 'space-between',
                               alignItems: 'center',
                               padding: '12px 16px',
-                              backgroundColor: statusColors.bg,
+                              backgroundColor: stageStatusColors.bg,
                               borderRadius: '8px',
                               cursor: 'pointer',
                               marginBottom: isCollapsed ? '0' : '12px',
@@ -1360,8 +1465,9 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                               <span style={{ fontSize: '18px' }}>
                                 {isCollapsed ? '▶' : '▼'}
                               </span>
-                              <h4 className="text-headline" style={{ margin: 0, color: statusColors.color }}>
-                                {status}
+                              <span style={{ fontSize: '16px' }}>{stageStatusColors.icon}</span>
+                              <h4 className="text-headline" style={{ margin: 0, color: stageStatusColors.color }}>
+                                {displayStatus}
                               </h4>
                               <span style={{
                                 padding: '2px 8px',
@@ -1369,7 +1475,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                                 fontWeight: 600,
                                 borderRadius: '12px',
                                 backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                                color: statusColors.color,
+                                color: stageStatusColors.color,
                               }}>
                                 {caps.length}
                               </span>
@@ -1710,20 +1816,93 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                     />
                   </div>
 
-                  <div style={{ marginBottom: '16px' }}>
-                    <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>Status</label>
-                    <select
-                      value={editFormData.status}
-                      onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
-                      className="input"
-                      style={{ width: '100%' }}
-                    >
-                      <option value="">Select Status</option>
-                      <option value="Planned">Planned</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Implemented">Implemented</option>
-                      <option value="Deprecated">Deprecated</option>
-                    </select>
+                  {/* INTENT State Model - 4 Dimensions */}
+                  <div style={{
+                    marginBottom: '16px',
+                    padding: '16px',
+                    border: '1px solid var(--color-separator)',
+                    borderRadius: '12px',
+                    backgroundColor: 'var(--color-secondarySystemBackground)'
+                  }}>
+                    <h4 className="text-subheadline" style={{ marginBottom: '12px' }}>INTENT State Model</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      {/* Lifecycle State */}
+                      <div>
+                        <label className="text-caption1" style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Lifecycle State</label>
+                        <select
+                          value={editFormData.lifecycle_state}
+                          onChange={(e) => setEditFormData({ ...editFormData, lifecycle_state: e.target.value })}
+                          className="input"
+                          style={{ width: '100%' }}
+                        >
+                          <option value="draft">Draft</option>
+                          <option value="active">Active</option>
+                          <option value="implemented">Implemented</option>
+                          <option value="maintained">Maintained</option>
+                          <option value="retired">Retired</option>
+                        </select>
+                      </div>
+
+                      {/* Workflow Stage */}
+                      <div>
+                        <label className="text-caption1" style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Workflow Stage</label>
+                        <select
+                          value={editFormData.workflow_stage}
+                          onChange={(e) => setEditFormData({ ...editFormData, workflow_stage: e.target.value })}
+                          className="input"
+                          disabled={editFormData.lifecycle_state !== 'active'}
+                          style={{ width: '100%', opacity: editFormData.lifecycle_state !== 'active' ? 0.6 : 1 }}
+                        >
+                          <option value="intent">Intent</option>
+                          <option value="specification">Specification</option>
+                          <option value="ui_design">UI-Design</option>
+                          <option value="implementation">Implementation</option>
+                          <option value="control_loop">Control-Loop</option>
+                        </select>
+                      </div>
+
+                      {/* Stage Status */}
+                      <div>
+                        <label className="text-caption1" style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Stage Status</label>
+                        <select
+                          value={editFormData.stage_status}
+                          onChange={(e) => setEditFormData({ ...editFormData, stage_status: e.target.value })}
+                          className="input"
+                          disabled={editFormData.lifecycle_state !== 'active'}
+                          style={{ width: '100%', opacity: editFormData.lifecycle_state !== 'active' ? 0.6 : 1 }}
+                        >
+                          <option value="in_progress">In Progress</option>
+                          <option value="ready_for_approval">Ready for Approval</option>
+                          <option value="approved">Approved</option>
+                          <option value="blocked">Blocked</option>
+                        </select>
+                      </div>
+
+                      {/* Approval Status */}
+                      <div>
+                        <label className="text-caption1" style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>Approval Status</label>
+                        <select
+                          value={editFormData.approval_status}
+                          onChange={(e) => {
+                            const newApprovalStatus = e.target.value;
+                            // Auto-set stage_status based on approval status
+                            let newStageStatus = editFormData.stage_status;
+                            if (newApprovalStatus === 'approved') {
+                              newStageStatus = 'approved';
+                            } else if (newApprovalStatus === 'rejected') {
+                              newStageStatus = 'blocked';
+                            }
+                            setEditFormData({ ...editFormData, approval_status: newApprovalStatus, stage_status: newStageStatus });
+                          }}
+                          className="input"
+                          style={{ width: '100%' }}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="approved">Approved</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
 
                   <div style={{ marginBottom: '16px' }}>

@@ -5,6 +5,12 @@ import type {
   CreateCapabilityRequest,
   CapabilityAsset,
 } from '../api/services';
+import type {
+  LifecycleState,
+  WorkflowStage,
+  StageStatus,
+  ApprovalStatus,
+} from '../api/enablerService';
 import { capabilityService } from '../api/services';
 import { Button } from './Button';
 import { useWorkspace } from '../context/WorkspaceContext';
@@ -44,13 +50,17 @@ export const CapabilityForm: React.FC<CapabilityFormProps> = ({
   const [formData, setFormData] = useState<CreateCapabilityRequest>({
     capability_id: capability ? '' : generateCapabilityId(), // Auto-generate for new capabilities
     name: '',
-    status: 'planned',
     description: '',
     purpose: '',
     storyboard_reference: '',
     upstream_dependencies: [],
     downstream_dependencies: [],
     assets: [],
+    // INTENT State Model - 4 dimensions
+    lifecycle_state: 'draft',
+    workflow_stage: 'intent',
+    stage_status: 'in_progress',
+    approval_status: 'pending',
   });
 
   const [loading, setLoading] = useState(false);
@@ -61,13 +71,17 @@ export const CapabilityForm: React.FC<CapabilityFormProps> = ({
       setFormData({
         capability_id: capability.capability_id,
         name: capability.name,
-        status: capability.status,
         description: capability.description,
         purpose: capability.purpose,
         storyboard_reference: capability.storyboard_reference,
         upstream_dependencies: capability.upstream_dependencies.map(d => d.id!),
         downstream_dependencies: capability.downstream_dependencies.map(d => d.id!),
         assets: capability.assets,
+        // INTENT State Model - 4 dimensions
+        lifecycle_state: capability.lifecycle_state || 'draft',
+        workflow_stage: capability.workflow_stage || 'intent',
+        stage_status: capability.stage_status || 'in_progress',
+        approval_status: capability.approval_status || 'pending',
       });
     }
   }, [capability]);
@@ -180,7 +194,10 @@ export const CapabilityForm: React.FC<CapabilityFormProps> = ({
       markdown += `## Metadata\n`;
       markdown += `- **ID**: ${formData.capability_id}\n`;
       markdown += `- **Type**: Capability\n`;
-      markdown += `- **Status**: ${formData.status}\n`;
+      markdown += `- **Lifecycle State**: ${formData.lifecycle_state}\n`;
+      markdown += `- **Workflow Stage**: ${formData.workflow_stage}\n`;
+      markdown += `- **Stage Status**: ${formData.stage_status}\n`;
+      markdown += `- **Approval Status**: ${formData.approval_status}\n`;
       if (formData.storyboard_reference) {
         markdown += `- **Storyboard Reference**: ${formData.storyboard_reference}\n`;
       }
@@ -356,28 +373,134 @@ export const CapabilityForm: React.FC<CapabilityFormProps> = ({
           />
         </div>
 
-        {/* Status */}
-        <div>
-          <label className="text-subheadline" style={{ display: 'block', marginBottom: '8px' }}>
-            Status <span style={{ color: 'var(--color-systemRed)' }}>*</span>
-          </label>
-          <select
-            required
-            value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              borderRadius: '8px',
-              border: '1px solid var(--color-separator)',
-              fontSize: '15px',
-            }}
-          >
-            <option value="planned">Planned</option>
-            <option value="in_progress">In Progress</option>
-            <option value="implemented">Implemented</option>
-            <option value="deprecated">Deprecated</option>
-          </select>
+        {/* INTENT State Model - 4 Dimensions */}
+        <div style={{
+          border: '1px solid var(--color-separator)',
+          borderRadius: '12px',
+          padding: '16px',
+          backgroundColor: 'var(--color-secondarySystemBackground)'
+        }}>
+          <h4 className="text-subheadline" style={{ marginBottom: '16px', color: 'var(--color-label)' }}>
+            INTENT State Model
+          </h4>
+          <p className="text-footnote text-secondary" style={{ marginBottom: '16px' }}>
+            Track the capability through its lifecycle using 4 independent dimensions.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            {/* Lifecycle State */}
+            <div>
+              <label className="text-footnote" style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>
+                Lifecycle State
+              </label>
+              <select
+                value={formData.lifecycle_state}
+                onChange={(e) => setFormData({ ...formData, lifecycle_state: e.target.value as LifecycleState })}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--color-separator)',
+                  fontSize: '14px',
+                  backgroundColor: 'var(--color-systemBackground)',
+                }}
+              >
+                <option value="draft">Draft</option>
+                <option value="active">Active</option>
+                <option value="implemented">Implemented</option>
+                <option value="maintained">Maintained</option>
+                <option value="retired">Retired</option>
+              </select>
+              <p className="text-caption2 text-tertiary" style={{ marginTop: '4px' }}>
+                Where is this in its overall life?
+              </p>
+            </div>
+
+            {/* Workflow Stage */}
+            <div>
+              <label className="text-footnote" style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>
+                Workflow Stage
+              </label>
+              <select
+                value={formData.workflow_stage}
+                onChange={(e) => setFormData({ ...formData, workflow_stage: e.target.value as WorkflowStage })}
+                disabled={formData.lifecycle_state !== 'active'}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--color-separator)',
+                  fontSize: '14px',
+                  backgroundColor: formData.lifecycle_state !== 'active' ? 'var(--color-tertiarySystemBackground)' : 'var(--color-systemBackground)',
+                  opacity: formData.lifecycle_state !== 'active' ? 0.6 : 1,
+                }}
+              >
+                <option value="intent">Intent</option>
+                <option value="specification">Specification</option>
+                <option value="ui_design">UI-Design</option>
+                <option value="implementation">Implementation</option>
+                <option value="control_loop">Control-Loop</option>
+              </select>
+              <p className="text-caption2 text-tertiary" style={{ marginTop: '4px' }}>
+                {formData.lifecycle_state !== 'active' ? 'Only applies when Active' : 'Which of the 5 stages?'}
+              </p>
+            </div>
+
+            {/* Stage Status */}
+            <div>
+              <label className="text-footnote" style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>
+                Stage Status
+              </label>
+              <select
+                value={formData.stage_status}
+                onChange={(e) => setFormData({ ...formData, stage_status: e.target.value as StageStatus })}
+                disabled={formData.lifecycle_state !== 'active'}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--color-separator)',
+                  fontSize: '14px',
+                  backgroundColor: formData.lifecycle_state !== 'active' ? 'var(--color-tertiarySystemBackground)' : 'var(--color-systemBackground)',
+                  opacity: formData.lifecycle_state !== 'active' ? 0.6 : 1,
+                }}
+              >
+                <option value="in_progress">In Progress</option>
+                <option value="ready_for_approval">Ready for Approval</option>
+                <option value="approved">Approved</option>
+                <option value="blocked">Blocked</option>
+              </select>
+              <p className="text-caption2 text-tertiary" style={{ marginTop: '4px' }}>
+                {formData.lifecycle_state !== 'active' ? 'Only applies when Active' : 'Progress within stage'}
+              </p>
+            </div>
+
+            {/* Approval Status */}
+            <div>
+              <label className="text-footnote" style={{ display: 'block', marginBottom: '6px', fontWeight: 500 }}>
+                Approval Status
+              </label>
+              <select
+                value={formData.approval_status}
+                onChange={(e) => setFormData({ ...formData, approval_status: e.target.value as ApprovalStatus })}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--color-separator)',
+                  fontSize: '14px',
+                  backgroundColor: 'var(--color-systemBackground)',
+                }}
+              >
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <p className="text-caption2 text-tertiary" style={{ marginTop: '4px' }}>
+                Authorization decision
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Description */}

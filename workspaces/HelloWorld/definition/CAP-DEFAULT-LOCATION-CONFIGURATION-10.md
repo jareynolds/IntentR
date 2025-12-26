@@ -1,15 +1,9 @@
 # Default Location Configuration
 
-**Status:** Implemented
-
-**Storyboard Reference:** read default location
-
 ## Metadata
-- **ID**: CAP-010
-- **Type**: Capability
-- **Generated**: 12/18/2025, 8:44:52 PM
 
 - **Storyboard Reference**: read default location
+
 ## Description
 _Add description for this capability._
 

@@ -106,6 +106,29 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Handle entity state updates (capabilities, enablers, story cards)
+  socket.on('entity-state-update', ({ workspaceId, entityType, entityId, newState, version }) => {
+    const roomId = `workspace-${workspaceId}`;
+    const roomUsers = workspaceUsers.get(roomId);
+
+    if (roomUsers && roomUsers.has(socket.id)) {
+      const user = roomUsers.get(socket.id);
+
+      console.log(`Entity state update in ${roomId}:`, entityType, entityId);
+
+      // Broadcast the state change to all other users in the room
+      socket.to(roomId).emit('entity-state-change', {
+        userId: socket.id,
+        user,
+        entityType,
+        entityId,
+        newState,
+        version,
+        timestamp: Date.now()
+      });
+    }
+  });
+
   // Handle disconnection
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);

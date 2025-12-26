@@ -1,4 +1,5 @@
 import { integrationClient, designClient, capabilityClient, apiRequest } from './client';
+import type { LifecycleState, WorkflowStage, StageStatus, ApprovalStatus } from './enablerService';
 
 // Integration Service API
 export const integrationService = {
@@ -51,7 +52,6 @@ export type Capability = {
   id?: number;
   capability_id: string;
   name: string;
-  status: string;
   description: string;
   purpose: string;
   storyboard_reference: string;
@@ -59,9 +59,13 @@ export type Capability = {
   updated_at?: string;
   created_by?: number;
   is_active?: boolean;
-  // Approval workflow fields
-  workflow_stage?: 'specification' | 'definition' | 'design' | 'execution';
-  approval_status?: 'draft' | 'pending_approval' | 'approved' | 'rejected' | 'in_progress' | 'completed' | 'blocked' | 'skipped';
+  // INTENT State Model - 4 dimensions (aligned with STATE_MODEL.md)
+  lifecycle_state?: LifecycleState;
+  workflow_stage?: WorkflowStage;
+  stage_status?: StageStatus;
+  approval_status?: ApprovalStatus;
+  // Legacy field for backward compatibility
+  status?: string;
 }
 
 export type CapabilityWithDetails = Capability & {
@@ -73,18 +77,21 @@ export type CapabilityWithDetails = Capability & {
 export type CreateCapabilityRequest = {
   capability_id: string;
   name: string;
-  status: string;
   description: string;
   purpose: string;
   storyboard_reference: string;
   upstream_dependencies: number[];
   downstream_dependencies: number[];
   assets: CapabilityAsset[];
+  // INTENT State Model - 4 dimensions
+  lifecycle_state?: LifecycleState;
+  workflow_stage?: WorkflowStage;
+  stage_status?: StageStatus;
+  approval_status?: ApprovalStatus;
 }
 
 export type UpdateCapabilityRequest = {
   name?: string;
-  status?: string;
   description?: string;
   purpose?: string;
   storyboard_reference?: string;
@@ -92,6 +99,11 @@ export type UpdateCapabilityRequest = {
   downstream_dependencies?: number[];
   assets?: CapabilityAsset[];
   is_active?: boolean;
+  // INTENT State Model - 4 dimensions
+  lifecycle_state?: LifecycleState;
+  workflow_stage?: WorkflowStage;
+  stage_status?: StageStatus;
+  approval_status?: ApprovalStatus;
 }
 
 // Capability Service API

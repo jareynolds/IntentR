@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { useEntityState } from '../context/EntityStateContext';
 import { INTEGRATION_URL } from '../api/client';
+import {
+  type LifecycleState,
+  type WorkflowStage,
+  type ApprovalStatus,
+  type StageStatus,
+} from '../api/entityStateService';
 
 interface IntentItem {
   id: string;
@@ -15,6 +22,7 @@ interface IntentItem {
   reviewedAt?: string;
   rejectionComment?: string;
   path?: string;
+  entityId?: string; // Card ID (e.g., STORY-xxx, VIS-xxx, IDEA-xxx) for database sync
 }
 
 interface PhaseStatus {
@@ -34,6 +42,7 @@ interface ItemApprovalStatus {
 export const IntentApproval: React.FC = () => {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
+  const { storyCards: dbStoryCards, syncStoryCard, refreshWorkspaceState } = useEntityState();
   const [loading, setLoading] = useState(false);
   const [phaseStatus, setPhaseStatus] = useState<PhaseStatus>({
     vision: { total: 0, approved: 0, rejected: 0, items: [] },
@@ -192,6 +201,7 @@ export const IntentApproval: React.FC = () => {
         description: v.description,
         lastModified: v.lastModified,
         path: v.path,
+        entityId: v.themeId || v.fields?.['ID'] || v.filename?.replace(/\.md$/, ''),
       }));
 
       // Load ideation items (using ideation-files endpoint which handles IDEA-* files)
@@ -210,6 +220,7 @@ export const IntentApproval: React.FC = () => {
         description: i.description,
         lastModified: i.lastModified,
         path: i.path,
+        entityId: i.ideaId || i.fields?.['ID'] || i.filename?.replace(/\.md$/, ''),
       }));
 
       // Load storyboard items (using story-files endpoint which handles story*, STORY*, SB-* files)
@@ -228,6 +239,7 @@ export const IntentApproval: React.FC = () => {
         description: s.description,
         lastModified: s.lastModified,
         path: s.path,
+        entityId: s.storyId || s.fields?.['ID'] || s.filename?.replace(/\.md$/, ''),
       }));
 
       // Apply saved approval statuses
@@ -290,7 +302,7 @@ export const IntentApproval: React.FC = () => {
     }
   };
 
-  const handleApproveItem = (item: IntentItem) => {
+  const handleApproveItem = async (item: IntentItem) => {
     const newApprovals = {
       ...itemApprovals,
       [item.id]: {
@@ -302,6 +314,34 @@ export const IntentApproval: React.FC = () => {
 
     // Update phase status
     updateItemStatus(item, 'approved');
+
+    // Sync approval status to database (single source of truth)
+    // BUSINESS RULE (see STATE_MODEL.md "Automatic State Transitions on Approval"):
+    // On APPROVE: Set all 4 dimensions - lifecycle_state, workflow_stage, stage_status, approval_status
+    // NOTE: Use currentWorkspace.name (not .id) for consistency with EntityStateContext.refreshWorkspaceState
+    if (item.entityId && currentWorkspace?.name) {
+      try {
+        const result = await syncStoryCard({
+          card_id: item.entityId,
+          title: item.name,
+          description: item.description || '',
+          card_type: item.type, // 'vision', 'ideation', or 'storyboard'
+          position_x: 0,
+          position_y: 0,
+          workspace_id: currentWorkspace.name,
+          file_path: item.path,
+          lifecycle_state: 'active' as LifecycleState,       // REQUIRED: entity is now active in workflow
+          workflow_stage: 'intent' as WorkflowStage,         // REQUIRED: this is the Intent phase
+          stage_status: 'approved' as StageStatus,           // REQUIRED: stage work complete
+          approval_status: 'approved' as ApprovalStatus,     // REQUIRED: authorization granted
+        });
+        console.log(`Synced ${item.type} ${item.entityId} approval to database:`, result);
+        // Refresh the workspace state to get updated data
+        await refreshWorkspaceState();
+      } catch (err) {
+        console.error('Failed to sync approval to database:', err);
+      }
+    }
   };
 
   const handleRejectItem = (item: IntentItem) => {
@@ -309,12 +349,14 @@ export const IntentApproval: React.FC = () => {
     setRejectionComment('');
   };
 
-  const confirmRejectItem = () => {
+  const confirmRejectItem = async () => {
     if (!rejectionModal.item) return;
+
+    const item = rejectionModal.item;
 
     const newApprovals = {
       ...itemApprovals,
-      [rejectionModal.item.id]: {
+      [item.id]: {
         status: 'rejected' as const,
         comment: rejectionComment,
         reviewedAt: new Date().toISOString(),
@@ -323,7 +365,35 @@ export const IntentApproval: React.FC = () => {
     saveItemApprovals(newApprovals);
 
     // Update phase status
-    updateItemStatus(rejectionModal.item, 'rejected', rejectionComment);
+    updateItemStatus(item, 'rejected', rejectionComment);
+
+    // Sync rejection status to database (single source of truth)
+    // BUSINESS RULE (see STATE_MODEL.md "Automatic State Transitions on Approval"):
+    // On REJECT: Set all 4 dimensions - lifecycle_state, workflow_stage, stage_status, approval_status
+    // NOTE: Use currentWorkspace.name (not .id) for consistency with EntityStateContext.refreshWorkspaceState
+    if (item.entityId && currentWorkspace?.name) {
+      try {
+        const result = await syncStoryCard({
+          card_id: item.entityId,
+          title: item.name,
+          description: item.description || '',
+          card_type: item.type, // 'vision', 'ideation', or 'storyboard'
+          position_x: 0,
+          position_y: 0,
+          workspace_id: currentWorkspace.name,
+          file_path: item.path,
+          lifecycle_state: 'active' as LifecycleState,       // REQUIRED: entity remains in workflow but blocked
+          workflow_stage: 'intent' as WorkflowStage,         // REQUIRED: this is the Intent phase
+          stage_status: 'blocked' as StageStatus,            // REQUIRED: cannot proceed until resolved
+          approval_status: 'rejected' as ApprovalStatus,     // REQUIRED: authorization denied
+        });
+        console.log(`Synced ${item.type} ${item.entityId} rejection to database:`, result);
+        // Refresh the workspace state to get updated data
+        await refreshWorkspaceState();
+      } catch (err) {
+        console.error('Failed to sync rejection to database:', err);
+      }
+    }
 
     // Close modal
     setRejectionModal({ isOpen: false, item: null });
@@ -352,10 +422,41 @@ export const IntentApproval: React.FC = () => {
     });
   };
 
-  const handleResetItemStatus = (item: IntentItem) => {
+  const handleResetItemStatus = async (item: IntentItem) => {
     const newApprovals = { ...itemApprovals };
     delete newApprovals[item.id];
     saveItemApprovals(newApprovals);
+
+    // Sync reset status to database (single source of truth)
+    // BUSINESS RULE (see STATE_MODEL.md "Automatic State Transitions on Approval"):
+    // On RESET: Only stage_status and approval_status change
+    // lifecycle_state and workflow_stage remain unchanged (preserved from existing state).
+    // NOTE: Use currentWorkspace.name (not .id) for consistency with EntityStateContext.refreshWorkspaceState
+    if (item.entityId && currentWorkspace?.name) {
+      try {
+        // Get existing state to preserve lifecycle_state and workflow_stage
+        const dbCard = dbStoryCards.get(item.entityId);
+        const result = await syncStoryCard({
+          card_id: item.entityId,
+          title: item.name,
+          description: item.description || '',
+          card_type: item.type, // 'vision', 'ideation', or 'storyboard'
+          position_x: 0,
+          position_y: 0,
+          workspace_id: currentWorkspace.name,
+          file_path: item.path,
+          lifecycle_state: dbCard?.lifecycle_state || 'active' as LifecycleState,
+          workflow_stage: dbCard?.workflow_stage || 'intent' as WorkflowStage,
+          stage_status: 'in_progress' as StageStatus,  // REQUIRED: stage_status reset
+          approval_status: 'pending' as ApprovalStatus, // REQUIRED: approval_status reset
+        });
+        console.log(`Synced ${item.type} ${item.entityId} reset to database:`, result);
+        // Refresh the workspace state to get updated data
+        await refreshWorkspaceState();
+      } catch (err) {
+        console.error('Failed to sync reset to database:', err);
+      }
+    }
 
     // Update phase status
     setPhaseStatus(prev => {

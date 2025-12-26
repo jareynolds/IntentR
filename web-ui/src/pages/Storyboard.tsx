@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '../components/Button';
-import { useWorkspace, type StoryCard, type Connection } from '../context/WorkspaceContext';
+import { useWorkspace, type StoryCard, type Connection, type StoryCardLifecycleState, type StoryCardWorkflowStage, type StoryCardStageStatus, type StoryCardApprovalStatus } from '../context/WorkspaceContext';
 import { useCollaboration } from '../context/CollaborationContext';
+import { useEntityState } from '../context/EntityStateContext';
 import RemoteCursors from '../components/RemoteCursors';
 import { AssetsPane } from '../components/AssetsPane';
 import { ConfirmDialog, PageLayout } from '../components';
@@ -11,6 +12,7 @@ import { INTEGRATION_URL, SPEC_URL } from '../api/client';
 export const Storyboard: React.FC = () => {
   const { currentWorkspace, updateStoryboard } = useWorkspace();
   const { joinWorkspace, leaveWorkspace, updateCursor, broadcastGridUpdate, onGridUpdate } = useCollaboration();
+  const { storyCards: dbStoryCards, syncStoryCard, fetchStoryCardState } = useEntityState();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Get all available ideation tags from workspace
@@ -56,7 +58,11 @@ export const Storyboard: React.FC = () => {
     title: '',
     description: '',
     imageUrl: '',
-    status: 'pending' as StoryCard['status'],
+    // INTENT State Model - 4 dimensions
+    lifecycle_state: 'draft' as StoryCardLifecycleState,
+    workflow_stage: 'intent' as StoryCardWorkflowStage,
+    stage_status: 'in_progress' as StoryCardStageStatus,
+    approval_status: 'pending' as StoryCardApprovalStatus,
     ideationTags: [] as string[],
     ideationCardId: '' as string | undefined,
   });
@@ -130,12 +136,30 @@ export const Storyboard: React.FC = () => {
   };
 
   // Helper function to get status label
-  const getStatusLabel = (status: StoryCard['status']): string => {
-    switch (status) {
-      case 'completed': return 'Completed';
-      case 'in-progress': return 'In Progress';
-      case 'pending': return 'Pending';
-      default: return 'Pending';
+  // Helper to get display label for lifecycle state
+  const getLifecycleLabel = (state: StoryCardLifecycleState | undefined): string => {
+    switch (state) {
+      case 'draft': return 'Draft';
+      case 'active': return 'Active';
+      case 'implemented': return 'Implemented';
+      case 'maintained': return 'Maintained';
+      case 'retired': return 'Retired';
+      default: return 'Draft';
+    }
+  };
+
+  // Legacy helper for backward compatibility
+  const getStatusLabel = (card: StoryCard): string => {
+    // Use lifecycle_state if available, otherwise fall back to legacy status
+    if (card.lifecycle_state) {
+      return getLifecycleLabel(card.lifecycle_state);
+    }
+    // Legacy fallback
+    switch (card.status) {
+      case 'completed': return 'Implemented';
+      case 'in-progress': return 'Active';
+      case 'pending': return 'Draft';
+      default: return 'Draft';
     }
   };
 
@@ -166,7 +190,10 @@ export const Storyboard: React.FC = () => {
       markdown += `- **Type**: Story Card\n`;
       markdown += `- **Storyboard**: ${workspaceName}\n`;
       markdown += `- **Card ID**: ${card.id}\n`;
-      markdown += `- **Status**: ${getStatusLabel(card.status)}\n`;
+      markdown += `- **Lifecycle State**: ${getStatusLabel(card)}\n`;
+      markdown += `- **Workflow Stage**: ${card.workflow_stage || 'intent'}\n`;
+      markdown += `- **Stage Status**: ${card.stage_status || 'in_progress'}\n`;
+      markdown += `- **Approval Status**: ${card.approval_status || 'pending'}\n`;
       markdown += `- **Grid Position X**: ${Math.round(card.x)}\n`;
       markdown += `- **Grid Position Y**: ${Math.round(card.y)}\n`;
       markdown += `- **Generated**: ${new Date().toLocaleString()}\n`;
@@ -249,7 +276,9 @@ export const Storyboard: React.FC = () => {
     indexMarkdown += 'flowchart TD\n';
     cardsToSave.forEach(card => {
       const nodeId = card.id.replace(/-/g, '');
-      const statusEmoji = card.status === 'completed' ? '✓' : card.status === 'in-progress' ? '⟳' : '○';
+      // Use lifecycle_state for status emoji (with fallback to legacy status)
+      const state = card.lifecycle_state || (card.status === 'completed' ? 'implemented' : card.status === 'in-progress' ? 'active' : 'draft');
+      const statusEmoji = state === 'implemented' || state === 'maintained' ? '✓' : state === 'active' ? '⟳' : '○';
       indexMarkdown += `    ${nodeId}["${statusEmoji} ${card.title}"]\n`;
     });
     connectionsToSave.forEach(conn => {
@@ -261,12 +290,12 @@ export const Storyboard: React.FC = () => {
 
     // Card index with positions
     indexMarkdown += `## Story Cards\n\n`;
-    indexMarkdown += `| # | Title | Status | X | Y | File | Dependencies |\n`;
-    indexMarkdown += `|---|-------|--------|---|---|------|-------------|\n`;
+    indexMarkdown += `| # | Title | Lifecycle | X | Y | File | Dependencies |\n`;
+    indexMarkdown += `|---|-------|-----------|---|---|------|-------------|\n`;
     cardsToSave.forEach((card, index) => {
       const fileName = generateFileName(card.title);
       const depCount = connectionsToSave.filter(c => c.from === card.id || c.to === card.id).length;
-      indexMarkdown += `| ${index + 1} | [${card.title}](./${fileName}) | ${getStatusLabel(card.status)} | ${Math.round(card.x)} | ${Math.round(card.y)} | ${fileName} | ${depCount} |\n`;
+      indexMarkdown += `| ${index + 1} | [${card.title}](./${fileName}) | ${getStatusLabel(card)} | ${Math.round(card.x)} | ${Math.round(card.y)} | ${fileName} | ${depCount} |\n`;
     });
     indexMarkdown += '\n';
 
@@ -281,10 +310,10 @@ export const Storyboard: React.FC = () => {
 
     // Card positions data (machine-readable for restoration)
     indexMarkdown += `## Card Positions Data\n\n`;
-    indexMarkdown += `| Card ID | Title | X | Y | Status |\n`;
-    indexMarkdown += `|---------|-------|---|---|--------|\n`;
+    indexMarkdown += `| Card ID | Title | X | Y | Lifecycle |\n`;
+    indexMarkdown += `|---------|-------|---|---|----------|\n`;
     cardsToSave.forEach(card => {
-      indexMarkdown += `| ${card.id} | ${card.title} | ${Math.round(card.x)} | ${Math.round(card.y)} | ${card.status} |\n`;
+      indexMarkdown += `| ${card.id} | ${card.title} | ${Math.round(card.x)} | ${Math.round(card.y)} | ${card.lifecycle_state || 'draft'} |\n`;
     });
 
     files.push({ fileName: indexFileName, content: indexMarkdown });
@@ -303,6 +332,34 @@ export const Storyboard: React.FC = () => {
         }),
       });
       console.log(`[Auto-save] Saved ${files.length} files to conception folder`);
+
+      // Sync each story card state to database via EntityStateContext
+      if (currentWorkspace?.id) {
+        for (const card of cardsToSave) {
+          try {
+            const fileName = generateFileName(card.title);
+            await syncStoryCard({
+              card_id: card.id,
+              title: card.title,
+              description: card.description || '',
+              card_type: 'story',
+              image_url: card.imageUrl,
+              position_x: Math.round(card.x),
+              position_y: Math.round(card.y),
+              workspace_id: currentWorkspace.id,
+              file_path: `${currentWorkspace.projectFolder}/conception/${fileName}`,
+              lifecycle_state: (card.lifecycle_state || 'draft') as 'draft' | 'active' | 'implemented' | 'maintained' | 'retired',
+              workflow_stage: (card.workflow_stage || 'intent') as 'intent' | 'specification' | 'ui_design' | 'implementation' | 'control_loop',
+              stage_status: (card.stage_status || 'in_progress') as 'in_progress' | 'ready_for_approval' | 'approved' | 'blocked',
+              approval_status: (card.approval_status || 'pending') as 'pending' | 'approved' | 'rejected',
+            });
+          } catch (syncErr) {
+            console.warn(`[Auto-save] Failed to sync story card ${card.id} to database:`, syncErr);
+            // Don't fail the overall save if sync fails - files are already saved
+          }
+        }
+        console.log(`[Auto-save] Synced ${cardsToSave.length} story cards to database`);
+      }
     } catch (error) {
       console.warn('[Auto-save] Failed to save storyboard:', error);
     }
@@ -752,7 +809,11 @@ export const Storyboard: React.FC = () => {
         imageUrl: '',
         x: card.x,
         y: card.y,
-        status: card.status,
+        // INTENT State Model - 4 dimensions (with backward compatibility)
+        lifecycle_state: card.lifecycle_state || 'draft',
+        workflow_stage: card.workflow_stage || 'intent',
+        stage_status: card.stage_status || 'in_progress',
+        approval_status: card.approval_status || 'pending',
         ideationTags: [],
         sourceFileName: card.sourceFileName || undefined,
       }));
@@ -1259,20 +1320,48 @@ export const Storyboard: React.FC = () => {
 
   const handleAddCard = () => {
     setEditingCardId(null);
-    setCardFormData({ title: '', description: '', imageUrl: '', status: 'pending', ideationTags: [], ideationCardId: '' });
+    // Auto-set initial state for new storyboard cards:
+    // - lifecycle_state: 'active' (ready for work)
+    // - workflow_stage: 'intent' (storyboards start at intent phase)
+    // - stage_status: 'in_progress' (work has begun)
+    setCardFormData({ title: '', description: '', imageUrl: '', lifecycle_state: 'active', workflow_stage: 'intent', stage_status: 'in_progress', approval_status: 'pending', ideationTags: [], ideationCardId: '' });
     setShowCardDialog(true);
   };
 
-  const handleEditCard = (cardId: string) => {
+  const handleEditCard = async (cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     if (!card) return;
 
     setEditingCardId(cardId);
+
+    // Get INTENT State Model dimensions from DATABASE (single source of truth)
+    let lifecycleState = card.lifecycle_state || 'draft';
+    let workflowStage = card.workflow_stage || 'intent';
+    let stageStatus = card.stage_status || 'in_progress';
+    let approvalStatus = card.approval_status || 'pending';
+
+    // Try to get state from cached dbStoryCards first, then fetch from database
+    let dbState = dbStoryCards.get(cardId);
+    if (!dbState) {
+      dbState = await fetchStoryCardState(cardId) || undefined;
+    }
+
+    if (dbState) {
+      lifecycleState = dbState.lifecycle_state || lifecycleState;
+      workflowStage = dbState.workflow_stage || workflowStage;
+      stageStatus = dbState.stage_status || stageStatus;
+      approvalStatus = dbState.approval_status || approvalStatus;
+    }
+
     setCardFormData({
       title: card.title,
       description: card.description,
       imageUrl: card.imageUrl,
-      status: card.status,
+      // INTENT State Model - 4 dimensions from DATABASE
+      lifecycle_state: lifecycleState as StoryCardLifecycleState,
+      workflow_stage: workflowStage as StoryCardWorkflowStage,
+      stage_status: stageStatus as StoryCardStageStatus,
+      approval_status: approvalStatus as StoryCardApprovalStatus,
       ideationTags: card.ideationTags || [],
       ideationCardId: card.ideationCardId || '',
     });
@@ -1311,7 +1400,11 @@ export const Storyboard: React.FC = () => {
       imageUrl: cardFormData.imageUrl,
       x: Math.round(centerX),
       y: Math.round(centerY),
-      status: cardFormData.status,
+      // INTENT State Model - 4 dimensions
+      lifecycle_state: cardFormData.lifecycle_state,
+      workflow_stage: cardFormData.workflow_stage,
+      stage_status: cardFormData.stage_status,
+      approval_status: cardFormData.approval_status,
       ideationTags: cardFormData.ideationTags,
       ideationCardId: cardFormData.ideationCardId || undefined,
     };
@@ -1319,7 +1412,7 @@ export const Storyboard: React.FC = () => {
     setCards(prevCards => [...prevCards, newCard]);
     setShowCardDialog(false);
     setEditingCardId(null);
-    setCardFormData({ title: '', description: '', imageUrl: '', status: 'pending', ideationTags: [], ideationCardId: '' });
+    setCardFormData({ title: '', description: '', imageUrl: '', lifecycle_state: 'draft', workflow_stage: 'intent', stage_status: 'in_progress', approval_status: 'pending', ideationTags: [], ideationCardId: '' });
   };
 
   const handleUpdateCard = () => {
@@ -1332,7 +1425,7 @@ export const Storyboard: React.FC = () => {
     ));
     setShowCardDialog(false);
     setEditingCardId(null);
-    setCardFormData({ title: '', description: '', imageUrl: '', status: 'pending', ideationTags: [], ideationCardId: '' });
+    setCardFormData({ title: '', description: '', imageUrl: '', lifecycle_state: 'draft', workflow_stage: 'intent', stage_status: 'in_progress', approval_status: 'pending', ideationTags: [], ideationCardId: '' });
   };
 
   const handleSaveCard = () => {
@@ -1423,8 +1516,26 @@ export const Storyboard: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: StoryCard['status']) => {
-    switch (status) {
+  // Helper to get color for lifecycle state
+  const getLifecycleColor = (state: StoryCardLifecycleState | undefined): string => {
+    switch (state) {
+      case 'draft': return 'var(--color-systemGray)';
+      case 'active': return 'var(--color-systemBlue)';
+      case 'implemented': return 'var(--color-systemGreen)';
+      case 'maintained': return 'var(--color-systemTeal)';
+      case 'retired': return 'var(--color-systemOrange)';
+      default: return 'var(--color-systemGray)';
+    }
+  };
+
+  // Legacy helper for backward compatibility
+  const getStatusColor = (card: StoryCard): string => {
+    // Use lifecycle_state if available, otherwise fall back to legacy status
+    if (card.lifecycle_state) {
+      return getLifecycleColor(card.lifecycle_state);
+    }
+    // Legacy fallback
+    switch (card.status) {
       case 'completed': return 'var(--color-systemGreen)';
       case 'in-progress': return 'var(--color-systemBlue)';
       case 'pending': return 'var(--color-systemGray)';
@@ -1822,7 +1933,7 @@ Cards can be linked to ideation content and later analyzed to generate capabilit
                 style={{
                   left: card.x * zoom,
                   top: card.y * zoom,
-                  borderColor: getStatusColor(card.status),
+                  borderColor: getStatusColor(card),
                   transform: `scale(${zoom})`,
                   transformOrigin: '0 0',
                 }}
@@ -1832,8 +1943,8 @@ Cards can be linked to ideation content and later analyzed to generate capabilit
             <div className="card-content">
               <div className="card-header">
                 <h4 className="text-headline">{card.title}</h4>
-                <span className="card-status-badge" style={{ backgroundColor: getStatusColor(card.status) }}>
-                  {getStatusLabel(card.status)}
+                <span className="card-status-badge" style={{ backgroundColor: getStatusColor(card) }}>
+                  {getStatusLabel(card)}
                 </span>
               </div>
               <p className="text-footnote text-secondary card-description">{card.description}</p>
@@ -1970,18 +2081,87 @@ Cards can be linked to ideation content and later analyzed to generate capabilit
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="card-status" className="label">Status</label>
-              <select
-                id="card-status"
-                value={cardFormData.status}
-                onChange={(e) => setCardFormData({ ...cardFormData, status: e.target.value as StoryCard['status'] })}
-                className="input"
-              >
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-              </select>
+            {/* INTENT State Model - 4 Dimensions */}
+            <div style={{
+              padding: '16px',
+              background: 'var(--color-systemGray6)',
+              borderRadius: '12px',
+              marginBottom: '16px'
+            }}>
+              <h4 className="text-headline" style={{ marginBottom: '12px' }}>INTENT State</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label htmlFor="card-lifecycle" className="label">Lifecycle State</label>
+                  <select
+                    id="card-lifecycle"
+                    value={cardFormData.lifecycle_state}
+                    onChange={(e) => setCardFormData({ ...cardFormData, lifecycle_state: e.target.value as StoryCardLifecycleState })}
+                    className="input"
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="active">Active</option>
+                    <option value="implemented">Implemented</option>
+                    <option value="maintained">Maintained</option>
+                    <option value="retired">Retired</option>
+                  </select>
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label htmlFor="card-workflow" className="label">Workflow Stage</label>
+                  <select
+                    id="card-workflow"
+                    value={cardFormData.workflow_stage}
+                    onChange={(e) => setCardFormData({ ...cardFormData, workflow_stage: e.target.value as StoryCardWorkflowStage })}
+                    disabled={cardFormData.lifecycle_state !== 'active'}
+                    className="input"
+                    style={{ opacity: cardFormData.lifecycle_state !== 'active' ? 0.6 : 1 }}
+                  >
+                    <option value="intent">Intent</option>
+                    <option value="specification">Specification</option>
+                    <option value="ui_design">UI Design</option>
+                    <option value="implementation">Implementation</option>
+                    <option value="control_loop">Control Loop</option>
+                  </select>
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label htmlFor="card-stage-status" className="label">Stage Status</label>
+                  <select
+                    id="card-stage-status"
+                    value={cardFormData.stage_status}
+                    onChange={(e) => setCardFormData({ ...cardFormData, stage_status: e.target.value as StoryCardStageStatus })}
+                    disabled={cardFormData.lifecycle_state !== 'active'}
+                    className="input"
+                    style={{ opacity: cardFormData.lifecycle_state !== 'active' ? 0.6 : 1 }}
+                  >
+                    <option value="in_progress">In Progress</option>
+                    <option value="ready_for_approval">Ready for Approval</option>
+                    <option value="approved">Approved</option>
+                    <option value="blocked">Blocked</option>
+                  </select>
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label htmlFor="card-approval" className="label">Approval Status</label>
+                  <select
+                    id="card-approval"
+                    value={cardFormData.approval_status}
+                    onChange={(e) => {
+                      const newApprovalStatus = e.target.value as StoryCardApprovalStatus;
+                      // Auto-set stage_status based on approval status
+                      let newStageStatus = cardFormData.stage_status;
+                      if (newApprovalStatus === 'approved') {
+                        newStageStatus = 'approved';
+                      } else if (newApprovalStatus === 'rejected') {
+                        newStageStatus = 'blocked';
+                      }
+                      setCardFormData({ ...cardFormData, approval_status: newApprovalStatus, stage_status: newStageStatus });
+                    }}
+                    className="input"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             <div className="form-group">

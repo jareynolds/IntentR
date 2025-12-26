@@ -41,6 +41,8 @@ IntentR is a GoLang microservices application for design-driven development. It 
 ./stop.sh
 ```
 
+**After starting services, open http://localhost:6175 in your browser.**
+
 ## Build & Test Commands
 
 ```bash
