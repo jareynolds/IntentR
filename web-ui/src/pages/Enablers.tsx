@@ -25,12 +25,31 @@ interface FileEnabler {
   filename: string;
   path: string;
   name: string;
+  description: string;
   purpose: string;
   status: string;
   owner: string;
   priority: string;
   capabilityId: string;
   enablerId: string;
+  technicalSpecs?: string;
+  rejectionComment?: string;
+  createdBy?: string;
+  // New enabler specification fields
+  enablerType?: string;  // service, library, UI component, data pipeline, infra module, policy, runbook
+  responsibility?: string;  // single responsibility statement
+  publicInterface?: string;  // endpoints/functions/events with signatures
+  internalDesign?: string;  // key algorithms, data structures, invariants
+  dependencies?: string;  // packages, services, cloud resources
+  configuration?: string;  // environment variables, feature flags, secrets, defaults
+  dataContracts?: string;  // schemas, versioning strategy, migrations
+  operationalRequirements?: string;  // SLOs, scaling, quotas, rate limits
+  securityControls?: string;  // authn/authz, encryption, secret handling, audit logs
+  testingStrategy?: string;  // unit/contract/integration/e2e; test data approach
+  observability?: string;  // logs/metrics/traces, dashboards, alerts
+  deployment?: string;  // build steps, runtime, rollback, canary strategy
+  runbook?: string;  // failure modes + remediation
+  costProfile?: string;  // main cost drivers and guardrails
   // INTENT State Model - 4 dimensions (from fields parsing)
   fields?: Record<string, string>;
 }
@@ -156,6 +175,10 @@ export const Enablers: React.FC = () => {
     coverageNotes?: string;
   } | null>(null);
 
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+
   // Inline requirement for enabler form
   interface InlineRequirement {
     id: string;
@@ -172,9 +195,14 @@ export const Enablers: React.FC = () => {
     enabler_id: '',
     capability_id: 0,
     name: '',
+    description: '',
     purpose: '',
     owner: '',
+    status: '',
     priority: 'medium',
+    technical_specs: undefined,
+    rejection_comment: '',
+    created_by: undefined,
     // INTENT State Model - 4 dimensions
     // New enablers: active lifecycle, specification stage, in_progress status
     lifecycle_state: 'active',
@@ -226,6 +254,179 @@ export const Enablers: React.FC = () => {
 
   const closeConfirmDialog = () => {
     setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+  };
+
+  // AI Recommendation state
+  interface AIRecommendationOption {
+    name: string;
+    enabler_type: string;
+    responsibility: string;
+    public_interface: string;
+    internal_design: string;
+    dependencies: string;
+    configuration: string;
+    data_contracts: string;
+    operational_requirements: string;
+    security_controls: string;
+    testing_strategy: string;
+    observability: string;
+    deployment: string;
+    runbook: string;
+    cost_profile: string;
+  }
+  const [aiRecommendationOptions, setAiRecommendationOptions] = useState<AIRecommendationOption[]>([]);
+  const [selectedAiOptionIndex, setSelectedAiOptionIndex] = useState<number>(-1);
+  const [isLoadingAiRecommendation, setIsLoadingAiRecommendation] = useState(false);
+  const [aiRecommendationError, setAiRecommendationError] = useState<string | null>(null);
+
+  // Generate AI recommendations for enabler specification details
+  const handleGenerateAiRecommendation = async () => {
+    if (!enablerFormData.name) {
+      setAiRecommendationError('Please enter an enabler name first.');
+      return;
+    }
+
+    // Get API key
+    const anthropicKey = localStorage.getItem('anthropic_api_key') || '';
+    if (!anthropicKey) {
+      setAiRecommendationError('Please add your Anthropic API key in the Settings page.');
+      return;
+    }
+
+    setIsLoadingAiRecommendation(true);
+    setAiRecommendationError(null);
+
+    const prompt = `You are helping to define technical specifications for a software enabler. Based on the following information, generate exactly 3 different approaches/options for implementing this enabler.
+
+Enabler Name: ${enablerFormData.name}
+Description: ${enablerFormData.description || 'Not provided'}
+Purpose: ${enablerFormData.purpose || 'Not provided'}
+
+For each of the 3 options, provide a complete specification with:
+1. A descriptive name for this approach (e.g., "Microservice Architecture", "Monolithic Approach", "Event-Driven Design")
+2. Type: one of [service, library, ui_component, data_pipeline, infra_module, policy, runbook]
+3. Responsibility: A single responsibility statement
+4. Public Interface: Endpoints, functions, or events with signatures
+5. Internal Design: Key algorithms, data structures, invariants
+6. Dependencies: Packages, services, cloud resources needed
+7. Configuration: Environment variables, feature flags, secrets, defaults
+8. Data Contracts: Schemas, versioning strategy, migrations
+9. Operational Requirements: SLOs, scaling, quotas, rate limits
+10. Security Controls: Authentication/authorization, encryption, secret handling, audit logs
+11. Testing Strategy: Unit/contract/integration/e2e testing approach, test data strategy
+12. Observability: Logs, metrics, traces, dashboards, alerts
+13. Deployment: Build steps, runtime, rollback, canary strategy
+14. Runbook: Failure modes and remediation procedures
+15. Cost Profile: Main cost drivers and guardrails
+
+IMPORTANT: Respond ONLY with valid JSON in this exact format, no other text:
+{
+  "options": [
+    {
+      "name": "Option Name Here",
+      "enabler_type": "service",
+      "responsibility": "...",
+      "public_interface": "...",
+      "internal_design": "...",
+      "dependencies": "...",
+      "configuration": "...",
+      "data_contracts": "...",
+      "operational_requirements": "...",
+      "security_controls": "...",
+      "testing_strategy": "...",
+      "observability": "...",
+      "deployment": "...",
+      "runbook": "...",
+      "cost_profile": "..."
+    }
+  ]
+}`;
+
+    try {
+      const response = await fetch(`${INTEGRATION_URL}/ai-chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: prompt,
+          workspacePath: currentWorkspace?.projectFolder || '',
+          history: [],
+          apiKey: anthropicKey,
+        }),
+      });
+
+      if (!response.ok) {
+        setAiRecommendationError(`Server error: ${response.status}`);
+        setIsLoadingAiRecommendation(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.error) {
+        setAiRecommendationError(data.error);
+        setIsLoadingAiRecommendation(false);
+        return;
+      }
+
+      // Parse the JSON response
+      const responseText = data.response || '';
+      // Extract JSON from the response (it might be wrapped in markdown code blocks)
+      let jsonStr = responseText;
+      const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (jsonMatch) {
+        jsonStr = jsonMatch[1].trim();
+      } else {
+        // Try to find JSON object directly
+        const jsonStart = responseText.indexOf('{');
+        const jsonEnd = responseText.lastIndexOf('}');
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+          jsonStr = responseText.substring(jsonStart, jsonEnd + 1);
+        }
+      }
+
+      try {
+        const parsed = JSON.parse(jsonStr);
+        if (parsed.options && Array.isArray(parsed.options)) {
+          setAiRecommendationOptions(parsed.options);
+          setSelectedAiOptionIndex(-1); // Reset selection
+        } else {
+          setAiRecommendationError('Invalid response format from AI');
+        }
+      } catch (parseError) {
+        console.error('Failed to parse AI response:', parseError, responseText);
+        setAiRecommendationError('Failed to parse AI response. Please try again.');
+      }
+    } catch (error) {
+      console.error('AI recommendation error:', error);
+      setAiRecommendationError('Failed to generate recommendations. Please try again.');
+    } finally {
+      setIsLoadingAiRecommendation(false);
+    }
+  };
+
+  // Apply selected AI option to form fields
+  const handleSelectAiOption = (index: number) => {
+    setSelectedAiOptionIndex(index);
+    if (index >= 0 && index < aiRecommendationOptions.length) {
+      const option = aiRecommendationOptions[index];
+      setEnablerFormData(prev => ({
+        ...prev,
+        enabler_type: option.enabler_type,
+        responsibility: option.responsibility,
+        public_interface: option.public_interface,
+        internal_design: option.internal_design,
+        dependencies: option.dependencies,
+        configuration: option.configuration,
+        data_contracts: option.data_contracts,
+        operational_requirements: option.operational_requirements,
+        security_controls: option.security_controls,
+        testing_strategy: option.testing_strategy,
+        observability: option.observability,
+        deployment: option.deployment,
+        runbook: option.runbook,
+        cost_profile: option.cost_profile,
+      }));
+    }
   };
 
   // Load capabilities and file enablers when workspace changes or on mount
@@ -430,9 +631,14 @@ export const Enablers: React.FC = () => {
       enabler_id: generateId('ENB'),
       capability_id: 0, // Use 0 for file-based capabilities
       name: '',
+      description: '',
       purpose: '',
       owner: '',
+      status: '',
       priority: 'medium',
+      technical_specs: undefined,
+      rejection_comment: '',
+      created_by: undefined,
       // INTENT State Model - 4 dimensions
       // New enablers: active lifecycle, specification stage, in_progress status
       lifecycle_state: 'active',
@@ -494,18 +700,64 @@ export const Enablers: React.FC = () => {
     }
 
     // Populate form with existing enabler data
+    // Description can come from enabler.description or enabler.fields['Description']
+    const description = enabler.description || enabler.fields?.['Description'] || '';
+    // Status from enabler or fields
+    const status = enabler.status || enabler.fields?.['Status'] || '';
+    // Technical specs from fields (stored as string in markdown)
+    const technicalSpecs = enabler.technicalSpecs || enabler.fields?.['Technical Specifications'] || '';
+    // Rejection comment from fields
+    const rejectionComment = enabler.rejectionComment || enabler.fields?.['Rejection Comment'] || '';
+    // Created by from fields
+    const createdBy = enabler.createdBy || enabler.fields?.['Created By'] || '';
+    // New enabler specification fields
+    const enablerType = enabler.enablerType || enabler.fields?.['Type'] || '';
+    const responsibility = enabler.responsibility || enabler.fields?.['Responsibility'] || '';
+    const publicInterface = enabler.publicInterface || enabler.fields?.['Public Interface'] || '';
+    const internalDesign = enabler.internalDesign || enabler.fields?.['Internal Design'] || '';
+    const dependencies = enabler.dependencies || enabler.fields?.['Dependencies'] || '';
+    const configuration = enabler.configuration || enabler.fields?.['Configuration'] || '';
+    const dataContracts = enabler.dataContracts || enabler.fields?.['Data Contracts'] || '';
+    const operationalRequirements = enabler.operationalRequirements || enabler.fields?.['Operational Requirements'] || '';
+    const securityControls = enabler.securityControls || enabler.fields?.['Security Controls'] || '';
+    const testingStrategy = enabler.testingStrategy || enabler.fields?.['Testing Strategy'] || '';
+    const observability = enabler.observability || enabler.fields?.['Observability'] || '';
+    const deployment = enabler.deployment || enabler.fields?.['Deployment'] || '';
+    const runbook = enabler.runbook || enabler.fields?.['Runbook'] || '';
+    const costProfile = enabler.costProfile || enabler.fields?.['Cost Profile'] || '';
+
     setEnablerFormData({
       enabler_id: enabler.enablerId || '',
       capability_id: 0,
       name: enabler.name || '',
-      purpose: enabler.purpose || '',
+      description: description,
+      purpose: enabler.purpose || enabler.fields?.['Purpose'] || '',
       owner: enabler.owner || '',
+      status: status,
       priority: (enabler.priority as any) || 'medium',
+      technical_specs: technicalSpecs ? { content: technicalSpecs } : undefined,
+      rejection_comment: rejectionComment,
+      created_by: createdBy ? parseInt(createdBy, 10) : undefined,
       // INTENT State Model - 4 dimensions from DATABASE
       lifecycle_state: lifecycleState as LifecycleState,
       workflow_stage: workflowStage as WorkflowStage,
       stage_status: stageStatus as StageStatus,
       approval_status: approvalStatus as ApprovalStatus,
+      // Enabler specification fields
+      enabler_type: enablerType,
+      responsibility: responsibility,
+      public_interface: publicInterface,
+      internal_design: internalDesign,
+      dependencies: dependencies,
+      configuration: configuration,
+      data_contracts: dataContracts,
+      operational_requirements: operationalRequirements,
+      security_controls: securityControls,
+      testing_strategy: testingStrategy,
+      observability: observability,
+      deployment: deployment,
+      runbook: runbook,
+      cost_profile: costProfile,
     });
 
     // Try to load requirements from the file
@@ -788,12 +1040,75 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
       markdown += `- **Capability**: ${capabilityName}\n`;
       markdown += `- **Owner**: ${enablerFormData.owner || 'Not specified'}\n`;
       markdown += `- **Priority**: ${enablerFormData.priority || 'medium'}\n`;
+      markdown += `- **Status**: ${enablerFormData.status || 'draft'}\n`;
       // NOTE: State fields (lifecycle_state, workflow_stage, stage_status, approval_status)
       // are NOT written to markdown - database is the single source of truth
-      markdown += `- **Created**: ${new Date().toLocaleString()}\n\n`;
+      markdown += `- **Created**: ${new Date().toLocaleString()}\n`;
+      if (enablerFormData.created_by) {
+        markdown += `- **Created By**: ${enablerFormData.created_by}\n`;
+      }
+      markdown += `\n`;
 
+      // Description section
+      if (enablerFormData.description) {
+        markdown += `## Description\n${enablerFormData.description}\n\n`;
+      }
+
+      // Purpose section
       if (enablerFormData.purpose) {
         markdown += `## Purpose\n${enablerFormData.purpose}\n\n`;
+      }
+
+      // Technical Specifications section
+      const techSpecsContent = typeof enablerFormData.technical_specs === 'object' && enablerFormData.technical_specs?.content
+        ? String(enablerFormData.technical_specs.content)
+        : '';
+      if (techSpecsContent) {
+        markdown += `## Technical Specifications\n${techSpecsContent}\n\n`;
+      }
+
+      // Enabler Specification Details sections
+      if (enablerFormData.enabler_type) {
+        markdown += `## Type\n${enablerFormData.enabler_type}\n\n`;
+      }
+      if (enablerFormData.responsibility) {
+        markdown += `## Responsibility\n${enablerFormData.responsibility}\n\n`;
+      }
+      if (enablerFormData.public_interface) {
+        markdown += `## Public Interface\n${enablerFormData.public_interface}\n\n`;
+      }
+      if (enablerFormData.internal_design) {
+        markdown += `## Internal Design\n${enablerFormData.internal_design}\n\n`;
+      }
+      if (enablerFormData.dependencies) {
+        markdown += `## Dependencies\n${enablerFormData.dependencies}\n\n`;
+      }
+      if (enablerFormData.configuration) {
+        markdown += `## Configuration\n${enablerFormData.configuration}\n\n`;
+      }
+      if (enablerFormData.data_contracts) {
+        markdown += `## Data Contracts\n${enablerFormData.data_contracts}\n\n`;
+      }
+      if (enablerFormData.operational_requirements) {
+        markdown += `## Operational Requirements\n${enablerFormData.operational_requirements}\n\n`;
+      }
+      if (enablerFormData.security_controls) {
+        markdown += `## Security Controls\n${enablerFormData.security_controls}\n\n`;
+      }
+      if (enablerFormData.testing_strategy) {
+        markdown += `## Testing Strategy\n${enablerFormData.testing_strategy}\n\n`;
+      }
+      if (enablerFormData.observability) {
+        markdown += `## Observability\n${enablerFormData.observability}\n\n`;
+      }
+      if (enablerFormData.deployment) {
+        markdown += `## Deployment\n${enablerFormData.deployment}\n\n`;
+      }
+      if (enablerFormData.runbook) {
+        markdown += `## Runbook\n${enablerFormData.runbook}\n\n`;
+      }
+      if (enablerFormData.cost_profile) {
+        markdown += `## Cost Profile\n${enablerFormData.cost_profile}\n\n`;
       }
 
       // Add Functional Requirements section
@@ -1609,12 +1924,25 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
           </div>
 
           <div>
+            <label className="text-subheadline">Description</label>
+            <textarea
+              className="input"
+              rows={3}
+              value={enablerFormData.description || ''}
+              onChange={(e) => setEnablerFormData({ ...enablerFormData, description: e.target.value })}
+              placeholder="Describe what this enabler does..."
+              style={{ width: '100%', marginTop: '4px' }}
+            />
+          </div>
+
+          <div>
             <label className="text-subheadline">Purpose</label>
             <textarea
               className="input"
               rows={3}
               value={enablerFormData.purpose}
               onChange={(e) => setEnablerFormData({ ...enablerFormData, purpose: e.target.value })}
+              placeholder="Technical purpose of this enabler..."
               style={{ width: '100%', marginTop: '4px' }}
             />
           </div>
@@ -1644,8 +1972,283 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
                 <option value="low">Low</option>
               </select>
             </div>
-
           </div>
+
+          {/* AI Recommendation Section */}
+          <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--color-separator)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+              <Button
+                variant="secondary"
+                onClick={handleGenerateAiRecommendation}
+                disabled={isLoadingAiRecommendation || !enablerFormData.name}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                {isLoadingAiRecommendation ? (
+                  <>
+                    <span style={{
+                      display: 'inline-block',
+                      width: '14px',
+                      height: '14px',
+                      border: '2px solid currentColor',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                    Generating...
+                  </>
+                ) : (
+                  'AI Recommendation'
+                )}
+              </Button>
+
+              {aiRecommendationOptions.length > 0 && (
+                <select
+                  className="input"
+                  value={selectedAiOptionIndex}
+                  onChange={(e) => handleSelectAiOption(parseInt(e.target.value))}
+                  style={{ flex: 1, maxWidth: '300px' }}
+                >
+                  <option value={-1}>Select an AI-generated option...</option>
+                  {aiRecommendationOptions.map((option, index) => (
+                    <option key={index} value={index}>
+                      {option.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            {aiRecommendationError && (
+              <Alert variant="error" style={{ marginBottom: '12px' }}>
+                {aiRecommendationError}
+              </Alert>
+            )}
+
+            <h4 className="text-subheadline" style={{ marginBottom: '12px', color: 'var(--color-label)' }}>
+              Enabler Specification Details
+            </h4>
+
+            <div>
+              <label className="text-subheadline">Type</label>
+              <select
+                className="input"
+                value={enablerFormData.enabler_type || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, enabler_type: e.target.value })}
+                style={{ width: '100%', marginTop: '4px' }}
+              >
+                <option value="">Select Type</option>
+                <option value="service">Service</option>
+                <option value="library">Library</option>
+                <option value="ui_component">UI Component</option>
+                <option value="data_pipeline">Data Pipeline</option>
+                <option value="infra_module">Infrastructure Module</option>
+                <option value="policy">Policy</option>
+                <option value="runbook">Runbook</option>
+              </select>
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Responsibility</label>
+              <textarea
+                className="input"
+                rows={2}
+                value={enablerFormData.responsibility || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, responsibility: e.target.value })}
+                placeholder="Single responsibility statement - what this enabler is accountable for..."
+                style={{ width: '100%', marginTop: '4px' }}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Public Interface</label>
+              <textarea
+                className="input"
+                rows={4}
+                value={enablerFormData.public_interface || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, public_interface: e.target.value })}
+                placeholder="Endpoints, functions, events with signatures (even if draft)..."
+                style={{ width: '100%', marginTop: '4px', fontFamily: 'monospace', fontSize: '12px' }}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Internal Design</label>
+              <textarea
+                className="input"
+                rows={4}
+                value={enablerFormData.internal_design || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, internal_design: e.target.value })}
+                placeholder="Key algorithms, data structures, invariants..."
+                style={{ width: '100%', marginTop: '4px', fontFamily: 'monospace', fontSize: '12px' }}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Dependencies</label>
+              <textarea
+                className="input"
+                rows={3}
+                value={enablerFormData.dependencies || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, dependencies: e.target.value })}
+                placeholder="Packages, services, cloud resources..."
+                style={{ width: '100%', marginTop: '4px' }}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Configuration</label>
+              <textarea
+                className="input"
+                rows={3}
+                value={enablerFormData.configuration || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, configuration: e.target.value })}
+                placeholder="Environment variables, feature flags, secrets, defaults..."
+                style={{ width: '100%', marginTop: '4px', fontFamily: 'monospace', fontSize: '12px' }}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Data Contracts</label>
+              <textarea
+                className="input"
+                rows={4}
+                value={enablerFormData.data_contracts || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, data_contracts: e.target.value })}
+                placeholder="Schemas, versioning strategy, migrations..."
+                style={{ width: '100%', marginTop: '4px', fontFamily: 'monospace', fontSize: '12px' }}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Operational Requirements</label>
+              <textarea
+                className="input"
+                rows={3}
+                value={enablerFormData.operational_requirements || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, operational_requirements: e.target.value })}
+                placeholder="SLOs, scaling, quotas, rate limits..."
+                style={{ width: '100%', marginTop: '4px' }}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Security Controls</label>
+              <textarea
+                className="input"
+                rows={3}
+                value={enablerFormData.security_controls || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, security_controls: e.target.value })}
+                placeholder="Authentication/authorization, encryption, secret handling, audit logs..."
+                style={{ width: '100%', marginTop: '4px' }}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Testing Strategy</label>
+              <textarea
+                className="input"
+                rows={3}
+                value={enablerFormData.testing_strategy || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, testing_strategy: e.target.value })}
+                placeholder="Unit/contract/integration/e2e testing approach, test data strategy..."
+                style={{ width: '100%', marginTop: '4px' }}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Observability</label>
+              <textarea
+                className="input"
+                rows={3}
+                value={enablerFormData.observability || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, observability: e.target.value })}
+                placeholder="Logs, metrics, traces, dashboards, alerts..."
+                style={{ width: '100%', marginTop: '4px' }}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Deployment</label>
+              <textarea
+                className="input"
+                rows={3}
+                value={enablerFormData.deployment || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, deployment: e.target.value })}
+                placeholder="Build steps, runtime, rollback, canary strategy..."
+                style={{ width: '100%', marginTop: '4px' }}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Runbook</label>
+              <textarea
+                className="input"
+                rows={3}
+                value={enablerFormData.runbook || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, runbook: e.target.value })}
+                placeholder="Failure modes and remediation procedures..."
+                style={{ width: '100%', marginTop: '4px' }}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <label className="text-subheadline">Cost Profile</label>
+              <textarea
+                className="input"
+                rows={2}
+                value={enablerFormData.cost_profile || ''}
+                onChange={(e) => setEnablerFormData({ ...enablerFormData, cost_profile: e.target.value })}
+                placeholder="Main cost drivers and guardrails..."
+                style={{ width: '100%', marginTop: '4px' }}
+              />
+            </div>
+          </div>
+
+          {/* Rejection Comment - Read-only, only shown when rejected */}
+          {enablerFormData.approval_status === 'rejected' && enablerFormData.rejection_comment && (
+            <div style={{
+              padding: '12px',
+              backgroundColor: 'var(--color-systemRed)',
+              opacity: 0.1,
+              borderRadius: '8px',
+              border: '1px solid var(--color-systemRed)'
+            }}>
+              <label className="text-subheadline" style={{ color: 'var(--color-systemRed)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>⚠️</span> Rejection Comment
+              </label>
+              <p style={{
+                marginTop: '8px',
+                padding: '8px',
+                backgroundColor: 'var(--color-secondarySystemBackground)',
+                borderRadius: '4px',
+                color: 'var(--color-label)'
+              }}>
+                {enablerFormData.rejection_comment}
+              </p>
+            </div>
+          )}
+
+          {/* Created By - Read-only */}
+          {enablerFormData.created_by && (
+            <div>
+              <label className="text-subheadline" style={{ color: 'var(--color-secondaryLabel)' }}>
+                Created By (User ID)
+              </label>
+              <input
+                type="text"
+                className="input"
+                value={enablerFormData.created_by || ''}
+                readOnly
+                style={{
+                  width: '100%',
+                  marginTop: '4px',
+                  backgroundColor: 'var(--color-tertiarySystemBackground)',
+                  color: 'var(--color-secondaryLabel)',
+                  cursor: 'default'
+                }}
+              />
+            </div>
+          )}
 
           {/* Requirements Section */}
           <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--color-separator)' }}>
@@ -2269,6 +2872,38 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
     );
   };
 
+  // Helper to get approval_status for an enabler from the database
+  const getEnablerApprovalStatusForFilter = (enabler: FileEnabler): string => {
+    const enablerId = enabler.enablerId || enabler.filename.replace(/\.md$/, '');
+    const dbEnabler = dbEnablers.get(enablerId);
+    return dbEnabler?.approval_status || 'pending'; // Default to pending if not in DB
+  };
+
+  // Calculate summary counts based on approval_status from database
+  const summaryCounts = {
+    pending: fileEnablers.filter(e => getEnablerApprovalStatusForFilter(e) === 'pending').length,
+    approved: fileEnablers.filter(e => getEnablerApprovalStatusForFilter(e) === 'approved').length,
+    rejected: fileEnablers.filter(e => getEnablerApprovalStatusForFilter(e) === 'rejected').length,
+    total: fileEnablers.length,
+  };
+
+  // Filter enablers by search query and status filter
+  const getFilteredEnablers = (enablers: FileEnabler[]) => {
+    return enablers.filter(enabler => {
+      // Search filter
+      const matchesSearch = !searchQuery ||
+        enabler.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        enabler.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        enabler.purpose?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Approval status filter (from database - single source of truth)
+      const enablerApprovalStatus = getEnablerApprovalStatusForFilter(enabler);
+      const matchesStatus = statusFilter === 'all' || enablerApprovalStatus === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  };
+
   return (
     <PageLayout
       title="Enabler Management"
@@ -2304,6 +2939,47 @@ Enablers bridge the gap between high-level business capabilities and actual code
           </button>
         </Alert>
       )}
+
+      {/* Summary Dashboard - Approval Status */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '12px',
+        marginBottom: '24px'
+      }}>
+        <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('all')}>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-label)' }}>
+            {summaryCounts.total}
+          </div>
+          <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
+            📊 Total
+          </div>
+        </Card>
+        <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('pending')}>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemOrange)' }}>
+            {summaryCounts.pending}
+          </div>
+          <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
+            ⏳ Pending
+          </div>
+        </Card>
+        <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('approved')}>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemGreen)' }}>
+            {summaryCounts.approved}
+          </div>
+          <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
+            ✅ Approved
+          </div>
+        </Card>
+        <Card style={{ padding: '16px', textAlign: 'center', cursor: 'pointer' }} onClick={() => setStatusFilter('rejected')}>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--color-systemRed)' }}>
+            {summaryCounts.rejected}
+          </div>
+          <div style={{ fontSize: '13px', color: 'var(--color-secondaryLabel)', marginTop: '4px' }}>
+            ❌ Rejected
+          </div>
+        </Card>
+      </div>
 
       {/* Proposed Enablers Section */}
       {showProposedEnablers && proposedEnablers.length > 0 && (
@@ -2636,11 +3312,55 @@ Enablers bridge the gap between high-level business capabilities and actual code
             // Filter file enablers by selected capability, or show all if none selected
             // Use normalized comparison to handle different capability ID formats
             const normalizedSelectedCapId = normalizeCapabilityId(selectedCapabilityId || undefined);
-            const filteredEnablers = selectedCapabilityId
+            const capabilityFilteredEnablers = selectedCapabilityId
               ? fileEnablers.filter(e => normalizeCapabilityId(e.capabilityId) === normalizedSelectedCapId)
               : fileEnablers;
+
+            // Apply search and status filters
+            const filteredEnablers = getFilteredEnablers(capabilityFilteredEnablers);
             return (
               <>
+                {/* Search and Filter Controls */}
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                  <input
+                    type="text"
+                    placeholder="Search enablers..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="input"
+                    style={{ flex: 1, padding: '10px 16px' }}
+                  />
+                  <select
+                    className="input"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    style={{ width: '180px', padding: '10px 16px' }}
+                  >
+                    <option value="all">All Approval Statuses</option>
+                    <option value="pending">⏳ Pending</option>
+                    <option value="approved">✅ Approved</option>
+                    <option value="rejected">❌ Rejected</option>
+                  </select>
+                  {(searchQuery || statusFilter !== 'all') && (
+                    <button
+                      onClick={() => {
+                        setSearchQuery('');
+                        setStatusFilter('all');
+                      }}
+                      style={{
+                        background: 'none',
+                        border: '1px solid var(--color-separator)',
+                        borderRadius: '6px',
+                        padding: '10px 16px',
+                        cursor: 'pointer',
+                        color: 'var(--color-secondaryLabel)',
+                      }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                   <h3 className="text-title2">
                     {selectedCapabilityId ? (
@@ -2651,7 +3371,7 @@ Enablers bridge the gap between high-level business capabilities and actual code
                         </span>
                       </>
                     ) : (
-                      <>All Enablers ({fileEnablers.length})</>
+                      <>All Enablers ({filteredEnablers.length}{filteredEnablers.length !== fileEnablers.length ? ` of ${fileEnablers.length}` : ''})</>
                     )}
                   </h3>
                   {filteredEnablers.length > 0 && (

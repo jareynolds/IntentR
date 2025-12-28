@@ -18,6 +18,7 @@ Directly derived from STORY-DISPLAY-WEATHER-DATA-ON-SCREEN.md which requires dis
 - UI renders correctly across major browsers
 - Weather information is visually clear and readable
 
+- **Storyboard Reference**: display weather data on screen
 ## User Perspective
 
 ### Primary Persona

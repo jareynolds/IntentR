@@ -15,6 +15,7 @@
 - **Generated**: 12/22/2025, 11:01:11 AM
 - **Source**: Capability-Driven Architecture Map Analysis
 
+- **Storyboard Reference**: display prompt results
 ## Business Context
 
 ### Problem Statement

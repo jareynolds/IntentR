@@ -198,6 +198,14 @@ func main() {
 	mux.HandleFunc("GET /workspace-config", corsMiddleware(handler.HandleGetWorkspaceConfig))
 	mux.HandleFunc("OPTIONS /workspace-config", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 
+	// SyncCode2Spec routes (Reverse-to-Design)
+	mux.HandleFunc("POST /sync-code-to-spec", corsMiddleware(handler.HandleSyncCode2Spec))
+	mux.HandleFunc("OPTIONS /sync-code-to-spec", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+	mux.HandleFunc("POST /get-code-diff", corsMiddleware(handler.HandleGetCodeDiff))
+	mux.HandleFunc("OPTIONS /get-code-diff", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+	mux.HandleFunc("POST /apply-spec-update", corsMiddleware(handler.HandleApplySpecUpdate))
+	mux.HandleFunc("OPTIONS /apply-spec-update", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+
 	// Create server
 	// Note: WriteTimeout increased to 5 minutes for long-running AI analysis
 	server := &http.Server{

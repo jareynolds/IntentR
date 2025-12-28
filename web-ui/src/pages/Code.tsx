@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { usePhaseApprovals } from '../context/EntityStateContext';
 import { PageLayout } from '../components';
 import { INTEGRATION_URL } from '../api/client';
 
@@ -26,6 +27,7 @@ interface PhaseApprovalStatus {
 
 export const Code: React.FC = () => {
   const { currentWorkspace } = useWorkspace();
+  const { isPhaseApproved } = usePhaseApprovals();
   const [isGenerating, setIsGenerating] = useState(false);
   const [output, setOutput] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
@@ -88,50 +90,28 @@ export const Code: React.FC = () => {
     fetchCodeFiles();
   }, [currentWorkspace?.projectFolder]);
 
-  // Check if all phase approvals are complete
+  // Check if all phase approvals are complete using database-backed EntityStateContext
   const checkAllPhaseApprovals = (): { allApproved: boolean; missingPhases: string[] } => {
     if (!currentWorkspace?.id) {
       return { allApproved: false, missingPhases: ['No workspace selected'] };
     }
 
-    const phases = [
-      { key: `conception-approved-${currentWorkspace.id}`, name: 'Intent' },
-      { key: `definition-approved-${currentWorkspace.id}`, name: 'Specification' },
-      { key: `design-approved-${currentWorkspace.id}`, name: 'Specification (Design)' },
-      { key: `implementation-approved-${currentWorkspace.id}`, name: 'UI Design' },
-      { key: `phaseApprovals_${currentWorkspace.id}_testing`, name: 'Control Loop' },
+    // Map workflow stages to display names
+    // These correspond to the WorkflowStage type: 'intent' | 'specification' | 'ui_design' | 'implementation' | 'control_loop'
+    // All approval pages now use the database-backed EntityStateContext
+    const phases: Array<{ stage: 'intent' | 'specification' | 'ui_design' | 'implementation' | 'control_loop'; name: string }> = [
+      { stage: 'intent', name: 'Intent' },
+      { stage: 'specification', name: 'Specification' },
+      { stage: 'ui_design', name: 'UI Design' },
+      { stage: 'implementation', name: 'Implementation' },
+      { stage: 'control_loop', name: 'Control Loop' },
     ];
 
     const missingPhases: string[] = [];
 
     for (const phase of phases) {
-      const stored = localStorage.getItem(phase.key);
-
-      if (!stored) {
-        missingPhases.push(phase.name);
-        continue;
-      }
-
-      try {
-        const data = JSON.parse(stored);
-
-        // For Intent, Specification, System - check if approved flag is true
-        if (phase.name !== 'Control Loop') {
-          if (!data.approved) {
-            missingPhases.push(phase.name);
-          }
-        } else {
-          // For Testing - check if all items have status 'approved'
-          if (Array.isArray(data)) {
-            const allTestsApproved = data.length > 0 && data.every((item: any) => item.status === 'approved');
-            if (!allTestsApproved) {
-              missingPhases.push(phase.name);
-            }
-          } else {
-            missingPhases.push(phase.name);
-          }
-        }
-      } catch (e) {
+      // Use the database-backed isPhaseApproved function from EntityStateContext
+      if (!isPhaseApproved(phase.stage)) {
         missingPhases.push(phase.name);
       }
     }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { usePhaseApprovals } from '../context/EntityStateContext';
 import { INTEGRATION_URL } from '../api/client';
 
 interface SystemItem {
@@ -86,6 +87,12 @@ const defaultSystemItems: SystemItem[] = [
 export const SystemApproval: React.FC = () => {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
+  const {
+    phaseApprovals,
+    approvePhase: approvePhaseDb,
+    revokePhase: revokePhaseDb,
+    isPhaseApproved,
+  } = usePhaseApprovals();
   const [loading, setLoading] = useState(false);
   const [phaseStatus, setPhaseStatus] = useState<PhaseStatus>({
     uiAssets: { total: 1, approved: 0, rejected: 0, items: [] },
@@ -93,8 +100,11 @@ export const SystemApproval: React.FC = () => {
     uiStyles: { total: 1, approved: 0, rejected: 0, items: [] },
     uiDesigner: { total: 1, approved: 0, rejected: 0, items: [] },
   });
-  const [systemApproved, setSystemApproved] = useState(false);
-  const [approvalDate, setApprovalDate] = useState<string | null>(null);
+
+  // Get phase approval state from database (this is UI Design phase)
+  const systemApproved = isPhaseApproved('ui_design');
+  const systemPhaseApproval = phaseApprovals.get('ui_design');
+  const approvalDate = systemPhaseApproval?.approved_at || null;
 
   // Item approval tracking
   const [itemApprovals, setItemApprovals] = useState<ItemApprovalStatus>({});
@@ -137,15 +147,8 @@ export const SystemApproval: React.FC = () => {
               const fileApprovals = JSON.parse(data.content);
               approvals = fileApprovals.itemApprovals || {};
               localStorage.setItem(`system-item-approvals-${currentWorkspace.id}`, JSON.stringify(approvals));
-
-              if (fileApprovals.phaseApproved) {
-                setSystemApproved(true);
-                setApprovalDate(fileApprovals.phaseApprovedDate || null);
-                localStorage.setItem(`system-approved-${currentWorkspace.id}`, JSON.stringify({
-                  approved: true,
-                  date: fileApprovals.phaseApprovedDate
-                }));
-              }
+              // Phase approval state is now managed by usePhaseApprovals hook from EntityStateContext
+              // No need to set local state - systemApproved and approvalDate are derived from phaseApprovals Map
             }
           }
         } catch (err) {
@@ -209,13 +212,9 @@ export const SystemApproval: React.FC = () => {
         },
       });
 
-      // Check if system phase is already approved
-      const phaseApproval = localStorage.getItem(`system-approved-${currentWorkspace.id}`);
-      if (phaseApproval) {
-        const data = JSON.parse(phaseApproval);
-        setSystemApproved(data.approved);
-        setApprovalDate(data.date);
-      }
+      // Phase approval state is now managed by usePhaseApprovals hook from EntityStateContext
+      // No need to check localStorage - systemApproved and approvalDate
+      // are derived from the phaseApprovals Map
     } catch (err) {
       console.error('Failed to load system items:', err);
     } finally {
@@ -376,24 +375,20 @@ export const SystemApproval: React.FC = () => {
   const handleApproveSystem = async () => {
     if (!currentWorkspace?.id) return;
 
-    const approvalData = {
-      approved: true,
-      date: new Date().toISOString(),
-    };
-    localStorage.setItem(`system-approved-${currentWorkspace.id}`, JSON.stringify(approvalData));
-    setSystemApproved(true);
-    setApprovalDate(approvalData.date);
+    // Use database-backed approval (ui_design phase)
+    await approvePhaseDb('ui_design');
 
-    await savePhaseApprovalToFile(true, approvalData.date);
+    // Also save to file for sharing/import (backwards compatibility)
+    await savePhaseApprovalToFile(true, new Date().toISOString());
   };
 
   const handleRevokeApproval = async () => {
     if (!currentWorkspace?.id) return;
 
-    localStorage.removeItem(`system-approved-${currentWorkspace.id}`);
-    setSystemApproved(false);
-    setApprovalDate(null);
+    // Use database-backed revocation
+    await revokePhaseDb('ui_design');
 
+    // Also save to file for sharing/import (backwards compatibility)
     await savePhaseApprovalToFile(false, null);
   };
 

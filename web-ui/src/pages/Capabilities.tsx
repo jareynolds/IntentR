@@ -99,12 +99,26 @@ export const Capabilities: React.FC = () => {
     type: 'capability' | 'feature' | 'enabler';
     rationale: string;
     successMetrics?: string[];
+    purpose?: string;
+    storyboardReferences?: string[];
+    upstreamDependencies?: string[];
+    downstreamDependencies?: string[];
+    priority?: 'high' | 'medium' | 'low';
+    businessValue?: string;
+    userPersonas?: string[];
+    keyFeatures?: string[];
+    acceptanceCriteria?: string[];
+    userScenarios?: Array<{ title: string; description: string }>;
+    inScope?: string[];
+    outOfScope?: string[];
   }>>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [analysisInfo, setAnalysisInfo] = useState<{
     totalConceptionDocuments?: number;
     keyThemes?: string[];
     coverageNotes?: string;
+    missingAreas?: string;
+    recommendedOrder?: string[];
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -783,6 +797,11 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
     const sequenceNum = fileCapabilities.length + suggestions.indexOf(suggestion) + 1;
     const fileName = `${prefix}-${safeName}-${sequenceNum}.md`;
 
+    // Determine priority from suggestion or default to Medium
+    const priority = suggestion.priority
+      ? suggestion.priority.charAt(0).toUpperCase() + suggestion.priority.slice(1)
+      : 'Medium';
+
     // Generate markdown content following INTENT Capability template
     let markdown = `# ${suggestion.name}\n\n`;
     markdown += `## Metadata\n`;
@@ -790,15 +809,32 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
     markdown += `- **Type**: Capability\n`;
     markdown += `- **Status**: Ready for Analysis\n`;
     markdown += `- **Approval**: Pending\n`;
-    markdown += `- **Priority**: Medium\n`;
+    markdown += `- **Priority**: ${priority}\n`;
     markdown += `- **Analysis Review**: Required\n`;
     markdown += `- **Generated**: ${new Date().toLocaleString()}\n`;
     markdown += `- **Source**: Capability-Driven Architecture Map Analysis\n\n`;
+
+    // Purpose section (new)
+    markdown += `## Purpose\n\n`;
+    if (suggestion.purpose) {
+      markdown += `${suggestion.purpose}\n\n`;
+    } else {
+      markdown += `_Define the purpose of this capability._\n\n`;
+    }
+
     markdown += `## Business Context\n\n`;
     markdown += `### Problem Statement\n`;
     markdown += `${suggestion.description}\n\n`;
+
+    // Business Value (new)
+    if (suggestion.businessValue) {
+      markdown += `### Business Value\n`;
+      markdown += `${suggestion.businessValue}\n\n`;
+    }
+
     markdown += `### Value Proposition\n`;
     markdown += `${suggestion.rationale}\n\n`;
+
     markdown += `### Success Metrics\n`;
     if (suggestion.successMetrics && suggestion.successMetrics.length > 0) {
       suggestion.successMetrics.forEach(metric => {
@@ -808,23 +844,109 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
       markdown += `- TODO: Define success metrics\n`;
     }
     markdown += `\n`;
+
+    // Key Features section (new)
+    if (suggestion.keyFeatures && suggestion.keyFeatures.length > 0) {
+      markdown += `### Key Features\n`;
+      suggestion.keyFeatures.forEach(feature => {
+        markdown += `- ${feature}\n`;
+      });
+      markdown += `\n`;
+    }
+
     markdown += `## User Perspective\n\n`;
-    markdown += `### Primary Persona\n`;
-    markdown += `_Define the primary user who benefits from this capability._\n\n`;
+
+    // User Personas (new - populated from analysis)
+    markdown += `### Target Users\n`;
+    if (suggestion.userPersonas && suggestion.userPersonas.length > 0) {
+      suggestion.userPersonas.forEach(persona => {
+        markdown += `- ${persona}\n`;
+      });
+    } else {
+      markdown += `- _Define the primary user who benefits from this capability._\n`;
+    }
+    markdown += `\n`;
+
+    // User Scenarios (populated from analysis)
     markdown += `### User Scenarios\n`;
-    markdown += `1. _Add user scenario 1_\n`;
-    markdown += `2. _Add user scenario 2_\n\n`;
+    if (suggestion.userScenarios && suggestion.userScenarios.length > 0) {
+      suggestion.userScenarios.forEach((scenario, index) => {
+        markdown += `${index + 1}. **${scenario.title}**: ${scenario.description}\n`;
+      });
+    } else {
+      markdown += `1. _Add user scenario 1_\n`;
+      markdown += `2. _Add user scenario 2_\n`;
+    }
+    markdown += `\n`;
+
+    // Boundaries section (populated from analysis)
     markdown += `## Boundaries\n\n`;
     markdown += `### In Scope\n`;
-    markdown += `- _Define what IS included_\n\n`;
+    if (suggestion.inScope && suggestion.inScope.length > 0) {
+      suggestion.inScope.forEach(item => {
+        markdown += `- ${item}\n`;
+      });
+    } else {
+      markdown += `- _Define what IS included_\n`;
+    }
+    markdown += `\n`;
     markdown += `### Out of Scope\n`;
-    markdown += `- _Define what is NOT included_\n\n`;
+    if (suggestion.outOfScope && suggestion.outOfScope.length > 0) {
+      suggestion.outOfScope.forEach(item => {
+        markdown += `- ${item}\n`;
+      });
+    } else {
+      markdown += `- _Define what is NOT included_\n`;
+    }
+    markdown += `\n`;
+
+    // Dependencies section
+    markdown += `## Dependencies\n\n`;
+    markdown += `### Upstream Dependencies (This capability depends on)\n`;
+    if (suggestion.upstreamDependencies && suggestion.upstreamDependencies.length > 0) {
+      suggestion.upstreamDependencies.forEach(dep => {
+        markdown += `- ${dep}\n`;
+      });
+    } else {
+      markdown += `- _None identified_\n`;
+    }
+    markdown += `\n`;
+    markdown += `### Downstream Dependencies (Capabilities that depend on this)\n`;
+    if (suggestion.downstreamDependencies && suggestion.downstreamDependencies.length > 0) {
+      suggestion.downstreamDependencies.forEach(dep => {
+        markdown += `- ${dep}\n`;
+      });
+    } else {
+      markdown += `- _None identified_\n`;
+    }
+    markdown += `\n`;
+
+    // Storyboard References
+    markdown += `## Related Stories\n`;
+    if (suggestion.storyboardReferences && suggestion.storyboardReferences.length > 0) {
+      suggestion.storyboardReferences.forEach(ref => {
+        markdown += `- [[${ref}]]\n`;
+      });
+    } else {
+      markdown += `- _No stories linked_\n`;
+    }
+    markdown += `\n`;
+
     markdown += `## Enablers\n`;
     markdown += `| ID | Name | Purpose | State |\n`;
     markdown += `|----|------|---------|-------|\n`;
     markdown += `| | _To be defined_ | | |\n\n`;
+
+    // Acceptance Criteria (populated from analysis)
     markdown += `## Acceptance Criteria\n`;
-    markdown += `- [ ] TODO: Define acceptance criteria\n`;
+    if (suggestion.acceptanceCriteria && suggestion.acceptanceCriteria.length > 0) {
+      suggestion.acceptanceCriteria.forEach(criteria => {
+        markdown += `- [ ] ${criteria}\n`;
+      });
+    } else {
+      markdown += `- [ ] TODO: Define acceptance criteria\n`;
+    }
+    markdown += `\n`;
 
     try {
       const response = await fetch(`${INTEGRATION_URL}/save-specifications`, {
@@ -2258,6 +2380,16 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                       {analysisInfo.coverageNotes}
                     </p>
                   )}
+                  {analysisInfo.missingAreas && (
+                    <p className="text-footnote" style={{ margin: '8px 0 0 0', color: 'var(--color-systemOrange)' }}>
+                      <strong>Areas Not Covered:</strong> {analysisInfo.missingAreas}
+                    </p>
+                  )}
+                  {analysisInfo.recommendedOrder && analysisInfo.recommendedOrder.length > 0 && (
+                    <p className="text-footnote" style={{ margin: '8px 0 0 0' }}>
+                      <strong>Recommended Order:</strong> {analysisInfo.recommendedOrder.join(' → ')}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -2267,15 +2399,16 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                   <div
                     key={index}
                     style={{
-                      padding: '16px',
+                      padding: '20px',
                       borderRadius: '8px',
                       border: '1px solid var(--color-separator)',
                       backgroundColor: 'var(--color-secondarySystemBackground)',
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                    {/* Header with name, priority badge, and accept button */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
                       <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
                           <span style={{
                             display: 'inline-block',
                             padding: '4px 12px',
@@ -2289,36 +2422,245 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                           }}>
                             Capability
                           </span>
+                          {suggestion.priority && (
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '4px 10px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              borderRadius: '20px',
+                              backgroundColor: suggestion.priority === 'high'
+                                ? 'rgba(255, 59, 48, 0.15)'
+                                : suggestion.priority === 'medium'
+                                  ? 'rgba(255, 149, 0, 0.15)'
+                                  : 'rgba(142, 142, 147, 0.15)',
+                              color: suggestion.priority === 'high'
+                                ? 'var(--color-systemRed)'
+                                : suggestion.priority === 'medium'
+                                  ? 'var(--color-systemOrange)'
+                                  : 'var(--color-systemGray)',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px',
+                            }}>
+                              {suggestion.priority} priority
+                            </span>
+                          )}
                           <h3 className="text-headline" style={{ margin: 0 }}>{suggestion.name}</h3>
                         </div>
-                        <p className="text-body" style={{ marginBottom: '12px' }}>{suggestion.description}</p>
-
-                        <div style={{ marginBottom: '8px' }}>
-                          <p className="text-footnote" style={{ marginBottom: '4px' }}>
-                            <strong>Rationale:</strong>
-                          </p>
-                          <p className="text-footnote text-secondary" style={{ margin: 0 }}>
-                            {suggestion.rationale}
-                          </p>
-                        </div>
-
-                        {suggestion.successMetrics && suggestion.successMetrics.length > 0 && (
-                          <div>
-                            <p className="text-footnote" style={{ marginBottom: '4px' }}>
-                              <strong>Success Metrics:</strong>
-                            </p>
-                            <ul style={{ margin: 0, paddingLeft: '20px' }}>
-                              {suggestion.successMetrics.map((metric, i) => (
-                                <li key={i} className="text-footnote text-secondary">{metric}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
                       </div>
                       <Button variant="primary" onClick={() => handleAcceptSuggestion(suggestion)}>
                         Accept & Create
                       </Button>
                     </div>
+
+                    {/* Description */}
+                    <p className="text-body" style={{ marginBottom: '16px' }}>{suggestion.description}</p>
+
+                    {/* Purpose */}
+                    {suggestion.purpose && (
+                      <div style={{ marginBottom: '12px', padding: '12px', backgroundColor: 'rgba(0, 122, 255, 0.05)', borderRadius: '6px', borderLeft: '3px solid var(--color-systemBlue)' }}>
+                        <p className="text-footnote" style={{ marginBottom: '4px', fontWeight: 600 }}>
+                          Purpose
+                        </p>
+                        <p className="text-footnote" style={{ margin: 0 }}>
+                          {suggestion.purpose}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Business Value */}
+                    {suggestion.businessValue && (
+                      <div style={{ marginBottom: '12px' }}>
+                        <p className="text-footnote" style={{ margin: 0 }}>
+                          <strong>Business Value:</strong> {suggestion.businessValue}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Two-column layout for details */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '12px' }}>
+                      {/* Key Features */}
+                      {suggestion.keyFeatures && suggestion.keyFeatures.length > 0 && (
+                        <div>
+                          <p className="text-footnote" style={{ marginBottom: '6px', fontWeight: 600 }}>
+                            Key Features
+                          </p>
+                          <ul style={{ margin: 0, paddingLeft: '18px' }}>
+                            {suggestion.keyFeatures.map((feature, i) => (
+                              <li key={i} className="text-footnote text-secondary">{feature}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Success Metrics */}
+                      {suggestion.successMetrics && suggestion.successMetrics.length > 0 && (
+                        <div>
+                          <p className="text-footnote" style={{ marginBottom: '6px', fontWeight: 600 }}>
+                            Success Metrics
+                          </p>
+                          <ul style={{ margin: 0, paddingLeft: '18px' }}>
+                            {suggestion.successMetrics.map((metric, i) => (
+                              <li key={i} className="text-footnote text-secondary">{metric}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* User Personas */}
+                      {suggestion.userPersonas && suggestion.userPersonas.length > 0 && (
+                        <div>
+                          <p className="text-footnote" style={{ marginBottom: '6px', fontWeight: 600 }}>
+                            Target Users
+                          </p>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {suggestion.userPersonas.map((persona, i) => (
+                              <span key={i} style={{
+                                padding: '3px 10px',
+                                fontSize: '12px',
+                                borderRadius: '12px',
+                                backgroundColor: 'rgba(88, 86, 214, 0.1)',
+                                color: 'var(--color-systemIndigo)',
+                              }}>
+                                {persona}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Storyboard References */}
+                      {suggestion.storyboardReferences && suggestion.storyboardReferences.length > 0 && (
+                        <div>
+                          <p className="text-footnote" style={{ marginBottom: '6px', fontWeight: 600 }}>
+                            Related Stories
+                          </p>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {suggestion.storyboardReferences.map((ref, i) => (
+                              <span key={i} style={{
+                                padding: '3px 10px',
+                                fontSize: '12px',
+                                borderRadius: '12px',
+                                backgroundColor: 'rgba(52, 199, 89, 0.1)',
+                                color: 'var(--color-systemGreen)',
+                                fontFamily: 'monospace',
+                              }}>
+                                {ref}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Dependencies */}
+                    {((suggestion.upstreamDependencies && suggestion.upstreamDependencies.length > 0) ||
+                      (suggestion.downstreamDependencies && suggestion.downstreamDependencies.length > 0)) && (
+                      <div style={{ marginBottom: '12px', padding: '10px', backgroundColor: 'rgba(142, 142, 147, 0.08)', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+                          {suggestion.upstreamDependencies && suggestion.upstreamDependencies.length > 0 && (
+                            <div>
+                              <p className="text-footnote" style={{ margin: '0 0 4px 0', fontWeight: 600 }}>
+                                Depends On:
+                              </p>
+                              <p className="text-footnote text-secondary" style={{ margin: 0 }}>
+                                {suggestion.upstreamDependencies.join(', ')}
+                              </p>
+                            </div>
+                          )}
+                          {suggestion.downstreamDependencies && suggestion.downstreamDependencies.length > 0 && (
+                            <div>
+                              <p className="text-footnote" style={{ margin: '0 0 4px 0', fontWeight: 600 }}>
+                                Required By:
+                              </p>
+                              <p className="text-footnote text-secondary" style={{ margin: 0 }}>
+                                {suggestion.downstreamDependencies.join(', ')}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Scope (In/Out) */}
+                    {((suggestion.inScope && suggestion.inScope.length > 0) ||
+                      (suggestion.outOfScope && suggestion.outOfScope.length > 0)) && (
+                      <div style={{ marginBottom: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        {suggestion.inScope && suggestion.inScope.length > 0 && (
+                          <div style={{ padding: '10px', backgroundColor: 'rgba(52, 199, 89, 0.08)', borderRadius: '6px', borderLeft: '3px solid var(--color-systemGreen)' }}>
+                            <p className="text-footnote" style={{ margin: '0 0 6px 0', fontWeight: 600, color: 'var(--color-systemGreen)' }}>
+                              In Scope
+                            </p>
+                            <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                              {suggestion.inScope.map((item, i) => (
+                                <li key={i} className="text-footnote text-secondary">{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {suggestion.outOfScope && suggestion.outOfScope.length > 0 && (
+                          <div style={{ padding: '10px', backgroundColor: 'rgba(255, 59, 48, 0.08)', borderRadius: '6px', borderLeft: '3px solid var(--color-systemRed)' }}>
+                            <p className="text-footnote" style={{ margin: '0 0 6px 0', fontWeight: 600, color: 'var(--color-systemRed)' }}>
+                              Out of Scope
+                            </p>
+                            <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                              {suggestion.outOfScope.map((item, i) => (
+                                <li key={i} className="text-footnote text-secondary">{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* User Scenarios */}
+                    {suggestion.userScenarios && suggestion.userScenarios.length > 0 && (
+                      <div style={{ marginBottom: '12px' }}>
+                        <p className="text-footnote" style={{ marginBottom: '8px', fontWeight: 600 }}>
+                          User Scenarios
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {suggestion.userScenarios.map((scenario, i) => (
+                            <div key={i} style={{ padding: '10px', backgroundColor: 'rgba(88, 86, 214, 0.05)', borderRadius: '6px' }}>
+                              <p className="text-footnote" style={{ margin: '0 0 4px 0', fontWeight: 600 }}>
+                                {scenario.title}
+                              </p>
+                              <p className="text-footnote text-secondary" style={{ margin: 0, fontStyle: 'italic' }}>
+                                {scenario.description}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Acceptance Criteria */}
+                    {suggestion.acceptanceCriteria && suggestion.acceptanceCriteria.length > 0 && (
+                      <div style={{ marginBottom: '12px' }}>
+                        <p className="text-footnote" style={{ marginBottom: '8px', fontWeight: 600 }}>
+                          Acceptance Criteria
+                        </p>
+                        <div style={{ padding: '10px', backgroundColor: 'rgba(0, 122, 255, 0.05)', borderRadius: '6px' }}>
+                          <ul style={{ margin: 0, paddingLeft: '18px' }}>
+                            {suggestion.acceptanceCriteria.map((criteria, i) => (
+                              <li key={i} className="text-footnote" style={{ marginBottom: '4px' }}>
+                                {criteria}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Rationale - collapsible section */}
+                    <details style={{ marginTop: '8px' }}>
+                      <summary className="text-footnote" style={{ cursor: 'pointer', fontWeight: 600, color: 'var(--color-systemBlue)' }}>
+                        View Rationale
+                      </summary>
+                      <p className="text-footnote text-secondary" style={{ margin: '8px 0 0 0', paddingLeft: '12px', borderLeft: '2px solid var(--color-separator)' }}>
+                        {suggestion.rationale}
+                      </p>
+                    </details>
                   </div>
                 ))}
               </div>

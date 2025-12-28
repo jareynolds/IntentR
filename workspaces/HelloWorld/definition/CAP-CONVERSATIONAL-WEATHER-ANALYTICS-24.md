@@ -18,6 +18,7 @@ Emerges from the strategic theme 'demonstrate how prompt weather capabilities wo
 - Response relevance score
 - User satisfaction with answers
 
+- **Storyboard Reference**: display prompt results
 ## User Perspective
 
 ### Primary Persona

@@ -18,6 +18,7 @@ Directly derived from the USE AI ideation card emphasizing leveraging OpenWeathe
 - User engagement with AI prompts
 - Average session duration with AI features
 
+- **Storyboard Reference**: send prompt data to openweather API
 ## User Perspective
 
 ### Primary Persona

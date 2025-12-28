@@ -9,6 +9,7 @@
 - **Type**: Capability
 - **Generated**: 12/18/2025, 8:44:52 PM
 
+- **Storyboard Reference**: start app
 ## Description
 _Add description for this capability._
 

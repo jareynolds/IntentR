@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { usePhaseApprovals } from '../context/EntityStateContext';
 import { INTEGRATION_URL } from '../api/client';
 
 interface ImplementationItem {
@@ -80,10 +81,19 @@ const defaultImplementationItems: ImplementationItem[] = [
 export const ImplementationApproval: React.FC = () => {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
+  const {
+    phaseApprovals,
+    approvePhase: approvePhaseDb,
+    revokePhase: revokePhaseDb,
+    isPhaseApproved,
+  } = usePhaseApprovals();
   const [loading, setLoading] = useState(false);
   const [implementationItems, setImplementationItems] = useState<ImplementationItem[]>([]);
-  const [implementationApproved, setImplementationApproved] = useState(false);
-  const [approvalDate, setApprovalDate] = useState<string | null>(null);
+
+  // Get phase approval state from database
+  const implementationApproved = isPhaseApproved('implementation');
+  const implementationPhaseApproval = phaseApprovals.get('implementation');
+  const approvalDate = implementationPhaseApproval?.approved_at || null;
 
   // Item approval tracking
   const [itemApprovals, setItemApprovals] = useState<ItemApprovalStatus>({});
@@ -167,13 +177,9 @@ export const ImplementationApproval: React.FC = () => {
 
       setImplementationItems(itemsWithStatus);
 
-      // Check if implementation phase is already approved
-      const phaseApproval = localStorage.getItem(`implementation-approved-${currentWorkspace.id}`);
-      if (phaseApproval) {
-        const data = JSON.parse(phaseApproval);
-        setImplementationApproved(data.approved);
-        setApprovalDate(data.date);
-      }
+      // Phase approval state is now managed by usePhaseApprovals hook from EntityStateContext
+      // No need to check localStorage - implementationApproved and approvalDate
+      // are derived from the phaseApprovals Map
     } catch (err) {
       console.error('Failed to load implementation items:', err);
     } finally {
@@ -323,24 +329,20 @@ export const ImplementationApproval: React.FC = () => {
   const handleApproveImplementation = async () => {
     if (!currentWorkspace?.id) return;
 
-    const approvalData = {
-      approved: true,
-      date: new Date().toISOString(),
-    };
-    localStorage.setItem(`implementation-approved-${currentWorkspace.id}`, JSON.stringify(approvalData));
-    setImplementationApproved(true);
-    setApprovalDate(approvalData.date);
+    // Use database-backed approval
+    await approvePhaseDb('implementation');
 
-    await savePhaseApprovalToFile(true, approvalData.date);
+    // Also save to file for sharing/import (backwards compatibility)
+    await savePhaseApprovalToFile(true, new Date().toISOString());
   };
 
   const handleRevokeApproval = async () => {
     if (!currentWorkspace?.id) return;
 
-    localStorage.removeItem(`implementation-approved-${currentWorkspace.id}`);
-    setImplementationApproved(false);
-    setApprovalDate(null);
+    // Use database-backed revocation
+    await revokePhaseDb('implementation');
 
+    // Also save to file for sharing/import (backwards compatibility)
     await savePhaseApprovalToFile(false, null);
   };
 

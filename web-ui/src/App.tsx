@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header, Sidebar, ProtectedRoute, ProtectedPage, UIFrameworkProvider, UIFrameworkIndicator } from './components';
-import { Login, GoogleCallback, Welcome, Dashboard, WorkspaceOverview, Capabilities, Features, Vision, Designs, Integrations, AIChat, Code, Run, Workspaces, Storyboard, Ideation, Analyze, Settings, Admin, System, AIPrinciples, UIFramework, UIStyles, UIDesigner, DataCollection, Enablers, IntentApproval, SpecificationApproval, SystemApproval, ImplementationApproval, Testing, ControlLoopApproval, StoryMap, LearnINTENT } from './pages';
+import { Login, GoogleCallback, Welcome, Dashboard, WorkspaceOverview, Capabilities, Features, Vision, Designs, Integrations, AIChat, Code, Run, Workspaces, Storyboard, Ideation, Analyze, Settings, Admin, System, AIPrinciples, UIFramework, UIStyles, UIDesigner, DataCollection, Enablers, IntentApproval, SpecificationApproval, SystemApproval, ImplementationApproval, Testing, ControlLoopApproval, StoryMap, LearnINTENT, SyncCode2Spec } from './pages';
 import {
   WizardWorkspace,
   WizardIntentStart,
@@ -235,6 +235,7 @@ function AppContent() {
       })
       .filter(Boolean),
     { path: '/ai-chat', label: 'AI Assistant', icon: '◉' },
+    { path: '/sync-code-to-spec', label: 'Sync Code to Spec', icon: '⟲' },
   ];
 
   const sidebarItems = user?.role === 'admin'
@@ -281,6 +282,7 @@ function AppContent() {
             <Route path="/admin" element={<ProtectedPage path="/admin"><Admin /></ProtectedPage>} />
             <Route path="/data-collection" element={<ProtectedPage path="/data-collection"><DataCollection /></ProtectedPage>} />
             <Route path="/learn-intent" element={<ProtectedPage path="/learn-intent"><LearnINTENT /></ProtectedPage>} />
+            <Route path="/sync-code-to-spec" element={<ProtectedPage path="/sync-code-to-spec"><SyncCode2Spec /></ProtectedPage>} />
 
             {/* Wizard Routes */}
             <Route path="/wizard/workspace" element={<ProtectedPage path="/wizard/workspace"><WizardWorkspace /></ProtectedPage>} />

@@ -444,12 +444,12 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
       isShared: false,
     };
 
-    // Ensure workspace folder structure exists
+    // Ensure workspace folder structure exists and copy CODE_RULES
     try {
       await fetch(`${INTEGRATION_URL}/folders/ensure-workspace-structure`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ workspacePath: projectFolder }),
+        body: JSON.stringify({ path: projectFolder }),
       });
     } catch (error) {
       console.error('Error ensuring workspace structure:', error);

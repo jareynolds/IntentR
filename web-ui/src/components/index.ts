@@ -59,7 +59,8 @@ export { VersionControlPanel } from './VersionControlPanel';
 
 export { VersionHistoryDrawer } from './VersionHistoryDrawer';
 
-export { WorkspaceVersionControl } from './WorkspaceVersionControl';
+// WorkspaceVersionControl has been deprecated - functionality merged into WorkspaceIntegrations
+// export { WorkspaceVersionControl } from './WorkspaceVersionControl';
 
 export { PageHeader } from './PageHeader';
 

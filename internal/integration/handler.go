@@ -1529,6 +1529,7 @@ type EnsureWorkspaceStructureResponse struct {
 
 // HandleEnsureWorkspaceStructure handles POST /folders/ensure-workspace-structure
 // Creates all required workspace subfolders if they don't exist
+// Also copies the entire CODE_RULES folder from project root to workspace on initial creation
 func (h *Handler) HandleEnsureWorkspaceStructure(w http.ResponseWriter, r *http.Request) {
 	var req EnsureWorkspaceStructureRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -1544,6 +1545,13 @@ func (h *Handler) HandleEnsureWorkspaceStructure(w http.ResponseWriter, r *http.
 	// Ensure path is within workspaces directory for security
 	if !strings.HasPrefix(req.Path, "workspaces") {
 		http.Error(w, "path must be within workspaces directory", http.StatusBadRequest)
+		return
+	}
+
+	// Get current working directory for accessing project-level CODE_RULES
+	cwd, err := os.Getwd()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get working directory: %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -1586,6 +1594,67 @@ func (h *Handler) HandleEnsureWorkspaceStructure(w http.ResponseWriter, r *http.
 		} else {
 			existingFolders = append(existingFolders, folder)
 		}
+	}
+
+	// Copy entire CODE_RULES folder from project root to workspace
+	// This is done during workspace CREATION so admins get default prompts/rules to customize
+	codeRulesSrc := filepath.Join(cwd, "CODE_RULES")
+	codeRulesDest := filepath.Join(req.Path, "CODE_RULES")
+
+	// Only copy if destination CODE_RULES doesn't exist yet (fresh workspace creation)
+	if _, err := os.Stat(codeRulesDest); os.IsNotExist(err) {
+		if _, err := os.Stat(codeRulesSrc); err == nil {
+			// Walk through the source CODE_RULES directory and copy all files
+			err := filepath.Walk(codeRulesSrc, func(srcPath string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+
+				// Get relative path from CODE_RULES
+				relPath, err := filepath.Rel(codeRulesSrc, srcPath)
+				if err != nil {
+					return err
+				}
+
+				// Skip the root directory itself
+				if relPath == "." {
+					return nil
+				}
+
+				destPath := filepath.Join(codeRulesDest, relPath)
+
+				if info.IsDir() {
+					// Create directory
+					if err := os.MkdirAll(destPath, 0755); err != nil {
+						return err
+					}
+				} else {
+					// Ensure parent directory exists
+					parentDir := filepath.Dir(destPath)
+					if err := os.MkdirAll(parentDir, 0755); err != nil {
+						return err
+					}
+
+					// Copy file
+					content, err := os.ReadFile(srcPath)
+					if err != nil {
+						return err
+					}
+					if err := os.WriteFile(destPath, content, 0644); err != nil {
+						return err
+					}
+				}
+				return nil
+			})
+			if err != nil {
+				// Log error but don't fail the whole operation
+				fmt.Printf("[EnsureWorkspaceStructure] Warning: failed to copy CODE_RULES folder: %v\n", err)
+			} else {
+				createdFolders = append(createdFolders, "CODE_RULES (copied from project)")
+			}
+		}
+	} else {
+		existingFolders = append(existingFolders, "CODE_RULES")
 	}
 
 	response := EnsureWorkspaceStructureResponse{
@@ -1708,7 +1777,8 @@ type InitWorkspaceResponse struct {
 }
 
 // HandleInitWorkspaceFiles handles POST /workspace/init-files
-// Copies CLAUDE.md from root to workspace root, and MAIN_SWDEV_PLAN.md from CODE_RULES to workspace/CODE_RULES
+// Copies CLAUDE.md from root to workspace root (called on workspace activation/switch)
+// Note: CODE_RULES folder is copied during workspace CREATION, not activation
 func (h *Handler) HandleInitWorkspaceFiles(w http.ResponseWriter, r *http.Request) {
 	var req InitWorkspaceRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -1730,18 +1800,17 @@ func (h *Handler) HandleInitWorkspaceFiles(w http.ResponseWriter, r *http.Reques
 
 	// Build workspace path
 	workspacePath := filepath.Join(cwd, req.WorkspacePath)
-	workspaceCodeRulesPath := filepath.Join(workspacePath, "CODE_RULES")
 
-	// Ensure workspace and CODE_RULES directories exist
-	if err := os.MkdirAll(workspaceCodeRulesPath, 0755); err != nil {
-		http.Error(w, fmt.Sprintf("failed to create workspace CODE_RULES directory: %v", err), http.StatusInternalServerError)
+	// Ensure workspace directory exists
+	if err := os.MkdirAll(workspacePath, 0755); err != nil {
+		http.Error(w, fmt.Sprintf("failed to create workspace directory: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	var filesCopied []string
 	var filesExisted []string
 
-	// File 1: Copy CLAUDE.md from root to workspace root
+	// Copy CLAUDE.md from root to workspace root (if not exists)
 	claudeSrc := filepath.Join(cwd, "CLAUDE.md")
 	claudeDest := filepath.Join(workspacePath, "CLAUDE.md")
 	if _, err := os.Stat(claudeDest); os.IsNotExist(err) {
@@ -1759,26 +1828,6 @@ func (h *Handler) HandleInitWorkspaceFiles(w http.ResponseWriter, r *http.Reques
 		}
 	} else {
 		filesExisted = append(filesExisted, "CLAUDE.md")
-	}
-
-	// File 2: Copy MAIN_SWDEV_PLAN.md from CODE_RULES to workspace/CODE_RULES
-	planSrc := filepath.Join(cwd, "CODE_RULES", "MAIN_SWDEV_PLAN.md")
-	planDest := filepath.Join(workspaceCodeRulesPath, "MAIN_SWDEV_PLAN.md")
-	if _, err := os.Stat(planDest); os.IsNotExist(err) {
-		if _, err := os.Stat(planSrc); err == nil {
-			content, err := os.ReadFile(planSrc)
-			if err != nil {
-				http.Error(w, fmt.Sprintf("failed to read MAIN_SWDEV_PLAN.md: %v", err), http.StatusInternalServerError)
-				return
-			}
-			if err := os.WriteFile(planDest, content, 0644); err != nil {
-				http.Error(w, fmt.Sprintf("failed to write MAIN_SWDEV_PLAN.md: %v", err), http.StatusInternalServerError)
-				return
-			}
-			filesCopied = append(filesCopied, "CODE_RULES/MAIN_SWDEV_PLAN.md")
-		}
-	} else {
-		filesExisted = append(filesExisted, "CODE_RULES/MAIN_SWDEV_PLAN.md")
 	}
 
 	response := InitWorkspaceResponse{
@@ -2032,16 +2081,35 @@ func (h *Handler) HandleCapabilityFiles(w http.ResponseWriter, r *http.Request) 
 
 // FileEnabler represents an enabler parsed from a markdown file
 type FileEnabler struct {
-	Filename     string            `json:"filename"`
-	Path         string            `json:"path"`
-	Name         string            `json:"name"`
-	Purpose      string            `json:"purpose"`
-	Status       string            `json:"status"`
-	Owner        string            `json:"owner"`
-	Priority     string            `json:"priority"`
-	CapabilityID string            `json:"capabilityId"`
-	EnablerID    string            `json:"enablerId"`
-	Fields       map[string]string `json:"fields"`
+	Filename                string            `json:"filename"`
+	Path                    string            `json:"path"`
+	Name                    string            `json:"name"`
+	Description             string            `json:"description"`
+	Purpose                 string            `json:"purpose"`
+	Status                  string            `json:"status"`
+	Owner                   string            `json:"owner"`
+	Priority                string            `json:"priority"`
+	CapabilityID            string            `json:"capabilityId"`
+	EnablerID               string            `json:"enablerId"`
+	TechnicalSpecs          string            `json:"technicalSpecs,omitempty"`
+	RejectionComment        string            `json:"rejectionComment,omitempty"`
+	CreatedBy               string            `json:"createdBy,omitempty"`
+	// Enabler specification fields
+	EnablerType             string            `json:"enablerType,omitempty"`
+	Responsibility          string            `json:"responsibility,omitempty"`
+	PublicInterface         string            `json:"publicInterface,omitempty"`
+	InternalDesign          string            `json:"internalDesign,omitempty"`
+	Dependencies            string            `json:"dependencies,omitempty"`
+	Configuration           string            `json:"configuration,omitempty"`
+	DataContracts           string            `json:"dataContracts,omitempty"`
+	OperationalRequirements string            `json:"operationalRequirements,omitempty"`
+	SecurityControls        string            `json:"securityControls,omitempty"`
+	TestingStrategy         string            `json:"testingStrategy,omitempty"`
+	Observability           string            `json:"observability,omitempty"`
+	Deployment              string            `json:"deployment,omitempty"`
+	Runbook                 string            `json:"runbook,omitempty"`
+	CostProfile             string            `json:"costProfile,omitempty"`
+	Fields                  map[string]string `json:"fields"`
 }
 
 // FileTestScenario represents a test scenario file
@@ -2459,8 +2527,32 @@ func parseMarkdownEnabler(filename, path, content string) FileEnabler {
 			continue
 		}
 
+		// Parse Created By field
+		if strings.HasPrefix(trimmedLine, "**Created By**:") || strings.HasPrefix(trimmedLine, "- **Created By**:") ||
+			strings.HasPrefix(trimmedLine, "**Created By:**") || strings.HasPrefix(trimmedLine, "- **Created By:**") {
+			createdBy := trimmedLine
+			createdBy = strings.TrimPrefix(createdBy, "- ")
+			createdBy = strings.TrimPrefix(createdBy, "**Created By**:")
+			createdBy = strings.TrimPrefix(createdBy, "**Created By:**")
+			enabler.CreatedBy = strings.TrimSpace(createdBy)
+			enabler.Fields["Created By"] = enabler.CreatedBy
+			continue
+		}
+
 		// NOTE: INTENT State Model fields (lifecycle_state, workflow_stage, stage_status, approval_status)
 		// are NOT parsed from markdown. They are stored in the DATABASE only.
+	}
+
+	// Extract Description from ## Description section
+	descIdx := strings.Index(content, "## Description")
+	if descIdx != -1 {
+		afterDesc := content[descIdx+len("## Description"):]
+		nextSectionIdx := strings.Index(afterDesc, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterDesc)
+		}
+		enabler.Description = strings.TrimSpace(afterDesc[:nextSectionIdx])
+		enabler.Fields["Description"] = enabler.Description
 	}
 
 	// Extract purpose from ## Purpose section
@@ -2472,6 +2564,187 @@ func parseMarkdownEnabler(filename, path, content string) FileEnabler {
 			nextSectionIdx = len(afterPurpose)
 		}
 		enabler.Purpose = strings.TrimSpace(afterPurpose[:nextSectionIdx])
+		enabler.Fields["Purpose"] = enabler.Purpose
+	}
+
+	// Extract Technical Specifications from ## Technical Specifications section
+	techSpecIdx := strings.Index(content, "## Technical Specifications")
+	if techSpecIdx != -1 {
+		afterTechSpec := content[techSpecIdx+len("## Technical Specifications"):]
+		nextSectionIdx := strings.Index(afterTechSpec, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterTechSpec)
+		}
+		enabler.TechnicalSpecs = strings.TrimSpace(afterTechSpec[:nextSectionIdx])
+		enabler.Fields["Technical Specifications"] = enabler.TechnicalSpecs
+	}
+
+	// Extract Type from ## Type section
+	typeIdx := strings.Index(content, "## Type")
+	if typeIdx != -1 {
+		afterType := content[typeIdx+len("## Type"):]
+		nextSectionIdx := strings.Index(afterType, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterType)
+		}
+		enabler.EnablerType = strings.TrimSpace(afterType[:nextSectionIdx])
+		enabler.Fields["Type"] = enabler.EnablerType
+	}
+
+	// Extract Responsibility from ## Responsibility section
+	respIdx := strings.Index(content, "## Responsibility")
+	if respIdx != -1 {
+		afterResp := content[respIdx+len("## Responsibility"):]
+		nextSectionIdx := strings.Index(afterResp, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterResp)
+		}
+		enabler.Responsibility = strings.TrimSpace(afterResp[:nextSectionIdx])
+		enabler.Fields["Responsibility"] = enabler.Responsibility
+	}
+
+	// Extract Public Interface from ## Public Interface section
+	pubIntIdx := strings.Index(content, "## Public Interface")
+	if pubIntIdx != -1 {
+		afterPubInt := content[pubIntIdx+len("## Public Interface"):]
+		nextSectionIdx := strings.Index(afterPubInt, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterPubInt)
+		}
+		enabler.PublicInterface = strings.TrimSpace(afterPubInt[:nextSectionIdx])
+		enabler.Fields["Public Interface"] = enabler.PublicInterface
+	}
+
+	// Extract Internal Design from ## Internal Design section
+	intDesignIdx := strings.Index(content, "## Internal Design")
+	if intDesignIdx != -1 {
+		afterIntDesign := content[intDesignIdx+len("## Internal Design"):]
+		nextSectionIdx := strings.Index(afterIntDesign, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterIntDesign)
+		}
+		enabler.InternalDesign = strings.TrimSpace(afterIntDesign[:nextSectionIdx])
+		enabler.Fields["Internal Design"] = enabler.InternalDesign
+	}
+
+	// Extract Dependencies from ## Dependencies section
+	depsIdx := strings.Index(content, "## Dependencies")
+	if depsIdx != -1 {
+		afterDeps := content[depsIdx+len("## Dependencies"):]
+		nextSectionIdx := strings.Index(afterDeps, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterDeps)
+		}
+		enabler.Dependencies = strings.TrimSpace(afterDeps[:nextSectionIdx])
+		enabler.Fields["Dependencies"] = enabler.Dependencies
+	}
+
+	// Extract Configuration from ## Configuration section
+	configIdx := strings.Index(content, "## Configuration")
+	if configIdx != -1 {
+		afterConfig := content[configIdx+len("## Configuration"):]
+		nextSectionIdx := strings.Index(afterConfig, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterConfig)
+		}
+		enabler.Configuration = strings.TrimSpace(afterConfig[:nextSectionIdx])
+		enabler.Fields["Configuration"] = enabler.Configuration
+	}
+
+	// Extract Data Contracts from ## Data Contracts section
+	dataContractsIdx := strings.Index(content, "## Data Contracts")
+	if dataContractsIdx != -1 {
+		afterDataContracts := content[dataContractsIdx+len("## Data Contracts"):]
+		nextSectionIdx := strings.Index(afterDataContracts, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterDataContracts)
+		}
+		enabler.DataContracts = strings.TrimSpace(afterDataContracts[:nextSectionIdx])
+		enabler.Fields["Data Contracts"] = enabler.DataContracts
+	}
+
+	// Extract Operational Requirements from ## Operational Requirements section
+	opReqIdx := strings.Index(content, "## Operational Requirements")
+	if opReqIdx != -1 {
+		afterOpReq := content[opReqIdx+len("## Operational Requirements"):]
+		nextSectionIdx := strings.Index(afterOpReq, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterOpReq)
+		}
+		enabler.OperationalRequirements = strings.TrimSpace(afterOpReq[:nextSectionIdx])
+		enabler.Fields["Operational Requirements"] = enabler.OperationalRequirements
+	}
+
+	// Extract Security Controls from ## Security Controls section
+	securityIdx := strings.Index(content, "## Security Controls")
+	if securityIdx != -1 {
+		afterSecurity := content[securityIdx+len("## Security Controls"):]
+		nextSectionIdx := strings.Index(afterSecurity, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterSecurity)
+		}
+		enabler.SecurityControls = strings.TrimSpace(afterSecurity[:nextSectionIdx])
+		enabler.Fields["Security Controls"] = enabler.SecurityControls
+	}
+
+	// Extract Testing Strategy from ## Testing Strategy section
+	testingIdx := strings.Index(content, "## Testing Strategy")
+	if testingIdx != -1 {
+		afterTesting := content[testingIdx+len("## Testing Strategy"):]
+		nextSectionIdx := strings.Index(afterTesting, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterTesting)
+		}
+		enabler.TestingStrategy = strings.TrimSpace(afterTesting[:nextSectionIdx])
+		enabler.Fields["Testing Strategy"] = enabler.TestingStrategy
+	}
+
+	// Extract Observability from ## Observability section
+	obsIdx := strings.Index(content, "## Observability")
+	if obsIdx != -1 {
+		afterObs := content[obsIdx+len("## Observability"):]
+		nextSectionIdx := strings.Index(afterObs, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterObs)
+		}
+		enabler.Observability = strings.TrimSpace(afterObs[:nextSectionIdx])
+		enabler.Fields["Observability"] = enabler.Observability
+	}
+
+	// Extract Deployment from ## Deployment section
+	deployIdx := strings.Index(content, "## Deployment")
+	if deployIdx != -1 {
+		afterDeploy := content[deployIdx+len("## Deployment"):]
+		nextSectionIdx := strings.Index(afterDeploy, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterDeploy)
+		}
+		enabler.Deployment = strings.TrimSpace(afterDeploy[:nextSectionIdx])
+		enabler.Fields["Deployment"] = enabler.Deployment
+	}
+
+	// Extract Runbook from ## Runbook section
+	runbookIdx := strings.Index(content, "## Runbook")
+	if runbookIdx != -1 {
+		afterRunbook := content[runbookIdx+len("## Runbook"):]
+		nextSectionIdx := strings.Index(afterRunbook, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterRunbook)
+		}
+		enabler.Runbook = strings.TrimSpace(afterRunbook[:nextSectionIdx])
+		enabler.Fields["Runbook"] = enabler.Runbook
+	}
+
+	// Extract Cost Profile from ## Cost Profile section
+	costIdx := strings.Index(content, "## Cost Profile")
+	if costIdx != -1 {
+		afterCost := content[costIdx+len("## Cost Profile"):]
+		nextSectionIdx := strings.Index(afterCost, "\n## ")
+		if nextSectionIdx == -1 {
+			nextSectionIdx = len(afterCost)
+		}
+		enabler.CostProfile = strings.TrimSpace(afterCost[:nextSectionIdx])
+		enabler.Fields["Cost Profile"] = enabler.CostProfile
 	}
 
 	// Always use filename as source of truth for enabler ID if filename starts with ENB-
@@ -4718,6 +4991,120 @@ func (h *Handler) HandleActivateAIPreset(w http.ResponseWriter, r *http.Request)
 	})
 }
 
+// loadCapabilityAnalysisPrompt loads the capability analysis prompt from a file or returns the default
+// It checks in order: 1) workspace CODE_RULES/PROMPTS/, 2) project CODE_RULES/PROMPTS/, 3) default hardcoded
+func (h *Handler) loadCapabilityAnalysisPrompt(cwd, workspacePath, conceptionContent string, fileCount int) string {
+	// Paths to check for prompt template
+	promptPaths := []string{
+		filepath.Join(cwd, workspacePath, "CODE_RULES", "PROMPTS", "capability-analysis.md"),
+		filepath.Join(cwd, "CODE_RULES", "PROMPTS", "capability-analysis.md"),
+	}
+
+	var promptTemplate string
+	var promptSource string
+
+	for _, promptPath := range promptPaths {
+		if content, err := os.ReadFile(promptPath); err == nil {
+			promptTemplate = string(content)
+			promptSource = promptPath
+			break
+		}
+	}
+
+	if promptTemplate != "" {
+		// Extract the prompt section from the markdown file
+		// Look for "## Prompt" section and extract everything after it
+		promptStart := strings.Index(promptTemplate, "## Prompt")
+		if promptStart != -1 {
+			// Skip the "## Prompt" header line
+			promptTemplate = promptTemplate[promptStart+len("## Prompt"):]
+			// Trim leading whitespace
+			promptTemplate = strings.TrimLeft(promptTemplate, "\n\r ")
+		}
+
+		// Replace template variables
+		promptTemplate = strings.ReplaceAll(promptTemplate, "{{CONCEPTION_CONTENT}}", conceptionContent)
+		promptTemplate = strings.ReplaceAll(promptTemplate, "{{FILE_COUNT}}", fmt.Sprintf("%d", fileCount))
+
+		fmt.Printf("[CapabilityAnalysis] Using prompt template from: %s\n", promptSource)
+		return promptTemplate
+	}
+
+	// Fall back to default hardcoded prompt
+	fmt.Printf("[CapabilityAnalysis] Using default hardcoded prompt (no template file found)\n")
+	return fmt.Sprintf(`You are a software architect using the Capability-Driven Architecture Map methodology to decompose abstract software ideas into concrete capabilities.
+
+A Capability-Driven Architecture Map visualizes WHAT the system must be able to do (capabilities) before focusing on HOW it is built. It creates a clear lineage from:
+  idea → value → capability → enabler → module → component
+
+Your task is to analyze the conception phase documents below and propose capabilities based on the ideas, visions, stories, and themes described.
+
+%s
+
+Based on your analysis of these conception documents, propose 3-7 NEW capabilities that:
+1. Represent distinct business functions the system must perform
+2. Are user-centric and meaningful to end users or business stakeholders
+3. Are largely self-contained with clear boundaries
+4. Are at the right level of granularity (not too broad like "entire application", not too narrow like "single function")
+5. Follow common capability patterns like: User Management, Data Management, Integration, Reporting, Communication, Security, Configuration
+
+For each capability, provide comprehensive details including:
+1. A clear, business-focused name (noun-based, e.g., "User Authentication", "Report Generation")
+2. A comprehensive description of what business value it delivers
+3. A purpose statement explaining WHY this capability exists
+4. The rationale explaining how it derives from the conception documents
+5. Key success metrics that would indicate the capability is working
+6. References to relevant story files from the conception documents
+7. Dependencies on other proposed or existing capabilities
+8. Priority based on business value and user impact
+
+Return your response as a JSON object with this exact format:
+{
+  "suggestions": [
+    {
+      "name": "Capability Name",
+      "description": "Detailed description of what this capability enables users to do and what business value it provides. This should be 2-4 sentences explaining the functionality.",
+      "purpose": "A clear statement of WHY this capability exists, what problem it solves, and what value it delivers to users or the business. This should answer 'What is the intent behind this capability?'",
+      "type": "capability",
+      "rationale": "How this capability was derived from the conception documents - reference specific ideas, stories, or themes by their file names or content",
+      "successMetrics": ["Measurable metric 1", "Measurable metric 2", "Measurable metric 3"],
+      "storyboardReferences": ["STORY-file-name-1.md", "STORY-file-name-2.md"],
+      "upstreamDependencies": ["Name of capability this depends on"],
+      "downstreamDependencies": ["Name of capability that would depend on this"],
+      "priority": "high|medium|low",
+      "businessValue": "Brief statement of the business value (e.g., 'Increases user retention', 'Reduces manual effort', 'Enables new revenue stream')",
+      "userPersonas": ["Primary user type 1", "Primary user type 2"],
+      "keyFeatures": ["Feature 1", "Feature 2", "Feature 3"],
+      "acceptanceCriteria": ["Given X, When Y, Then Z - criteria 1", "Given X, When Y, Then Z - criteria 2", "Given X, When Y, Then Z - criteria 3"],
+      "userScenarios": [
+        {"title": "Scenario title 1", "description": "As a [user type], I want to [action] so that [benefit]"},
+        {"title": "Scenario title 2", "description": "As a [user type], I want to [action] so that [benefit]"}
+      ],
+      "inScope": ["What IS included in this capability - item 1", "What IS included - item 2"],
+      "outOfScope": ["What is NOT included - item 1", "What is NOT included - item 2"]
+    }
+  ],
+  "analysis": {
+    "totalConceptionDocuments": %d,
+    "keyThemes": ["theme1", "theme2"],
+    "coverageNotes": "Brief notes on how well the proposed capabilities cover the conception documents",
+    "missingAreas": "Any areas from the conception documents that are not covered by the proposed capabilities",
+    "recommendedOrder": ["Capability to implement first", "Second capability", "Third capability"]
+  }
+}
+
+IMPORTANT:
+- For storyboardReferences, use actual file names from the conception documents provided (e.g., STORY-*.md, IDEA-*.md, VIS-*.md)
+- For dependencies, reference other capabilities by their exact names (either from the existing capabilities list or from your proposed capabilities)
+- Ensure all arrays have at least one item where applicable
+- Priority should be based on: high = critical for MVP, medium = important but not blocking, low = nice to have
+- For acceptanceCriteria, use Given/When/Then format where possible
+- For userScenarios, use the "As a [user], I want [action] so that [benefit]" format
+- For inScope and outOfScope, be specific about boundaries to avoid scope creep
+
+Only return the JSON, no other text.`, conceptionContent, fileCount)
+}
+
 // HandleAnalyzeConception handles POST /analyze-conception
 // Reads conception files and generates capability proposals using Capability-Driven Architecture Map
 func (h *Handler) HandleAnalyzeConception(w http.ResponseWriter, r *http.Request) {
@@ -4829,48 +5216,8 @@ func (h *Handler) HandleAnalyzeConception(w http.ResponseWriter, r *http.Request
 		allContent.WriteString("\n")
 	}
 
-	// Create Capability-Driven Architecture Map prompt
-	prompt := fmt.Sprintf(`You are a software architect using the Capability-Driven Architecture Map methodology to decompose abstract software ideas into concrete capabilities.
-
-A Capability-Driven Architecture Map visualizes WHAT the system must be able to do (capabilities) before focusing on HOW it is built. It creates a clear lineage from:
-  idea → value → capability → enabler → module → component
-
-Your task is to analyze the conception phase documents below and propose capabilities based on the ideas, visions, stories, and themes described.
-
-%s
-
-Based on your analysis of these conception documents, propose 3-7 NEW capabilities that:
-1. Represent distinct business functions the system must perform
-2. Are user-centric and meaningful to end users or business stakeholders
-3. Are largely self-contained with clear boundaries
-4. Are at the right level of granularity (not too broad like "entire application", not too narrow like "single function")
-5. Follow common capability patterns like: User Management, Data Management, Integration, Reporting, Communication, Security, Configuration
-
-For each capability, provide:
-1. A clear, business-focused name (noun-based, e.g., "User Authentication", "Report Generation")
-2. A comprehensive description of what business value it delivers
-3. The rationale explaining how it derives from the conception documents
-4. Key success metrics that would indicate the capability is working
-
-Return your response as a JSON object with this exact format:
-{
-  "suggestions": [
-    {
-      "name": "Capability Name",
-      "description": "Detailed description of what this capability enables users to do and what business value it provides",
-      "type": "capability",
-      "rationale": "How this capability was derived from the conception documents - reference specific ideas, stories, or themes",
-      "successMetrics": ["Metric 1", "Metric 2"]
-    }
-  ],
-  "analysis": {
-    "totalConceptionDocuments": %d,
-    "keyThemes": ["theme1", "theme2"],
-    "coverageNotes": "Brief notes on how well the proposed capabilities cover the conception documents"
-  }
-}
-
-Only return the JSON, no other text.`, allContent.String(), fileCount)
+	// Try to read prompt template from workspace or fall back to default
+	prompt := h.loadCapabilityAnalysisPrompt(cwd, req.WorkspacePath, allContent.String(), fileCount)
 
 	// Call Claude API
 	requestBody := map[string]interface{}{
@@ -7179,4 +7526,553 @@ func generateCapabilityMarkdown(capID string, epic JiraEpic, status, priority st
 		time.Now().Format("2006-01-02"),           // Approval History date
 		epic.Key,                                  // Approval History - Jira key
 	)
+}
+
+// SyncCode2SpecRequest represents the request for syncing code changes to specifications
+type SyncCode2SpecRequest struct {
+	WorkspacePath string   `json:"workspacePath"`
+	CodeChanges   string   `json:"codeChanges"`
+	FileList      []string `json:"fileList"`
+	AnthropicKey  string   `json:"anthropicKey"`
+}
+
+// SyncCode2SpecResponse represents the response from the sync analysis
+type SyncCode2SpecResponse struct {
+	Success  bool            `json:"success"`
+	Analysis json.RawMessage `json:"analysis,omitempty"`
+	Error    string          `json:"error,omitempty"`
+}
+
+// HandleSyncCode2Spec handles POST /sync-code-to-spec
+// Analyzes manual code changes and proposes updates to specifications
+func (h *Handler) HandleSyncCode2Spec(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req SyncCode2SpecRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	if req.WorkspacePath == "" {
+		http.Error(w, "workspacePath is required", http.StatusBadRequest)
+		return
+	}
+
+	if req.AnthropicKey == "" {
+		http.Error(w, "anthropicKey is required", http.StatusBadRequest)
+		return
+	}
+
+	// Get current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get working directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Read enabler specifications
+	enablerSpecs, err := h.readSpecificationFiles(filepath.Join(cwd, req.WorkspacePath, "definition"), "enabler")
+	if err != nil {
+		log.Printf("Warning: Failed to read enabler specs: %v", err)
+		enablerSpecs = "No enabler specifications found."
+	}
+
+	// Read capability specifications
+	capabilitySpecs, err := h.readSpecificationFiles(filepath.Join(cwd, req.WorkspacePath, "definition"), "capability")
+	if err != nil {
+		log.Printf("Warning: Failed to read capability specs: %v", err)
+		capabilitySpecs = "No capability specifications found."
+	}
+
+	// Load the prompt template
+	prompt := h.loadSyncCode2SpecPrompt(cwd, req.WorkspacePath, enablerSpecs, capabilitySpecs, req.CodeChanges, strings.Join(req.FileList, "\n"))
+
+	// Create Anthropic client and call API
+	client := NewAnthropicClient(req.AnthropicKey)
+	response, err := client.SendMessage(r.Context(), prompt)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(SyncCode2SpecResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Failed to analyze code changes: %v", err),
+		})
+		return
+	}
+
+	// Try to extract JSON from the response
+	jsonStart := strings.Index(response, "{")
+	jsonEnd := strings.LastIndex(response, "}")
+	if jsonStart >= 0 && jsonEnd > jsonStart {
+		jsonStr := response[jsonStart : jsonEnd+1]
+		// Validate it's valid JSON
+		var parsed json.RawMessage
+		if err := json.Unmarshal([]byte(jsonStr), &parsed); err == nil {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(SyncCode2SpecResponse{
+				Success:  true,
+				Analysis: parsed,
+			})
+			return
+		}
+	}
+
+	// If we couldn't parse JSON, return the raw response as an error
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(SyncCode2SpecResponse{
+		Success: false,
+		Error:   "Failed to parse AI response. Raw response: " + response,
+	})
+}
+
+// readSpecificationFiles reads all specification files of a given type from a directory
+func (h *Handler) readSpecificationFiles(dir string, specType string) (string, error) {
+	var result strings.Builder
+
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return "", err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		filename := file.Name()
+		filenameLower := strings.ToLower(filename)
+
+		// Match files by prefix (CAP- for capability, ENB- for enabler) or by containing the word
+		var matches bool
+		if specType == "capability" {
+			matches = strings.HasPrefix(filenameLower, "cap-") || strings.Contains(filenameLower, "capability")
+		} else if specType == "enabler" {
+			matches = strings.HasPrefix(filenameLower, "enb-") || strings.Contains(filenameLower, "enabler")
+		} else {
+			matches = strings.Contains(filenameLower, specType)
+		}
+
+		if strings.HasSuffix(filename, ".md") && matches {
+			content, err := os.ReadFile(filepath.Join(dir, filename))
+			if err != nil {
+				continue
+			}
+			result.WriteString(fmt.Sprintf("\n--- %s ---\n", filename))
+			result.WriteString(string(content))
+			result.WriteString("\n")
+		}
+	}
+
+	if result.Len() == 0 {
+		return fmt.Sprintf("No %s specifications found.", specType), nil
+	}
+
+	return result.String(), nil
+}
+
+// loadSyncCode2SpecPrompt loads the sync-code-to-spec prompt template
+func (h *Handler) loadSyncCode2SpecPrompt(cwd, workspacePath, enablerSpecs, capabilitySpecs, codeChanges, fileList string) string {
+	// Try to load from workspace first, then fall back to project CODE_RULES
+	promptPaths := []string{
+		filepath.Join(cwd, workspacePath, "CODE_RULES", "PROMPTS", "sync-code-to-spec.md"),
+		filepath.Join(cwd, "CODE_RULES", "PROMPTS", "sync-code-to-spec.md"),
+	}
+
+	var promptContent string
+	for _, path := range promptPaths {
+		content, err := os.ReadFile(path)
+		if err == nil {
+			promptContent = string(content)
+			log.Printf("Loaded sync-code-to-spec prompt from: %s", path)
+			break
+		}
+	}
+
+	if promptContent == "" {
+		// Fallback to hardcoded prompt
+		promptContent = h.getDefaultSyncCode2SpecPrompt()
+	}
+
+	// Extract prompt section after "## Prompt" header
+	if idx := strings.Index(promptContent, "## Prompt"); idx >= 0 {
+		promptContent = promptContent[idx+len("## Prompt"):]
+	}
+
+	// Replace template variables
+	promptContent = strings.ReplaceAll(promptContent, "{{ENABLER_SPECS}}", enablerSpecs)
+	promptContent = strings.ReplaceAll(promptContent, "{{CAPABILITY_SPECS}}", capabilitySpecs)
+	promptContent = strings.ReplaceAll(promptContent, "{{CODE_CHANGES}}", codeChanges)
+	promptContent = strings.ReplaceAll(promptContent, "{{FILE_LIST}}", fileList)
+	promptContent = strings.ReplaceAll(promptContent, "{{WORKSPACE_PATH}}", workspacePath)
+
+	return strings.TrimSpace(promptContent)
+}
+
+// getDefaultSyncCode2SpecPrompt returns a fallback prompt if no template file is found
+func (h *Handler) getDefaultSyncCode2SpecPrompt() string {
+	return `You are a specification synchronization expert following the INTENT Framework. Analyze the code changes and propose updates to maintain specification integrity.
+
+## Current Enabler Specifications
+{{ENABLER_SPECS}}
+
+## Current Capability Specifications
+{{CAPABILITY_SPECS}}
+
+## Code Changes Made
+{{CODE_CHANGES}}
+
+## Modified Files
+{{FILE_LIST}}
+
+Analyze these changes and return a JSON object with:
+- summary: Brief overview
+- categorizedChanges: Array of changes with category (bug_fix, missing_requirement, edge_case, etc.)
+- specificationUpdates: Proposed updates to enablers/capabilities
+- promptImprovements: Suggestions to improve code generation prompts
+- newRequirements: New requirements to add
+- warnings: Any concerns or issues
+- confidence: Your confidence level (0-1)
+- needsHumanReview: Items requiring human judgment`
+}
+
+// GetCodeDiff gets the git diff for code changes
+type GetCodeDiffRequest struct {
+	WorkspacePath string `json:"workspacePath"`
+	BaseBranch    string `json:"baseBranch"`
+	CodeFolder    string `json:"codeFolder"`
+}
+
+type GetCodeDiffResponse struct {
+	Success bool   `json:"success"`
+	Diff    string `json:"diff,omitempty"`
+	Files   []string `json:"files,omitempty"`
+	Error   string `json:"error,omitempty"`
+}
+
+// HandleGetCodeDiff handles POST /get-code-diff
+// Returns git diff of the code folder
+func (h *Handler) HandleGetCodeDiff(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req GetCodeDiffRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	if req.WorkspacePath == "" {
+		http.Error(w, "workspacePath is required", http.StatusBadRequest)
+		return
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get working directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	codeFolder := req.CodeFolder
+	if codeFolder == "" {
+		codeFolder = "code"
+	}
+
+	codePath := filepath.Join(cwd, req.WorkspacePath, codeFolder)
+
+	// Check if code folder exists
+	if _, err := os.Stat(codePath); os.IsNotExist(err) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(GetCodeDiffResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Code folder not found: %s", codePath),
+		})
+		return
+	}
+
+	// Read all code files and their contents
+	var files []string
+	var codeContent strings.Builder
+
+	err = filepath.Walk(codePath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			// Skip hidden directories and node_modules
+			if strings.HasPrefix(info.Name(), ".") || info.Name() == "node_modules" || info.Name() == "dist" || info.Name() == "build" {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		// Only process code files
+		ext := strings.ToLower(filepath.Ext(path))
+		codeExtensions := map[string]bool{
+			".ts": true, ".tsx": true, ".js": true, ".jsx": true,
+			".go": true, ".py": true, ".java": true, ".rs": true,
+			".css": true, ".scss": true, ".html": true, ".vue": true,
+			".json": true, ".yaml": true, ".yml": true,
+		}
+
+		if codeExtensions[ext] {
+			relPath, _ := filepath.Rel(codePath, path)
+			files = append(files, relPath)
+
+			content, err := os.ReadFile(path)
+			if err == nil {
+				codeContent.WriteString(fmt.Sprintf("\n--- %s ---\n", relPath))
+				codeContent.WriteString(string(content))
+				codeContent.WriteString("\n")
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(GetCodeDiffResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Failed to read code files: %v", err),
+		})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(GetCodeDiffResponse{
+		Success: true,
+		Diff:    codeContent.String(),
+		Files:   files,
+	})
+}
+
+// ApplySpecUpdateRequest represents a request to apply a specification update
+type ApplySpecUpdateRequest struct {
+	WorkspacePath string `json:"workspacePath"`
+	TargetType    string `json:"targetType"` // "enabler" or "capability"
+	TargetId      string `json:"targetId"`
+	TargetName    string `json:"targetName,omitempty"` // Used when creating new files
+	Section       string `json:"section"`
+	Action        string `json:"action"` // "add", "modify", "remove", "create"
+	CurrentText   string `json:"currentText,omitempty"`
+	ProposedText  string `json:"proposedText"`
+}
+
+type ApplySpecUpdateResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message,omitempty"`
+	Error   string `json:"error,omitempty"`
+}
+
+// HandleApplySpecUpdate handles POST /apply-spec-update
+// Applies a proposed specification update to the actual file
+func (h *Handler) HandleApplySpecUpdate(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req ApplySpecUpdateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	if req.WorkspacePath == "" || req.ProposedText == "" {
+		http.Error(w, "workspacePath and proposedText are required", http.StatusBadRequest)
+		return
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get working directory: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Ensure definition directory exists
+	defsDir := filepath.Join(cwd, req.WorkspacePath, "definition")
+	if err := os.MkdirAll(defsDir, 0755); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Failed to create definitions directory: %v", err),
+		})
+		return
+	}
+
+	// Handle "create" action - create a new specification file
+	if req.Action == "create" {
+		// Generate filename from targetId or targetName
+		filename := req.TargetId
+		if filename == "" {
+			filename = req.TargetName
+		}
+		if filename == "" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+				Success: false,
+				Error:   "targetId or targetName is required for create action",
+			})
+			return
+		}
+
+		// Clean up filename - remove any path components and ensure .md extension
+		filename = filepath.Base(filename)
+		if !strings.HasSuffix(filename, ".md") {
+			filename = filename + ".md"
+		}
+
+		targetFile := filepath.Join(defsDir, filename)
+
+		// Check if file already exists
+		if _, err := os.Stat(targetFile); err == nil {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+				Success: false,
+				Error:   fmt.Sprintf("File already exists: %s", filename),
+			})
+			return
+		}
+
+		// Write the new file
+		if err := os.WriteFile(targetFile, []byte(req.ProposedText), 0644); err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+				Success: false,
+				Error:   fmt.Sprintf("Failed to create specification file: %v", err),
+			})
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+			Success: true,
+			Message: fmt.Sprintf("Successfully created new specification file: %s", filename),
+		})
+		return
+	}
+
+	// For non-create actions, we need a targetId to find the file
+	if req.TargetId == "" {
+		http.Error(w, "targetId is required for add/modify/remove actions", http.StatusBadRequest)
+		return
+	}
+
+	// Find the specification file
+	files, err := os.ReadDir(defsDir)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Failed to read definitions directory: %v", err),
+		})
+		return
+	}
+
+	var targetFile string
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		content, err := os.ReadFile(filepath.Join(defsDir, file.Name()))
+		if err != nil {
+			continue
+		}
+		// Check if this file contains the target ID
+		if strings.Contains(string(content), req.TargetId) {
+			targetFile = filepath.Join(defsDir, file.Name())
+			break
+		}
+	}
+
+	if targetFile == "" {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Could not find specification file for ID: %s. Use 'create' action to create a new file.", req.TargetId),
+		})
+		return
+	}
+
+	// Read the current file content
+	content, err := os.ReadFile(targetFile)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Failed to read specification file: %v", err),
+		})
+		return
+	}
+
+	fileContent := string(content)
+	var newContent string
+
+	switch req.Action {
+	case "add":
+		// Find the section and add the text after it
+		sectionHeader := "## " + req.Section
+		if idx := strings.Index(fileContent, sectionHeader); idx >= 0 {
+			// Find the end of the section header line
+			endOfLine := strings.Index(fileContent[idx:], "\n")
+			if endOfLine >= 0 {
+				insertPos := idx + endOfLine + 1
+				newContent = fileContent[:insertPos] + req.ProposedText + "\n" + fileContent[insertPos:]
+			}
+		} else {
+			// Section not found, append to end
+			newContent = fileContent + "\n## " + req.Section + "\n" + req.ProposedText + "\n"
+		}
+
+	case "modify":
+		if req.CurrentText != "" {
+			newContent = strings.Replace(fileContent, req.CurrentText, req.ProposedText, 1)
+		} else {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+				Success: false,
+				Error:   "currentText is required for modify action",
+			})
+			return
+		}
+
+	case "remove":
+		if req.CurrentText != "" {
+			newContent = strings.Replace(fileContent, req.CurrentText, "", 1)
+		} else {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+				Success: false,
+				Error:   "currentText is required for remove action",
+			})
+			return
+		}
+
+	default:
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Unknown action: %s. Valid actions are: create, add, modify, remove", req.Action),
+		})
+		return
+	}
+
+	// Write the updated content back
+	if err := os.WriteFile(targetFile, []byte(newContent), 0644); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Failed to write specification file: %v", err),
+		})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(ApplySpecUpdateResponse{
+		Success: true,
+		Message: fmt.Sprintf("Successfully applied %s update to %s", req.Action, filepath.Base(targetFile)),
+	})
 }

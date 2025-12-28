@@ -28,10 +28,21 @@ interface ResourceSuggestion {
   confidence: number;
 }
 
+interface GitConfig {
+  initialized: boolean;
+  userName?: string;
+  userEmail?: string;
+  remoteUrl?: string;
+  remoteName?: string;
+  currentBranch?: string;
+}
+
 interface WorkspaceIntegrationsProps {
   workspace: Workspace;
   onClose: () => void;
 }
+
+const SPEC_API_URL = 'http://localhost:4001';
 
 const AVAILABLE_INTEGRATIONS = [
   { name: 'Figma API', icon: '🎨' },
@@ -52,6 +63,19 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
   const [existingIntegrations, setExistingIntegrations] = useState<Record<string, IntegrationResource[]>>({});
   const [showJiraImport, setShowJiraImport] = useState(false);
   const [selectedJiraProject, setSelectedJiraProject] = useState<IntegrationResource | null>(null);
+
+  // GitHub/Git specific state
+  const [gitConfig, setGitConfig] = useState<GitConfig>({ initialized: false });
+  const [gitLoading, setGitLoading] = useState(false);
+  const [gitUserName, setGitUserName] = useState('');
+  const [gitUserEmail, setGitUserEmail] = useState('');
+  const [remoteUrl, setRemoteUrl] = useState('');
+  const [createNewRepo, setCreateNewRepo] = useState(false);
+  const [newRepoName, setNewRepoName] = useState('');
+  const [newRepoPrivate, setNewRepoPrivate] = useState(true);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [githubRepos, setGithubRepos] = useState<Array<{ id: number; name: string; full_name: string; html_url: string; clone_url: string; private: boolean; description: string | null }>>([]);
+  const [loadingRepos, setLoadingRepos] = useState(false);
 
   // Load existing workspace integrations on mount
   useEffect(() => {
@@ -114,6 +138,253 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
     }
 
     return { valid: missingFields.length === 0, missingFields };
+  };
+
+  // GitHub token helper - looks for token in various field names
+  const getGitHubToken = (): string | null => {
+    const config = localStorage.getItem('integration_config_github');
+    if (!config) return null;
+
+    try {
+      const parsed = JSON.parse(config);
+      if (!parsed.fields) return null;
+
+      const tokenFieldNames = [
+        'personal_access_token', 'Personal Access Token', 'token', 'Token',
+        'access_token', 'Access Token', 'api_key', 'API Key', 'apiKey', 'pat', 'PAT',
+      ];
+
+      for (const fieldName of tokenFieldNames) {
+        if (parsed.fields[fieldName] && typeof parsed.fields[fieldName] === 'string') {
+          return parsed.fields[fieldName];
+        }
+      }
+
+      const values = Object.values(parsed.fields);
+      const tokenValue = values.find(
+        (value): value is string => typeof value === 'string' && value.length > 0
+      );
+      return tokenValue || null;
+    } catch {
+      return null;
+    }
+  };
+
+  // Check git status for the workspace
+  const checkGitStatus = async () => {
+    if (!workspace.projectFolder) {
+      setGitLoading(false);
+      return;
+    }
+
+    setGitLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `${SPEC_API_URL}/git/config?workspace=${encodeURIComponent(workspace.projectFolder)}`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setGitConfig(data);
+        setGitUserName(data.userName || '');
+        setGitUserEmail(data.userEmail || '');
+        setRemoteUrl(data.remoteUrl || '');
+      } else {
+        setGitConfig({ initialized: false });
+      }
+    } catch (err) {
+      setGitConfig({ initialized: false });
+    } finally {
+      setGitLoading(false);
+    }
+  };
+
+  // Initialize git repository
+  const handleInitializeGit = async () => {
+    if (!workspace.projectFolder) {
+      setError('Workspace folder not set. Please set a project folder first.');
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch(`${SPEC_API_URL}/git/init`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace: workspace.projectFolder,
+          userName: gitUserName || undefined,
+          userEmail: gitUserEmail || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to initialize repository');
+      }
+
+      setSuccess('Git repository initialized successfully!');
+      await checkGitStatus();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to initialize repository');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Save git config
+  const handleSaveGitConfig = async () => {
+    if (!workspace.projectFolder) return;
+
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch(`${SPEC_API_URL}/git/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace: workspace.projectFolder,
+          userName: gitUserName,
+          userEmail: gitUserEmail,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to save configuration');
+      }
+
+      setSuccess('Git configuration saved!');
+      await checkGitStatus();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save configuration');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Connect to existing remote
+  const handleConnectRemote = async () => {
+    if (!workspace.projectFolder || !remoteUrl) return;
+
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch(`${SPEC_API_URL}/git/remote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace: workspace.projectFolder,
+          url: remoteUrl,
+          name: 'origin',
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to connect remote');
+      }
+
+      setSuccess('GitHub repository connected!');
+      await checkGitStatus();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to connect remote');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Create new GitHub repository
+  const handleCreateRepo = async () => {
+    if (!workspace.projectFolder || !newRepoName) return;
+
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const token = getGitHubToken();
+
+      if (!token) {
+        throw new Error('GitHub token not found. Please configure GitHub in the Integrations page first.');
+      }
+
+      const response = await fetch(`${SPEC_API_URL}/git/create-repo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace: workspace.projectFolder,
+          name: newRepoName,
+          private: newRepoPrivate,
+          token,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to create repository');
+      }
+
+      const data = await response.json();
+      setRemoteUrl(data.url);
+      setSuccess(`Repository created: ${data.url}`);
+      setCreateNewRepo(false);
+      await checkGitStatus();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create repository');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Fetch user's GitHub repositories
+  const fetchGitHubRepos = async () => {
+    const token = getGitHubToken();
+    if (!token) {
+      setError('GitHub token not found. Please configure GitHub in the Integrations page first.');
+      return;
+    }
+
+    setLoadingRepos(true);
+    setError(null);
+
+    try {
+      // Fetch repos directly from GitHub API
+      const response = await fetch('https://api.github.com/user/repos?sort=updated&per_page=100', {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('GitHub token is invalid or expired. Please update your GitHub configuration.');
+        }
+        throw new Error(`Failed to fetch repositories: ${response.statusText}`);
+      }
+
+      const repos = await response.json();
+      setGithubRepos(repos);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch GitHub repositories');
+    } finally {
+      setLoadingRepos(false);
+    }
+  };
+
+  // Select a repo from the list to connect
+  const handleSelectRepo = (repo: { clone_url: string; full_name: string }) => {
+    setRemoteUrl(repo.clone_url);
   };
 
   const fetchResources = async (integrationName: string) => {
@@ -192,6 +463,15 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
 
   const handleIntegrationSelect = (integrationName: string) => {
     setSelectedIntegration(integrationName);
+    setError(null);
+    setSuccess(null);
+
+    // For GitHub, load git status and fetch repos
+    if (integrationName === 'GitHub') {
+      checkGitStatus();
+      fetchGitHubRepos();
+      return;
+    }
 
     // Pre-select existing resources for this integration
     const existingResources = existingIntegrations[integrationName] || [];
@@ -225,7 +505,7 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
       // For Figma API, we need to fetch the actual files from the selected teams/users
       if (selectedIntegration === 'Figma API' && dataToSave.length > 0) {
         console.log('[WorkspaceIntegrations] Fetching Figma files from selected teams/users...');
-        const config = availableIntegrations.find(i => i.name === 'Figma API')?.config;
+        const config = getIntegrationConfig('Figma API');
 
         if (config?.fields?.access_token) {
           try {
@@ -362,6 +642,12 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
           </Alert>
         )}
 
+        {success && (
+          <Alert type="success" style={{ marginBottom: '20px' }}>
+            {success}
+          </Alert>
+        )}
+
         {/* Integration Selection */}
         {!selectedIntegration && (
           <div>
@@ -443,7 +729,438 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
               <h3 className="text-headline">{selectedIntegration} Resources</h3>
             </div>
 
-            {loading && (
+            {/* GitHub Version Control UI */}
+            {selectedIntegration === 'GitHub' && (
+              <div>
+                {gitLoading && (
+                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <div className="spinner" style={{
+                      width: '50px',
+                      height: '50px',
+                      border: '4px solid var(--color-grey-200)',
+                      borderTop: '4px solid var(--color-blue-500)',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                      margin: '0 auto 16px'
+                    }} />
+                    <p className="text-body">Checking repository status...</p>
+                  </div>
+                )}
+
+                {!gitLoading && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    {/* Status Section */}
+                    <div style={{
+                      padding: '16px',
+                      backgroundColor: gitConfig.initialized ? 'var(--color-green-50, #f0fdf4)' : 'var(--color-grey-50)',
+                      border: `1px solid ${gitConfig.initialized ? 'var(--color-green-200, #bbf7d0)' : 'var(--color-grey-200)'}`,
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px'
+                    }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '8px',
+                        backgroundColor: gitConfig.initialized ? 'var(--color-green-100, #dcfce7)' : 'var(--color-grey-100)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        {gitConfig.initialized ? (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--color-green-600, #16a34a)">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                          </svg>
+                        ) : (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--color-grey-400)">
+                            <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+                          </svg>
+                        )}
+                      </div>
+                      <div>
+                        <p style={{ margin: 0, fontWeight: 600 }}>
+                          {gitConfig.initialized ? 'Repository Initialized' : 'Not Initialized'}
+                        </p>
+                        {gitConfig.currentBranch && (
+                          <p className="text-caption1 text-secondary" style={{ margin: 0 }}>
+                            Branch: <code>{gitConfig.currentBranch}</code>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Initialize Section */}
+                    {!gitConfig.initialized && workspace.projectFolder && (
+                      <div>
+                        <h4 className="text-headline" style={{ marginBottom: '12px' }}>
+                          Initialize Repository
+                        </h4>
+                        <p className="text-footnote text-secondary" style={{ marginBottom: '16px' }}>
+                          Initialize a new Git repository in your workspace folder.
+                        </p>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          <div>
+                            <label className="label" style={{ display: 'block', marginBottom: '8px' }}>Git User Name</label>
+                            <input
+                              type="text"
+                              value={gitUserName}
+                              onChange={(e) => setGitUserName(e.target.value)}
+                              placeholder="Your Name"
+                              className="input"
+                              style={{ width: '100%' }}
+                            />
+                          </div>
+                          <div>
+                            <label className="label" style={{ display: 'block', marginBottom: '8px' }}>Git User Email</label>
+                            <input
+                              type="email"
+                              value={gitUserEmail}
+                              onChange={(e) => setGitUserEmail(e.target.value)}
+                              placeholder="your.email@example.com"
+                              className="input"
+                              style={{ width: '100%' }}
+                            />
+                          </div>
+                        </div>
+
+                        <Button
+                          variant="primary"
+                          onClick={handleInitializeGit}
+                          disabled={saving || !workspace.projectFolder}
+                          style={{ marginTop: '16px' }}
+                        >
+                          {saving ? 'Initializing...' : 'Initialize Repository'}
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* No Project Folder Warning */}
+                    {!workspace.projectFolder && (
+                      <Alert type="warning">
+                        <strong>Project Folder Required</strong>
+                        <p style={{ margin: '8px 0 0 0' }}>
+                          Please set a project folder for this workspace before configuring version control.
+                        </p>
+                      </Alert>
+                    )}
+
+                    {/* Git Config Section (when initialized) */}
+                    {gitConfig.initialized && (
+                      <>
+                        <div>
+                          <h4 className="text-headline" style={{ marginBottom: '12px' }}>
+                            Git Configuration
+                          </h4>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div>
+                              <label className="label" style={{ display: 'block', marginBottom: '8px' }}>Git User Name</label>
+                              <input
+                                type="text"
+                                value={gitUserName}
+                                onChange={(e) => setGitUserName(e.target.value)}
+                                placeholder="Your Name"
+                                className="input"
+                                style={{ width: '100%' }}
+                              />
+                            </div>
+                            <div>
+                              <label className="label" style={{ display: 'block', marginBottom: '8px' }}>Git User Email</label>
+                              <input
+                                type="email"
+                                value={gitUserEmail}
+                                onChange={(e) => setGitUserEmail(e.target.value)}
+                                placeholder="your.email@example.com"
+                                className="input"
+                                style={{ width: '100%' }}
+                              />
+                            </div>
+                          </div>
+
+                          <Button
+                            variant="outline"
+                            onClick={handleSaveGitConfig}
+                            disabled={saving}
+                            style={{ marginTop: '12px' }}
+                          >
+                            {saving ? 'Saving...' : 'Save Configuration'}
+                          </Button>
+                        </div>
+
+                        {/* GitHub Connection Section */}
+                        <div>
+                          <h4 className="text-headline" style={{ marginBottom: '12px' }}>
+                            GitHub Repository
+                          </h4>
+
+                          {!getGitHubToken() && (
+                            <div
+                              style={{
+                                padding: '20px',
+                                backgroundColor: 'var(--color-yellow-50, #fefce8)',
+                                border: '1px solid var(--color-yellow-200, #fef08a)',
+                                borderRadius: '8px',
+                                marginBottom: '16px',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                                <div
+                                  style={{
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '8px',
+                                    backgroundColor: 'var(--color-yellow-100, #fef9c3)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--color-yellow-600, #ca8a04)">
+                                    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/>
+                                  </svg>
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                  <p style={{ margin: 0, marginBottom: '8px', fontWeight: 600, color: 'var(--color-yellow-900, #713f12)' }}>
+                                    GitHub Connection Required
+                                  </p>
+                                  <p style={{ margin: 0, marginBottom: '12px', color: 'var(--color-yellow-800, #854d0e)', fontSize: '14px' }}>
+                                    To create repositories or push changes to GitHub, you need to configure your GitHub credentials first. Go to the main Integrations page and configure GitHub with your Personal Access Token.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Current Connection Status */}
+                          {gitConfig.remoteUrl && (
+                            <div
+                              style={{
+                                padding: '16px',
+                                backgroundColor: 'var(--color-green-50, #f0fdf4)',
+                                border: '1px solid var(--color-green-200, #bbf7d0)',
+                                borderRadius: '8px',
+                                marginBottom: '16px',
+                              }}
+                            >
+                              <p style={{ margin: 0, marginBottom: '8px', fontWeight: 500 }}>
+                                Currently Connected
+                              </p>
+                              <code
+                                style={{
+                                  fontSize: '13px',
+                                  backgroundColor: 'rgba(0,0,0,0.05)',
+                                  padding: '4px 8px',
+                                  borderRadius: '4px',
+                                  wordBreak: 'break-all',
+                                }}
+                              >
+                                {gitConfig.remoteUrl}
+                              </code>
+                            </div>
+                          )}
+
+                          {/* Repository Options */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                              {/* Toggle between link existing and create new */}
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <button
+                                  onClick={() => setCreateNewRepo(false)}
+                                  style={{
+                                    flex: 1,
+                                    padding: '12px',
+                                    border: `2px solid ${!createNewRepo ? 'var(--color-blue-500)' : 'var(--color-grey-200)'}`,
+                                    borderRadius: '8px',
+                                    backgroundColor: !createNewRepo ? 'var(--color-blue-50)' : 'white',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s',
+                                  }}
+                                >
+                                  <p style={{ margin: 0, fontWeight: 500 }}>Link Existing</p>
+                                  <p className="text-caption1 text-secondary" style={{ margin: 0 }}>
+                                    Connect to an existing repo
+                                  </p>
+                                </button>
+                                <button
+                                  onClick={() => setCreateNewRepo(true)}
+                                  disabled={!getGitHubToken()}
+                                  style={{
+                                    flex: 1,
+                                    padding: '12px',
+                                    border: `2px solid ${createNewRepo ? 'var(--color-blue-500)' : 'var(--color-grey-200)'}`,
+                                    borderRadius: '8px',
+                                    backgroundColor: createNewRepo ? 'var(--color-blue-50)' : 'white',
+                                    cursor: getGitHubToken() ? 'pointer' : 'not-allowed',
+                                    opacity: getGitHubToken() ? 1 : 0.5,
+                                    transition: 'all 0.15s',
+                                  }}
+                                >
+                                  <p style={{ margin: 0, fontWeight: 500 }}>Create New</p>
+                                  <p className="text-caption1 text-secondary" style={{ margin: 0 }}>
+                                    Create a new GitHub repo
+                                  </p>
+                                </button>
+                              </div>
+
+                              {!createNewRepo ? (
+                                <div>
+                                  {/* Available Repos List */}
+                                  {loadingRepos ? (
+                                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                                      <div style={{
+                                        width: '30px',
+                                        height: '30px',
+                                        border: '3px solid var(--color-grey-200)',
+                                        borderTop: '3px solid var(--color-blue-500)',
+                                        borderRadius: '50%',
+                                        animation: 'spin 1s linear infinite',
+                                        margin: '0 auto 12px'
+                                      }} />
+                                      <p className="text-footnote text-secondary">Loading your repositories...</p>
+                                    </div>
+                                  ) : githubRepos.length > 0 ? (
+                                    <div style={{ marginBottom: '16px' }}>
+                                      <label className="label" style={{ display: 'block', marginBottom: '8px' }}>
+                                        Your Repositories ({githubRepos.length})
+                                      </label>
+                                      <div style={{
+                                        maxHeight: '200px',
+                                        overflowY: 'auto',
+                                        border: '1px solid var(--color-grey-200)',
+                                        borderRadius: '8px',
+                                      }}>
+                                        {githubRepos.map((repo) => (
+                                          <div
+                                            key={repo.id}
+                                            onClick={() => handleSelectRepo(repo)}
+                                            style={{
+                                              padding: '12px',
+                                              borderBottom: '1px solid var(--color-grey-100)',
+                                              cursor: 'pointer',
+                                              backgroundColor: remoteUrl === repo.clone_url ? 'var(--color-blue-50)' : 'white',
+                                              transition: 'background-color 0.15s',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                              if (remoteUrl !== repo.clone_url) {
+                                                e.currentTarget.style.backgroundColor = 'var(--color-grey-50)';
+                                              }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                              if (remoteUrl !== repo.clone_url) {
+                                                e.currentTarget.style.backgroundColor = 'white';
+                                              }
+                                            }}
+                                          >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                              <span style={{ fontSize: '16px' }}>{repo.private ? '🔒' : '🌐'}</span>
+                                              <div style={{ flex: 1 }}>
+                                                <p style={{ margin: 0, fontWeight: 500, fontSize: '14px' }}>
+                                                  {repo.full_name}
+                                                </p>
+                                                {repo.description && (
+                                                  <p className="text-caption1 text-secondary" style={{ margin: '2px 0 0 0' }}>
+                                                    {repo.description.length > 60 ? repo.description.substring(0, 60) + '...' : repo.description}
+                                                  </p>
+                                                )}
+                                              </div>
+                                              {remoteUrl === repo.clone_url && (
+                                                <span style={{ color: 'var(--color-blue-500)', fontSize: '18px' }}>✓</span>
+                                              )}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                      <Button
+                                        variant="outline"
+                                        onClick={fetchGitHubRepos}
+                                        style={{ marginTop: '8px', fontSize: '13px' }}
+                                      >
+                                        🔄 Refresh List
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <div style={{ marginBottom: '16px' }}>
+                                      <p className="text-footnote text-secondary" style={{ marginBottom: '8px' }}>
+                                        No repositories found or unable to fetch. You can enter a URL manually below.
+                                      </p>
+                                      <Button
+                                        variant="outline"
+                                        onClick={fetchGitHubRepos}
+                                        style={{ fontSize: '13px' }}
+                                      >
+                                        🔄 Try Again
+                                      </Button>
+                                    </div>
+                                  )}
+
+                                  {/* Manual URL input */}
+                                  <div style={{ marginTop: githubRepos.length > 0 ? '16px' : '0', paddingTop: githubRepos.length > 0 ? '16px' : '0', borderTop: githubRepos.length > 0 ? '1px solid var(--color-grey-200)' : 'none' }}>
+                                    <label className="label" style={{ display: 'block', marginBottom: '8px' }}>
+                                      {githubRepos.length > 0 ? 'Or enter repository URL manually' : 'Repository URL'}
+                                    </label>
+                                    <input
+                                      type="url"
+                                      value={remoteUrl}
+                                      onChange={(e) => setRemoteUrl(e.target.value)}
+                                      placeholder="https://github.com/username/repo.git"
+                                      className="input"
+                                      style={{ width: '100%' }}
+                                    />
+                                  </div>
+                                  <Button
+                                    variant="primary"
+                                    onClick={handleConnectRemote}
+                                    disabled={saving || !remoteUrl}
+                                    style={{ marginTop: '12px' }}
+                                  >
+                                    {saving ? 'Connecting...' : 'Connect Repository'}
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                  <div>
+                                    <label className="label" style={{ display: 'block', marginBottom: '8px' }}>Repository Name</label>
+                                    <input
+                                      type="text"
+                                      value={newRepoName}
+                                      onChange={(e) => setNewRepoName(e.target.value)}
+                                      placeholder="my-project"
+                                      className="input"
+                                      style={{ width: '100%' }}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                      <input
+                                        type="checkbox"
+                                        checked={newRepoPrivate}
+                                        onChange={(e) => setNewRepoPrivate(e.target.checked)}
+                                      />
+                                      <span>Private repository</span>
+                                    </label>
+                                  </div>
+                                  <Button
+                                    variant="primary"
+                                    onClick={handleCreateRepo}
+                                    disabled={saving || !newRepoName}
+                                  >
+                                    {saving ? 'Creating...' : 'Create Repository'}
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Resource Selection for Figma/Jira */}
+            {selectedIntegration !== 'GitHub' && loading && (
               <div style={{ textAlign: 'center', padding: '40px' }}>
                 <div style={{
                   width: '50px',
@@ -458,13 +1175,13 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
               </div>
             )}
 
-            {!loading && resources.length === 0 && !error && (
+            {selectedIntegration !== 'GitHub' && !loading && resources.length === 0 && !error && (
               <Alert type="info">
                 No resources found for this integration. Make sure your credentials are correct.
               </Alert>
             )}
 
-            {!loading && resources.length > 0 && (
+            {selectedIntegration !== 'GitHub' && !loading && resources.length > 0 && (
               <div>
                 {loadingSuggestions && (
                   <Alert type="info" style={{ marginBottom: '16px' }}>
@@ -614,6 +1331,13 @@ export const WorkspaceIntegrations: React.FC<WorkspaceIntegrationsProps> = ({ wo
             }}
           />
         )}
+
+        {/* Spinner animation */}
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     </div>
   );

@@ -9,7 +9,7 @@
 - **Type**: Capability
 - **Generated**: 12/18/2025, 8:44:52 PM
 
-- **Storyboard Reference**: send prompt data to openweather API, pull weather data
+- **Storyboard Reference**: pull weather data
 ## Description
 Integrates with OpenWeather API to both send prompt data and pull weather data for the application.
 

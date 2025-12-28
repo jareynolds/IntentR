@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Alert, Button, PageLayout } from '../components';
 import { ValidationDashboard } from '../components/ValidationDashboard';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { usePhaseApprovals } from '../context/EntityStateContext';
 import { INTEGRATION_URL } from '../api/client';
 
 interface ControlLoopItem {
@@ -83,10 +84,19 @@ const defaultControlLoopItems: ControlLoopItem[] = [
 export const ControlLoopApproval: React.FC = () => {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
+  const {
+    phaseApprovals,
+    approvePhase: approvePhaseDb,
+    revokePhase: revokePhaseDb,
+    isPhaseApproved,
+  } = usePhaseApprovals();
   const [loading, setLoading] = useState(false);
   const [controlLoopItems, setControlLoopItems] = useState<ControlLoopItem[]>([]);
-  const [controlLoopApproved, setControlLoopApproved] = useState(false);
-  const [approvalDate, setApprovalDate] = useState<string | null>(null);
+
+  // Get phase approval state from database
+  const controlLoopApproved = isPhaseApproved('control_loop');
+  const controlLoopPhaseApproval = phaseApprovals.get('control_loop');
+  const approvalDate = controlLoopPhaseApproval?.approved_at || null;
 
   // Item approval tracking
   const [itemApprovals, setItemApprovals] = useState<ItemApprovalStatus>({});
@@ -268,7 +278,7 @@ export const ControlLoopApproval: React.FC = () => {
     });
   };
 
-  const handleApproveItem = (item: ControlLoopItem) => {
+  const handleApproveItem = async (item: ControlLoopItem) => {
     const reviewedAt = new Date().toISOString();
     setControlLoopItems(prev => {
       const updated = prev.map(i =>
@@ -278,11 +288,10 @@ export const ControlLoopApproval: React.FC = () => {
       );
       saveControlLoopItems(updated);
 
-      // Check if all items are now approved
+      // Check if all items are now approved - if so, approve the phase in database
       const allApproved = updated.every(i => i.status === 'approved');
-      setControlLoopApproved(allApproved);
       if (allApproved) {
-        setApprovalDate(reviewedAt);
+        approvePhaseDb('control_loop');
       }
 
       return updated;
@@ -298,7 +307,7 @@ export const ControlLoopApproval: React.FC = () => {
     }));
   };
 
-  const handleRejectItem = () => {
+  const handleRejectItem = async () => {
     if (!rejectionModal.item) return;
 
     const reviewedAt = new Date().toISOString();
@@ -324,12 +333,16 @@ export const ControlLoopApproval: React.FC = () => {
       },
     }));
 
-    setControlLoopApproved(false);
+    // Revoke phase approval in database if it was approved
+    if (controlLoopApproved) {
+      await revokePhaseDb('control_loop');
+    }
+
     setRejectionModal({ isOpen: false, item: null });
     setRejectionComment('');
   };
 
-  const handleResetItem = (item: ControlLoopItem) => {
+  const handleResetItem = async (item: ControlLoopItem) => {
     setControlLoopItems(prev => {
       const updated = prev.map(i =>
         i.id === item.id
@@ -352,8 +365,10 @@ export const ControlLoopApproval: React.FC = () => {
       return updated;
     });
 
-    setControlLoopApproved(false);
-    setApprovalDate(null);
+    // Revoke phase approval in database if it was approved
+    if (controlLoopApproved) {
+      await revokePhaseDb('control_loop');
+    }
   };
 
   const getStatusColor = (status: string) => {

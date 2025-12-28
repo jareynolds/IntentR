@@ -1,0 +1,268 @@
+================================================================================
+INTENTR CAPABILITY & ENABLER MARKDOWN QUICK REFERENCE
+================================================================================
+
+CAPABILITY MARKDOWN SECTIONS (in order)
+================================================================================
+## Metadata
+  - **Name**: ...
+  - **Type**: Capability
+  - **System**: ...
+  - **Component**: ...
+  - **ID**: CAP-XXXXXX
+  - **Owner**: ...
+  - **Status**: ...
+  - **Approval**: Pending/Approved/Rejected
+  - **Priority**: High/Medium/Low
+  - **Analysis Review**: Required/Not Required
+
+## Purpose
+  [Single paragraph explanation]
+
+## Business Context
+  ### Problem Statement
+  ### Value Proposition
+  ### Business Value (optional)
+  ### Success Metrics
+    - Metric 1
+    - Metric 2
+
+## User Perspective
+  ### Target Users
+  ### User Scenarios
+    1. **Title**: Description
+    2. **Title**: Description
+
+## Boundaries
+  ### In Scope
+  ### Out of Scope
+  ### Assumptions (optional)
+  ### Constraints (optional)
+
+## Dependencies
+  ### Upstream Dependencies (This capability depends on)
+  ### Downstream Dependencies (Capabilities that depend on this)
+
+## Related Stories (optional)
+  - [[STORY-NAME]]
+
+## Enablers
+  | ID | Name | Purpose | State |
+  |----|------|---------|-------|
+  | ENB-XXXXXX | Name | Purpose | state |
+
+## Acceptance Criteria
+  - [ ] Criterion 1
+  - [ ] Criterion 2
+
+## Technical Specifications
+  ### Capability Dependency Flow Diagram
+  [Mermaid flowchart code]
+
+## Design Artifacts (optional)
+  - [Link to design files]
+
+## Approval History (optional)
+  | Date | Stage | Decision | By | Feedback |
+
+================================================================================
+ENABLER MARKDOWN SECTIONS (in order)
+================================================================================
+## Metadata
+  - **Name**: ...
+  - **Type**: Enabler
+  - **ID**: ENB-XXXXXX
+  - **Capability ID**: CAP-XXXXXX
+  - **Owner**: ...
+  - **Status**: [Draft/Ready for Analysis/In Analysis/Ready for Design/In Design/Ready for Implementation/In Implementation/Implemented/In Testing/Tested]
+  - **Approval**: Pending/Approved/Rejected
+  - **Priority**: High/Medium/Low
+  - **Analysis Review**: Required/Not Required
+  - **Code Review**: Required/Not Required
+
+## Technical Context
+  ### Purpose
+  ### Architecture Fit
+  ### Existing Patterns to Follow
+    - Pattern 1
+    - Pattern 2
+
+## Functional Requirements
+  | ID | Name | Requirement | Status | Priority | Approval |
+  |----|------|-------------|--------|----------|----------|
+  | FR-XXXXXX | Name | Req | Status | Priority | Approval |
+
+## Non-Functional Requirements
+  | ID | Name | Requirement | Type | Status | Priority | Approval |
+  |----|------|-------------|------|--------|----------|----------|
+  | NFR-XXXXXX | Name | Req | Type | Status | Priority | Approval |
+
+## Technical Specifications
+  ### Enabler Dependency Flow Diagram
+  [Mermaid flowchart]
+
+  ### API Technical Specifications (if applicable)
+  | API Type | Operation | Endpoint | Description | Request | Response |
+
+  ### Data Models
+  [Mermaid ER diagram]
+
+  ### Class Diagrams
+  [Mermaid class diagram]
+
+  ### Sequence Diagrams
+  [Mermaid sequence diagram]
+
+  ### Dataflow Diagrams
+  [Mermaid flowchart]
+
+  ### State Diagrams
+  [Mermaid state diagram]
+
+## Edge Cases and Error Handling (optional)
+  | Scenario | Expected Behavior | Test Case |
+
+## External Dependencies (optional)
+  - Dependency 1
+  - Dependency 2
+
+## Acceptance Scenarios (Gherkin) (optional)
+  ### Test Suite: TST-XXXXXX - [Name] Tests
+  [Gherkin code with @TST-XXXXXX @TS-XXXXXX tags]
+
+## Test Scenario Summary (optional)
+  | Scenario ID | Name | Requirement | Priority | Status | Automation |
+
+## Test Architecture (optional)
+  - **Framework**: Jest/Vitest/godog/Cucumber.js
+  - **Coverage Target**: 80%+
+  - **Test Types**: Unit, Integration, E2E
+
+## Testing Strategy (optional)
+  ### Unit Testing
+  ### Integration Testing
+  ### End-to-End Testing
+
+## Implementation Hints (optional)
+  ### Suggested Approach
+  ### Known Gotchas
+  ### Reference Implementations
+
+## Approval History (optional)
+  | Date | Stage | Decision | By | Feedback |
+
+================================================================================
+ID GENERATION PATTERNS
+================================================================================
+Format: PREFIX-XXXXXX (6-digit numeric part)
+
+Capabilities:             CAP-XXXXXX
+Enablers:                 ENB-XXXXXX
+Functional Requirements:  FR-XXXXXX
+Non-Functional Req:       NFR-XXXXXX
+Test Scenarios:           TS-XXXXXX
+Test Suites:              TST-XXXXXX
+
+Algorithm:
+  1. Extract last 4 digits of timestamp: timeComponent
+  2. Generate random 0-99: randomComponent
+  3. Combine: (timeComponent * 100) + randomComponent
+  4. Pad to 6 digits, extract last 6
+  5. Check uniqueness in existing files
+
+================================================================================
+INTENT STATE MODEL (4 Dimensions)
+================================================================================
+lifecycle_state:
+  draft → active → implemented → maintained → retired
+
+workflow_stage:
+  intent → specification → ui_design → implementation → control_loop
+
+stage_status:
+  in_progress → ready_for_approval → approved → blocked
+
+approval_status:
+  pending → approved → rejected
+
+================================================================================
+CRITICAL FORMATTING RULES
+================================================================================
+1. Header Levels MUST match exactly:
+   - ## for main sections (Metadata, Technical Context, etc.)
+   - ### for subsections (Purpose, Problem Statement, etc.)
+
+2. Metadata fields MUST use bold with colons:
+   ✓ - **Name**: value
+   ✗ - Name: value
+   ✗ - **Name** value
+
+3. Table format MUST be exact:
+   ✓ | Col1 | Col2 | Col3 |
+     |------|------|------|
+   ✗ | Col1 | Col2 | Col3|
+   ✗ |Col1|Col2|Col3|
+
+4. Mermaid diagrams MUST preserve syntax:
+   ✓ flowchart TD
+   ✓ erDiagram
+   ✓ classDiagram
+   ✓ sequenceDiagram
+   ✓ stateDiagram-v2
+
+5. User Scenarios MUST follow format:
+   ✓ 1. **Title**: Description
+   ✗ 1. Title: Description
+   ✗ 1) Title: Description
+
+6. Story References MUST use wiki syntax:
+   ✓ - [[STORY-NAME]]
+   ✗ - [STORY-NAME]
+   ✗ - STORY-NAME
+
+================================================================================
+SYNC RECOMMENDATIONS FOR CODE-TO-SPEC
+================================================================================
+DO:
+  ✓ Preserve exact section headers and order
+  ✓ Add content to Technical Specifications subsections
+  ✓ Update state fields in Metadata section
+  ✓ Replace "(Template)" headers when design phase completes
+  ✓ Maintain markdown formatting and table alignment
+  ✓ Keep ID fields unchanged
+
+DON'T:
+  ✗ Modify section header capitalization or punctuation
+  ✗ Reorder table columns
+  ✗ Change ID values
+  ✗ Add extra columns to tables
+  ✗ Modify template placeholder text prematurely
+  ✗ Remove subsection headers when building content
+  ✗ Change approval status in markdown (use database only)
+
+================================================================================
+REACT PARSING HINTS
+================================================================================
+Capabilities.tsx generates markdown for:
+  - Metadata (lines 807-814)
+  - Purpose (lines 818-823)
+  - Business Context sections (lines 825-846)
+  - User Perspective sections (lines 857-880)
+  - Boundaries sections (lines 883-901)
+  - Dependencies (lines 904-922)
+  - Related Stories (lines 925-932)
+  - Enablers table (lines 935-938)
+  - Acceptance Criteria (lines 941-948)
+
+Enablers.tsx generates markdown for:
+  - Metadata (starting around line 1040)
+  - Technical Context → Purpose (around 1040-1050)
+  - Functional Requirements table (lines 1116-1126)
+  - Non-Functional Requirements table (lines 1130-1140)
+  - Acceptance Criteria placeholder (line 1142)
+
+Both use this pattern for metadata:
+  markdown += `## Metadata\n`;
+  markdown += `- **FieldName**: ${value}\n`;
+
+================================================================================

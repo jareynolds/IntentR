@@ -6,7 +6,8 @@
  * making the code portable across different environments.
  */
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // API base paths - these are relative URLs that nginx routes to the correct services
 export const API_PATHS = {

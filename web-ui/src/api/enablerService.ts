@@ -93,23 +93,44 @@ export interface CreateEnablerRequest {
   enabler_id: string;
   capability_id: number;
   name: string;
+  description?: string;
   purpose?: string;
   owner?: string;
+  status?: string;
   priority?: Priority;
   analysis_review_required?: boolean;
   code_review_required?: boolean;
   technical_specs?: Record<string, unknown>;
+  rejection_comment?: string;
+  created_by?: number;
   // INTENT State Model - 4 dimensions
   lifecycle_state?: LifecycleState;
   workflow_stage?: WorkflowStage;
   stage_status?: StageStatus;
   approval_status?: ApprovalStatus;
+  // Enabler specification fields
+  enabler_type?: string;  // service, library, UI component, data pipeline, infra module, policy, runbook
+  responsibility?: string;  // single responsibility statement
+  public_interface?: string;  // endpoints/functions/events with signatures
+  internal_design?: string;  // key algorithms, data structures, invariants
+  dependencies?: string;  // packages, services, cloud resources
+  configuration?: string;  // environment variables, feature flags, secrets, defaults
+  data_contracts?: string;  // schemas, versioning strategy, migrations
+  operational_requirements?: string;  // SLOs, scaling, quotas, rate limits
+  security_controls?: string;  // authn/authz, encryption, secret handling, audit logs
+  testing_strategy?: string;  // unit/contract/integration/e2e; test data approach
+  observability?: string;  // logs/metrics/traces, dashboards, alerts
+  deployment?: string;  // build steps, runtime, rollback, canary strategy
+  runbook?: string;  // failure modes + remediation
+  cost_profile?: string;  // main cost drivers and guardrails
 }
 
 export interface UpdateEnablerRequest {
   name?: string;
+  description?: string;
   purpose?: string;
   owner?: string;
+  status?: string;
   // INTENT State Model - 4 dimensions
   lifecycle_state?: LifecycleState;
   workflow_stage?: WorkflowStage;
@@ -120,7 +141,23 @@ export interface UpdateEnablerRequest {
   analysis_review_required?: boolean;
   code_review_required?: boolean;
   technical_specs?: Record<string, unknown>;
+  rejection_comment?: string;
   is_active?: boolean;
+  // Enabler specification fields
+  enabler_type?: string;
+  responsibility?: string;
+  public_interface?: string;
+  internal_design?: string;
+  dependencies?: string;
+  configuration?: string;
+  data_contracts?: string;
+  operational_requirements?: string;
+  security_controls?: string;
+  testing_strategy?: string;
+  observability?: string;
+  deployment?: string;
+  runbook?: string;
+  cost_profile?: string;
 }
 
 // ========================

@@ -32,3 +32,4 @@ export { Testing } from './Testing';
 export { ControlLoopApproval } from './ControlLoopApproval';
 export { StoryMap } from './StoryMap';
 export { LearnINTENT } from './LearnINTENT';
+export { SyncCode2Spec } from './SyncCode2Spec';
