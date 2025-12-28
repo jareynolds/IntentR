@@ -35,6 +35,8 @@ interface FileEnabler {
   technicalSpecs?: string;
   rejectionComment?: string;
   createdBy?: string;
+  createdAt?: string;
+  modifiedAt?: string;
   // New enabler specification fields
   enablerType?: string;  // service, library, UI component, data pipeline, infra module, policy, runbook
   responsibility?: string;  // single responsibility statement
@@ -178,6 +180,10 @@ export const Enablers: React.FC = () => {
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  // Sort state
+  const [sortField, setSortField] = useState<'name' | 'modifiedAt' | 'createdAt'>('modifiedAt');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   // Inline requirement for enabler form
   interface InlineRequirement {
@@ -655,9 +661,10 @@ IMPORTANT: Respond ONLY with valid JSON in this exact format, no other text:
     setEditingEnabler(null);
     setEditingFileEnabler(enabler);
 
-    // Reset AI suggestion state
+    // Reset AI suggestion state - clear all cached suggestion data
     setSuggestedCapabilityId(null);
     setCapabilityNeedsConfirmation(false);
+    setIsCapabilitySuggesting(false);
 
     // Set the capability ID for the form dropdown (NOT the main filter)
     // If the stored capabilityId is actually a name (not an ID like CAP-xxx), find the actual capability
@@ -2888,8 +2895,52 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
   };
 
   // Filter enablers by search query and status filter
+  // Sort enablers based on current sort field and direction
+  const sortEnablers = (enablers: FileEnabler[]): FileEnabler[] => {
+    return [...enablers].sort((a, b) => {
+      let comparison = 0;
+
+      switch (sortField) {
+        case 'name':
+          comparison = (a.name || a.filename || '').localeCompare(b.name || b.filename || '');
+          break;
+        case 'modifiedAt':
+          const aModified = a.modifiedAt ? new Date(a.modifiedAt).getTime() : 0;
+          const bModified = b.modifiedAt ? new Date(b.modifiedAt).getTime() : 0;
+          comparison = aModified - bModified;
+          break;
+        case 'createdAt':
+          const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          comparison = aCreated - bCreated;
+          break;
+        default:
+          comparison = 0;
+      }
+
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  };
+
+  // Format date for display
+  const formatDate = (dateString?: string): string => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return '';
+    }
+  };
+
   const getFilteredEnablers = (enablers: FileEnabler[]) => {
-    return enablers.filter(enabler => {
+    const filtered = enablers.filter(enabler => {
       // Search filter
       const matchesSearch = !searchQuery ||
         enabler.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -2902,6 +2953,9 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
 
       return matchesSearch && matchesStatus;
     });
+
+    // Apply sorting
+    return sortEnablers(filtered);
   };
 
   return (
@@ -3254,70 +3308,13 @@ Enablers bridge the gap between high-level business capabilities and actual code
         </Card>
       )}
 
-      {/* Capability Selection */}
-      <Card style={{ marginBottom: '24px' }}>
-        <h3 className="text-title2" style={{ marginBottom: '16px' }}>Select Capability</h3>
-        {!currentWorkspace?.projectFolder ? (
-          <p className="text-body text-secondary">
-            Please set a project folder for this workspace to load capabilities.
-          </p>
-        ) : (
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <select
-              className="input"
-              value={selectedCapabilityId || ''}
-              onChange={(e) => {
-                clearSelection();
-                setSelectedCapabilityId(e.target.value || null);
-              }}
-              disabled={loadingCapabilities}
-              style={{ flex: 1, padding: '10px 16px' }}
-            >
-              <option value="">
-                {loadingCapabilities ? 'Loading capabilities...' : '-- Select a Capability --'}
-              </option>
-              {capabilities.map((cap) => (
-                <option key={cap.filename} value={cap.capabilityId}>
-                  {cap.capabilityId} - {cap.name}
-                </option>
-              ))}
-            </select>
-            {selectedCapabilityId && (
-              <Button variant="primary" onClick={handleCreateEnabler}>
-                + Add Enabler
-              </Button>
-            )}
-          </div>
-        )}
-        {!loadingCapabilities && capabilities.length === 0 && currentWorkspace?.projectFolder && (
-          <p className="text-footnote text-secondary" style={{ marginTop: '8px' }}>
-            No capabilities found. Create CAP-*.md files in the definition folder.
-          </p>
-        )}
-      </Card>
-
-      {/* Enablers List - Always show, filter by capability if selected */}
+      {/* Enablers List */}
       <div style={{ display: 'grid', gridTemplateColumns: selectedEnabler ? '350px 1fr' : '1fr', gap: '24px' }}>
         {/* File-based Enablers Column */}
         <div>
           {(() => {
-            // Helper function to extract CAP-XXXXXX pattern from capability ID
-            const normalizeCapabilityId = (capId: string | undefined): string => {
-              if (!capId) return '';
-              // Look for CAP-XXXXXX pattern anywhere in the string
-              const match = capId.match(/CAP-\d+/i);
-              return match ? match[0].toUpperCase() : capId.trim().toUpperCase();
-            };
-
-            // Filter file enablers by selected capability, or show all if none selected
-            // Use normalized comparison to handle different capability ID formats
-            const normalizedSelectedCapId = normalizeCapabilityId(selectedCapabilityId || undefined);
-            const capabilityFilteredEnablers = selectedCapabilityId
-              ? fileEnablers.filter(e => normalizeCapabilityId(e.capabilityId) === normalizedSelectedCapId)
-              : fileEnablers;
-
-            // Apply search and status filters
-            const filteredEnablers = getFilteredEnablers(capabilityFilteredEnablers);
+            // Apply search, status, and sort filters to all enablers
+            const filteredEnablers = getFilteredEnablers(fileEnablers);
             return (
               <>
                 {/* Search and Filter Controls */}
@@ -3341,6 +3338,23 @@ Enablers bridge the gap between high-level business capabilities and actual code
                     <option value="approved">✅ Approved</option>
                     <option value="rejected">❌ Rejected</option>
                   </select>
+                  <select
+                    className="input"
+                    value={`${sortField}-${sortDirection}`}
+                    onChange={(e) => {
+                      const [field, direction] = e.target.value.split('-') as ['name' | 'modifiedAt' | 'createdAt', 'asc' | 'desc'];
+                      setSortField(field);
+                      setSortDirection(direction);
+                    }}
+                    style={{ width: '180px', padding: '10px 16px' }}
+                  >
+                    <option value="modifiedAt-desc">Modified (Newest)</option>
+                    <option value="modifiedAt-asc">Modified (Oldest)</option>
+                    <option value="createdAt-desc">Created (Newest)</option>
+                    <option value="createdAt-asc">Created (Oldest)</option>
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                  </select>
                   {(searchQuery || statusFilter !== 'all') && (
                     <button
                       onClick={() => {
@@ -3363,16 +3377,7 @@ Enablers bridge the gap between high-level business capabilities and actual code
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                   <h3 className="text-title2">
-                    {selectedCapabilityId ? (
-                      <>
-                        Enablers ({filteredEnablers.length})
-                        <span className="text-footnote text-secondary" style={{ fontWeight: 'normal', marginLeft: '8px' }}>
-                          for {capabilities.find(c => c.capabilityId === selectedCapabilityId)?.name || selectedCapabilityId}
-                        </span>
-                      </>
-                    ) : (
-                      <>All Enablers ({filteredEnablers.length}{filteredEnablers.length !== fileEnablers.length ? ` of ${fileEnablers.length}` : ''})</>
-                    )}
+                    All Enablers ({filteredEnablers.length}{filteredEnablers.length !== fileEnablers.length ? ` of ${fileEnablers.length}` : ''})
                   </h3>
                   {filteredEnablers.length > 0 && (
                     <button
@@ -3456,15 +3461,20 @@ Enablers bridge the gap between high-level business capabilities and actual code
                 ) : filteredEnablers.length === 0 ? (
                   <Card>
                     <p className="text-body text-secondary" style={{ textAlign: 'center', padding: '20px' }}>
-                      {selectedCapabilityId
-                        ? 'No enablers found for this capability. Create your first enabler to get started.'
-                        : 'No enablers found. Select a capability and create your first enabler to get started.'}
+                      No enablers found. Create ENB-*.md files in the definition folder to get started.
                     </p>
                   </Card>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
                       {filteredEnablers.map((enabler) => {
                         const isSelected = selectedEnablerIds.has(enabler.enablerId);
+                        // Get approval status from database
+                        const enablerApprovalStatus = getEnablerApprovalStatusForFilter(enabler);
+                        const approvalColors = enablerApprovalStatus === 'approved'
+                          ? { bg: 'rgba(52, 199, 89, 0.15)', color: 'var(--color-systemGreen)' }
+                          : enablerApprovalStatus === 'rejected'
+                            ? { bg: 'rgba(255, 59, 48, 0.15)', color: 'var(--color-systemRed)' }
+                            : { bg: 'rgba(255, 149, 0, 0.15)', color: 'var(--color-systemOrange)' };
                         return (
                         <Card
                           key={enabler.enablerId}
@@ -3485,15 +3495,16 @@ Enablers bridge the gap between high-level business capabilities and actual code
                             <div style={{ flex: 1 }}>
                               <h4 className="text-headline" style={{ marginBottom: '8px' }}>{enabler.name}</h4>
                               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                                {/* Approval Status Badge (from database) */}
                                 <span style={{
                                   padding: '2px 8px',
                                   fontSize: '11px',
                                   fontWeight: 600,
                                   borderRadius: '12px',
-                                  backgroundColor: 'var(--color-systemGreen)20',
-                                  color: 'var(--color-systemGreen)',
+                                  backgroundColor: approvalColors.bg,
+                                  color: approvalColors.color,
                                 }}>
-                                  {enabler.status || 'Planned'}
+                                  {enablerApprovalStatus === 'approved' ? '✓ Approved' : enablerApprovalStatus === 'rejected' ? '✗ Rejected' : '⏳ Pending'}
                                 </span>
                                 <span style={{
                                   padding: '2px 8px',
@@ -3512,6 +3523,19 @@ Enablers bridge the gap between high-level business capabilities and actual code
                                   {enabler.purpose.length > 100 ? enabler.purpose.substring(0, 100) + '...' : enabler.purpose}
                                 </p>
                               )}
+                              {/* Display dates */}
+                              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '6px' }}>
+                                {enabler.modifiedAt && (
+                                  <span className="text-footnote text-secondary" style={{ fontSize: '10px' }}>
+                                    Modified: {formatDate(enabler.modifiedAt)}
+                                  </span>
+                                )}
+                                {enabler.createdAt && enabler.createdAt !== enabler.modifiedAt && (
+                                  <span className="text-footnote text-secondary" style={{ fontSize: '10px' }}>
+                                    Created: {formatDate(enabler.createdAt)}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             <div style={{ display: 'flex', gap: '8px' }}>
                               <button

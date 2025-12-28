@@ -31,14 +31,6 @@ interface PhaseStatus {
   enablers: { total: number; approved: number; rejected: number; items: SpecificationItem[] };
 }
 
-interface ItemApprovalStatus {
-  [itemId: string]: {
-    status: 'approved' | 'rejected' | 'draft';
-    comment?: string;
-    reviewedAt?: string;
-  };
-}
-
 export const SpecificationApproval: React.FC = () => {
   const navigate = useNavigate();
   const { currentWorkspace } = useWorkspace();
@@ -66,15 +58,20 @@ export const SpecificationApproval: React.FC = () => {
   const specificationPhaseApproval = phaseApprovals.get('specification');
   const approvalDate = specificationPhaseApproval?.approved_at || null;
 
-  // Item approval tracking
-  const [itemApprovals, setItemApprovals] = useState<ItemApprovalStatus>({});
-
   // Rejection modal state
   const [rejectionModal, setRejectionModal] = useState<{
     isOpen: boolean;
     item: SpecificationItem | null;
   }>({ isOpen: false, item: null });
   const [rejectionComment, setRejectionComment] = useState('');
+
+  // Refresh workspace state from database on page mount
+  // This ensures we have the latest approval statuses when navigating to this page
+  useEffect(() => {
+    if (currentWorkspace?.name) {
+      refreshWorkspaceState();
+    }
+  }, [currentWorkspace?.name, refreshWorkspaceState]);
 
   // Load specification phase items
   // Re-run when dbCapabilities or dbEnablers change (e.g., after editing on Capabilities/Enablers pages)
@@ -85,19 +82,7 @@ export const SpecificationApproval: React.FC = () => {
   }, [currentWorkspace?.projectFolder, dbCapabilities, dbEnablers]);
 
   // NOTE: localStorage for item approvals is no longer used - database is single source of truth
-  // The loadItemApprovals function has been removed. Approval status now comes from
-  // dbCapabilities and dbEnablers via EntityStateContext.
-
-  const saveItemApprovals = (approvals: ItemApprovalStatus) => {
-    if (!currentWorkspace?.id) return;
-
-    // Save to localStorage only - entity state is in database
-    // JSON file writing removed - database is single source of truth
-    localStorage.setItem(`specification-item-approvals-${currentWorkspace.id}`, JSON.stringify(approvals));
-    setItemApprovals(approvals);
-  };
-
-  // savePhaseApprovalToFile removed - phase approval now managed via database
+  // Approval status now comes from dbCapabilities and dbEnablers via EntityStateContext.
 
   const loadSpecificationItems = async () => {
     if (!currentWorkspace?.projectFolder) return;
@@ -221,14 +206,6 @@ export const SpecificationApproval: React.FC = () => {
   // State changes now only go to database via syncCapability/syncEnabler
 
   const handleApproveItem = async (item: SpecificationItem) => {
-    const newApprovals = {
-      ...itemApprovals,
-      [item.id]: {
-        status: 'approved' as const,
-        reviewedAt: new Date().toISOString(),
-      },
-    };
-    saveItemApprovals(newApprovals);
     updateItemStatus(item, 'approved');
 
     // Sync approval status to database (single source of truth)
@@ -299,15 +276,6 @@ export const SpecificationApproval: React.FC = () => {
     if (!rejectionModal.item) return;
 
     const item = rejectionModal.item;
-    const newApprovals = {
-      ...itemApprovals,
-      [item.id]: {
-        status: 'rejected' as const,
-        comment: rejectionComment,
-        reviewedAt: new Date().toISOString(),
-      },
-    };
-    saveItemApprovals(newApprovals);
     updateItemStatus(item, 'rejected', rejectionComment);
 
     // Sync rejection status to database (single source of truth)
@@ -391,10 +359,6 @@ export const SpecificationApproval: React.FC = () => {
   };
 
   const handleResetItemStatus = async (item: SpecificationItem) => {
-    const newApprovals = { ...itemApprovals };
-    delete newApprovals[item.id];
-    saveItemApprovals(newApprovals);
-
     // Sync reset status to database (single source of truth)
     // updateSourceFile removed - database is single source of truth
     // BUSINESS RULE (see STATE_MODEL.md "Automatic State Transitions on Approval"):
@@ -913,13 +877,6 @@ All items must be approved before proceeding to the System phase."
           {renderSectionCard('Enablers', phaseStatus.enablers, '/enablers', '⚙️')}
         </>
       )}
-
-      {/* INTENT Info */}
-      <Alert type="info" style={{ marginTop: '24px' }}>
-        <strong>INTENT Specification Phase:</strong> The formal specification phase establishes the scope and design of your project.
-        Before proceeding to System, ensure all capabilities and enablers have been reviewed and approved.
-        This gate ensures alignment on what you're building and how it will work.
-      </Alert>
 
       {/* Rejection Modal */}
       {rejectionModal.isOpen && (

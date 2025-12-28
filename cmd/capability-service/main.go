@@ -1446,17 +1446,25 @@ func (s *Server) handleSyncCapabilityFromFile(w http.ResponseWriter, r *http.Req
 func (s *Server) handleSyncEnablerFromFile(w http.ResponseWriter, r *http.Request) {
 	var enabler models.Enabler
 	if err := json.NewDecoder(r.Body).Decode(&enabler); err != nil {
+		log.Printf("[handleSyncEnablerFromFile] FAILED to decode request body: %v", err)
 		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
 		return
 	}
+
+	log.Printf("[handleSyncEnablerFromFile] Received request for enabler_id=%s, name=%s, workspace_id=%s, lifecycle_state=%s, workflow_stage=%s, stage_status=%s, approval_status=%s",
+		enabler.EnablerID, enabler.Name, enabler.WorkspaceID, enabler.LifecycleState, enabler.WorkflowStage, enabler.StageStatus, enabler.ApprovalStatus)
 
 	userID := 1 // Default user ID
 
 	result, err := s.entityStateRepo.UpsertEnablerFromFile(enabler, &userID)
 	if err != nil {
+		log.Printf("[handleSyncEnablerFromFile] FAILED to upsert enabler %s: %v", enabler.EnablerID, err)
 		http.Error(w, fmt.Sprintf("Failed to sync enabler: %v", err), http.StatusInternalServerError)
 		return
 	}
+
+	log.Printf("[handleSyncEnablerFromFile] SUCCESS - Upserted enabler %s with id=%d, approval_status=%s",
+		result.EnablerID, result.ID, result.ApprovalStatus)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)

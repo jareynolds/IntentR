@@ -23,6 +23,8 @@ interface FileCapability {
   description: string;
   status: string;
   content: string;
+  createdAt?: string;
+  modifiedAt?: string;
   fields: Record<string, string>;
 }
 
@@ -124,6 +126,10 @@ export const Capabilities: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [storyboardCards, setStoryboardCards] = useState<StoryboardCard[]>([]);
+
+  // Sort state
+  const [sortField, setSortField] = useState<'name' | 'modifiedAt' | 'createdAt'>('modifiedAt');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   // AI-suggested storyboard state
   const [suggestedStoryboard, setSuggestedStoryboard] = useState<string | null>(null);
@@ -966,20 +972,48 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
         setSuggestions(prev => prev.filter(s => s.name !== suggestion.name));
         // Refresh file capabilities
         await fetchFileCapabilities();
-        alert(`✅ Created definition/${fileName}`);
+        return { success: true, fileName };
       } else {
         throw new Error('Failed to save capability file');
       }
     } catch (err) {
-      alert(`Failed to create capability: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      return { success: false, fileName, error: err instanceof Error ? err.message : 'Unknown error' };
+    }
+  };
+
+  // Wrapper for individual accept that shows notification
+  const handleAcceptSingleSuggestion = async (suggestion: typeof suggestions[0]) => {
+    const result = await handleAcceptSuggestion(suggestion);
+    if (result) {
+      if (result.success) {
+        alert(`✅ Created definition/${result.fileName}`);
+      } else {
+        alert(`❌ Failed to create capability: ${result.error}`);
+      }
     }
   };
 
   const handleAcceptAllSuggestions = async () => {
+    const results: { success: boolean; fileName: string; error?: string }[] = [];
     for (const suggestion of suggestions) {
-      await handleAcceptSuggestion(suggestion);
+      const result = await handleAcceptSuggestion(suggestion);
+      if (result) {
+        results.push(result);
+      }
     }
     setShowSuggestions(false);
+
+    // Show single summary notification
+    const successful = results.filter(r => r.success);
+    const failed = results.filter(r => !r.success);
+
+    if (failed.length === 0) {
+      alert(`✅ Successfully created ${successful.length} capability file(s)`);
+    } else if (successful.length === 0) {
+      alert(`❌ Failed to create all ${failed.length} capability file(s)`);
+    } else {
+      alert(`Created ${successful.length} capability file(s). Failed: ${failed.length}`);
+    }
   };
 
   const loadCapabilities = async () => {
@@ -1111,6 +1145,23 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
       .join(' ');
   };
 
+  // Format date for display
+  const formatDate = (dateString?: string): string => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return '';
+    }
+  };
+
   // Filter and search logic
   // Helper to get approval_status for a capability from the database
   const getCapabilityApprovalStatusForFilter = (cap: FileCapability): string => {
@@ -1119,8 +1170,35 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
     return dbCap?.approval_status || 'pending'; // Default to pending if not in DB
   };
 
+  // Sort capabilities based on current sort field and direction
+  const sortCapabilities = (caps: FileCapability[]): FileCapability[] => {
+    return [...caps].sort((a, b) => {
+      let comparison = 0;
+
+      switch (sortField) {
+        case 'name':
+          comparison = (a.name || a.filename || '').localeCompare(b.name || b.filename || '');
+          break;
+        case 'modifiedAt':
+          const aModified = a.modifiedAt ? new Date(a.modifiedAt).getTime() : 0;
+          const bModified = b.modifiedAt ? new Date(b.modifiedAt).getTime() : 0;
+          comparison = aModified - bModified;
+          break;
+        case 'createdAt':
+          const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          comparison = aCreated - bCreated;
+          break;
+        default:
+          comparison = 0;
+      }
+
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  };
+
   const filterCapabilities = (caps: FileCapability[]) => {
-    return caps.filter(cap => {
+    const filtered = caps.filter(cap => {
       // Search filter
       const matchesSearch = searchQuery === '' ||
         cap.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1133,6 +1211,9 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
 
       return matchesSearch && matchesStatus;
     });
+
+    // Apply sorting
+    return sortCapabilities(filtered);
   };
 
   // Get the flow order for a capability based on its storyboard reference
@@ -1579,6 +1660,29 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                     <option value="approved">✅ Approved</option>
                     <option value="rejected">❌ Rejected</option>
                   </select>
+                  <select
+                    value={`${sortField}-${sortDirection}`}
+                    onChange={(e) => {
+                      const [field, direction] = e.target.value.split('-') as ['name' | 'modifiedAt' | 'createdAt', 'asc' | 'desc'];
+                      setSortField(field);
+                      setSortDirection(direction);
+                    }}
+                    className="input"
+                    style={{
+                      padding: '10px 16px',
+                      fontSize: '14px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--color-separator)',
+                      minWidth: '180px',
+                    }}
+                  >
+                    <option value="modifiedAt-desc">Modified (Newest)</option>
+                    <option value="modifiedAt-asc">Modified (Oldest)</option>
+                    <option value="createdAt-desc">Created (Newest)</option>
+                    <option value="createdAt-asc">Created (Oldest)</option>
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                  </select>
                   {(searchQuery || statusFilter !== 'all') && (
                     <Button
                       variant="secondary"
@@ -1658,7 +1762,13 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                           {!isCollapsed && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                               {caps.map((fileCap) => {
-                                const capStatusColors = getStatusColor(fileCap.status || 'planned');
+                                // Get approval status from database
+                                const capApprovalStatus = getCapabilityApprovalStatusForFilter(fileCap);
+                                const approvalColors = capApprovalStatus === 'approved'
+                                  ? { bg: 'rgba(52, 199, 89, 0.15)', color: 'var(--color-systemGreen)' }
+                                  : capApprovalStatus === 'rejected'
+                                    ? { bg: 'rgba(255, 59, 48, 0.15)', color: 'var(--color-systemRed)' }
+                                    : { bg: 'rgba(255, 149, 0, 0.15)', color: 'var(--color-systemOrange)' };
                                 const enablersForCap = getEnablersForCapability(fileCap);
                                 const isExpanded = expandedCapabilities.has(fileCap.path);
                                 const hasEnablers = enablersForCap.length > 0;
@@ -1689,20 +1799,19 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                                         </h3>
 
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                          {fileCap.status && (
-                                            <span style={{
-                                              display: 'inline-block',
-                                              padding: '4px 12px',
-                                              fontSize: '12px',
-                                              fontWeight: 600,
-                                              borderRadius: '20px',
-                                              backgroundColor: capStatusColors.bg,
-                                              color: capStatusColors.color,
-                                              width: 'fit-content'
-                                            }}>
-                                              {formatStatus(fileCap.status)}
-                                            </span>
-                                          )}
+                                          {/* Approval Status Badge (from database) */}
+                                          <span style={{
+                                            display: 'inline-block',
+                                            padding: '4px 12px',
+                                            fontSize: '12px',
+                                            fontWeight: 600,
+                                            borderRadius: '20px',
+                                            backgroundColor: approvalColors.bg,
+                                            color: approvalColors.color,
+                                            width: 'fit-content'
+                                          }}>
+                                            {capApprovalStatus === 'approved' ? '✓ Approved' : capApprovalStatus === 'rejected' ? '✗ Rejected' : '⏳ Pending'}
+                                          </span>
                                           <p className="text-footnote text-secondary">
                                             <strong>File:</strong> {fileCap.filename}
                                           </p>
@@ -1711,6 +1820,19 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                                               {fileCap.description}
                                             </p>
                                           )}
+                                          {/* Display dates */}
+                                          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                                            {fileCap.modifiedAt && (
+                                              <p className="text-footnote text-secondary" style={{ margin: 0 }}>
+                                                <strong>Modified:</strong> {formatDate(fileCap.modifiedAt)}
+                                              </p>
+                                            )}
+                                            {fileCap.createdAt && fileCap.createdAt !== fileCap.modifiedAt && (
+                                              <p className="text-footnote text-secondary" style={{ margin: 0 }}>
+                                                <strong>Created:</strong> {formatDate(fileCap.createdAt)}
+                                              </p>
+                                            )}
+                                          </div>
                                           {/* Display additional fields from markdown */}
                                           {Object.entries(fileCap.fields || {}).slice(0, 3).map(([key, value]) => (
                                             <p key={key} className="text-footnote text-secondary">
@@ -2448,7 +2570,7 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
                           <h3 className="text-headline" style={{ margin: 0 }}>{suggestion.name}</h3>
                         </div>
                       </div>
-                      <Button variant="primary" onClick={() => handleAcceptSuggestion(suggestion)}>
+                      <Button variant="primary" onClick={() => handleAcceptSingleSuggestion(suggestion)}>
                         Accept & Create
                       </Button>
                     </div>

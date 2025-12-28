@@ -259,6 +259,10 @@ func (r *EntityStateRepository) UpsertCapabilityFromFile(cap models.Capability, 
 // GetEnablerState retrieves an enabler's state by enabler_id
 func (r *EntityStateRepository) GetEnablerState(enablerID string) (*models.Enabler, error) {
 	var enb models.Enabler
+	var capabilityID sql.NullInt64
+	var lifecycleState, workflowStage, stageStatus, approvalStatus, workspaceID, filePath sql.NullString
+	var version sql.NullInt64
+
 	err := r.db.QueryRow(`
 		SELECT id, enabler_id, capability_id, name, description, purpose, owner, priority,
 		       created_at, updated_at, created_by, is_active,
@@ -267,15 +271,28 @@ func (r *EntityStateRepository) GetEnablerState(enablerID string) (*models.Enabl
 		FROM enablers
 		WHERE enabler_id = $1 AND is_active = true
 	`, enablerID).Scan(
-		&enb.ID, &enb.EnablerID, &enb.CapabilityID, &enb.Name, &enb.Description,
+		&enb.ID, &enb.EnablerID, &capabilityID, &enb.Name, &enb.Description,
 		&enb.Purpose, &enb.Owner, &enb.Priority, &enb.CreatedAt, &enb.UpdatedAt,
 		&enb.CreatedBy, &enb.IsActive,
-		&enb.LifecycleState, &enb.WorkflowStage, &enb.StageStatus, &enb.ApprovalStatus,
-		&enb.Version, &enb.WorkspaceID, &enb.FilePath,
+		&lifecycleState, &workflowStage, &stageStatus, &approvalStatus,
+		&version, &workspaceID, &filePath,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get enabler state: %w", err)
 	}
+
+	// Handle nullable fields
+	if capabilityID.Valid {
+		enb.CapabilityID = int(capabilityID.Int64)
+	}
+	enb.LifecycleState = lifecycleState.String
+	enb.WorkflowStage = workflowStage.String
+	enb.StageStatus = stageStatus.String
+	enb.ApprovalStatus = approvalStatus.String
+	enb.Version = int(version.Int64)
+	enb.WorkspaceID = workspaceID.String
+	enb.FilePath = filePath.String
+
 	return &enb, nil
 }
 
@@ -298,16 +315,33 @@ func (r *EntityStateRepository) GetEnablersByWorkspace(workspaceID string) ([]mo
 	var enablers []models.Enabler
 	for rows.Next() {
 		var enb models.Enabler
+		var capabilityID sql.NullInt64
+		var lifecycleState, workflowStage, stageStatus, approvalStatus, wsID, fp sql.NullString
+		var version sql.NullInt64
+
 		err := rows.Scan(
-			&enb.ID, &enb.EnablerID, &enb.CapabilityID, &enb.Name, &enb.Description,
+			&enb.ID, &enb.EnablerID, &capabilityID, &enb.Name, &enb.Description,
 			&enb.Purpose, &enb.Owner, &enb.Priority, &enb.CreatedAt, &enb.UpdatedAt,
 			&enb.CreatedBy, &enb.IsActive,
-			&enb.LifecycleState, &enb.WorkflowStage, &enb.StageStatus, &enb.ApprovalStatus,
-			&enb.Version, &enb.WorkspaceID, &enb.FilePath,
+			&lifecycleState, &workflowStage, &stageStatus, &approvalStatus,
+			&version, &wsID, &fp,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan enabler: %w", err)
 		}
+
+		// Handle nullable fields
+		if capabilityID.Valid {
+			enb.CapabilityID = int(capabilityID.Int64)
+		}
+		enb.LifecycleState = lifecycleState.String
+		enb.WorkflowStage = workflowStage.String
+		enb.StageStatus = stageStatus.String
+		enb.ApprovalStatus = approvalStatus.String
+		enb.Version = int(version.Int64)
+		enb.WorkspaceID = wsID.String
+		enb.FilePath = fp.String
+
 		enablers = append(enablers, enb)
 	}
 
@@ -417,6 +451,7 @@ func (r *EntityStateRepository) CreateEnabler(req models.CreateEnablerRequest, u
 // UpsertEnablerFromFile creates or updates an enabler from file data (for import)
 // For updates, only state fields are modified; structural fields (capability_id, etc.) are preserved
 // unless explicitly provided (non-zero/non-empty values).
+// For new enablers, capability_id can be 0 if it's not yet linked to a capability (e.g., state sync from approval).
 func (r *EntityStateRepository) UpsertEnablerFromFile(enb models.Enabler, userID *int) (*models.Enabler, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
@@ -426,14 +461,19 @@ func (r *EntityStateRepository) UpsertEnablerFromFile(enb models.Enabler, userID
 
 	// Try to find existing enabler by enabler_id
 	var existingID int
-	var existingCapabilityID int
+	var existingCapabilityID sql.NullInt64
 	err = tx.QueryRow(`SELECT id, capability_id FROM enablers WHERE enabler_id = $1`, enb.EnablerID).Scan(&existingID, &existingCapabilityID)
 
 	if err == sql.ErrNoRows {
-		// Insert new enabler - capability_id is required for new enablers
+		// Insert new enabler - capability_id is optional (can be 0/NULL for orphan enablers during state sync)
+		// Use sql.NullInt64 to allow NULL in the database
+		var capabilityIDValue interface{}
 		if enb.CapabilityID == 0 {
-			return nil, fmt.Errorf("capability_id is required for new enablers")
+			capabilityIDValue = nil // Will be inserted as NULL
+		} else {
+			capabilityIDValue = enb.CapabilityID
 		}
+
 		err = tx.QueryRow(`
 			INSERT INTO enablers (
 				enabler_id, capability_id, name, description, purpose, owner, priority,
@@ -441,7 +481,7 @@ func (r *EntityStateRepository) UpsertEnablerFromFile(enb models.Enabler, userID
 				workspace_id, file_path, created_by, version
 			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 1)
 			RETURNING id
-		`, enb.EnablerID, enb.CapabilityID, enb.Name, enb.Description, enb.Purpose, enb.Owner, enb.Priority,
+		`, enb.EnablerID, capabilityIDValue, enb.Name, enb.Description, enb.Purpose, enb.Owner, enb.Priority,
 			enb.LifecycleState, enb.WorkflowStage, enb.StageStatus, enb.ApprovalStatus,
 			enb.WorkspaceID, enb.FilePath, userID,
 		).Scan(&existingID)
@@ -453,9 +493,13 @@ func (r *EntityStateRepository) UpsertEnablerFromFile(enb models.Enabler, userID
 	} else {
 		// Update existing enabler - only update state fields; preserve structural fields if not provided
 		// If capability_id is 0 (not provided), keep the existing value
-		capabilityIDToUse := existingCapabilityID
+		var capabilityIDToUse interface{}
 		if enb.CapabilityID != 0 {
 			capabilityIDToUse = enb.CapabilityID
+		} else if existingCapabilityID.Valid {
+			capabilityIDToUse = existingCapabilityID.Int64
+		} else {
+			capabilityIDToUse = nil // Keep as NULL
 		}
 
 		// For state-only updates (from approval pages), only name may be provided along with state fields.

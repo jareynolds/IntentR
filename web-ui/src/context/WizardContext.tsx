@@ -195,7 +195,7 @@ export const DEFAULT_SECTION_SUBPAGE_IDS: Record<string, string[]> = {
   workspace: ['overview'],
   intent: ['overview', 'vision', 'ideation', 'storyboard'],
   specification: ['overview', 'capabilities', 'enablers', 'story-map'],
-  system: ['overview', 'designs', 'ui-framework', 'ui-styles', 'ui-designer'],
+  system: ['overview', 'system', 'designs', 'ui-framework', 'ui-styles', 'ui-designer'],
   'control-loop': ['overview', 'testing', 'control-loop-approval'],
   implementation: ['overview', 'ai-principles', 'code', 'run'],
   discovery: ['overview', 'analyze'],
@@ -222,6 +222,7 @@ export const ALL_SUBPAGE_DEFINITIONS: Record<string, { id: string; name: string 
   ],
   system: [
     { id: 'overview', name: 'Section Overview' },
+    { id: 'system', name: 'System Architecture' },
     { id: 'designs', name: 'UI Assets' },
     { id: 'ui-framework', name: 'UI Framework' },
     { id: 'ui-styles', name: 'UI Styles' },

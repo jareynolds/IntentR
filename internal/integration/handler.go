@@ -1938,6 +1938,8 @@ type FileCapability struct {
 	Description  string            `json:"description"`
 	Status       string            `json:"status"`
 	Content      string            `json:"content"`
+	CreatedAt    string            `json:"createdAt,omitempty"`
+	ModifiedAt   string            `json:"modifiedAt,omitempty"`
 	Fields       map[string]string `json:"fields"`
 }
 
@@ -2038,6 +2040,16 @@ func (h *Handler) HandleCapabilityFiles(w http.ResponseWriter, r *http.Request) 
 		// Parse the markdown to extract fields (may return multiple capabilities)
 		caps := parseMarkdownCapabilities(filename, path, string(content))
 
+		// Set file modification time for all parsed capabilities
+		modTime := info.ModTime().Format(time.RFC3339)
+		for i := range caps {
+			caps[i].ModifiedAt = modTime
+			// CreatedAt is set to ModTime as well since filesystem doesn't reliably track creation time
+			if caps[i].CreatedAt == "" {
+				caps[i].CreatedAt = modTime
+			}
+		}
+
 		// If file contains multiple capabilities, split it into separate files
 		if len(caps) > 1 {
 			if err := splitMultiCapabilityFile(path, caps); err != nil {
@@ -2094,6 +2106,8 @@ type FileEnabler struct {
 	TechnicalSpecs          string            `json:"technicalSpecs,omitempty"`
 	RejectionComment        string            `json:"rejectionComment,omitempty"`
 	CreatedBy               string            `json:"createdBy,omitempty"`
+	CreatedAt               string            `json:"createdAt,omitempty"`
+	ModifiedAt              string            `json:"modifiedAt,omitempty"`
 	// Enabler specification fields
 	EnablerType             string            `json:"enablerType,omitempty"`
 	Responsibility          string            `json:"responsibility,omitempty"`
@@ -2219,6 +2233,15 @@ func (h *Handler) HandleEnablerFiles(w http.ResponseWriter, r *http.Request) {
 
 		// Parse the markdown to extract enabler fields
 		enabler := parseMarkdownEnabler(filename, path, string(content))
+
+		// Set file modification time
+		modTime := info.ModTime().Format(time.RFC3339)
+		enabler.ModifiedAt = modTime
+		// CreatedAt is set to ModTime as well since filesystem doesn't reliably track creation time
+		if enabler.CreatedAt == "" {
+			enabler.CreatedAt = modTime
+		}
+
 		enablers = append(enablers, enabler)
 
 		return nil
@@ -2497,25 +2520,7 @@ func parseMarkdownEnabler(filename, path, content string) FileEnabler {
 			continue
 		}
 
-		if strings.HasPrefix(trimmedLine, "**Capability**:") || strings.HasPrefix(trimmedLine, "- **Capability**:") ||
-			strings.HasPrefix(trimmedLine, "**Capability:**") || strings.HasPrefix(trimmedLine, "- **Capability:**") {
-			cap := trimmedLine
-			cap = strings.TrimPrefix(cap, "- ")
-			cap = strings.TrimPrefix(cap, "**Capability**:")
-			cap = strings.TrimPrefix(cap, "**Capability:**")
-			cap = strings.TrimSpace(cap)
-			// Extract capability ID from format "Name (CAP-XXXXXX)"
-			if idx := strings.LastIndex(cap, "("); idx != -1 {
-				capId := strings.TrimSuffix(strings.TrimPrefix(cap[idx:], "("), ")")
-				enabler.CapabilityID = strings.TrimSpace(capId)
-			} else {
-				enabler.CapabilityID = cap
-			}
-			enabler.Fields["Capability"] = cap
-			continue
-		}
-
-		// Also parse **Capability ID**: CAP-XXXXXX format
+		// Parse **Capability ID**: CAP-XXXXXX format (preferred - the actual ID)
 		if strings.HasPrefix(trimmedLine, "**Capability ID**:") || strings.HasPrefix(trimmedLine, "- **Capability ID**:") ||
 			strings.HasPrefix(trimmedLine, "**Capability ID:**") || strings.HasPrefix(trimmedLine, "- **Capability ID:**") {
 			capId := trimmedLine
@@ -2524,6 +2529,28 @@ func parseMarkdownEnabler(filename, path, content string) FileEnabler {
 			capId = strings.TrimPrefix(capId, "**Capability ID:**")
 			enabler.CapabilityID = strings.TrimSpace(capId)
 			enabler.Fields["Capability ID"] = enabler.CapabilityID
+			continue
+		}
+
+		// Parse **Capability**: format (name, only use for ID if Capability ID not already set)
+		if strings.HasPrefix(trimmedLine, "**Capability**:") || strings.HasPrefix(trimmedLine, "- **Capability**:") ||
+			strings.HasPrefix(trimmedLine, "**Capability:**") || strings.HasPrefix(trimmedLine, "- **Capability:**") {
+			cap := trimmedLine
+			cap = strings.TrimPrefix(cap, "- ")
+			cap = strings.TrimPrefix(cap, "**Capability**:")
+			cap = strings.TrimPrefix(cap, "**Capability:**")
+			cap = strings.TrimSpace(cap)
+			enabler.Fields["Capability"] = cap
+			// Only set CapabilityID from Capability name if not already set from Capability ID field
+			if enabler.CapabilityID == "" {
+				// Extract capability ID from format "Name (CAP-XXXXXX)"
+				if idx := strings.LastIndex(cap, "("); idx != -1 {
+					capId := strings.TrimSuffix(strings.TrimPrefix(cap[idx:], "("), ")")
+					enabler.CapabilityID = strings.TrimSpace(capId)
+				} else {
+					enabler.CapabilityID = cap
+				}
+			}
 			continue
 		}
 
