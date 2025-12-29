@@ -1543,9 +1543,14 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
       quickDescription="Track and manage INTENT capabilities - high-level business outcomes across your organization."
       detailedDescription="In Intent-Centered and Engineering-Driven, Narration for Transformation (INTENT), capabilities represent high-level business outcomes that contain multiple enablers. They integrate with design artifacts and AI-assisted development tools to accelerate delivery. Each capability should focus on delivering measurable business value and can be broken down into technical enablers that implement specific functionality."
       actions={
-        <Button variant="primary" onClick={handleCreate}>
-          + Create Capability
-        </Button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <Button variant="primary" onClick={handleCreate}>
+            + New Capability
+          </Button>
+          <Button variant="secondary" onClick={handleAnalyzeSpecifications} disabled={isAnalyzing || loadingFiles}>
+            {isAnalyzing ? 'Analyzing...' : 'Analyze'}
+          </Button>
+        </div>
       }
     >
 
@@ -1558,17 +1563,6 @@ Respond with ONLY the exact storyboard card title (e.g., "User Login Flow") and 
         {/* File-based Capabilities Section */}
         {currentWorkspace?.projectFolder && (
           <div style={{ marginBottom: '32px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 className="text-title2">Capabilities from Specifications</h3>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <Button variant="primary" onClick={handleAnalyzeSpecifications} disabled={isAnalyzing || loadingFiles}>
-                  {isAnalyzing ? '🤖 Analyzing...' : '🤖 Analyze'}
-                </Button>
-                <Button variant="secondary" onClick={fetchFileCapabilities} disabled={loadingFiles}>
-                  {loadingFiles ? 'Loading...' : 'Refresh'}
-                </Button>
-              </div>
-            </div>
 
             {loadingFiles ? (
               <div style={{ textAlign: 'center', padding: '20px' }}>

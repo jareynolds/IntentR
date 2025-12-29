@@ -629,8 +629,8 @@ IMPORTANT: Respond ONLY with valid JSON in this exact format, no other text:
     setSuggestedCapabilityId(null);
     setCapabilityNeedsConfirmation(false);
     setIsCapabilitySuggesting(false);
-    // Initialize form capability from the selected filter
-    setFormCapabilityId(selectedCapabilityId);
+    // Initialize form capability (user will select from dropdown in form)
+    setFormCapabilityId(null);
     // For file-based capabilities, we store the capability ID string
     // The numeric capability_id is 0 since we're using file-based references
     setEnablerFormData({
@@ -2941,11 +2941,36 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
 
   const getFilteredEnablers = (enablers: FileEnabler[]) => {
     const filtered = enablers.filter(enabler => {
-      // Search filter
-      const matchesSearch = !searchQuery ||
-        enabler.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        enabler.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        enabler.purpose?.toLowerCase().includes(searchQuery.toLowerCase());
+      // Search filter - search across all enabler fields
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = !searchQuery || [
+        // Core fields
+        enabler.name,
+        enabler.description,
+        enabler.purpose,
+        enabler.enablerId,
+        enabler.capabilityId,
+        enabler.owner,
+        enabler.filename,
+        // Technical specification fields
+        enabler.technicalSpecs,
+        enabler.responsibility,
+        enabler.publicInterface,
+        enabler.internalDesign,
+        enabler.dependencies,
+        enabler.configuration,
+        enabler.dataContracts,
+        enabler.operationalRequirements,
+        enabler.securityControls,
+        enabler.testingStrategy,
+        enabler.observability,
+        enabler.deployment,
+        enabler.runbook,
+        enabler.costProfile,
+        enabler.enablerType,
+        // Search all dynamic fields from markdown
+        ...(enabler.fields ? Object.values(enabler.fields) : []),
+      ].some(field => field?.toLowerCase().includes(query));
 
       // Approval status filter (from database - single source of truth)
       const enablerApprovalStatus = getEnablerApprovalStatusForFilter(enabler);
@@ -2966,13 +2991,18 @@ Respond with ONLY the capability ID (e.g., "CAP-123456") and nothing else. If no
 Each enabler contains functional and non-functional requirements with testable acceptance criteria.
 Enablers bridge the gap between high-level business capabilities and actual code implementation, providing clear specifications for AI-assisted development."
       actions={
-        <Button
-          variant="secondary"
-          onClick={handleAnalyzeSpecifications}
-          disabled={isAnalyzingCapabilities}
-        >
-          {isAnalyzingCapabilities ? 'Analyzing...' : 'Analyze'}
-        </Button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <Button variant="primary" onClick={handleCreateEnabler}>
+            + New Enabler
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={handleAnalyzeSpecifications}
+            disabled={isAnalyzingCapabilities}
+          >
+            {isAnalyzingCapabilities ? 'Analyzing...' : 'Analyze'}
+          </Button>
+        </div>
       }
     >
 
@@ -3321,7 +3351,7 @@ Enablers bridge the gap between high-level business capabilities and actual code
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
                   <input
                     type="text"
-                    placeholder="Search enablers..."
+                    placeholder="Search all enabler content..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="input"
