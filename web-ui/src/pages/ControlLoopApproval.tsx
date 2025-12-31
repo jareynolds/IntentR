@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Alert, Button, PageLayout } from '../components';
 import { ValidationDashboard } from '../components/ValidationDashboard';
@@ -107,11 +107,22 @@ export const ControlLoopApproval: React.FC = () => {
     item: ControlLoopItem | null;
   }>({ isOpen: false, item: null });
   const [rejectionComment, setRejectionComment] = useState('');
+  const [bulkApprovalLoading, setBulkApprovalLoading] = useState(false);
+  const [phaseActionLoading, setPhaseActionLoading] = useState(false);
 
-  // Load control-loop phase items
+  // Track if initial load is complete to avoid showing loading spinner on status updates
+  const initialLoadComplete = useRef(false);
+  const lastWorkspaceId = useRef<string | null>(null);
+
+  // Load control-loop phase items - only on initial load or workspace change
   useEffect(() => {
     if (currentWorkspace?.id) {
-      loadControlLoopItems();
+      // Only do full load if workspace changed or first load
+      if (lastWorkspaceId.current !== currentWorkspace.id) {
+        lastWorkspaceId.current = currentWorkspace.id;
+        initialLoadComplete.current = false;
+        loadControlLoopItems();
+      }
     }
   }, [currentWorkspace?.id]);
 
@@ -215,6 +226,7 @@ export const ControlLoopApproval: React.FC = () => {
       console.error('Error loading control-loop items:', error);
       setControlLoopItems(defaultControlLoopItems);
     } finally {
+      initialLoadComplete.current = true;
       setLoading(false);
     }
   };
@@ -404,6 +416,93 @@ export const ControlLoopApproval: React.FC = () => {
   };
 
   const hasRejections = controlLoopItems.some(item => item.status === 'rejected');
+
+  // Bulk approval helper functions
+  const getTotalItems = () => controlLoopItems.length;
+  const getTotalApproved = () => controlLoopItems.filter(i => i.status === 'approved').length;
+  const getTotalRejected = () => controlLoopItems.filter(i => i.status === 'rejected').length;
+
+  const getCompletionPercentage = () => {
+    const total = getTotalItems();
+    if (total === 0) return 0;
+    return Math.round((getTotalApproved() / total) * 100);
+  };
+
+  const canApprovePhase = () => {
+    return (
+      getTotalItems() > 0 &&
+      getTotalItems() === getTotalApproved() &&
+      getTotalRejected() === 0
+    );
+  };
+
+  const getPendingItemsCount = () => {
+    return controlLoopItems.filter(i => i.status !== 'approved' && i.status !== 'rejected').length;
+  };
+
+  const getApprovableItems = () => {
+    return controlLoopItems.filter(i => i.status !== 'approved' && i.status !== 'rejected');
+  };
+
+  const handleBulkApprove = async () => {
+    const pendingItems = getApprovableItems();
+    if (pendingItems.length === 0) return;
+
+    setBulkApprovalLoading(true);
+
+    const reviewedAt = new Date().toISOString();
+    const updatedItems = controlLoopItems.map(item => {
+      if (item.status !== 'approved' && item.status !== 'rejected') {
+        // Mark all checklist items as checked
+        const checkedItems = item.checklistItems?.map(ci => ({ ...ci, checked: true })) || [];
+        return {
+          ...item,
+          status: 'approved' as const,
+          reviewedAt,
+          rejectionComment: undefined,
+          checklistItems: checkedItems,
+        };
+      }
+      return item;
+    });
+
+    setControlLoopItems(updatedItems);
+    await saveControlLoopItems(updatedItems);
+
+    // Build updated approvals
+    const newApprovals = { ...itemApprovals };
+    pendingItems.forEach(item => {
+      const checkedItems = item.checklistItems?.map(ci => ({ ...ci, checked: true })) || [];
+      newApprovals[item.id] = {
+        status: 'approved',
+        reviewedAt,
+        checklistItems: checkedItems,
+      };
+    });
+    setItemApprovals(newApprovals);
+
+    // Approve the phase in database since all items are now approved
+    await approvePhaseDb('control_loop');
+    setBulkApprovalLoading(false);
+  };
+
+  const handleApprovePhase = async () => {
+    setPhaseActionLoading(true);
+    try {
+      await approvePhaseDb('control_loop');
+    } finally {
+      setPhaseActionLoading(false);
+    }
+  };
+
+  const handleRevokePhaseApproval = async () => {
+    setPhaseActionLoading(true);
+    try {
+      await revokePhaseDb('control_loop');
+    } finally {
+      setPhaseActionLoading(false);
+    }
+  };
 
   return (
     <PageLayout
@@ -618,42 +717,114 @@ export const ControlLoopApproval: React.FC = () => {
         }
       `}</style>
 
-      <div style={{ padding: '16px', paddingBottom: 0, display: 'flex', justifyContent: 'flex-end' }}>
+      {/* Phase Status Overview */}
+      <Card style={{ marginBottom: '24px', backgroundColor: 'var(--color-secondarySystemBackground)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          {/* Progress Circle */}
+          <div style={{
+            width: '100px',
+            height: '100px',
+            borderRadius: '50%',
+            background: `conic-gradient(
+              ${controlLoopApproved ? 'var(--color-systemGreen)' : getTotalRejected() > 0 ? 'var(--color-systemRed)' : 'var(--color-systemBlue)'} ${getCompletionPercentage()}%,
+              var(--color-systemGray3) 0
+            )`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--color-systemBackground)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '20px',
+              fontWeight: 'bold',
+            }}>
+              {getCompletionPercentage()}%
+            </div>
+          </div>
+
+          {/* Status Text */}
+          <div style={{ flex: 1 }}>
+            <h3 className="text-title2" style={{ marginBottom: '8px' }}>
+              {controlLoopApproved
+                ? 'Control Loop Phase Approved'
+                : getTotalRejected() > 0
+                  ? 'Items Need Revision'
+                  : canApprovePhase()
+                    ? 'Ready for Final Approval'
+                    : 'Review in Progress'}
+            </h3>
+            <p className="text-body text-secondary">
+              {getTotalApproved()} approved, {getTotalRejected()} rejected of {getTotalItems()} items.
+            </p>
+            {controlLoopApproved && approvalDate && (
+              <p className="text-footnote text-secondary" style={{ marginTop: '4px' }}>
+                Completed on {new Date(approvalDate).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+
+          {/* Action Button - Dual Purpose */}
+          <div>
+            {controlLoopApproved ? (
+              /* State 3: Phase approved - Show "Complete" or navigation option */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                <Button variant="primary" onClick={() => navigate('/dashboard')}>
+                  Complete →
+                </Button>
+                <button
+                  onClick={handleRevokePhaseApproval}
+                  disabled={phaseActionLoading}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: phaseActionLoading ? 'not-allowed' : 'pointer',
+                    color: 'var(--color-systemRed)',
+                    fontSize: '12px',
+                    opacity: phaseActionLoading ? 0.6 : 1,
+                  }}
+                >
+                  {phaseActionLoading ? 'Processing...' : 'Revoke Approval'}
+                </button>
+              </div>
+            ) : getPendingItemsCount() > 0 ? (
+              /* State 1: Items pending - Show "Approve All" */
+              <Button
+                variant="primary"
+                onClick={handleBulkApprove}
+                disabled={bulkApprovalLoading || loading}
+                style={{
+                  backgroundColor: 'var(--color-systemGreen)',
+                  opacity: (bulkApprovalLoading || loading) ? 0.6 : 1,
+                }}
+              >
+                {bulkApprovalLoading ? 'Approving...' : `Approve All (${getPendingItemsCount()})`}
+              </Button>
+            ) : (
+              /* State 2: All items approved, phase not yet approved - Show "Approve Phase" */
+              <Button
+                variant="primary"
+                onClick={handleApprovePhase}
+                disabled={!canApprovePhase() || phaseActionLoading}
+              >
+                {phaseActionLoading ? 'Approving...' : 'Approve Control Loop Phase'}
+              </Button>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      {/* Navigation */}
+      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'flex-end' }}>
         <Button variant="secondary" onClick={() => navigate('/control-loop')}>
           Back to Control Loop
         </Button>
       </div>
-
-      {/* Phase Status Banner */}
-      {controlLoopApproved ? (
-        <div className="phase-status-banner approved">
-          <span className="status-icon">[OK]</span>
-          <div>
-            <div className="status-text">Control Loop Phase Approved</div>
-            {approvalDate && (
-              <div className="status-date">
-                Approved on {new Date(approvalDate).toLocaleDateString()}
-              </div>
-            )}
-          </div>
-        </div>
-      ) : hasRejections ? (
-        <div className="phase-status-banner rejected">
-          <span className="status-icon">[X]</span>
-          <div>
-            <div className="status-text">Items Require Attention</div>
-            <div className="status-date">Some items have been rejected and need revision</div>
-          </div>
-        </div>
-      ) : (
-        <div className="phase-status-banner pending">
-          <span className="status-icon">[!]</span>
-          <div>
-            <div className="status-text">Pending Approval</div>
-            <div className="status-date">Review and approve all items to complete this phase</div>
-          </div>
-        </div>
-      )}
 
       {/* Validation Dashboard */}
       <ValidationDashboard />

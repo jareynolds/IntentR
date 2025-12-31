@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header, Sidebar, ProtectedRoute, ProtectedPage, UIFrameworkProvider, UIFrameworkIndicator } from './components';
-import { Login, GoogleCallback, Welcome, Dashboard, WorkspaceOverview, Capabilities, Features, Vision, Designs, Integrations, AIChat, Code, Run, Workspaces, Storyboard, Ideation, Analyze, Settings, Admin, System, AIPrinciples, UIFramework, UIStyles, UIDesigner, DataCollection, Enablers, IntentApproval, SpecificationApproval, SystemApproval, ImplementationApproval, Testing, ControlLoopApproval, StoryMap, LearnINTENT, SyncCode2Spec } from './pages';
+import { Login, GoogleCallback, Welcome, Dashboard, WorkspaceOverview, Capabilities, Features, Vision, Designs, Integrations, AIChat, Code, Run, Workspaces, Storyboard, Ideation, Analyze, Settings, Admin, System, AIPrinciples, UIFramework, UIStyles, UIDesigner, DataCollection, Enablers, IntentApproval, SpecificationApproval, SystemApproval, Testing, ControlLoopApproval, StoryMap, LearnINTENT, SyncCode2Spec } from './pages';
 import {
   WizardWorkspace,
   WizardIntentStart,
@@ -101,12 +101,14 @@ function AppContent() {
   const { currentWorkspace } = useWorkspace();
   const { flowType, customFlows, customSubpages } = useWizard();
 
+  // Mobile sidebar state
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
   // Track rejection status for each phase
   const [phaseRejections, setPhaseRejections] = useState({
     intent: false,
     specification: false,
-    system: false,
-    implementation: false,
+    design: false,
     'control-loop': false,
   });
 
@@ -114,8 +116,7 @@ function AppContent() {
   const [phaseApprovals, setPhaseApprovals] = useState({
     intent: false,
     specification: false,
-    system: false,
-    implementation: false,
+    design: false,
     'control-loop': false,
   });
 
@@ -143,30 +144,26 @@ function AppContent() {
         setPhaseRejections({
           intent: checkPhaseRejections(currentWorkspace.id, 'intent'),
           specification: checkPhaseRejections(currentWorkspace.id, 'specification'),
-          system: checkPhaseRejections(currentWorkspace.id, 'system'),
-          implementation: checkPhaseRejections(currentWorkspace.id, 'implementation'),
+          design: checkPhaseRejections(currentWorkspace.id, 'design'),
           'control-loop': checkPhaseRejections(currentWorkspace.id, 'control-loop'),
         });
         setPhaseApprovals({
           intent: checkPhaseApproved(currentWorkspace.id, 'intent'),
           specification: checkPhaseApproved(currentWorkspace.id, 'specification'),
-          system: checkPhaseApproved(currentWorkspace.id, 'system'),
-          implementation: checkPhaseApproved(currentWorkspace.id, 'implementation'),
+          design: checkPhaseApproved(currentWorkspace.id, 'design'),
           'control-loop': checkPhaseApproved(currentWorkspace.id, 'control-loop'),
         });
       } else {
         setPhaseRejections({
           intent: false,
           specification: false,
-          system: false,
-          implementation: false,
+          design: false,
           'control-loop': false,
         });
         setPhaseApprovals({
           intent: false,
           specification: false,
-          system: false,
-          implementation: false,
+          design: false,
           'control-loop': false,
         });
       }
@@ -244,9 +241,17 @@ function AppContent() {
 
   return (
     <div className="app">
-      <Header title="Intentr" subtitle="Innovate Faster with Integrity" />
+      <Header
+        title="Intentr"
+        subtitle="Innovate Faster with Integrity"
+        onMobileMenuClick={() => setIsMobileSidebarOpen(true)}
+      />
       <div className="app-layout">
-        <Sidebar items={sidebarItems} />
+        <Sidebar
+          items={sidebarItems}
+          isMobileOpen={isMobileSidebarOpen}
+          onMobileClose={() => setIsMobileSidebarOpen(false)}
+        />
         <UIFrameworkIndicator />
         <main className="app-main">
           <Routes>
@@ -259,7 +264,7 @@ function AppContent() {
             <Route path="/intent-approval" element={<ProtectedPage path="/intent-approval"><IntentApproval /></ProtectedPage>} />
             <Route path="/specification-approval" element={<ProtectedPage path="/specification-approval"><SpecificationApproval /></ProtectedPage>} />
             <Route path="/system-approval" element={<ProtectedPage path="/system-approval"><SystemApproval /></ProtectedPage>} />
-            <Route path="/implementation-approval" element={<ProtectedPage path="/implementation-approval"><ImplementationApproval /></ProtectedPage>} />
+            <Route path="/design-approval" element={<ProtectedPage path="/design-approval"><SystemApproval /></ProtectedPage>} />
             <Route path="/testing" element={<ProtectedPage path="/testing"><Testing /></ProtectedPage>} />
             <Route path="/control-loop-approval" element={<ProtectedPage path="/control-loop-approval"><ControlLoopApproval /></ProtectedPage>} />
             <Route path="/system" element={<ProtectedPage path="/system"><System /></ProtectedPage>} />
@@ -290,8 +295,8 @@ function AppContent() {
             <Route path="/wizard/intent" element={<ProtectedPage path="/wizard/intent"><WizardIntent /></ProtectedPage>} />
             <Route path="/wizard/specification/start" element={<ProtectedPage path="/wizard/specification/start"><WizardSpecificationStart /></ProtectedPage>} />
             <Route path="/wizard/specification" element={<ProtectedPage path="/wizard/specification"><WizardSpecification /></ProtectedPage>} />
-            <Route path="/wizard/system/start" element={<ProtectedPage path="/wizard/system/start"><WizardSystemStart /></ProtectedPage>} />
-            <Route path="/wizard/system" element={<ProtectedPage path="/wizard/system"><WizardSystem /></ProtectedPage>} />
+            <Route path="/wizard/design/start" element={<ProtectedPage path="/wizard/design/start"><WizardSystemStart /></ProtectedPage>} />
+            <Route path="/wizard/design" element={<ProtectedPage path="/wizard/design"><WizardSystem /></ProtectedPage>} />
             <Route path="/wizard/control-loop/start" element={<ProtectedPage path="/wizard/control-loop/start"><WizardControlLoopStart /></ProtectedPage>} />
             <Route path="/wizard/control-loop" element={<ProtectedPage path="/wizard/control-loop"><WizardControlLoop /></ProtectedPage>} />
             <Route path="/wizard/implementation/start" element={<ProtectedPage path="/wizard/implementation/start"><WizardImplementationStart /></ProtectedPage>} />
@@ -353,8 +358,8 @@ function App() {
 
                             @media (max-width: 768px) {
                               .app-main {
-                                padding: 20px;
-                                margin-left: 56px;
+                                padding: 16px;
+                                margin-left: 0;
                               }
                             }
                           `}</style>

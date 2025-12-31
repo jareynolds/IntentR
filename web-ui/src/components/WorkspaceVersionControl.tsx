@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './Button';
 import { Alert } from './Alert';
+import { SPEC_URL } from '../api/client';
 
 interface WorkspaceVersionControlProps {
   workspace: {
@@ -20,7 +21,7 @@ interface GitConfig {
   currentBranch?: string;
 }
 
-const SPEC_API_URL = 'http://localhost:4001';
+const SPEC_API_URL = SPEC_URL;
 
 export const WorkspaceVersionControl: React.FC<WorkspaceVersionControlProps> = ({
   workspace,

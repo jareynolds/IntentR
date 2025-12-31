@@ -6,11 +6,11 @@ export const SystemStart: React.FC = () => {
   const navigate = useNavigate();
 
   const handleBegin = () => {
-    navigate('/wizard/system');
+    navigate('/wizard/design');
   };
 
   const handleSkip = () => {
-    navigate('/wizard/system');
+    navigate('/wizard/design');
   };
 
   const illustration = (
@@ -60,17 +60,17 @@ export const SystemStart: React.FC = () => {
 
   return (
     <StartPageLayout
-      title="UI Design Phase"
-      subtitle="Designing the user interface"
+      title="Design Phase"
+      subtitle="Designing the system and user interface"
       description={[
-        'The UI Design phase is where your application\'s visual identity takes form. You\'ll configure UI frameworks, define styles, and manage design assets that guide implementation.',
-        'During this phase, you will set up your UI framework and component library, define color schemes, typography, and styling conventions, import and manage design assets from tools like Figma, and create visual specifications for your interface.',
-        'Good UI design documentation ensures consistency across your application and enables AI to generate accurate, visually coherent code.',
+        'The Design phase is where your application\'s architecture and visual identity take form. You\'ll define system architecture, configure UI frameworks, define styles, and manage design assets that guide implementation.',
+        'During this phase, you will design your system architecture, set up your UI framework and component library, define color schemes, typography, and styling conventions, import and manage design assets from tools like Figma, and create visual specifications for your interface.',
+        'Good design documentation ensures consistency across your application and enables AI to generate accurate, well-architected code.',
       ]}
       highlights={highlights}
       illustration={illustration}
       onBegin={handleBegin}
-      beginLabel="Begin UI Design"
+      beginLabel="Begin Design"
       showSkip={true}
       onSkip={handleSkip}
       accentColor="indigo"

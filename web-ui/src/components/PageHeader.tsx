@@ -121,6 +121,9 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       <style>{`
         .page-header {
           margin-bottom: 24px;
+          width: 100%;
+          max-width: 100%;
+          box-sizing: border-box;
         }
 
         .page-header__title-row {
@@ -129,17 +132,61 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           justify-content: space-between;
           margin-bottom: 8px;
           flex-wrap: wrap;
-          gap: 16px;
+          gap: 12px;
+          width: 100%;
+          max-width: 100%;
+          box-sizing: border-box;
+          overflow: hidden;
         }
 
         .page-header__title-row h1 {
           margin: 0;
+          min-width: 0;
+          flex: 1 1 auto;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .page-header__actions {
           display: flex;
           gap: 8px;
           align-items: center;
+          flex: 0 0 auto;
+          flex-wrap: wrap;
+          max-width: 100%;
+        }
+
+        /* Medium screens: force actions to wrap below title */
+        @media (max-width: 1024px) {
+          .page-header__title-row {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .page-header__title-row h1 {
+            white-space: normal;
+            overflow: visible;
+          }
+
+          .page-header__actions {
+            width: 100%;
+            justify-content: flex-start;
+            margin-top: 4px;
+          }
+        }
+
+        /* Small screens: ensure buttons wrap within actions */
+        @media (max-width: 480px) {
+          .page-header__actions {
+            gap: 6px;
+          }
+
+          .page-header__actions button,
+          .page-header__actions .btn {
+            flex: 0 0 auto;
+            min-width: fit-content;
+          }
         }
 
         .page-header__quick-desc {

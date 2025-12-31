@@ -39,8 +39,9 @@ export const SECTION_SUBPAGES: Record<string, WizardSubpage[]> = {
     { id: 'enablers', name: 'Enablers' },
     { id: 'story-map', name: 'Dependencies' },
   ],
-  system: [
+  design: [
     { id: 'overview', name: 'Section Overview' },
+    { id: 'system', name: 'System Architecture' },
     { id: 'designs', name: 'UI Assets' },
     { id: 'ui-framework', name: 'UI Framework' },
     { id: 'ui-styles', name: 'UI Styles' },
@@ -130,9 +131,9 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
     description: 'Define capabilities and enablers',
     icon: '☰',
   },
-  system: {
-    id: 'system',
-    name: 'UI Design',
+  design: {
+    id: 'design',
+    name: 'Design',
     description: 'Configure UI framework, styles, and design assets',
     icon: '⚙',
   },
@@ -167,10 +168,10 @@ const createStep = (id: string): WizardStep => ({
 
 // Default wizard flows (fallback)
 export const DEFAULT_WIZARD_FLOWS: Record<WizardFlowType, string[]> = {
-  'new': ['workspace', 'intent', 'specification', 'system', 'control-loop', 'implementation'],
-  'refactor': ['workspace', 'specification', 'control-loop', 'implementation'],
-  'enhance': ['workspace', 'intent', 'specification', 'system', 'control-loop', 'implementation'],
-  'reverse-engineer': ['workspace', 'discovery', 'specification', 'system', 'control-loop', 'implementation'],
+  'new': ['workspace', 'intent', 'specification', 'design', 'control-loop', 'implementation'],
+  'refactor': ['workspace', 'specification', 'design', 'control-loop', 'implementation'],
+  'enhance': ['workspace', 'intent', 'specification', 'design', 'control-loop', 'implementation'],
+  'reverse-engineer': ['workspace', 'discovery', 'specification', 'design', 'control-loop', 'implementation'],
 };
 
 // Storage keys for custom wizard flows and subpages
@@ -195,7 +196,7 @@ export const DEFAULT_SECTION_SUBPAGE_IDS: Record<string, string[]> = {
   workspace: ['overview'],
   intent: ['overview', 'vision', 'ideation', 'storyboard'],
   specification: ['overview', 'capabilities', 'enablers', 'story-map'],
-  system: ['overview', 'system', 'designs', 'ui-framework', 'ui-styles', 'ui-designer'],
+  design: ['overview', 'system', 'designs', 'ui-framework', 'ui-styles', 'ui-designer'],
   'control-loop': ['overview', 'testing', 'control-loop-approval'],
   implementation: ['overview', 'ai-principles', 'code', 'run'],
   discovery: ['overview', 'analyze'],
@@ -220,14 +221,14 @@ export const ALL_SUBPAGE_DEFINITIONS: Record<string, { id: string; name: string 
     { id: 'story-map', name: 'Dependencies' },
     { id: 'specification-approval', name: 'Phase Approval' },
   ],
-  system: [
+  design: [
     { id: 'overview', name: 'Section Overview' },
     { id: 'system', name: 'System Architecture' },
     { id: 'designs', name: 'UI Assets' },
     { id: 'ui-framework', name: 'UI Framework' },
     { id: 'ui-styles', name: 'UI Styles' },
     { id: 'ui-designer', name: 'UI Designer' },
-    { id: 'system-approval', name: 'Phase Approval' },
+    { id: 'design-approval', name: 'Phase Approval' },
   ],
   'control-loop': [
     { id: 'overview', name: 'Section Overview' },
@@ -239,7 +240,6 @@ export const ALL_SUBPAGE_DEFINITIONS: Record<string, { id: string; name: string 
     { id: 'ai-principles', name: 'AI Principles' },
     { id: 'code', name: 'Code' },
     { id: 'run', name: 'Run' },
-    { id: 'implementation-approval', name: 'Phase Approval' },
   ],
   discovery: [
     { id: 'overview', name: 'Section Overview' },

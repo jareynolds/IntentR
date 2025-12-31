@@ -93,6 +93,13 @@
           "index": 7,
           "route": "/wizard/specification",
           "tab": "ui-designer"
+        },
+        {
+          "id": "specification-approval",
+          "name": "Phase Approval",
+          "index": 8,
+          "route": "/wizard/specification",
+          "tab": "specification-approval"
         }
       ],
       "navigation": {
@@ -100,6 +107,51 @@
           "stepId": "workspace",
           "subpageId": "overview",
           "route": "/wizard/workspace"
+        },
+        "next": {
+          "stepId": "design",
+          "subpageId": "overview",
+          "route": "/wizard/design/start"
+        }
+      }
+    },
+    {
+      "id": "design",
+      "name": "Design",
+      "description": "Configure UI framework, styles, and design assets",
+      "index": 2,
+      "route": "/wizard/design",
+      "startRoute": "/wizard/design/start",
+      "component": "WizardSystem",
+      "startComponent": "WizardSystemStart",
+      "subpages": [
+        {
+          "id": "overview",
+          "name": "Overview",
+          "index": 0,
+          "route": "/wizard/design/start",
+          "isStartPage": true
+        },
+        {
+          "id": "system",
+          "name": "System Architecture",
+          "index": 1,
+          "route": "/wizard/design",
+          "tab": "system"
+        },
+        {
+          "id": "design-approval",
+          "name": "Phase Approval",
+          "index": 2,
+          "route": "/wizard/design",
+          "tab": "design-approval"
+        }
+      ],
+      "navigation": {
+        "previous": {
+          "stepId": "specification",
+          "subpageId": "specification-approval",
+          "route": "/wizard/specification"
         },
         "next": {
           "stepId": "control-loop",
@@ -112,7 +164,7 @@
       "id": "control-loop",
       "name": "Control Loop",
       "description": "Update and run test scenarios",
-      "index": 2,
+      "index": 3,
       "route": "/wizard/control-loop",
       "startRoute": "/wizard/control-loop/start",
       "component": "WizardControlLoop",
@@ -135,9 +187,9 @@
       ],
       "navigation": {
         "previous": {
-          "stepId": "specification",
-          "subpageId": "ui-designer",
-          "route": "/wizard/specification"
+          "stepId": "design",
+          "subpageId": "design-approval",
+          "route": "/wizard/design"
         },
         "next": {
           "stepId": "implementation",
@@ -150,7 +202,7 @@
       "id": "implementation",
       "name": "Implementation",
       "description": "Implement refactoring changes",
-      "index": 3,
+      "index": 4,
       "route": "/wizard/implementation",
       "startRoute": "/wizard/implementation/start",
       "component": "WizardImplementation",
@@ -211,8 +263,8 @@
   ],
   "metadata": {
     "version": "1.0.0",
-    "totalSteps": 4,
+    "totalSteps": 5,
     "estimatedDuration": "1-2 hours",
-    "notes": "Refactor workflow skips Intent and System phases, focusing on updating existing specifications"
+    "notes": "Refactor workflow skips Intent phase, focusing on updating existing specifications and design"
   }
 }

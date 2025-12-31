@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Alert, Button, PageLayout, CreateIntegrationModal } from '../components';
 import type { CustomIntegration } from '../components';
 import axios from 'axios';
-import { INTEGRATION_URL } from '../api/client';
+import { INTEGRATION_URL, SPEC_URL } from '../api/client';
 import { useWorkspace } from '../context/WorkspaceContext';
 
 interface IntegrationConfig {
@@ -189,7 +189,7 @@ export const Integrations: React.FC = () => {
         if (workspace.projectFolder) {
           try {
             const response = await fetch(
-              `http://localhost:4001/git/config?workspace=${encodeURIComponent(workspace.projectFolder)}`
+              `${SPEC_URL}/git/config?workspace=${encodeURIComponent(workspace.projectFolder)}`
             );
             if (response.ok) {
               const data = await response.json();

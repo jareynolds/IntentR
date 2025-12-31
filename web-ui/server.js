@@ -593,13 +593,34 @@ app.post('/git/commit', async (req, res) => {
       return res.status(400).json({ error: 'Commit message is required' });
     }
 
-    // Stage files (if specific files provided) or all changes
+    const cwd = getWorkspacePath(workspace);
+
+    // Stage files - always use 'git add -A' for reliability
+    // The client-provided files list may be stale or from a different workspace
+    // Using 'git add -A' stages all changes in the current workspace
     if (files && files.length > 0) {
+      // Try to add specific files, but skip ones that don't exist
+      let addedAny = false;
       for (const file of files) {
-        await gitExec(workspace, `add "${file}"`);
+        try {
+          // Check if file exists in the workspace before adding
+          const filePath = path.join(cwd, file);
+          await fs.access(filePath);
+          await gitExec(workspace, `add "${file}"`);
+          addedAny = true;
+        } catch (fileError) {
+          // File doesn't exist in this workspace, skip it
+          console.log(`[git] Skipping file not in workspace: ${file}`);
+        }
+      }
+
+      // If no specific files were added, fall back to adding all changes
+      if (!addedAny) {
+        console.log('[git] No specific files added, falling back to git add -A');
+        await gitExec(workspace, 'add -A');
       }
     } else {
-      // Stage all specification-related changes
+      // Stage all changes
       await gitExec(workspace, 'add -A');
     }
 

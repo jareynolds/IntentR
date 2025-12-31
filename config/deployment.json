@@ -1,0 +1,16 @@
+{
+  "mode": "auto",
+  "publicHost": "",
+  "workspaceAppPort": 8080,
+  "description": "Deployment configuration for IntentR",
+  "modeOptions": {
+    "auto": "Auto-detect environment (EC2/cloud uses public IP, otherwise localhost)",
+    "local": "Force localhost for all URLs",
+    "public": "Use specified publicHost for URLs"
+  },
+  "notes": [
+    "mode: 'auto' | 'local' | 'public'",
+    "publicHost: Only used when mode is 'public' - set to your server's IP or hostname",
+    "workspaceAppPort: Port for workspace app proxy (default 8080)"
+  ]
+}

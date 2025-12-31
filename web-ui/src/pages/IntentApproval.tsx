@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
@@ -64,12 +64,93 @@ export const IntentApproval: React.FC = () => {
   }>({ isOpen: false, item: null });
   const [rejectionComment, setRejectionComment] = useState('');
 
-  // Load intent phase items - approval status comes from database via dbStoryCards
+  // Feedback state for user notifications
+  const [feedbackMessage, setFeedbackMessage] = useState<{
+    type: 'success' | 'error' | 'warning';
+    message: string;
+  } | null>(null);
+  const [itemActionLoading, setItemActionLoading] = useState<string | null>(null); // Track which item is being processed
+  const [phaseActionLoading, setPhaseActionLoading] = useState(false);
+  const [bulkApprovalLoading, setBulkApprovalLoading] = useState(false);
+
+  // Track if initial load is complete to avoid showing loading spinner on status updates
+  const initialLoadComplete = useRef(false);
+  const lastProjectFolder = useRef<string | null>(null);
+
+  // Auto-clear feedback messages after 5 seconds
+  useEffect(() => {
+    if (feedbackMessage) {
+      const timer = setTimeout(() => setFeedbackMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [feedbackMessage]);
+
+  // Load intent phase items - only on initial load or project folder change
   useEffect(() => {
     if (currentWorkspace?.projectFolder) {
-      loadIntentItems();
+      // Only do full load if project folder changed or first load
+      if (lastProjectFolder.current !== currentWorkspace.projectFolder) {
+        lastProjectFolder.current = currentWorkspace.projectFolder;
+        initialLoadComplete.current = false;
+        loadIntentItems();
+      }
     }
-  }, [currentWorkspace?.projectFolder, dbStoryCards]);
+  }, [currentWorkspace?.projectFolder]);
+
+  // Apply approval statuses from database without full reload
+  // This runs when dbStoryCards changes (e.g., after approval) but doesn't reload files
+  useEffect(() => {
+    if (!initialLoadComplete.current) return; // Skip until initial load is done
+
+    // Update approval statuses in place without reloading from files
+    setPhaseStatus(prev => {
+      const applyStatusToItems = (items: IntentItem[]): IntentItem[] => {
+        return items.map(item => {
+          const dbState = item.entityId ? dbStoryCards.get(item.entityId) : null;
+          if (dbState) {
+            let status: 'approved' | 'rejected' | 'draft' = 'draft';
+            if (dbState.approval_status === 'approved') {
+              status = 'approved';
+            } else if (dbState.approval_status === 'rejected') {
+              status = 'rejected';
+            }
+            return {
+              ...item,
+              status,
+              rejectionComment: dbState.rejection_comment,
+              reviewedAt: dbState.updated_at,
+            };
+          }
+          return item;
+        });
+      };
+
+      const updatedVision = applyStatusToItems(prev.vision.items);
+      const updatedIdeation = applyStatusToItems(prev.ideation.items);
+      const updatedStoryboard = applyStatusToItems(prev.storyboard.items);
+
+      return {
+        vision: {
+          ...prev.vision,
+          items: updatedVision,
+          approved: updatedVision.filter(i => i.status === 'approved').length,
+          rejected: updatedVision.filter(i => i.status === 'rejected').length,
+        },
+        ideation: {
+          ...prev.ideation,
+          items: updatedIdeation,
+          approved: updatedIdeation.filter(i => i.status === 'approved').length,
+          rejected: updatedIdeation.filter(i => i.status === 'rejected').length,
+        },
+        storyboard: {
+          ...prev.storyboard,
+          items: updatedStoryboard,
+          approved: updatedStoryboard.filter(i => i.status === 'approved').length,
+          rejected: updatedStoryboard.filter(i => i.status === 'rejected').length,
+        },
+      };
+    });
+  }, [dbStoryCards]);
 
   // All approval state is now managed in the database via syncStoryCard
   // localStorage and JSON files are no longer used
@@ -195,6 +276,9 @@ export const IntentApproval: React.FC = () => {
       // Phase approval now comes from database via usePhaseApprovals hook
       // No need to check localStorage - intentApproved and approvalDate
       // are derived from phaseApprovals Map
+
+      // Mark initial load as complete so subsequent dbStoryCards changes don't cause full reload
+      initialLoadComplete.current = true;
     } catch (err) {
       console.error('Failed to load intent items:', err);
     } finally {
@@ -203,34 +287,143 @@ export const IntentApproval: React.FC = () => {
   };
 
   const handleApproveItem = async (item: IntentItem) => {
-    // Update local UI state immediately
+    // Validate prerequisites
+    if (!item.entityId) {
+      setFeedbackMessage({
+        type: 'warning',
+        message: `Cannot approve "${item.name}": Missing entity ID. Item may not be synced to database.`,
+      });
+      return;
+    }
+
+    if (!currentWorkspace?.name) {
+      setFeedbackMessage({
+        type: 'error',
+        message: 'No workspace selected. Please select a workspace first.',
+      });
+      return;
+    }
+
+    // Set loading state for this item
+    setItemActionLoading(item.id);
+
+    // Store previous status for rollback
+    const previousStatus = item.status;
+
+    // Optimistic UI update
     updateItemStatus(item, 'approved');
 
-    // Sync approval status to database (single source of truth)
-    // BUSINESS RULE (see STATE_MODEL.md "Automatic State Transitions on Approval"):
-    // On APPROVE: Set all 4 dimensions - lifecycle_state, workflow_stage, stage_status, approval_status
-    // NOTE: Use currentWorkspace.name (not .id) for consistency with EntityStateContext.refreshWorkspaceState
-    if (item.entityId && currentWorkspace?.name) {
+    try {
+      // Sync approval status to database (single source of truth)
+      // BUSINESS RULE (see STATE_MODEL.md "Automatic State Transitions on Approval"):
+      // On APPROVE: Set all 4 dimensions - lifecycle_state, workflow_stage, stage_status, approval_status
+      const existingCard = dbStoryCards.get(item.entityId);
+
+      if (existingCard) {
+        // Item exists - use updateStoryCard which only updates state fields (preserves position, etc.)
+        const result = await updateStoryCard(item.entityId, {
+          lifecycle_state: 'active' as LifecycleState,       // REQUIRED: entity is now active in workflow
+          workflow_stage: 'intent' as WorkflowStage,         // REQUIRED: this is the Intent phase
+          stage_status: 'approved' as StageStatus,           // REQUIRED: stage work complete
+          approval_status: 'approved' as ApprovalStatus,     // REQUIRED: authorization granted
+          version: existingCard.version,                     // Required for optimistic locking
+        });
+
+        if (!result) {
+          throw new Error('Failed to update story card - no result returned');
+        }
+      } else {
+        // Item doesn't exist - use syncStoryCard to create it
+        const result = await syncStoryCard({
+          card_id: item.entityId,
+          title: item.name,
+          description: item.description || '',
+          card_type: item.type, // 'vision', 'ideation', or 'storyboard'
+          position_x: 0,
+          position_y: 0,
+          workspace_id: currentWorkspace.name,
+          file_path: item.path,
+          lifecycle_state: 'active' as LifecycleState,
+          workflow_stage: 'intent' as WorkflowStage,
+          stage_status: 'approved' as StageStatus,
+          approval_status: 'approved' as ApprovalStatus,
+        });
+
+        if (!result) {
+          throw new Error('Failed to create story card - no result returned');
+        }
+      }
+
+      // Refresh the workspace state to get updated data from database
+      await refreshWorkspaceState();
+
+      setFeedbackMessage({
+        type: 'success',
+        message: `"${item.name}" approved successfully.`,
+      });
+    } catch (err) {
+      // Rollback optimistic update on failure
+      updateItemStatus(item, previousStatus as 'draft' | 'approved' | 'rejected');
+
+      console.error('Failed to approve item:', err);
+      setFeedbackMessage({
+        type: 'error',
+        message: `Failed to approve "${item.name}": ${err instanceof Error ? err.message : 'Unknown error'}`,
+      });
+    } finally {
+      setItemActionLoading(null);
+    }
+  };
+
+  // Bulk approve all pending items
+  const handleBulkApprove = async () => {
+    if (!currentWorkspace?.name) {
+      setFeedbackMessage({
+        type: 'error',
+        message: 'No workspace selected. Please select a workspace first.',
+      });
+      return;
+    }
+
+    // Get all items that are not yet approved
+    const pendingItems = getApprovableItems();
+
+    if (pendingItems.length === 0) {
+      setFeedbackMessage({
+        type: 'warning',
+        message: 'No items to approve. All items are already approved.',
+      });
+      return;
+    }
+
+    setBulkApprovalLoading(true);
+
+    let successCount = 0;
+    let failCount = 0;
+    let skippedCount = 0;
+
+    // Process all items
+    for (const item of pendingItems) {
+      // Generate entityId if missing (use filename without extension as fallback)
+      const entityId = item.entityId || item.id?.replace(/\.md$/, '') || `${item.type}-${Date.now()}`;
+
       try {
-        // Check if item exists in database - if so, use updateStoryCard to preserve existing fields
-        const existingCard = dbStoryCards.get(item.entityId);
+        const existingCard = dbStoryCards.get(entityId);
 
         if (existingCard) {
-          // Item exists - use updateStoryCard which only updates state fields (preserves position, etc.)
-          await updateStoryCard(item.entityId, {
-            lifecycle_state: 'active' as LifecycleState,       // REQUIRED: entity is now active in workflow
-            workflow_stage: 'intent' as WorkflowStage,         // REQUIRED: this is the Intent phase
-            stage_status: 'approved' as StageStatus,           // REQUIRED: stage work complete
-            approval_status: 'approved' as ApprovalStatus,     // REQUIRED: authorization granted
-            version: existingCard.version,                     // Required for optimistic locking
+          await updateStoryCard(entityId, {
+            lifecycle_state: 'active' as LifecycleState,
+            workflow_stage: 'intent' as WorkflowStage,
+            stage_status: 'approved' as StageStatus,
+            approval_status: 'approved' as ApprovalStatus,
+            version: existingCard.version,
           });
         } else {
-          // Item doesn't exist - use syncStoryCard to create it
           await syncStoryCard({
-            card_id: item.entityId,
+            card_id: entityId,
             title: item.name,
             description: item.description || '',
-            card_type: item.type, // 'vision', 'ideation', or 'storyboard'
+            card_type: item.type,
             position_x: 0,
             position_y: 0,
             workspace_id: currentWorkspace.name,
@@ -241,12 +434,50 @@ export const IntentApproval: React.FC = () => {
             approval_status: 'approved' as ApprovalStatus,
           });
         }
-        // Refresh the workspace state to get updated data
-        await refreshWorkspaceState();
-      } catch {
-        // Silent failure for approval sync
+
+        // Update local state optimistically
+        updateItemStatus(item, 'approved');
+        successCount++;
+      } catch (err) {
+        console.error(`Failed to approve ${item.name}:`, err);
+        failCount++;
       }
     }
+
+    // Refresh state once at the end
+    await refreshWorkspaceState();
+
+    setBulkApprovalLoading(false);
+
+    if (failCount === 0) {
+      setFeedbackMessage({
+        type: 'success',
+        message: `Successfully approved ${successCount} item${successCount !== 1 ? 's' : ''}.`,
+      });
+    } else {
+      setFeedbackMessage({
+        type: 'warning',
+        message: `Approved ${successCount} item${successCount !== 1 ? 's' : ''}, but ${failCount} failed.`,
+      });
+    }
+  };
+
+  // Get count of pending items for bulk approval button (items not yet approved)
+  const getPendingItemsCount = () => {
+    return [
+      ...phaseStatus.vision.items,
+      ...phaseStatus.ideation.items,
+      ...phaseStatus.storyboard.items,
+    ].filter(i => i.status !== 'approved').length;
+  };
+
+  // Get items that can be bulk approved (pending items with entityId for database sync)
+  const getApprovableItems = () => {
+    return [
+      ...phaseStatus.vision.items.filter(i => i.status !== 'approved'),
+      ...phaseStatus.ideation.items.filter(i => i.status !== 'approved'),
+      ...phaseStatus.storyboard.items.filter(i => i.status !== 'approved'),
+    ];
   };
 
   const handleRejectItem = (item: IntentItem) => {
@@ -259,56 +490,104 @@ export const IntentApproval: React.FC = () => {
 
     const item = rejectionModal.item;
 
-    // Update local UI state immediately
-    updateItemStatus(item, 'rejected', rejectionComment);
-
-    // Sync rejection status to database (single source of truth)
-    // BUSINESS RULE (see STATE_MODEL.md "Automatic State Transitions on Approval"):
-    // On REJECT: Set all 4 dimensions - lifecycle_state, workflow_stage, stage_status, approval_status
-    // NOTE: Use currentWorkspace.name (not .id) for consistency with EntityStateContext.refreshWorkspaceState
-    if (item.entityId && currentWorkspace?.name) {
-      try {
-        // Check if item exists in database - if so, use updateStoryCard to preserve existing fields
-        const existingCard = dbStoryCards.get(item.entityId);
-
-        if (existingCard) {
-          // Item exists - use updateStoryCard which only updates state fields (preserves position, etc.)
-          await updateStoryCard(item.entityId, {
-            lifecycle_state: 'active' as LifecycleState,       // REQUIRED: entity remains in workflow but blocked
-            workflow_stage: 'intent' as WorkflowStage,         // REQUIRED: this is the Intent phase
-            stage_status: 'blocked' as StageStatus,            // REQUIRED: cannot proceed until resolved
-            approval_status: 'rejected' as ApprovalStatus,     // REQUIRED: authorization denied
-            version: existingCard.version,                     // Required for optimistic locking
-            change_reason: rejectionComment,                   // Store rejection reason in change_reason
-          });
-        } else {
-          // Item doesn't exist - use syncStoryCard to create it
-          await syncStoryCard({
-            card_id: item.entityId,
-            title: item.name,
-            description: item.description || '',
-            card_type: item.type, // 'vision', 'ideation', or 'storyboard'
-            position_x: 0,
-            position_y: 0,
-            workspace_id: currentWorkspace.name,
-            file_path: item.path,
-            lifecycle_state: 'active' as LifecycleState,
-            workflow_stage: 'intent' as WorkflowStage,
-            stage_status: 'blocked' as StageStatus,
-            approval_status: 'rejected' as ApprovalStatus,
-            rejection_comment: rejectionComment,
-          });
-        }
-        // Refresh the workspace state to get updated data
-        await refreshWorkspaceState();
-      } catch {
-        // Silent failure for rejection sync
-      }
+    // Validate prerequisites
+    if (!item.entityId) {
+      setFeedbackMessage({
+        type: 'warning',
+        message: `Cannot reject "${item.name}": Missing entity ID. Item may not be synced to database.`,
+      });
+      setRejectionModal({ isOpen: false, item: null });
+      setRejectionComment('');
+      return;
     }
 
-    // Close modal
+    if (!currentWorkspace?.name) {
+      setFeedbackMessage({
+        type: 'error',
+        message: 'No workspace selected. Please select a workspace first.',
+      });
+      setRejectionModal({ isOpen: false, item: null });
+      setRejectionComment('');
+      return;
+    }
+
+    // Set loading state for this item
+    setItemActionLoading(item.id);
+
+    // Store previous status for rollback
+    const previousStatus = item.status;
+    const previousComment = item.rejectionComment;
+
+    // Optimistic UI update
+    updateItemStatus(item, 'rejected', rejectionComment);
+
+    // Close modal immediately for better UX
     setRejectionModal({ isOpen: false, item: null });
+    const commentToSave = rejectionComment;
     setRejectionComment('');
+
+    try {
+      // Sync rejection status to database (single source of truth)
+      // BUSINESS RULE (see STATE_MODEL.md "Automatic State Transitions on Approval"):
+      // On REJECT: Set all 4 dimensions - lifecycle_state, workflow_stage, stage_status, approval_status
+      const existingCard = dbStoryCards.get(item.entityId);
+
+      if (existingCard) {
+        // Item exists - use updateStoryCard which only updates state fields (preserves position, etc.)
+        const result = await updateStoryCard(item.entityId, {
+          lifecycle_state: 'active' as LifecycleState,       // REQUIRED: entity remains in workflow but blocked
+          workflow_stage: 'intent' as WorkflowStage,         // REQUIRED: this is the Intent phase
+          stage_status: 'blocked' as StageStatus,            // REQUIRED: cannot proceed until resolved
+          approval_status: 'rejected' as ApprovalStatus,     // REQUIRED: authorization denied
+          version: existingCard.version,                     // Required for optimistic locking
+          change_reason: commentToSave,                      // Store rejection reason in change_reason
+        });
+
+        if (!result) {
+          throw new Error('Failed to update story card - no result returned');
+        }
+      } else {
+        // Item doesn't exist - use syncStoryCard to create it
+        const result = await syncStoryCard({
+          card_id: item.entityId,
+          title: item.name,
+          description: item.description || '',
+          card_type: item.type, // 'vision', 'ideation', or 'storyboard'
+          position_x: 0,
+          position_y: 0,
+          workspace_id: currentWorkspace.name,
+          file_path: item.path,
+          lifecycle_state: 'active' as LifecycleState,
+          workflow_stage: 'intent' as WorkflowStage,
+          stage_status: 'blocked' as StageStatus,
+          approval_status: 'rejected' as ApprovalStatus,
+          rejection_comment: commentToSave,
+        });
+
+        if (!result) {
+          throw new Error('Failed to create story card - no result returned');
+        }
+      }
+
+      // Refresh the workspace state to get updated data from database
+      await refreshWorkspaceState();
+
+      setFeedbackMessage({
+        type: 'success',
+        message: `"${item.name}" rejected${commentToSave ? ' with comment' : ''}.`,
+      });
+    } catch (err) {
+      // Rollback optimistic update on failure
+      updateItemStatus(item, previousStatus as 'draft' | 'approved' | 'rejected', previousComment);
+
+      console.error('Failed to reject item:', err);
+      setFeedbackMessage({
+        type: 'error',
+        message: `Failed to reject "${item.name}": ${err instanceof Error ? err.message : 'Unknown error'}`,
+      });
+    } finally {
+      setItemActionLoading(null);
+    }
   };
 
   const updateItemStatus = (item: IntentItem, newStatus: 'approved' | 'rejected', comment?: string) => {
@@ -413,22 +692,74 @@ export const IntentApproval: React.FC = () => {
   };
 
   const handleApproveIntent = async () => {
-    // Use database phase approval API
-    // intentApproved and approvalDate are derived from phaseApprovals Map
+    // Validate workspace
+    if (!currentWorkspace?.name) {
+      setFeedbackMessage({
+        type: 'error',
+        message: 'No workspace selected. Please select a workspace first.',
+      });
+      return;
+    }
+
+    setPhaseActionLoading(true);
+
     try {
-      await approvePhaseDb('intent');
-    } catch {
-      // Silent failure for phase approval
+      // Use database phase approval API
+      // intentApproved and approvalDate are derived from phaseApprovals Map
+      const result = await approvePhaseDb('intent');
+
+      if (result) {
+        setFeedbackMessage({
+          type: 'success',
+          message: 'Intent phase approved successfully! You can now proceed to the Specification phase.',
+        });
+      } else {
+        throw new Error('No result returned from phase approval');
+      }
+    } catch (err) {
+      console.error('Failed to approve intent phase:', err);
+      setFeedbackMessage({
+        type: 'error',
+        message: `Failed to approve Intent phase: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      });
+    } finally {
+      setPhaseActionLoading(false);
     }
   };
 
   const handleRevokeApproval = async () => {
-    // Use database phase revoke API
-    // intentApproved and approvalDate are derived from phaseApprovals Map
+    // Validate workspace
+    if (!currentWorkspace?.name) {
+      setFeedbackMessage({
+        type: 'error',
+        message: 'No workspace selected. Please select a workspace first.',
+      });
+      return;
+    }
+
+    setPhaseActionLoading(true);
+
     try {
-      await revokePhaseDb('intent');
-    } catch {
-      // Silent failure for phase revocation
+      // Use database phase revoke API
+      // intentApproved and approvalDate are derived from phaseApprovals Map
+      const result = await revokePhaseDb('intent');
+
+      if (result) {
+        setFeedbackMessage({
+          type: 'warning',
+          message: 'Intent phase approval revoked. Individual items remain approved.',
+        });
+      } else {
+        throw new Error('No result returned from phase revocation');
+      }
+    } catch (err) {
+      console.error('Failed to revoke intent phase approval:', err);
+      setFeedbackMessage({
+        type: 'error',
+        message: `Failed to revoke Intent phase approval: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      });
+    } finally {
+      setPhaseActionLoading(false);
     }
   };
 
@@ -616,9 +947,10 @@ export const IntentApproval: React.FC = () => {
                         <Button
                           variant="primary"
                           onClick={() => handleApproveItem(item)}
+                          disabled={itemActionLoading === item.id}
                           style={{ padding: '6px 12px', fontSize: '12px', backgroundColor: 'var(--color-systemGreen)' }}
                         >
-                          Approve
+                          {itemActionLoading === item.id ? 'Approving...' : 'Approve'}
                         </Button>
                       )}
 
@@ -626,9 +958,10 @@ export const IntentApproval: React.FC = () => {
                         <Button
                           variant="secondary"
                           onClick={() => handleRejectItem(item)}
+                          disabled={itemActionLoading === item.id}
                           style={{ padding: '6px 12px', fontSize: '12px', color: 'var(--color-systemRed)', borderColor: 'var(--color-systemRed)' }}
                         >
-                          Reject
+                          {itemActionLoading === item.id ? 'Processing...' : 'Reject'}
                         </Button>
                       )}
 
@@ -686,6 +1019,31 @@ Rejected items need revision before they can be approved. All items must be appr
       className="max-w-7xl mx-auto"
     >
 
+      {/* Feedback Alert */}
+      {feedbackMessage && (
+        <Alert
+          variant={feedbackMessage.type === 'success' ? 'success' : feedbackMessage.type === 'warning' ? 'warning' : 'error'}
+          style={{ marginBottom: '16px' }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{feedbackMessage.message}</span>
+            <button
+              onClick={() => setFeedbackMessage(null)}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '18px',
+                cursor: 'pointer',
+                padding: '0 4px',
+                opacity: 0.7,
+              }}
+            >
+              ×
+            </button>
+          </div>
+        </Alert>
+      )}
+
       {/* Phase Status Overview */}
       <Card style={{ marginBottom: '24px', backgroundColor: 'var(--color-secondarySystemBackground)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
@@ -738,33 +1096,62 @@ Rejected items need revision before they can be approved. All items must be appr
             )}
           </div>
 
-          {/* Action Button */}
+          {/* Action Button - Dual Purpose */}
           <div>
             {intentApproved ? (
+              /* State 3: Phase approved - Show "Proceed to Specification" */
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
                 <Button variant="primary" onClick={() => navigate('/capabilities')}>
-                  Proceed to Specification
+                  Proceed to Specification →
                 </Button>
                 <button
                   onClick={handleRevokeApproval}
+                  disabled={phaseActionLoading}
                   style={{
                     background: 'none',
                     border: 'none',
-                    cursor: 'pointer',
+                    cursor: phaseActionLoading ? 'not-allowed' : 'pointer',
                     color: 'var(--color-systemRed)',
                     fontSize: '12px',
+                    opacity: phaseActionLoading ? 0.5 : 1,
                   }}
                 >
-                  Revoke Approval
+                  {phaseActionLoading ? 'Processing...' : 'Revoke Approval'}
                 </button>
               </div>
+            ) : getPendingItemsCount() > 0 ? (
+              /* State 1: Items pending - Show "Approve All" */
+              <Button
+                variant="primary"
+                onClick={handleBulkApprove}
+                disabled={bulkApprovalLoading || loading}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '160px', justifyContent: 'center' }}
+              >
+                {bulkApprovalLoading ? (
+                  <>
+                    <span style={{
+                      display: 'inline-block',
+                      width: '14px',
+                      height: '14px',
+                      border: '2px solid currentColor',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                    Approving...
+                  </>
+                ) : (
+                  `Approve All (${getPendingItemsCount()})`
+                )}
+              </Button>
             ) : (
+              /* State 2: All items approved, phase not yet approved - Show "Approve Intent Phase" */
               <Button
                 variant="primary"
                 onClick={handleApproveIntent}
-                disabled={!canApprovePhase()}
+                disabled={!canApprovePhase() || phaseActionLoading}
               >
-                Approve Intent Phase
+                {phaseActionLoading ? 'Approving...' : 'Approve Intent Phase'}
               </Button>
             )}
           </div>
@@ -823,12 +1210,6 @@ Rejected items need revision before they can be approved. All items must be appr
         </>
       )}
 
-      {/* INTENT Info */}
-      <Alert type="info" style={{ marginTop: '24px' }}>
-        <strong>INTENT Intent Phase:</strong> The intent declaration phase establishes the foundation for your project.
-        Before proceeding to Specification (Capabilities & Enablers), ensure all vision themes, ideas, and storyboards
-        have been reviewed and approved. This gate ensures alignment on what you're building before defining how.
-      </Alert>
 
       {/* Rejection Modal */}
       {rejectionModal.isOpen && (

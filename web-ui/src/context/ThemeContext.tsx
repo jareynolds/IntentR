@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { ubeTheme, availableThemes } from '../types/theme';
+import { darkBlueTheme, availableThemes } from '../types/theme';
 import type { Theme } from '../types/theme';
 
 interface ThemeContextType {
@@ -31,7 +31,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       const savedTheme = availableThemes.find(t => t.id === savedThemeId);
       if (savedTheme) return savedTheme;
     }
-    return ubeTheme;
+    return darkBlueTheme;
   });
 
   useEffect(() => {

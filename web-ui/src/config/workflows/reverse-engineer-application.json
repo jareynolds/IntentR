@@ -131,6 +131,13 @@
           "index": 7,
           "route": "/wizard/specification",
           "tab": "ui-designer"
+        },
+        {
+          "id": "specification-approval",
+          "name": "Phase Approval",
+          "index": 8,
+          "route": "/wizard/specification",
+          "tab": "specification-approval"
         }
       ],
       "navigation": {
@@ -140,19 +147,19 @@
           "route": "/wizard/discovery"
         },
         "next": {
-          "stepId": "system",
+          "stepId": "design",
           "subpageId": "overview",
-          "route": "/wizard/system/start"
+          "route": "/wizard/design/start"
         }
       }
     },
     {
-      "id": "system",
-      "name": "UI Design",
+      "id": "design",
+      "name": "Design",
       "description": "Configure UI framework, styles, and design assets",
       "index": 3,
-      "route": "/wizard/system",
-      "startRoute": "/wizard/system/start",
+      "route": "/wizard/design",
+      "startRoute": "/wizard/design/start",
       "component": "WizardSystem",
       "startComponent": "WizardSystemStart",
       "subpages": [
@@ -160,21 +167,28 @@
           "id": "overview",
           "name": "Overview",
           "index": 0,
-          "route": "/wizard/system/start",
+          "route": "/wizard/design/start",
           "isStartPage": true
         },
         {
           "id": "system",
-          "name": "UI Design",
+          "name": "System Architecture",
           "index": 1,
-          "route": "/wizard/system",
+          "route": "/wizard/design",
           "tab": "system"
+        },
+        {
+          "id": "design-approval",
+          "name": "Phase Approval",
+          "index": 2,
+          "route": "/wizard/design",
+          "tab": "design-approval"
         }
       ],
       "navigation": {
         "previous": {
           "stepId": "specification",
-          "subpageId": "ui-designer",
+          "subpageId": "specification-approval",
           "route": "/wizard/specification"
         },
         "next": {
@@ -211,9 +225,9 @@
       ],
       "navigation": {
         "previous": {
-          "stepId": "system",
-          "subpageId": "system",
-          "route": "/wizard/system"
+          "stepId": "design",
+          "subpageId": "design-approval",
+          "route": "/wizard/design"
         },
         "next": {
           "stepId": "implementation",

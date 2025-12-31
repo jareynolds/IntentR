@@ -2,6 +2,38 @@
 
 Complete guide for setting up the IntentR microservices environment on AWS EC2 Linux instances.
 
+## Recent Updates (2025-12-30)
+
+### New Features
+- **arm64 Support**: Full support for AWS Graviton (ARM) instances
+- **Node.js 22.x**: Required for Vite 7.x frontend build
+- **Docker Buildx 0.19+**: Required for Docker Compose v5.0.1+
+- **EBS Storage Setup**: Automatic detection and configuration of additional volumes
+- **Docker Data Migration**: Automatically moves Docker data to EBS volume
+- **Nginx Proxy Configuration**: Automatic configuration for external access via public IP
+
+### New Scripts
+- `install-nodejs.sh` - Installs Node.js 22.x from NodeSource
+- `setup-storage.sh` - Configures EBS volumes and Docker storage
+- `configure-nginx.sh` - Configures nginx reverse proxy for external access
+
+### Updated Scripts
+- `install-docker.sh` - Now installs Docker Buildx and supports arm64
+- `setup-ec2-environment.sh` - Includes all components with skip options
+
+### Key Requirements
+| Component | Minimum Version | Reason |
+|-----------|-----------------|--------|
+| Node.js | 20.19+ or 22.12+ | Vite 7.x requirement |
+| Docker Buildx | 0.17+ | Docker Compose v5.0.1+ requirement |
+| Go | 1.21+ | Backend services |
+
+### Important Notes - Nginx Configuration
+The application uses Docker nginx for reverse proxy. Key configuration details:
+- **Auth Service**: Routes `/api/auth/*` must NOT have path rewriting (service expects full path)
+- **User API**: Routes `/api/users` must be proxied to auth service for user management
+- **Frontend Proxy**: Set `VITE_USE_PROXY=true` in `web-ui/.env` for external access
+
 ## Table of Contents
 
 - [Overview](#overview)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
@@ -64,6 +64,12 @@ export const SpecificationApproval: React.FC = () => {
     item: SpecificationItem | null;
   }>({ isOpen: false, item: null });
   const [rejectionComment, setRejectionComment] = useState('');
+  const [bulkApprovalLoading, setBulkApprovalLoading] = useState(false);
+  const [phaseActionLoading, setPhaseActionLoading] = useState(false);
+
+  // Track if initial load is complete to avoid showing loading spinner on status updates
+  const initialLoadComplete = useRef(false);
+  const lastProjectFolder = useRef<string | null>(null);
 
   // Refresh workspace state from database on page mount
   // This ensures we have the latest approval statuses when navigating to this page
@@ -73,13 +79,86 @@ export const SpecificationApproval: React.FC = () => {
     }
   }, [currentWorkspace?.name, refreshWorkspaceState]);
 
-  // Load specification phase items
-  // Re-run when dbCapabilities or dbEnablers change (e.g., after editing on Capabilities/Enablers pages)
+  // Load specification phase items - only on initial load or project folder change
   useEffect(() => {
     if (currentWorkspace?.projectFolder) {
-      loadSpecificationItems();
+      // Only do full load if project folder changed or first load
+      if (lastProjectFolder.current !== currentWorkspace.projectFolder) {
+        lastProjectFolder.current = currentWorkspace.projectFolder;
+        initialLoadComplete.current = false;
+        loadSpecificationItems();
+      }
     }
-  }, [currentWorkspace?.projectFolder, dbCapabilities, dbEnablers]);
+  }, [currentWorkspace?.projectFolder]);
+
+  // Apply approval statuses from database without full reload
+  // This runs when dbCapabilities or dbEnablers change (e.g., after approval) but doesn't reload files
+  useEffect(() => {
+    if (!initialLoadComplete.current) return; // Skip until initial load is done
+
+    // Update approval statuses in place without reloading from files
+    setPhaseStatus(prev => {
+      const applyCapabilityStatus = (items: SpecificationItem[]): SpecificationItem[] => {
+        return items.map(item => {
+          const dbState = item.entityId ? dbCapabilities.get(item.entityId) : null;
+          if (dbState) {
+            let status: 'approved' | 'rejected' | 'draft' = 'draft';
+            if (dbState.approval_status === 'approved') {
+              status = 'approved';
+            } else if (dbState.approval_status === 'rejected') {
+              status = 'rejected';
+            }
+            return {
+              ...item,
+              status,
+              rejectionComment: dbState.rejection_comment,
+              reviewedAt: dbState.updated_at,
+            };
+          }
+          return item;
+        });
+      };
+
+      const applyEnablerStatus = (items: SpecificationItem[]): SpecificationItem[] => {
+        return items.map(item => {
+          const dbState = item.entityId ? dbEnablers.get(item.entityId) : null;
+          if (dbState) {
+            let status: 'approved' | 'rejected' | 'draft' = 'draft';
+            if (dbState.approval_status === 'approved') {
+              status = 'approved';
+            } else if (dbState.approval_status === 'rejected') {
+              status = 'rejected';
+            }
+            return {
+              ...item,
+              status,
+              rejectionComment: dbState.rejection_comment,
+              reviewedAt: dbState.updated_at,
+            };
+          }
+          return item;
+        });
+      };
+
+      const updatedCapabilities = applyCapabilityStatus(prev.capabilities.items);
+      const updatedEnablers = applyEnablerStatus(prev.enablers.items);
+
+      return {
+        capabilities: {
+          ...prev.capabilities,
+          items: updatedCapabilities,
+          approved: updatedCapabilities.filter(i => i.status === 'approved').length,
+          rejected: updatedCapabilities.filter(i => i.status === 'rejected').length,
+        },
+        enablers: {
+          ...prev.enablers,
+          items: updatedEnablers,
+          approved: updatedEnablers.filter(i => i.status === 'approved').length,
+          rejected: updatedEnablers.filter(i => i.status === 'rejected').length,
+        },
+      };
+    });
+  }, [dbCapabilities, dbEnablers]);
 
   // NOTE: localStorage for item approvals is no longer used - database is single source of truth
   // Approval status now comes from dbCapabilities and dbEnablers via EntityStateContext.
@@ -198,6 +277,7 @@ export const SpecificationApproval: React.FC = () => {
     } catch (err) {
       console.error('Failed to load specification items:', err);
     } finally {
+      initialLoadComplete.current = true;
       setLoading(false);
     }
   };
@@ -463,25 +543,104 @@ export const SpecificationApproval: React.FC = () => {
     );
   };
 
+  // Bulk approval helper functions
+  const getPendingItemsCount = () => {
+    const allItems = [...phaseStatus.capabilities.items, ...phaseStatus.enablers.items];
+    return allItems.filter(i => i.status !== 'approved' && i.status !== 'rejected').length;
+  };
+
+  const getApprovableItems = () => {
+    const allItems = [...phaseStatus.capabilities.items, ...phaseStatus.enablers.items];
+    return allItems.filter(i => i.status !== 'approved' && i.status !== 'rejected');
+  };
+
+  const handleBulkApprove = async () => {
+    const pendingItems = getApprovableItems();
+    if (pendingItems.length === 0) return;
+
+    setBulkApprovalLoading(true);
+
+    for (const item of pendingItems) {
+      // Generate entityId if not present
+      const entityId = item.entityId || item.id?.replace(/\.md$/, '') || `${item.type}-${Date.now()}`;
+
+      // Update local state immediately (optimistic update)
+      updateItemStatus(item, 'approved');
+
+      // Sync to database
+      if (currentWorkspace?.name) {
+        try {
+          if (item.type === 'capability') {
+            await syncCapability({
+              capability_id: entityId,
+              name: item.name,
+              workspace_id: currentWorkspace.name,
+              lifecycle_state: 'active' as LifecycleState,
+              workflow_stage: 'specification' as WorkflowStage,
+              stage_status: 'approved' as StageStatus,
+              approval_status: 'approved' as ApprovalStatus,
+            });
+          } else if (item.type === 'enabler') {
+            let parentDbId: number | undefined;
+            if (item.parentCapabilityId) {
+              const parentCap = dbCapabilities.get(item.parentCapabilityId);
+              if (parentCap) {
+                parentDbId = parentCap.id;
+              }
+            }
+
+            const syncData: Record<string, unknown> = {
+              enabler_id: entityId,
+              name: item.name,
+              workspace_id: currentWorkspace.name,
+              lifecycle_state: 'active' as LifecycleState,
+              workflow_stage: 'specification' as WorkflowStage,
+              stage_status: 'approved' as StageStatus,
+              approval_status: 'approved' as ApprovalStatus,
+            };
+
+            if (parentDbId) {
+              syncData.capability_id = parentDbId;
+            }
+
+            await syncEnabler(syncData as Partial<import('../api/entityStateService').EnablerState>);
+          }
+        } catch (err) {
+          console.error(`Failed to sync approval for ${item.name}:`, err);
+        }
+      }
+    }
+
+    // Refresh workspace state to get updated data
+    await refreshWorkspaceState();
+    setBulkApprovalLoading(false);
+  };
+
   const handleApproveSpecification = async () => {
     // Use database phase approval API
     // specificationApproved and approvalDate are derived from phaseApprovals Map
+    setPhaseActionLoading(true);
     try {
       await approvePhaseDb('specification');
       console.log('Specification phase approved via database');
     } catch (err) {
       console.error('Failed to approve specification phase:', err);
+    } finally {
+      setPhaseActionLoading(false);
     }
   };
 
   const handleRevokeApproval = async () => {
     // Use database phase revoke API
     // specificationApproved and approvalDate are derived from phaseApprovals Map
+    setPhaseActionLoading(true);
     try {
       await revokePhaseDb('specification');
       console.log('Specification phase approval revoked via database');
     } catch (err) {
       console.error('Failed to revoke specification phase approval:', err);
+    } finally {
+      setPhaseActionLoading(false);
     }
   };
 
@@ -796,33 +955,50 @@ All items must be approved before proceeding to the System phase."
             )}
           </div>
 
-          {/* Action Button */}
+          {/* Action Button - Dual Purpose */}
           <div>
             {specificationApproved ? (
+              /* State 3: Phase approved - Show "Proceed to Next Section" */
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
                 <Button variant="primary" onClick={() => navigate('/system')}>
-                  Proceed to System
+                  Proceed to Next Section →
                 </Button>
                 <button
                   onClick={handleRevokeApproval}
+                  disabled={phaseActionLoading}
                   style={{
                     background: 'none',
                     border: 'none',
-                    cursor: 'pointer',
+                    cursor: phaseActionLoading ? 'not-allowed' : 'pointer',
                     color: 'var(--color-systemRed)',
                     fontSize: '12px',
+                    opacity: phaseActionLoading ? 0.6 : 1,
                   }}
                 >
-                  Revoke Approval
+                  {phaseActionLoading ? 'Processing...' : 'Revoke Approval'}
                 </button>
               </div>
+            ) : getPendingItemsCount() > 0 ? (
+              /* State 1: Items pending - Show "Approve All" */
+              <Button
+                variant="primary"
+                onClick={handleBulkApprove}
+                disabled={bulkApprovalLoading || loading}
+                style={{
+                  backgroundColor: 'var(--color-systemGreen)',
+                  opacity: (bulkApprovalLoading || loading) ? 0.6 : 1,
+                }}
+              >
+                {bulkApprovalLoading ? 'Approving...' : `Approve All (${getPendingItemsCount()})`}
+              </Button>
             ) : (
+              /* State 2: All items approved, phase not yet approved - Show "Approve Phase" */
               <Button
                 variant="primary"
                 onClick={handleApproveSpecification}
-                disabled={!canApprovePhase()}
+                disabled={!canApprovePhase() || phaseActionLoading}
               >
-                Approve Specification Phase
+                {phaseActionLoading ? 'Approving...' : 'Approve Specification Phase'}
               </Button>
             )}
           </div>

@@ -1,0 +1,12 @@
+{
+  "aboveLogin": {
+    "title": "Welcome to IntentR Demo Environment",
+    "subtitle": "Intent-Driven Development Platform",
+    "text": "This Trial Enviornment is for demo purposes only. It cannot be used for generating product code and is to be used at your own risk. The IntentR company cannot be held liable for any thing done on this system."
+  },
+  "belowLogin": {
+    "title": "Disclaimer",
+    "subtitle": "Liability",
+    "text": "By logging into this Trial environment, you agree to use the system responsbily and with good intent and agree to adhere to the rules of conduct as outlined by the company. Please email us at intentrai@gmail.com for any questions. Enjoy using the System!"
+  }
+}

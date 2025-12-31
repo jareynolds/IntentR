@@ -105,6 +105,73 @@ export const Storyboard: React.FC = () => {
     return result;
   }, [cards]);
 
+  /**
+   * Merge new connections with existing connections.
+   * Uses connection ID as primary key to prevent duplicates.
+   * Validates that both from/to card IDs exist in the provided cards array.
+   */
+  const mergeConnections = (
+    existingConnections: Connection[],
+    newConnections: Connection[],
+    validCardIds: Set<string>
+  ): Connection[] => {
+    const seenIds = new Set<string>();
+    const result: Connection[] = [];
+
+    // Add existing connections first (preserving order)
+    for (const conn of existingConnections) {
+      if (!seenIds.has(conn.id)) {
+        // Validate that both endpoints still exist
+        if (validCardIds.has(conn.from) && validCardIds.has(conn.to)) {
+          seenIds.add(conn.id);
+          result.push(conn);
+        }
+      }
+    }
+
+    // Add new connections that don't already exist
+    for (const conn of newConnections) {
+      if (!seenIds.has(conn.id)) {
+        // Validate that both endpoints exist
+        if (validCardIds.has(conn.from) && validCardIds.has(conn.to)) {
+          seenIds.add(conn.id);
+          result.push(conn);
+        }
+      }
+    }
+
+    return result;
+  };
+
+  /**
+   * Deduplicate connections by ID (primary) and optionally by from-to pair.
+   * Validates that connections reference existing cards.
+   */
+  const deduplicateConnections = (
+    connections: Connection[],
+    validCardIds?: Set<string>
+  ): Connection[] => {
+    const seenIds = new Set<string>();
+    const result: Connection[] = [];
+
+    for (const conn of connections) {
+      if (!seenIds.has(conn.id)) {
+        // If validCardIds provided, validate endpoints
+        if (validCardIds) {
+          if (validCardIds.has(conn.from) && validCardIds.has(conn.to)) {
+            seenIds.add(conn.id);
+            result.push(conn);
+          }
+        } else {
+          seenIds.add(conn.id);
+          result.push(conn);
+        }
+      }
+    }
+
+    return result;
+  };
+
   // Auto-save refs
   const initialLoadComplete = useRef(false);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -410,20 +477,14 @@ export const Storyboard: React.FC = () => {
   useEffect(() => {
     if (currentWorkspace?.storyboard) {
       // Load cards from workspace - database state is fetched when editing
-      setCards(currentWorkspace.storyboard.cards || []);
+      const loadedCards = currentWorkspace.storyboard.cards || [];
+      setCards(loadedCards);
 
-      // Deduplicate connections when loading
+      // Deduplicate connections when loading, using ID as primary key
+      // and validating that connection endpoints reference existing cards
       const loadedConnections = currentWorkspace.storyboard.connections || [];
-      const uniqueConnections: Connection[] = [];
-      const seenKeys = new Set<string>();
-
-      for (const conn of loadedConnections) {
-        const key = `${conn.from}-${conn.to}`;
-        if (!seenKeys.has(key)) {
-          seenKeys.add(key);
-          uniqueConnections.push(conn);
-        }
-      }
+      const validCardIds = new Set(loadedCards.map(c => c.id));
+      const uniqueConnections = deduplicateConnections(loadedConnections, validCardIds);
 
       setConnections(uniqueConnections);
 
@@ -713,17 +774,13 @@ export const Storyboard: React.FC = () => {
         });
       }
 
-      // Add loaded connections if any (with proper deduplication)
+      // Add loaded connections if any (with proper deduplication by ID only)
       if (loadedConnections.length > 0) {
         setConnections(prevConns => {
-          // Filter out connections that already exist in prevConns
-          const newConns = loadedConnections.filter(newConn => {
-            const exists = prevConns.some(existingConn =>
-              existingConn.id === newConn.id ||
-              (existingConn.from === newConn.from && existingConn.to === newConn.to)
-            );
-            return !exists;
-          });
+          // Filter out connections that already exist by ID only
+          // (allows multiple connections between same card pairs)
+          const existingIds = new Set(prevConns.map(c => c.id));
+          const newConns = loadedConnections.filter(newConn => !existingIds.has(newConn.id));
 
           if (newConns.length > 0) {
             return [...prevConns, ...newConns];
@@ -908,22 +965,41 @@ export const Storyboard: React.FC = () => {
           offsetX = maxX + 400;
         }
 
-        // Add new cards with adjusted positions
-        const cardsWithPositions = uniqueNewCards.map((card, index) => ({
-          ...card,
-          id: `card-${Date.now()}-${index}`,
-          x: card.x + offsetX,
-          y: card.y,
-        }));
+        // Create a mapping from old card IDs to new card IDs
+        const idMapping = new Map<string, string>();
+        const timestamp = Date.now();
 
-        // If this is the first set of cards, also add connections
-        if (prevCards.length === 0 && data.connections) {
-          const newConnections: Connection[] = data.connections.map((conn: any) => ({
-            id: conn.id,
-            from: conn.from,
-            to: conn.to,
-          }));
-          setConnections(newConnections);
+        // Add new cards with adjusted positions and track ID mapping
+        const cardsWithPositions = uniqueNewCards.map((card, index) => {
+          const newId = `card-${timestamp}-${index}`;
+          idMapping.set(card.id, newId);
+          return {
+            ...card,
+            id: newId,
+            x: card.x + offsetX,
+            y: card.y,
+          };
+        });
+
+        // Process connections from AI analysis - map old IDs to new IDs and merge
+        if (data.connections && data.connections.length > 0) {
+          const newConnections: Connection[] = data.connections
+            .map((conn: any) => ({
+              id: conn.id || `conn-${timestamp}-${Math.random().toString(36).substr(2, 9)}`,
+              // Map old card IDs to new IDs, or keep original if not in mapping (existing card)
+              from: idMapping.get(conn.from) || conn.from,
+              to: idMapping.get(conn.to) || conn.to,
+            }));
+
+          // Merge with existing connections using functional update
+          setConnections(prevConns => {
+            // Build set of all valid card IDs (existing + new)
+            const allCardIds = new Set([
+              ...prevCards.map(c => c.id),
+              ...cardsWithPositions.map(c => c.id)
+            ]);
+            return mergeConnections(prevConns, newConnections, allCardIds);
+          });
         }
 
         return [...prevCards, ...cardsWithPositions];
@@ -978,22 +1054,19 @@ export const Storyboard: React.FC = () => {
         isRemoteUpdate.current = true;
 
         if (update.updateType === 'full-update' && update.data) {
-          if (update.data.cards) {
-            setCards(update.data.cards);
-          }
-          if (update.data.connections) {
-            // Deduplicate connections from remote update
-            const remoteConnections = update.data.connections;
-            const uniqueConnections: Connection[] = [];
-            const seenKeys = new Set<string>();
+          // Get the cards from the update (or current cards if not provided)
+          const updatedCards = update.data.cards || [];
 
-            for (const conn of remoteConnections) {
-              const key = `${conn.from}-${conn.to}`;
-              if (!seenKeys.has(key)) {
-                seenKeys.add(key);
-                uniqueConnections.push(conn);
-              }
-            }
+          if (update.data.cards) {
+            setCards(updatedCards);
+          }
+
+          if (update.data.connections) {
+            // Deduplicate connections from remote update using ID as primary key
+            // and validate against the card IDs from the same update
+            const remoteConnections = update.data.connections;
+            const validCardIds = new Set(updatedCards.map((c: StoryCard) => c.id));
+            const uniqueConnections = deduplicateConnections(remoteConnections, validCardIds);
 
             setConnections(uniqueConnections);
           }
@@ -2302,6 +2375,8 @@ Cards can be linked to ideation content and later analyzed to generate capabilit
           display: flex;
           flex-direction: column;
           background: var(--color-systemBackground);
+          overflow-x: hidden;
+          max-width: 100%;
         }
 
         .storyboard-header {
@@ -2317,6 +2392,13 @@ Cards can be linked to ideation content and later analyzed to generate capabilit
           display: flex;
           gap: 12px;
           flex-wrap: wrap;
+          max-width: 100%;
+        }
+
+        .header-actions button,
+        .header-actions .btn {
+          flex: 0 0 auto;
+          white-space: nowrap;
         }
 
         .storyboard-canvas-wrapper {

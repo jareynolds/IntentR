@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Alert, Button, PageLayout } from '../components';
 import { useWorkspace } from '../context/WorkspaceContext';
@@ -104,11 +104,22 @@ export const ImplementationApproval: React.FC = () => {
     item: ImplementationItem | null;
   }>({ isOpen: false, item: null });
   const [rejectionComment, setRejectionComment] = useState('');
+  const [bulkApprovalLoading, setBulkApprovalLoading] = useState(false);
+  const [phaseActionLoading, setPhaseActionLoading] = useState(false);
 
-  // Load implementation phase items
+  // Track if initial load is complete to avoid showing loading spinner on status updates
+  const initialLoadComplete = useRef(false);
+  const lastWorkspaceId = useRef<string | null>(null);
+
+  // Load implementation phase items - only on initial load or workspace change
   useEffect(() => {
     if (currentWorkspace?.id) {
-      loadImplementationItems();
+      // Only do full load if workspace changed or first load
+      if (lastWorkspaceId.current !== currentWorkspace.id) {
+        lastWorkspaceId.current = currentWorkspace.id;
+        initialLoadComplete.current = false;
+        loadImplementationItems();
+      }
     }
   }, [currentWorkspace?.id]);
 
@@ -183,6 +194,7 @@ export const ImplementationApproval: React.FC = () => {
     } catch (err) {
       console.error('Failed to load implementation items:', err);
     } finally {
+      initialLoadComplete.current = true;
       setLoading(false);
     }
   };
@@ -326,24 +338,67 @@ export const ImplementationApproval: React.FC = () => {
     );
   };
 
+  // Bulk approval helper functions
+  const getPendingItemsCount = () => {
+    return implementationItems.filter(i => i.status !== 'approved' && i.status !== 'rejected').length;
+  };
+
+  const getApprovableItems = () => {
+    return implementationItems.filter(i => i.status !== 'approved' && i.status !== 'rejected');
+  };
+
+  const handleBulkApprove = async () => {
+    const pendingItems = getApprovableItems();
+    if (pendingItems.length === 0) return;
+
+    setBulkApprovalLoading(true);
+
+    // Auto-check all checklist items and approve each item
+    const newApprovals = { ...itemApprovals };
+    for (const item of pendingItems) {
+      // Mark all checklist items as checked
+      const checkedItems = item.checklistItems?.map(ci => ({ ...ci, checked: true })) || [];
+
+      newApprovals[item.id] = {
+        status: 'approved' as const,
+        reviewedAt: new Date().toISOString(),
+        checklistItems: checkedItems,
+      };
+    }
+
+    await saveItemApprovals(newApprovals);
+    loadImplementationItems();
+    setBulkApprovalLoading(false);
+  };
+
   const handleApproveImplementation = async () => {
     if (!currentWorkspace?.id) return;
 
-    // Use database-backed approval
-    await approvePhaseDb('implementation');
+    setPhaseActionLoading(true);
+    try {
+      // Use database-backed approval
+      await approvePhaseDb('implementation');
 
-    // Also save to file for sharing/import (backwards compatibility)
-    await savePhaseApprovalToFile(true, new Date().toISOString());
+      // Also save to file for sharing/import (backwards compatibility)
+      await savePhaseApprovalToFile(true, new Date().toISOString());
+    } finally {
+      setPhaseActionLoading(false);
+    }
   };
 
   const handleRevokeApproval = async () => {
     if (!currentWorkspace?.id) return;
 
-    // Use database-backed revocation
-    await revokePhaseDb('implementation');
+    setPhaseActionLoading(true);
+    try {
+      // Use database-backed revocation
+      await revokePhaseDb('implementation');
 
-    // Also save to file for sharing/import (backwards compatibility)
-    await savePhaseApprovalToFile(false, null);
+      // Also save to file for sharing/import (backwards compatibility)
+      await savePhaseApprovalToFile(false, null);
+    } finally {
+      setPhaseActionLoading(false);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -578,33 +633,50 @@ Complete all reviews and approve each section before proceeding to Control Loop.
             )}
           </div>
 
-          {/* Action Button */}
+          {/* Action Button - Dual Purpose */}
           <div>
             {implementationApproved ? (
+              /* State 3: Phase approved - Show "Proceed to Next Section" */
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
                 <Button variant="primary" onClick={() => navigate('/testing-approval')}>
-                  Proceed to Control Loop
+                  Proceed to Next Section →
                 </Button>
                 <button
                   onClick={handleRevokeApproval}
+                  disabled={phaseActionLoading}
                   style={{
                     background: 'none',
                     border: 'none',
-                    cursor: 'pointer',
+                    cursor: phaseActionLoading ? 'not-allowed' : 'pointer',
                     color: 'var(--color-systemRed)',
                     fontSize: '12px',
+                    opacity: phaseActionLoading ? 0.6 : 1,
                   }}
                 >
-                  Revoke Approval
+                  {phaseActionLoading ? 'Processing...' : 'Revoke Approval'}
                 </button>
               </div>
+            ) : getPendingItemsCount() > 0 ? (
+              /* State 1: Items pending - Show "Approve All" */
+              <Button
+                variant="primary"
+                onClick={handleBulkApprove}
+                disabled={bulkApprovalLoading || loading}
+                style={{
+                  backgroundColor: 'var(--color-systemGreen)',
+                  opacity: (bulkApprovalLoading || loading) ? 0.6 : 1,
+                }}
+              >
+                {bulkApprovalLoading ? 'Approving...' : `Approve All (${getPendingItemsCount()})`}
+              </Button>
             ) : (
+              /* State 2: All items approved, phase not yet approved - Show "Approve Phase" */
               <Button
                 variant="primary"
                 onClick={handleApproveImplementation}
-                disabled={!canApprovePhase()}
+                disabled={!canApprovePhase() || phaseActionLoading}
               >
-                Approve System Phase
+                {phaseActionLoading ? 'Approving...' : 'Approve Implementation Phase'}
               </Button>
             )}
           </div>

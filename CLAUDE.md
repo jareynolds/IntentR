@@ -41,7 +41,9 @@ IntentR is a GoLang microservices application for design-driven development. It 
 ./stop.sh
 ```
 
-**After starting services, open http://localhost:6175 in your browser.**
+**After starting services, open http://localhost in your browser.**
+
+> **Deployment Note**: IntentR uses nginx as a reverse proxy for all deployments (local and remote). All API requests go through nginx on port 80, which routes them to the appropriate backend services. This ensures consistent behavior regardless of where the application is running.
 
 ## Build & Test Commands
 
@@ -86,26 +88,37 @@ npm run lint           # ESLint
 ## Architecture
 
 ```
-┌──────────────────────────────────────────┐
-│     Web UI (React + Vite) :6175          │
-└──────────────────────────────────────────┘
-              │
-    ┌─────────┼──────────┬──────────┐
-    │         │          │          │
-┌───▼────┐ ┌──▼──────┐ ┌──▼──────┐ ┌──▼──────┐
-│ Design │ │Capability│ │Integration│ │  Auth   │
-│:9081   │ │ :9082    │ │  :9080    │ │  :9083  │
-└────────┘ └──────────┘ └──────────┘ └─────────┘
-                │              │
-           ┌────▼──────────────▼───┐
-           │  PostgreSQL :6432     │
-           └───────────────────────┘
+                    Browser
+                       │
+                       ▼
+        ┌──────────────────────────────┐
+        │     nginx (Reverse Proxy)    │
+        │          :80                 │
+        └──────────────────────────────┘
+                       │
+       ┌───────────────┼───────────────┐
+       │               │               │
+       ▼               ▼               ▼
+┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+│   Web UI    │ │   Go APIs   │ │  Node APIs  │
+│ (Vite:6175) │ │ :9080-9083  │ │ :4001-4002  │
+└─────────────┘ └─────────────┘ └─────────────┘
+                       │
+              ┌────────▼────────┐
+              │ PostgreSQL:6432 │
+              └─────────────────┘
 ```
 
-**Additional Node.js Services:**
-- Specification API (:4001) - Markdown file management
-- Collaboration Server (:9084) - WebSocket real-time updates
+**Go Microservices:**
+- Integration Service (:9080) - Figma, AI chat, code generation
+- Design Service (:9081) - Design management
+- Capability Service (:9082) - Capabilities, enablers, state management
+- Auth Service (:9083) - JWT, OAuth, user management
+
+**Node.js Services:**
+- Specification API (:4001) - Markdown file management, Git operations
 - Shared Workspace Server (:4002) - Workspace sync
+- Collaboration Server (:9084) - WebSocket real-time updates
 
 ## Tech Stack
 

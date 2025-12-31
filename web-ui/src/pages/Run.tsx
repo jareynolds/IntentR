@@ -156,7 +156,10 @@ export const Run: React.FC = () => {
       quickDescription="Start and test your generated application."
       detailedDescription="Launch and manage your workspace application from this page.
 The Run page detects start.sh and stop.sh scripts in your code folder to manage application lifecycle.
-Monitor running status, access application URLs, and view startup logs all in one place."
+Monitor running status, access application URLs, and view startup logs all in one place.
+
+Applications are accessible via port 8080 through nginx reverse proxy.
+Set the PUBLIC_HOST environment variable to your server's public IP or hostname for external access."
       className="page-container"
     >
 
@@ -334,6 +337,12 @@ Monitor running status, access application URLs, and view startup logs all in on
               {appStatus.url}
             </a>
           </div>
+
+          {appStatus.port && (
+            <p className="text-footnote" style={{ marginBottom: '12px', color: 'var(--color-secondaryLabel)' }}>
+              Internal port: {appStatus.port} → Proxied via nginx on port 8080
+            </p>
+          )}
 
           <div style={{ display: 'flex', gap: '8px' }}>
             <Button variant="secondary" onClick={() => window.open(appStatus.url, '_blank')}>

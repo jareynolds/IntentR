@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { useWorkspace } from './WorkspaceContext';
+import { SPEC_URL } from '../api/client';
 
 // Types
 export interface GitCommit {
@@ -87,8 +88,8 @@ interface VersionControlContextValue {
 
 const VersionControlContext = createContext<VersionControlContextValue | null>(null);
 
-// API base URL
-const SPEC_API_URL = 'http://localhost:4001';
+// API base URL - uses proxy in production, direct URL in development
+const SPEC_API_URL = SPEC_URL;
 
 interface VersionControlProviderProps {
   children: ReactNode;

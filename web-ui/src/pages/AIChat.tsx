@@ -266,7 +266,7 @@ Your chat history is maintained throughout the session for context-aware respons
 
       <style>{`
         .ai-chat-page {
-          max-width: 1200px;
+          max-width: 80rem;
           margin: 0 auto;
         }
 

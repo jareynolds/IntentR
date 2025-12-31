@@ -3025,6 +3025,7 @@ Navigate between different views: Capability Map, State Diagrams, Sequence Diagr
       <style>{`
         .system-page {
           height: 100%;
+          width: 100%;
           display: flex;
           flex-direction: column;
           background: var(--color-systemBackground);
@@ -3075,6 +3076,7 @@ Navigate between different views: Capability Map, State Diagrams, Sequence Diagr
           padding: 0 24px 16px;
           border-bottom: 1px solid var(--color-systemGray5);
           background: var(--color-systemBackground);
+          width: 100%;
         }
 
         .system-tab {
@@ -3113,7 +3115,9 @@ Navigate between different views: Capability Map, State Diagrams, Sequence Diagr
 
         .placeholder-content {
           text-align: center;
-          max-width: 500px;
+          max-width: 800px;
+          width: 100%;
+          padding: 0 24px;
         }
 
         .placeholder-content h2 {
@@ -3142,6 +3146,8 @@ Navigate between different views: Capability Map, State Diagrams, Sequence Diagr
           display: flex;
           flex-direction: column;
           background: var(--color-systemBackground);
+          width: 100%;
+          min-width: 0;
         }
 
         .diagram-generate-bar {

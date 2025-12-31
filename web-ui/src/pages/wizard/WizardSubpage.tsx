@@ -19,10 +19,10 @@ import { AIPrinciples } from '../AIPrinciples';
 import { Code } from '../Code';
 import { Run } from '../Run';
 import { Analyze } from '../Analyze';
+import { System } from '../System';
 import { IntentApproval } from '../IntentApproval';
 import { SpecificationApproval } from '../SpecificationApproval';
 import { SystemApproval } from '../SystemApproval';
-import { ImplementationApproval } from '../ImplementationApproval';
 import { ControlLoopApproval } from '../ControlLoopApproval';
 
 // Map subpage IDs to their components
@@ -39,12 +39,13 @@ const SUBPAGE_COMPONENTS: Record<string, React.ComponentType> = {
   'story-map': StoryMap,
   'specification-approval': SpecificationApproval,
 
-  // System subpages
+  // Design subpages
+  'system': System, // System Architecture page
   'designs': Designs,
   'ui-framework': UIFramework,
   'ui-styles': UIStyles,
   'ui-designer': UIDesigner,
-  'system-approval': SystemApproval,
+  'design-approval': SystemApproval,
 
   // Control Loop subpages
   'testing': Testing,
@@ -54,7 +55,6 @@ const SUBPAGE_COMPONENTS: Record<string, React.ComponentType> = {
   'ai-principles': AIPrinciples,
   'code': Code,
   'run': Run,
-  'implementation-approval': ImplementationApproval,
 
   // Discovery subpages
   'analyze': Analyze,

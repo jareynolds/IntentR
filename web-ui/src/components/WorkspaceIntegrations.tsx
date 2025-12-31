@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Button } from './Button';
 import { Alert } from './Alert';
 import { JiraImportModal } from './JiraImportModal';
-import { INTEGRATION_URL } from '../api/client';
+import { INTEGRATION_URL, SPEC_URL } from '../api/client';
 
 interface Workspace {
   id: string;
@@ -42,7 +42,7 @@ interface WorkspaceIntegrationsProps {
   onClose: () => void;
 }
 
-const SPEC_API_URL = 'http://localhost:4001';
+const SPEC_API_URL = SPEC_URL;
 
 const AVAILABLE_INTEGRATIONS = [
   { name: 'Figma API', icon: '🎨' },

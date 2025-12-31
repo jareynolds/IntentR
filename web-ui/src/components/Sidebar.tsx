@@ -22,9 +22,11 @@ export interface SidebarItem {
 
 export interface SidebarProps {
   items: SidebarItem[];
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ items, isMobileOpen = false, onMobileClose }) => {
   const location = useLocation();
   let isPageVisible: (path: string) => boolean;
   let pendingApprovalCount = 0;
@@ -121,9 +123,38 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
     return children.some(child => location.pathname === child.path);
   };
 
+  // Close mobile sidebar when route changes
+  useEffect(() => {
+    if (isMobileOpen && onMobileClose) {
+      onMobileClose();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
   return (
     <>
-      <aside className={`sidebar ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
+      {/* Mobile backdrop overlay */}
+      {isMobileOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={onMobileClose}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside className={`sidebar ${isCollapsed ? 'sidebar-collapsed' : ''} ${isMobileOpen ? 'sidebar-mobile-open' : ''}`}>
+        {/* Mobile close button */}
+        <button
+          className="sidebar-mobile-close"
+          onClick={onMobileClose}
+          title="Close menu"
+          aria-label="Close navigation menu"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+
         <button
           className="sidebar-collapse-btn"
           onClick={() => setIsCollapsed(!isCollapsed)}
@@ -712,25 +743,112 @@ export const Sidebar: React.FC<SidebarProps> = ({ items }) => {
           padding-left: var(--spacing-3, 12px);
         }
 
+        /* Mobile backdrop */
+        .sidebar-backdrop {
+          display: none;
+        }
+
+        /* Mobile close button - hidden on desktop */
+        .sidebar-mobile-close {
+          display: none;
+        }
+
         @media (max-width: 768px) {
+          /* Backdrop overlay for mobile */
+          .sidebar-backdrop {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 199;
+            animation: fadeIn 0.3s ease;
+          }
+
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+
+          /* Sidebar off-canvas by default on mobile */
           .sidebar {
-            width: 200px;
+            width: 280px;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 200;
+            top: 0;
+            height: 100vh;
+            padding-top: var(--spacing-6, 24px);
+          }
+
+          /* Sidebar visible when open */
+          .sidebar.sidebar-mobile-open {
+            transform: translateX(0);
+          }
+
+          /* Force expanded mode on mobile (no collapsed state) */
+          .sidebar.sidebar-collapsed {
+            width: 280px;
+            transform: translateX(-100%);
+          }
+
+          .sidebar.sidebar-collapsed.sidebar-mobile-open {
+            transform: translateX(0);
+          }
+
+          /* Hide desktop collapse button on mobile */
+          .sidebar-collapse-btn {
+            display: none;
+          }
+
+          /* Show mobile close button */
+          .sidebar-mobile-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: var(--spacing-3, 12px);
+            right: var(--spacing-3, 12px);
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--color-systemFill-quaternary, rgba(120, 120, 128, 0.08));
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--color-label, #000);
+            transition: background 0.2s ease;
+            z-index: 10;
+          }
+
+          .sidebar-mobile-close:hover {
+            background: var(--color-systemFill, rgba(120, 120, 128, 0.2));
           }
 
           .sidebar-item {
-            font-size: 14px;
-            padding: var(--spacing-2, 8px) var(--spacing-2, 8px);
+            font-size: 15px;
+            padding: var(--spacing-3, 12px) var(--spacing-3, 12px);
           }
 
           .sidebar-icon {
-            font-size: 18px;
-            width: 20px;
-            height: 20px;
+            font-size: 20px;
+            width: 24px;
+            height: 24px;
           }
 
           .sidebar-child-item {
-            font-size: 13px;
-            padding-left: 40px;
+            font-size: 14px;
+            padding: var(--spacing-2, 8px) var(--spacing-3, 12px) var(--spacing-2, 8px) 44px;
+          }
+
+          .sidebar-phase {
+            font-size: 12px;
+            padding: var(--spacing-3, 12px);
+          }
+
+          .sidebar-phase-children .sidebar-child-item {
+            padding-left: var(--spacing-4, 16px);
           }
         }
       `}</style>

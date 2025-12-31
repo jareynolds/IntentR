@@ -505,5 +505,100 @@ export const ubeTheme: Theme = {
   },
 };
 
-// Ube is the default theme
-export const availableThemes: Theme[] = [ubeTheme, defaultTheme, figmaTheme, fordTheme, appleTheme];
+// Sixth theme - Dark Blue Design System
+// Professional enterprise theme with deep navy blue foundations
+export const darkBlueTheme: Theme = {
+  id: 'dark-blue-design-system',
+  name: 'Dark Blue',
+  description: 'Professional dark blue design system - Deep navy foundations with vibrant blue interactions',
+  designSystemUrl: '/design-systems/dark-blue-design-system.html',
+  colors: {
+    grey: {
+      50: '#f0f4f8',   // Light blue-tinted grey
+      100: '#d9e2ec',
+      200: '#bcccdc',
+      300: '#9fb3c8',
+      400: '#829ab1',
+      500: '#627d98',
+      600: '#486581',
+      700: '#334e68',
+      800: '#243b53',
+      900: '#102a43',  // Deep navy
+    },
+    blue: {
+      50: '#e6f6ff',
+      100: '#bae3ff',
+      200: '#7cc4fa',
+      300: '#47a3f3',
+      400: '#2186eb',
+      500: '#0967d2',  // Primary - vibrant blue
+      600: '#0552b5',  // Primary hover
+      700: '#03449e',
+      800: '#01337d',
+      900: '#002159',
+    },
+    indigo: {
+      50: '#e6e8ff',
+      100: '#c4c6ff',
+      200: '#a2a5fc',
+      300: '#8888fc',
+      400: '#7069fa',
+      500: '#5d55fa',
+      600: '#4d3df7',
+      700: '#3525e6',
+      800: '#1d0ebe',
+      900: '#0c008c',
+    },
+    purple: {
+      50: '#f2ebfe',
+      100: '#dacefc',
+      200: '#c1b1f8',
+      300: '#a894f3',
+      400: '#8e77ed',
+      500: '#7559e6',
+      600: '#5d44db',
+      700: '#472fc9',
+      800: '#321bb5',
+      900: '#1e0a99',
+    },
+    orange: {
+      50: '#fff8f0',
+      100: '#ffecd9',
+      200: '#ffd8b2',
+      300: '#ffc48a',
+      400: '#ffb163',
+      500: '#f59e0b',  // Accent color
+      600: '#d97706',
+      700: '#b45309',
+      800: '#92400e',
+      900: '#78350f',
+    },
+    green: {
+      50: '#e6ffed',
+      100: '#b8f0c5',
+      200: '#8ae19f',
+      300: '#5cd179',
+      400: '#2ec255',
+      500: '#17a34a',
+      600: '#0d8d3b',
+      700: '#05762d',
+      800: '#015f20',
+      900: '#004815',
+    },
+    red: {
+      50: '#ffe6e6',
+      100: '#ffbdbd',
+      200: '#ff9494',
+      300: '#ff6b6b',
+      400: '#ff4242',
+      500: '#e53e3e',
+      600: '#c62828',
+      700: '#a21d1d',
+      800: '#7e1414',
+      900: '#5c0c0c',
+    },
+  },
+};
+
+// Dark Blue is now the default theme
+export const availableThemes: Theme[] = [darkBlueTheme, ubeTheme, defaultTheme, figmaTheme, fordTheme, appleTheme];

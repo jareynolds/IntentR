@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useWizard, type WizardFlowType } from '../context/WizardContext';
 import { useWorkspace } from '../context/WorkspaceContext';
-import { authClient } from '../api/client';
+import { authClient, CLAUDE_PROXY_URL } from '../api/client';
 import { Card } from '../components';
 import { Alert } from '../components/Alert';
 import { Button } from '../components/Button';
@@ -27,7 +27,7 @@ const AVAILABLE_STEPS: WizardStepConfig[] = [
   { id: 'workspace', name: 'Workspace', description: 'Select your project type and workspace', icon: '◰' },
   { id: 'intent', name: 'Intent', description: 'Capture ideas, stories, and user journeys', icon: '◇' },
   { id: 'specification', name: 'Specification', description: 'Define capabilities and enablers', icon: '☰' },
-  { id: 'system', name: 'UI Design', description: 'Configure UI framework, styles, and design assets', icon: '⚙' },
+  { id: 'design', name: 'Design', description: 'Configure UI framework, styles, and design assets', icon: '⚙' },
   { id: 'control-loop', name: 'Control Loop', description: 'Validate test scenarios and acceptance criteria', icon: '✓' },
   { id: 'implementation', name: 'Implementation', description: 'Build, test, and deploy your application', icon: '▶' },
   { id: 'discovery', name: 'Discovery', description: 'Analyze and document existing code', icon: '🔍' },
@@ -52,14 +52,14 @@ const AVAILABLE_SUBPAGES: Record<string, WizardSubpageConfig[]> = {
     { id: 'story-map', name: 'Dependencies' },
     { id: 'specification-approval', name: 'Phase Approval' },
   ],
-  system: [
+  design: [
     { id: 'overview', name: 'Section Overview' },
     { id: 'system', name: 'System Architecture' },
     { id: 'designs', name: 'UI Assets' },
     { id: 'ui-framework', name: 'UI Framework' },
     { id: 'ui-styles', name: 'UI Styles' },
     { id: 'ui-designer', name: 'UI Designer' },
-    { id: 'system-approval', name: 'Phase Approval' },
+    { id: 'design-approval', name: 'Phase Approval' },
   ],
   'control-loop': [
     { id: 'overview', name: 'Section Overview' },
@@ -71,7 +71,6 @@ const AVAILABLE_SUBPAGES: Record<string, WizardSubpageConfig[]> = {
     { id: 'ai-principles', name: 'AI Principles' },
     { id: 'code', name: 'Code' },
     { id: 'run', name: 'Run' },
-    { id: 'implementation-approval', name: 'Phase Approval' },
   ],
   discovery: [
     { id: 'overview', name: 'Section Overview' },
@@ -80,11 +79,12 @@ const AVAILABLE_SUBPAGES: Record<string, WizardSubpageConfig[]> = {
 };
 
 // Default subpage order for each section
+// NOTE: Approval phases are always included at the end of each section (per INTENT methodology)
 const DEFAULT_SECTION_SUBPAGES: Record<string, string[]> = {
   workspace: ['overview'],
-  intent: ['overview', 'vision', 'ideation', 'storyboard'],
-  specification: ['overview', 'capabilities', 'enablers', 'story-map'],
-  system: ['overview', 'system', 'designs', 'ui-framework', 'ui-styles', 'ui-designer'],
+  intent: ['overview', 'vision', 'ideation', 'storyboard', 'intent-approval'],
+  specification: ['overview', 'capabilities', 'enablers', 'story-map', 'specification-approval'],
+  design: ['overview', 'system', 'designs', 'ui-framework', 'ui-styles', 'ui-designer', 'design-approval'],
   'control-loop': ['overview', 'testing', 'control-loop-approval'],
   implementation: ['overview', 'ai-principles', 'code', 'run'],
   discovery: ['overview', 'analyze'],
@@ -99,10 +99,10 @@ for (const sectionId of Object.keys(AVAILABLE_SUBPAGES)) {
 }
 
 const DEFAULT_WIZARD_FLOWS: Record<WizardFlowType, string[]> = {
-  'new': ['workspace', 'intent', 'specification', 'system', 'control-loop', 'implementation'],
-  'refactor': ['workspace', 'specification', 'control-loop', 'implementation'],
-  'enhance': ['workspace', 'intent', 'specification', 'system', 'control-loop', 'implementation'],
-  'reverse-engineer': ['workspace', 'discovery', 'specification', 'system', 'control-loop', 'implementation'],
+  'new': ['workspace', 'intent', 'specification', 'design', 'control-loop', 'implementation'],
+  'refactor': ['workspace', 'specification', 'design', 'control-loop', 'implementation'],
+  'enhance': ['workspace', 'intent', 'specification', 'design', 'control-loop', 'implementation'],
+  'reverse-engineer': ['workspace', 'discovery', 'specification', 'design', 'control-loop', 'implementation'],
 };
 
 const WIZARD_FLOWS_STORAGE_KEY = 'intentr_custom_wizard_flows';
@@ -155,11 +155,20 @@ const getRoleDisplayName = (role: string): string => {
   return roleMap[role] || role;
 };
 
+interface DeploymentConfig {
+  mode: 'auto' | 'local' | 'public';
+  publicHost: string;
+  workspaceAppPort: number;
+  resolvedHost?: string;
+  detectedCloudIP?: string;
+  saved?: boolean;
+}
+
 const Admin: React.FC = () => {
   const { user: currentUser } = useAuth();
   const { saveFlowsToWorkspace, customFlows: contextFlows, customSubpages: contextSubpages } = useWizard();
   const { currentWorkspace } = useWorkspace();
-  const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'integrations' | 'settings' | 'pageLayouts' | 'wizardFlows'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'integrations' | 'settings' | 'pageLayouts' | 'wizardFlows' | 'deployment'>('users');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -215,6 +224,12 @@ const Admin: React.FC = () => {
   const [customShowTitle, setCustomShowTitle] = useState(true);
   const [customShowDescription, setCustomShowDescription] = useState(true);
   const [customShowInfoButton, setCustomShowInfoButton] = useState(true);
+
+  // Deployment configuration state
+  const [deploymentConfig, setDeploymentConfig] = useState<DeploymentConfig | null>(null);
+  const [deploymentLoading, setDeploymentLoading] = useState(false);
+  const [deploymentSaving, setDeploymentSaving] = useState(false);
+  const [showDeploymentSuccess, setShowDeploymentSuccess] = useState(false);
 
   useEffect(() => {
     if (currentUser?.role !== 'admin') {
@@ -791,6 +806,62 @@ const Admin: React.FC = () => {
     }
   };
 
+  // Deployment configuration handlers
+  const fetchDeploymentConfig = useCallback(async () => {
+    setDeploymentLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${CLAUDE_PROXY_URL}/deployment-config`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch deployment config: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setDeploymentConfig(data);
+    } catch (err) {
+      console.error('Failed to fetch deployment config:', err);
+      setError(`Failed to fetch deployment config: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setDeploymentLoading(false);
+    }
+  }, []);
+
+  const saveDeploymentConfig = useCallback(async () => {
+    if (!deploymentConfig) return;
+
+    setDeploymentSaving(true);
+    setError(null);
+    try {
+      const response = await fetch(`${CLAUDE_PROXY_URL}/deployment-config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: deploymentConfig.mode,
+          publicHost: deploymentConfig.publicHost,
+          workspaceAppPort: deploymentConfig.workspaceAppPort,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to save deployment config: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setDeploymentConfig(data);
+      setShowDeploymentSuccess(true);
+      setTimeout(() => setShowDeploymentSuccess(false), 3000);
+    } catch (err) {
+      console.error('Failed to save deployment config:', err);
+      setError(`Failed to save deployment config: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setDeploymentSaving(false);
+    }
+  }, [deploymentConfig]);
+
+  // Load deployment config when tab is selected
+  useEffect(() => {
+    if (activeTab === 'deployment' && !deploymentConfig && !deploymentLoading) {
+      fetchDeploymentConfig();
+    }
+  }, [activeTab, deploymentConfig, deploymentLoading, fetchDeploymentConfig]);
+
   if (currentUser?.role !== 'admin') {
     return (
       <div>
@@ -913,6 +984,23 @@ const Admin: React.FC = () => {
           }}
         >
           Wizard Flows
+        </button>
+        <button
+          onClick={() => setActiveTab('deployment')}
+          style={{
+            padding: '12px 24px',
+            background: activeTab === 'deployment' ? 'var(--color-primary)' : 'transparent',
+            color: activeTab === 'deployment' ? 'white' : 'var(--color-grey-700)',
+            border: 'none',
+            borderRadius: '8px 8px 0 0',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            borderBottom: activeTab === 'deployment' ? '2px solid var(--color-primary)' : 'none',
+            marginBottom: '-2px'
+          }}
+        >
+          Deployment
         </button>
       </div>
 
@@ -2049,6 +2137,214 @@ const Admin: React.FC = () => {
             ))}
           </div>
         </Card>
+      </div>
+    ) : activeTab === 'deployment' ? (
+      <div>
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{ margin: '0 0 8px 0' }}>Deployment Settings</h2>
+          <p style={{ color: 'var(--color-grey-600)', margin: 0 }}>
+            Configure how IntentR determines public URLs for workspace applications.
+            This affects the URLs displayed on the Run page.
+          </p>
+        </div>
+
+        {showDeploymentSuccess && (
+          <Alert variant="success" message="Deployment settings saved successfully!" />
+        )}
+
+        {deploymentLoading ? (
+          <Card>
+            <p>Loading deployment configuration...</p>
+          </Card>
+        ) : deploymentConfig ? (
+          <>
+            {/* Mode Selection */}
+            <Card style={{ marginBottom: '24px' }}>
+              <h3 style={{ margin: '0 0 16px 0' }}>Deployment Mode</h3>
+              <p style={{ color: 'var(--color-grey-600)', fontSize: '14px', marginBottom: '16px' }}>
+                Choose how workspace app URLs should be generated.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {[
+                  {
+                    value: 'auto',
+                    label: 'Auto-detect',
+                    description: 'Automatically detect cloud environment (EC2, GCP, Azure). Uses public IP in cloud, localhost otherwise.'
+                  },
+                  {
+                    value: 'local',
+                    label: 'Local Development',
+                    description: 'Always use localhost for all URLs. Best for local development.'
+                  },
+                  {
+                    value: 'public',
+                    label: 'Public Server',
+                    description: 'Use a specific public hostname or IP address. Configure below.'
+                  }
+                ].map(option => (
+                  <label
+                    key={option.value}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '12px',
+                      padding: '16px',
+                      background: deploymentConfig.mode === option.value ? 'var(--color-primary-50)' : 'var(--color-grey-50)',
+                      border: deploymentConfig.mode === option.value ? '2px solid var(--color-primary)' : '1px solid var(--color-grey-200)',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="deploymentMode"
+                      value={option.value}
+                      checked={deploymentConfig.mode === option.value}
+                      onChange={() => setDeploymentConfig({ ...deploymentConfig, mode: option.value as 'auto' | 'local' | 'public' })}
+                      style={{ marginTop: '4px' }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{option.label}</div>
+                      <div style={{ fontSize: '13px', color: 'var(--color-grey-600)', marginTop: '4px' }}>
+                        {option.description}
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </Card>
+
+            {/* Public Host Configuration (only shown when mode is 'public') */}
+            {deploymentConfig.mode === 'public' && (
+              <Card style={{ marginBottom: '24px' }}>
+                <h3 style={{ margin: '0 0 16px 0' }}>Public Host Configuration</h3>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+                    Public Hostname or IP Address
+                  </label>
+                  <input
+                    type="text"
+                    value={deploymentConfig.publicHost}
+                    onChange={(e) => setDeploymentConfig({ ...deploymentConfig, publicHost: e.target.value })}
+                    placeholder="e.g., 203.0.113.42 or my-server.example.com"
+                    style={{
+                      width: '100%',
+                      maxWidth: '400px',
+                      padding: '10px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--color-grey-300)',
+                      fontSize: '14px',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                  <p style={{ fontSize: '13px', color: 'var(--color-grey-600)', marginTop: '8px' }}>
+                    Enter your server's public IP address or fully qualified domain name.
+                  </p>
+                </div>
+              </Card>
+            )}
+
+            {/* Port Configuration */}
+            <Card style={{ marginBottom: '24px' }}>
+              <h3 style={{ margin: '0 0 16px 0' }}>Port Configuration</h3>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+                  Workspace App Port
+                </label>
+                <input
+                  type="number"
+                  value={deploymentConfig.workspaceAppPort}
+                  onChange={(e) => setDeploymentConfig({ ...deploymentConfig, workspaceAppPort: parseInt(e.target.value) || 8080 })}
+                  min="1024"
+                  max="65535"
+                  style={{
+                    width: '120px',
+                    padding: '10px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--color-grey-300)',
+                    fontSize: '14px'
+                  }}
+                />
+                <p style={{ fontSize: '13px', color: 'var(--color-grey-600)', marginTop: '8px' }}>
+                  The port nginx uses to proxy workspace applications (default: 8080).
+                </p>
+              </div>
+            </Card>
+
+            {/* Current Status */}
+            <Card style={{ marginBottom: '24px', backgroundColor: 'var(--color-grey-50)' }}>
+              <h3 style={{ margin: '0 0 16px 0' }}>Current Status</h3>
+              <div style={{ display: 'grid', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontWeight: 500, minWidth: '160px' }}>Resolved Host:</span>
+                  <code style={{
+                    padding: '4px 8px',
+                    background: 'var(--color-grey-200)',
+                    borderRadius: '4px',
+                    fontSize: '13px'
+                  }}>
+                    {deploymentConfig.resolvedHost || 'Not available'}
+                  </code>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontWeight: 500, minWidth: '160px' }}>Detected Cloud IP:</span>
+                  <code style={{
+                    padding: '4px 8px',
+                    background: deploymentConfig.detectedCloudIP ? 'var(--color-success-100)' : 'var(--color-grey-200)',
+                    borderRadius: '4px',
+                    fontSize: '13px'
+                  }}>
+                    {deploymentConfig.detectedCloudIP || 'Not detected (running locally)'}
+                  </code>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontWeight: 500, minWidth: '160px' }}>Example App URL:</span>
+                  <code style={{
+                    padding: '4px 8px',
+                    background: 'var(--color-primary-50)',
+                    borderRadius: '4px',
+                    fontSize: '13px',
+                    color: 'var(--color-primary-700)'
+                  }}>
+                    http://{deploymentConfig.resolvedHost || 'localhost'}:{deploymentConfig.workspaceAppPort}
+                  </code>
+                </div>
+              </div>
+            </Card>
+
+            {/* Save Button */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Button onClick={saveDeploymentConfig} disabled={deploymentSaving}>
+                {deploymentSaving ? 'Saving...' : 'Save Settings'}
+              </Button>
+              <Button variant="secondary" onClick={fetchDeploymentConfig} disabled={deploymentLoading}>
+                Refresh
+              </Button>
+            </div>
+
+            {/* Info Box */}
+            <Card style={{ marginTop: '24px', borderLeft: '4px solid var(--color-info)' }}>
+              <h4 style={{ margin: '0 0 12px 0', color: 'var(--color-info-700)' }}>How It Works</h4>
+              <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--color-grey-700)', lineHeight: 1.6 }}>
+                <li><strong>Auto-detect mode</strong> queries cloud metadata services (AWS EC2, GCP, Azure) to find the public IP. Falls back to localhost if not in a cloud environment.</li>
+                <li><strong>Local Development mode</strong> always uses localhost, ideal for development on your local machine.</li>
+                <li><strong>Public Server mode</strong> uses your specified hostname/IP, useful for self-hosted servers without cloud metadata.</li>
+                <li>The <code>PUBLIC_HOST</code> environment variable, if set, takes priority over all other settings.</li>
+              </ul>
+            </Card>
+          </>
+        ) : (
+          <Card>
+            <p style={{ color: 'var(--color-error)' }}>
+              Failed to load deployment configuration. Make sure the Claude Proxy service is running.
+            </p>
+            <Button onClick={fetchDeploymentConfig} style={{ marginTop: '12px' }}>
+              Retry
+            </Button>
+          </Card>
+        )}
       </div>
     ) : null}
 

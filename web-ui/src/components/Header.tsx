@@ -6,14 +6,16 @@ import { HelpDrawer } from './HelpDrawer';
 export interface HeaderProps {
   title: string;
   subtitle?: string;
+  onMobileMenuClick?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
+export const Header: React.FC<HeaderProps> = ({ title, subtitle, onMobileMenuClick }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   return (
+    <>
     <header style={{
       position: 'sticky',
       top: 0,
@@ -22,18 +24,30 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
       borderBottom: '1px solid var(--color-secondary, #3b82f6)',
       backgroundColor: 'var(--color-primary, #1e3a8a)'
     }}>
-      <div style={{ padding: '16px 30px' }}>
+      <div style={{ padding: '16px 30px' }} className="header-content">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Mobile hamburger menu button */}
+            <button
+              className="header-mobile-menu-btn"
+              onClick={onMobileMenuClick}
+              aria-label="Open navigation menu"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              </svg>
+            </button>
+
             <img
               src="/intentr-logo.svg"
               alt="IntentR Logo"
               style={{ width: '48px', height: '48px' }}
+              className="header-logo"
             />
-            <div>
-              <h1 style={{ color: '#FFFFFF', fontSize: '32px', fontWeight: 600, margin: 0 }}>{title}</h1>
+            <div className="header-title-group">
+              <h1 style={{ color: '#FFFFFF', fontSize: '32px', fontWeight: 600, margin: 0 }} className="header-title">{title}</h1>
               {subtitle && (
-                <p style={{ fontSize: '12px', color: '#FFFFFF', margin: 0 }}>{subtitle}</p>
+                <p style={{ fontSize: '12px', color: '#FFFFFF', margin: 0 }} className="header-subtitle">{subtitle}</p>
               )}
             </div>
           </div>
@@ -147,5 +161,56 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
       {/* Help Drawer */}
       <HelpDrawer isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </header>
+
+    <style>{`
+      /* Mobile menu button - hidden on desktop */
+      .header-mobile-menu-btn {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        color: #FFFFFF;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background 0.2s ease;
+        margin-right: 4px;
+      }
+
+      .header-mobile-menu-btn:hover {
+        background: var(--color-secondary, #3b82f6);
+      }
+
+      @media (max-width: 768px) {
+        .header-mobile-menu-btn {
+          display: flex;
+        }
+
+        .header-content {
+          padding: 12px 16px !important;
+        }
+
+        .header-logo {
+          width: 36px !important;
+          height: 36px !important;
+        }
+
+        .header-title {
+          font-size: 22px !important;
+        }
+
+        .header-subtitle {
+          font-size: 10px !important;
+        }
+
+        /* Hide user name on mobile */
+        .header-content > div > div:last-child > span:first-child {
+          display: none;
+        }
+      }
+    `}</style>
+    </>
   );
 };

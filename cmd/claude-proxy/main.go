@@ -10,14 +10,142 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 )
 
 const defaultPort = "9085"
+
+// Nginx workspace app configuration
+const nginxWorkspaceAppConf = "/home/ec2-user/IntentR/nginx/conf.d/workspace-app.conf"
+
+// Deployment configuration file path
+const deploymentConfigPath = "/home/ec2-user/IntentR/config/deployment.json"
+
+// DeploymentConfig represents the deployment configuration
+type DeploymentConfig struct {
+	Mode             string `json:"mode"`             // "auto", "local", or "public"
+	PublicHost       string `json:"publicHost"`       // Used when mode is "public"
+	WorkspaceAppPort int    `json:"workspaceAppPort"` // Port for workspace app proxy
+}
+
+// readDeploymentConfig reads the deployment configuration from file
+func readDeploymentConfig() DeploymentConfig {
+	config := DeploymentConfig{
+		Mode:             "auto",
+		PublicHost:       "",
+		WorkspaceAppPort: 8080,
+	}
+
+	data, err := os.ReadFile(deploymentConfigPath)
+	if err != nil {
+		log.Printf("Could not read deployment config (using defaults): %v", err)
+		return config
+	}
+
+	if err := json.Unmarshal(data, &config); err != nil {
+		log.Printf("Could not parse deployment config (using defaults): %v", err)
+		return config
+	}
+
+	return config
+}
+
+// detectCloudEnvironment tries to detect if running in a cloud environment
+// Returns the public IP if detected, empty string otherwise
+func detectCloudEnvironment() string {
+	// Try EC2 metadata service (IMDSv1)
+	client := &http.Client{Timeout: 2 * time.Second}
+
+	// EC2 Instance Metadata Service
+	resp, err := client.Get("http://169.254.169.254/latest/meta-data/public-ipv4")
+	if err == nil && resp.StatusCode == 200 {
+		defer resp.Body.Close()
+		ip, err := io.ReadAll(resp.Body)
+		if err == nil && len(ip) > 0 {
+			log.Printf("Detected EC2 environment, public IP: %s", string(ip))
+			return string(ip)
+		}
+	}
+
+	// Try GCP metadata service
+	req, _ := http.NewRequest("GET", "http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip", nil)
+	if req != nil {
+		req.Header.Set("Metadata-Flavor", "Google")
+		resp, err := client.Do(req)
+		if err == nil && resp.StatusCode == 200 {
+			defer resp.Body.Close()
+			ip, err := io.ReadAll(resp.Body)
+			if err == nil && len(ip) > 0 {
+				log.Printf("Detected GCP environment, public IP: %s", string(ip))
+				return string(ip)
+			}
+		}
+	}
+
+	// Try Azure metadata service
+	req, _ = http.NewRequest("GET", "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2021-02-01&format=text", nil)
+	if req != nil {
+		req.Header.Set("Metadata", "true")
+		resp, err := client.Do(req)
+		if err == nil && resp.StatusCode == 200 {
+			defer resp.Body.Close()
+			ip, err := io.ReadAll(resp.Body)
+			if err == nil && len(ip) > 0 {
+				log.Printf("Detected Azure environment, public IP: %s", string(ip))
+				return string(ip)
+			}
+		}
+	}
+
+	return ""
+}
+
+// Get public hostname/IP for workspace app URLs
+// Priority: Environment variable > Config file > Auto-detect > localhost
+func getPublicHost() string {
+	// 1. Check for explicit PUBLIC_HOST environment variable (highest priority)
+	if host := os.Getenv("PUBLIC_HOST"); host != "" {
+		log.Printf("Using PUBLIC_HOST from environment: %s", host)
+		return host
+	}
+
+	// 2. Read deployment config
+	config := readDeploymentConfig()
+
+	switch config.Mode {
+	case "local":
+		// Force localhost
+		log.Printf("Deployment mode: local - using localhost")
+		return "localhost"
+
+	case "public":
+		// Use configured public host
+		if config.PublicHost != "" {
+			log.Printf("Deployment mode: public - using configured host: %s", config.PublicHost)
+			return config.PublicHost
+		}
+		log.Printf("Deployment mode: public but no host configured - falling back to auto-detect")
+		fallthrough
+
+	case "auto":
+		fallthrough
+	default:
+		// Auto-detect cloud environment
+		if cloudIP := detectCloudEnvironment(); cloudIP != "" {
+			log.Printf("Deployment mode: auto - detected cloud IP: %s", cloudIP)
+			return cloudIP
+		}
+		// Default to localhost for local development
+		log.Printf("Deployment mode: auto - no cloud detected, using localhost")
+		return "localhost"
+	}
+}
 
 // Request represents an incoming CLI execution request
 type Request struct {
@@ -44,6 +172,7 @@ func main() {
 	mux.HandleFunc("/run-app", corsMiddleware(handleRunApp))
 	mux.HandleFunc("/stop-app", corsMiddleware(handleStopApp))
 	mux.HandleFunc("/check-app-status", corsMiddleware(handleCheckAppStatus))
+	mux.HandleFunc("/deployment-config", corsMiddleware(handleDeploymentConfig))
 
 	// Handle OPTIONS for CORS preflight
 	mux.HandleFunc("OPTIONS /execute", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
@@ -56,6 +185,9 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	}))
 	mux.HandleFunc("OPTIONS /check-app-status", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	mux.HandleFunc("OPTIONS /deployment-config", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -202,6 +334,90 @@ func findClaudeCLI() (string, error) {
 	return "", fmt.Errorf("claude CLI not found in PATH or common locations. Please install it: npm install -g @anthropic-ai/claude-code")
 }
 
+// ========== Deployment Configuration ==========
+
+// handleDeploymentConfig handles GET and POST for deployment configuration
+func handleDeploymentConfig(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	switch r.Method {
+	case http.MethodGet:
+		// Return current configuration
+		config := readDeploymentConfig()
+
+		// Also include the current detected/resolved host for display
+		response := map[string]interface{}{
+			"mode":             config.Mode,
+			"publicHost":       config.PublicHost,
+			"workspaceAppPort": config.WorkspaceAppPort,
+			"resolvedHost":     getPublicHost(),
+			"detectedCloudIP":  detectCloudEnvironment(),
+		}
+		json.NewEncoder(w).Encode(response)
+
+	case http.MethodPost:
+		// Save new configuration
+		var config DeploymentConfig
+		if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body: " + err.Error()})
+			return
+		}
+
+		// Validate mode
+		validModes := map[string]bool{"auto": true, "local": true, "public": true}
+		if !validModes[config.Mode] {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Invalid mode. Must be 'auto', 'local', or 'public'"})
+			return
+		}
+
+		// Set default port if not specified
+		if config.WorkspaceAppPort == 0 {
+			config.WorkspaceAppPort = 8080
+		}
+
+		// Create config directory if it doesn't exist
+		configDir := filepath.Dir(deploymentConfigPath)
+		if err := os.MkdirAll(configDir, 0755); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to create config directory: " + err.Error()})
+			return
+		}
+
+		// Marshal config with indentation for readability
+		data, err := json.MarshalIndent(config, "", "  ")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to serialize config: " + err.Error()})
+			return
+		}
+
+		// Write to file
+		if err := os.WriteFile(deploymentConfigPath, data, 0644); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Failed to save config: " + err.Error()})
+			return
+		}
+
+		log.Printf("Deployment config saved: mode=%s, publicHost=%s, port=%d", config.Mode, config.PublicHost, config.WorkspaceAppPort)
+
+		// Return the saved config with resolved host
+		response := map[string]interface{}{
+			"mode":             config.Mode,
+			"publicHost":       config.PublicHost,
+			"workspaceAppPort": config.WorkspaceAppPort,
+			"resolvedHost":     getPublicHost(),
+			"saved":            true,
+		}
+		json.NewEncoder(w).Encode(response)
+
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Method not allowed"})
+	}
+}
+
 // ========== Workspace App Management ==========
 
 // AppRequest represents a request to manage a workspace app
@@ -279,9 +495,27 @@ func handleRunApp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Parse ports from start script and configure nginx
+	ports := parsePortsFromStartScript(startScript)
+	var appPort int
+	if len(ports) > 0 {
+		appPort = ports[0]
+		// Write nginx config to proxy port 8080 to the app
+		if err := writeNginxWorkspaceConfig(appPort); err != nil {
+			logs += fmt.Sprintf("\nWarning: could not configure nginx proxy: %v", err)
+		}
+	}
+
+	// Build public URL
+	publicHost := getPublicHost()
+	publicURL := fmt.Sprintf("http://%s:8080", publicHost)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(AppStatusResponse{
-		Logs: logs,
+		Logs:      logs,
+		IsRunning: true,
+		Port:      appPort,
+		URL:       publicURL,
 	})
 }
 
@@ -341,6 +575,11 @@ func handleStopApp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Clear nginx workspace app config
+	if err := clearNginxWorkspaceConfig(); err != nil {
+		logs += fmt.Sprintf("\nWarning: could not clear nginx config: %v", err)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(AppStatusResponse{
 		Logs: logs,
@@ -387,7 +626,10 @@ func handleCheckAppStatus(w http.ResponseWriter, r *http.Request) {
 		if isPortInUse(port) {
 			response.IsRunning = true
 			response.Port = port
-			response.URL = fmt.Sprintf("http://localhost:%d", port)
+
+			// Return public URL via nginx proxy on port 8080
+			publicHost := getPublicHost()
+			response.URL = fmt.Sprintf("http://%s:8080", publicHost)
 
 			// Check if it's this workspace's process
 			processInfo := getProcessOnPort(port)
@@ -502,4 +744,69 @@ func getProcessOnPort(port int) string {
 // containsPath checks if the process info contains the given path
 func containsPath(processInfo, path string) bool {
 	return bytes.Contains([]byte(processInfo), []byte(path))
+}
+
+// writeNginxWorkspaceConfig writes the nginx config for proxying to the workspace app
+func writeNginxWorkspaceConfig(port int) error {
+	config := fmt.Sprintf(`# Auto-generated workspace app proxy config
+# Port: %d
+location / {
+    proxy_pass http://host.docker.internal:%d;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 86400;
+    proxy_buffering off;
+}
+`, port, port)
+
+	err := os.WriteFile(nginxWorkspaceAppConf, []byte(config), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write nginx config: %w", err)
+	}
+
+	log.Printf("Wrote nginx workspace app config for port %d", port)
+
+	// Signal nginx to reload (via docker exec)
+	reloadNginx()
+	return nil
+}
+
+// clearNginxWorkspaceConfig clears the nginx workspace app config
+func clearNginxWorkspaceConfig() error {
+	config := `# Workspace app not running
+# This file is updated automatically when apps start/stop
+`
+	err := os.WriteFile(nginxWorkspaceAppConf, []byte(config), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to clear nginx config: %w", err)
+	}
+
+	log.Printf("Cleared nginx workspace app config")
+
+	// Signal nginx to reload
+	reloadNginx()
+	return nil
+}
+
+// reloadNginx signals nginx to reload its configuration
+func reloadNginx() {
+	// Try docker exec first (for Docker deployments)
+	cmd := exec.Command("docker", "exec", "intentr-nginx-1", "nginx", "-s", "reload")
+	if err := cmd.Run(); err != nil {
+		// Try alternative container name
+		cmd = exec.Command("docker", "exec", "nginx", "nginx", "-s", "reload")
+		if err := cmd.Run(); err != nil {
+			// Try systemctl for non-Docker deployments
+			cmd = exec.Command("sudo", "nginx", "-s", "reload")
+			if err := cmd.Run(); err != nil {
+				log.Printf("Warning: could not reload nginx: %v", err)
+			}
+		}
+	}
+	log.Printf("Signaled nginx to reload")
 }

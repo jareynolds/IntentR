@@ -14,16 +14,17 @@ import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
 // Check if we're using the nginx proxy
 const USE_PROXY = import.meta.env.VITE_USE_PROXY === 'true';
 
-// API paths for proxy mode (relative URLs)
+// API paths for proxy mode (empty - code includes full paths like /api/auth/login)
+// nginx routes based on path prefix to correct backend service
 const PROXY_PATHS = {
-  integration: '/api/integration',
-  design: '/api/design',
-  capability: '/api/capability',
-  auth: '/api/auth',
-  spec: '/api/spec',
-  workspace: '/api/workspace',
+  integration: '',
+  design: '',
+  capability: '',
+  auth: '',
+  spec: '',
+  workspace: '',
   collaboration: '', // WebSocket handled separately
-  claudeProxy: '/api/claude-proxy', // Host-side service for executing scripts
+  claudeProxy: '', // Host-side service for executing scripts
 };
 
 // Direct URLs for development mode
