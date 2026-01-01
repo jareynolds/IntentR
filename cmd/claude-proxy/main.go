@@ -470,6 +470,25 @@ func handleRunApp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Parse ports from start script BEFORE starting
+	ports := parsePortsFromStartScript(startScript)
+	var appPort int
+	var cleanupLogs string
+	if len(ports) > 0 {
+		appPort = ports[0]
+		// Kill any existing process on the port before starting
+		if isPortInUse(appPort) {
+			log.Printf("Port %d is in use, killing existing process...", appPort)
+			killed, killLog := killProcessOnPort(appPort)
+			cleanupLogs = killLog
+			if killed {
+				log.Printf("Successfully killed process on port %d", appPort)
+				// Give the OS a moment to release the port
+				time.Sleep(500 * time.Millisecond)
+			}
+		}
+	}
+
 	log.Printf("Running start.sh in: %s", codePath)
 
 	// Execute start.sh
@@ -486,6 +505,11 @@ func handleRunApp(w http.ResponseWriter, r *http.Request) {
 		logs += "\n" + stderr.String()
 	}
 
+	// Prepend cleanup logs if any
+	if cleanupLogs != "" {
+		logs = cleanupLogs + "\n" + logs
+	}
+
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(AppStatusResponse{
@@ -495,12 +519,8 @@ func handleRunApp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse ports from start script and configure nginx
-	ports := parsePortsFromStartScript(startScript)
-	var appPort int
-	if len(ports) > 0 {
-		appPort = ports[0]
-		// Write nginx config to proxy port 8080 to the app
+	// Configure nginx to proxy port 8080 to the app
+	if appPort > 0 {
 		if err := writeNginxWorkspaceConfig(appPort); err != nil {
 			logs += fmt.Sprintf("\nWarning: could not configure nginx proxy: %v", err)
 		}
@@ -739,6 +759,42 @@ func getProcessOnPort(port int) string {
 		return ""
 	}
 	return string(output)
+}
+
+// killProcessOnPort kills any process using the specified port
+// Returns true if a process was killed, along with a log message
+func killProcessOnPort(port int) (bool, string) {
+	// Get the PID(s) of processes using this port
+	cmd := exec.Command("lsof", "-t", "-i", fmt.Sprintf(":%d", port))
+	output, err := cmd.Output()
+	if err != nil || len(output) == 0 {
+		return false, ""
+	}
+
+	// Parse PIDs (may be multiple, one per line)
+	pids := bytes.Split(bytes.TrimSpace(output), []byte("\n"))
+	var killedPids []string
+
+	for _, pidBytes := range pids {
+		pid := string(bytes.TrimSpace(pidBytes))
+		if pid == "" {
+			continue
+		}
+
+		// Kill the process
+		killCmd := exec.Command("kill", "-9", pid)
+		if err := killCmd.Run(); err != nil {
+			log.Printf("Failed to kill PID %s: %v", pid, err)
+			continue
+		}
+		killedPids = append(killedPids, pid)
+		log.Printf("Killed process PID %s on port %d", pid, port)
+	}
+
+	if len(killedPids) > 0 {
+		return true, fmt.Sprintf("Killed existing process(es) on port %d (PIDs: %s)\n", port, bytes.Join(pids, []byte(", ")))
+	}
+	return false, ""
 }
 
 // containsPath checks if the process info contains the given path

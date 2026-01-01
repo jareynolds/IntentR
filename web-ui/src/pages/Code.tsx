@@ -33,9 +33,11 @@ export const Code: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [codeFiles, setCodeFiles] = useState<CodeFile[]>([]);
   const [approvalError, setApprovalError] = useState<string | null>(null);
-  const [cliCommand, setCliCommand] = useState<string>(() => {
-    const saved = localStorage.getItem('code_generation_cli_command');
-    return saved || `Claude, please follow the ./CLAUDE.md file (if not already) and ./CODE_RULES/MAIN_SWDEV_PLAN.md and use the ./CODE_RULES/ACTIVE_AI_PRINCIPLES.md and develop the application from all the specification markdown files that are specified in the following order: 1.) first read through all the files in the ./conception folder. 2.) Next read through the markdowns in the ./definition folder. 3.) next read the markdown files in the ./design folder. 4.) Next read the markdowns in the ./implementation folder and place the developed files into a new ./code folder (if it doesn't exist, then create it). Please apply the currently active UI Framework that is active for this workspace found in the ./design/UI_Framework.md file and ./design/UI_Style.md file.`;
+  const [baseCommand, setBaseCommand] = useState<string>('');
+  const [isLoadingCommand, setIsLoadingCommand] = useState(false);
+  const [additionalCommands, setAdditionalCommands] = useState<string>(() => {
+    const saved = localStorage.getItem('code_generation_additional_commands');
+    return saved || '';
   });
   const [logs, setLogs] = useState<LogEntry[]>(() => {
     // Load logs from localStorage on initial render
@@ -90,6 +92,41 @@ export const Code: React.FC = () => {
     fetchCodeFiles();
   }, [currentWorkspace?.projectFolder]);
 
+  // Fetch CODE_GEN_COMMAND.md from workspace
+  const fetchBaseCommand = async () => {
+    if (!currentWorkspace?.projectFolder) return;
+
+    setIsLoadingCommand(true);
+    try {
+      const response = await fetch(`${INTEGRATION_URL}/read-file`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspacePath: currentWorkspace.projectFolder,
+          filePath: 'implementation/PROMPT/CODE_GEN_COMMAND.md',
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBaseCommand(data.content || '');
+      } else {
+        // File doesn't exist yet - use empty string
+        setBaseCommand('');
+        console.log('CODE_GEN_COMMAND.md not found, using empty base command');
+      }
+    } catch (err) {
+      console.error('Failed to fetch CODE_GEN_COMMAND.md:', err);
+      setBaseCommand('');
+    } finally {
+      setIsLoadingCommand(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBaseCommand();
+  }, [currentWorkspace?.projectFolder]);
+
   // Check if all phase approvals are complete using database-backed EntityStateContext
   const checkAllPhaseApprovals = (): { allApproved: boolean; missingPhases: string[] } => {
     if (!currentWorkspace?.id) {
@@ -141,11 +178,16 @@ export const Code: React.FC = () => {
       return;
     }
 
-    if (!cliCommand.trim()) {
-      setError('Code generation command is empty. Please enter a command.');
-      addLog('error', 'Code generation command is empty');
+    if (!baseCommand.trim()) {
+      setError('Base code generation command is empty. Please ensure CODE_GEN_COMMAND.md exists in implementation/PROMPT/');
+      addLog('error', 'Base code generation command is empty - check implementation/PROMPT/CODE_GEN_COMMAND.md');
       return;
     }
+
+    // Combine base command with additional commands
+    const fullCommand = additionalCommands.trim()
+      ? `${baseCommand.trim()}\n\n${additionalCommands.trim()}`
+      : baseCommand.trim();
 
     setError(null);
     setIsGenerating(true);
@@ -154,6 +196,9 @@ export const Code: React.FC = () => {
     addLog('info', `Workspace: ${currentWorkspace.projectFolder}`);
     addLog('info', `AI Preset: ${currentWorkspace.activeAIPreset || 'Not set'}`);
     addLog('info', `UI Framework: ${currentWorkspace.selectedUIFramework || 'None'}`);
+    if (additionalCommands.trim()) {
+      addLog('info', 'Additional commands will be appended to base command');
+    }
 
     // Create abort controller for this request
     abortControllerRef.current = new AbortController();
@@ -169,7 +214,7 @@ export const Code: React.FC = () => {
         },
         body: JSON.stringify({
           workspacePath: currentWorkspace.projectFolder,
-          command: cliCommand,
+          command: fullCommand,
         }),
         signal: abortControllerRef.current.signal,
       });
@@ -228,30 +273,57 @@ All generated code respects the active UI Framework and AI Principles settings f
             </div>
           </div>
 
+          {/* Base Command Status */}
+          <div className="mb-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-tertiarySystemBackground)' }}>
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-medium">Base Command</h4>
+              {isLoadingCommand ? (
+                <span className="text-xs text-gray-500">Loading...</span>
+              ) : baseCommand ? (
+                <span className="text-xs text-green-600">✓ Loaded from CODE_GEN_COMMAND.md</span>
+              ) : (
+                <span className="text-xs text-orange-500">⚠ File not found</span>
+              )}
+            </div>
+            <p className="text-xs text-gray-500">
+              Source: <code>implementation/PROMPT/CODE_GEN_COMMAND.md</code>
+            </p>
+            {baseCommand && (
+              <details className="mt-2">
+                <summary className="text-xs text-blue-500 cursor-pointer">Preview base command</summary>
+                <pre className="mt-2 p-2 text-xs bg-gray-100 dark:bg-gray-800 rounded overflow-auto max-h-32 whitespace-pre-wrap">
+                  {baseCommand}
+                </pre>
+              </details>
+            )}
+          </div>
+
+          {/* Additional Code Commands */}
           <div className="mb-4">
-            <h4 className="font-medium mb-2">Code Generation Command (Editable)</h4>
+            <h4 className="font-medium mb-2">Additional Code Commands</h4>
             <textarea
-              value={cliCommand}
+              value={additionalCommands}
               onChange={(e) => {
-                setCliCommand(e.target.value);
-                localStorage.setItem('code_generation_cli_command', e.target.value);
+                setAdditionalCommands(e.target.value);
+                localStorage.setItem('code_generation_additional_commands', e.target.value);
               }}
+              placeholder="Enter any additional instructions to append to the base command..."
               className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-mono"
-              rows={6}
+              rows={5}
               style={{
                 resize: 'vertical',
-                minHeight: '120px',
+                minHeight: '100px',
               }}
             />
             <p className="text-xs text-gray-500 mt-1">
-              This command will be sent to Claude CLI. AI Preset: {currentWorkspace.activeAIPreset || 'Not set'} | UI Framework: {currentWorkspace.selectedUIFramework || 'None'}
+              These commands will be appended to the base command. AI Preset: {currentWorkspace.activeAIPreset || 'Not set'} | UI Framework: {currentWorkspace.selectedUIFramework || 'None'}
             </p>
           </div>
 
           <div className="flex gap-4">
             <Button
               onClick={handleGenerateCode}
-              disabled={isGenerating || !currentWorkspace.projectFolder || !cliCommand.trim()}
+              disabled={isGenerating || !currentWorkspace.projectFolder || !baseCommand.trim() || isLoadingCommand}
               className="flex-1"
             >
               {isGenerating ? 'Generating Code via CLI...' : 'Generate Code from Specifications'}

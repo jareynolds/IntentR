@@ -303,6 +303,23 @@ Set the PUBLIC_HOST environment variable to your server's public IP or hostname 
           }}>
             {logs}
           </pre>
+
+          {/* Open App Button - shown when app is running on configured port */}
+          {appStatus?.isRunning && appStatus?.port && (
+            <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  // Use the same host as the current page, but with the app's port
+                  const appUrl = `http://${window.location.hostname}:${appStatus.port}`;
+                  window.open(appUrl, '_blank');
+                }}
+                style={{ backgroundColor: 'var(--color-systemBlue)' }}
+              >
+                🚀 Open App
+              </Button>
+            </div>
+          )}
         </Card>
       )}
 
