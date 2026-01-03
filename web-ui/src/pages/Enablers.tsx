@@ -629,6 +629,10 @@ IMPORTANT: Respond ONLY with valid JSON in this exact format, no other text:
     setSuggestedCapabilityId(null);
     setCapabilityNeedsConfirmation(false);
     setIsCapabilitySuggesting(false);
+    // Reset AI recommendation state - clear previous enabler's suggestions
+    setAiRecommendationOptions([]);
+    setSelectedAiOptionIndex(-1);
+    setAiRecommendationError(null);
     // Initialize form capability (user will select from dropdown in form)
     setFormCapabilityId(null);
     // For file-based capabilities, we store the capability ID string
@@ -665,6 +669,10 @@ IMPORTANT: Respond ONLY with valid JSON in this exact format, no other text:
     setSuggestedCapabilityId(null);
     setCapabilityNeedsConfirmation(false);
     setIsCapabilitySuggesting(false);
+    // Reset AI recommendation state - clear previous enabler's suggestions
+    setAiRecommendationOptions([]);
+    setSelectedAiOptionIndex(-1);
+    setAiRecommendationError(null);
 
     // Set the capability ID for the form dropdown (NOT the main filter)
     // If the stored capabilityId is actually a name (not an ID like CAP-xxx), find the actual capability

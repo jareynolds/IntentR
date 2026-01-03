@@ -1657,6 +1657,72 @@ func (h *Handler) HandleEnsureWorkspaceStructure(w http.ResponseWriter, r *http.
 		existingFolders = append(existingFolders, "CODE_RULES")
 	}
 
+	// Copy implementation/PROMPT folder from project root to workspace
+	// This contains CODE_GEN_COMMAND.md and other prompt templates
+	promptSrc := filepath.Join(cwd, "implementation", "PROMPT")
+	promptDest := filepath.Join(req.Path, "implementation", "PROMPT")
+
+	// Only copy if destination implementation/PROMPT doesn't exist yet (fresh workspace creation)
+	if _, err := os.Stat(promptDest); os.IsNotExist(err) {
+		if _, err := os.Stat(promptSrc); err == nil {
+			// Ensure the destination directories exist
+			if err := os.MkdirAll(promptDest, 0755); err != nil {
+				fmt.Printf("[EnsureWorkspaceStructure] Warning: failed to create implementation/PROMPT folder: %v\n", err)
+			} else {
+				// Walk through the source PROMPT directory and copy all files
+				err := filepath.Walk(promptSrc, func(srcPath string, info os.FileInfo, err error) error {
+					if err != nil {
+						return err
+					}
+
+					// Get relative path from PROMPT
+					relPath, err := filepath.Rel(promptSrc, srcPath)
+					if err != nil {
+						return err
+					}
+
+					// Skip the root directory itself
+					if relPath == "." {
+						return nil
+					}
+
+					destPath := filepath.Join(promptDest, relPath)
+
+					if info.IsDir() {
+						// Create directory
+						if err := os.MkdirAll(destPath, 0755); err != nil {
+							return err
+						}
+					} else {
+						// Ensure parent directory exists
+						parentDir := filepath.Dir(destPath)
+						if err := os.MkdirAll(parentDir, 0755); err != nil {
+							return err
+						}
+
+						// Copy file
+						content, err := os.ReadFile(srcPath)
+						if err != nil {
+							return err
+						}
+						if err := os.WriteFile(destPath, content, 0644); err != nil {
+							return err
+						}
+					}
+					return nil
+				})
+				if err != nil {
+					// Log error but don't fail the whole operation
+					fmt.Printf("[EnsureWorkspaceStructure] Warning: failed to copy implementation/PROMPT folder: %v\n", err)
+				} else {
+					createdFolders = append(createdFolders, "implementation/PROMPT (copied from project)")
+				}
+			}
+		}
+	} else {
+		existingFolders = append(existingFolders, "implementation/PROMPT")
+	}
+
 	response := EnsureWorkspaceStructureResponse{
 		Success:        true,
 		Path:           req.Path,

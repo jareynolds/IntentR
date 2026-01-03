@@ -88,6 +88,8 @@ services:
       - ./CLAUDE.md:/root/CLAUDE.md
     networks:
       - intentra-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:9080/health"]
       interval: 30s

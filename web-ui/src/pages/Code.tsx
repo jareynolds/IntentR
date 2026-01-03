@@ -134,13 +134,13 @@ export const Code: React.FC = () => {
     }
 
     // Map workflow stages to display names
-    // These correspond to the WorkflowStage type: 'intent' | 'specification' | 'ui_design' | 'implementation' | 'control_loop'
+    // These correspond to the WorkflowStage type: 'intent' | 'specification' | 'ui_design' | 'control_loop'
+    // Note: 'implementation' phase approval was removed as it was confusing for users
     // All approval pages now use the database-backed EntityStateContext
-    const phases: Array<{ stage: 'intent' | 'specification' | 'ui_design' | 'implementation' | 'control_loop'; name: string }> = [
+    const phases: Array<{ stage: 'intent' | 'specification' | 'ui_design' | 'control_loop'; name: string }> = [
       { stage: 'intent', name: 'Intent' },
       { stage: 'specification', name: 'Specification' },
       { stage: 'ui_design', name: 'UI Design' },
-      { stage: 'implementation', name: 'Implementation' },
       { stage: 'control_loop', name: 'Control Loop' },
     ];
 

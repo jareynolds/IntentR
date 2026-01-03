@@ -192,7 +192,15 @@ function AppContent() {
   const buildSectionChildren = (sectionId: string) => {
     const subpageIds = customSubpages[sectionId] || [];
     // Filter out 'overview' as it's the section start page, not a child item
-    const childSubpages = subpageIds.filter(id => id !== 'overview');
+    let childSubpages = subpageIds.filter(id => id !== 'overview');
+
+    // IMPORTANT: Always ensure Phase Approval page is included if one exists for this section
+    // This prevents users from accidentally removing critical approval pages from the wizard flow
+    const approvalPageId = `${sectionId}-approval`;
+    if (ALL_SUBPAGES_FLAT[approvalPageId] && !childSubpages.includes(approvalPageId)) {
+      // Add approval page at the end (it should always be last in the flow)
+      childSubpages = [...childSubpages, approvalPageId];
+    }
 
     return childSubpages.map(subpageId => {
       const subpage = ALL_SUBPAGES_FLAT[subpageId];
