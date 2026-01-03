@@ -131,6 +131,13 @@ func main() {
 	mux.HandleFunc("OPTIONS /generate-code", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /generate-code-cli", corsMiddleware(handler.HandleGenerateCodeCLI))
 	mux.HandleFunc("OPTIONS /generate-code-cli", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+	// Background job-based code generation endpoints
+	mux.HandleFunc("POST /generate-code-job", corsMiddleware(handler.HandleStartCodeGenerationJob))
+	mux.HandleFunc("OPTIONS /generate-code-job", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+	mux.HandleFunc("GET /generate-code-status/", corsMiddleware(handler.HandleGetCodeGenerationJobStatus))
+	mux.HandleFunc("OPTIONS /generate-code-status/", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+	mux.HandleFunc("POST /generate-code-cancel/", corsMiddleware(handler.HandleCancelCodeGenerationJob))
+	mux.HandleFunc("OPTIONS /generate-code-cancel/", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /code-files", corsMiddleware(handler.HandleCodeFiles))
 	mux.HandleFunc("OPTIONS /code-files", corsMiddleware(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
 	mux.HandleFunc("POST /run-app", corsMiddleware(handler.HandleRunApp))

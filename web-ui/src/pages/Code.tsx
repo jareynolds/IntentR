@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { useWorkspace } from '../context/WorkspaceContext';
@@ -25,6 +25,30 @@ interface PhaseApprovalStatus {
   approvedAt?: string;
 }
 
+// Job status types from backend
+type JobStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+interface JobLogEntry {
+  timestamp: string;
+  type: string;
+  message: string;
+}
+
+interface JobStatusResponse {
+  id: string;
+  status: JobStatus;
+  progress?: string;
+  output?: string;
+  error?: string;
+  startedAt: string;
+  completedAt?: string;
+  elapsedSeconds: number;
+  logs: JobLogEntry[];
+}
+
+const JOB_ID_STORAGE_KEY = 'code_generation_active_job_id';
+const POLL_INTERVAL_MS = 5000; // Poll every 5 seconds
+
 export const Code: React.FC = () => {
   const { currentWorkspace } = useWorkspace();
   const { isPhaseApproved } = usePhaseApprovals();
@@ -44,7 +68,13 @@ export const Code: React.FC = () => {
     const saved = localStorage.getItem('code_generation_logs');
     return saved ? JSON.parse(saved) : [];
   });
-  const abortControllerRef = useRef<AbortController | null>(null);
+  // Job-based code generation state
+  const [currentJobId, setCurrentJobId] = useState<string | null>(() => {
+    return localStorage.getItem(JOB_ID_STORAGE_KEY);
+  });
+  const [jobElapsedTime, setJobElapsedTime] = useState<number>(0);
+  const [jobProgress, setJobProgress] = useState<string>('');
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const logEndRef = useRef<HTMLDivElement>(null);
 
   // Compute top-level files and folders from all code files
@@ -100,6 +130,132 @@ export const Code: React.FC = () => {
     setLogs([]);
     localStorage.removeItem('code_generation_logs');
   };
+
+  // Format elapsed time for display
+  const formatElapsedTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    if (mins > 0) {
+      return `${mins}m ${secs}s`;
+    }
+    return `${secs}s`;
+  };
+
+  // Stop polling and clean up job state
+  const stopPolling = useCallback(() => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+  }, []);
+
+  // Poll job status
+  const pollJobStatus = useCallback(async (jobId: string) => {
+    try {
+      const response = await fetch(`${INTEGRATION_URL}/generate-code-status/${jobId}`);
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          // Job not found - clean up
+          addLog('error', 'Job not found on server - it may have expired');
+          setCurrentJobId(null);
+          localStorage.removeItem(JOB_ID_STORAGE_KEY);
+          setIsGenerating(false);
+          stopPolling();
+          return;
+        }
+        throw new Error(`Status check failed: ${response.status}`);
+      }
+
+      const data: JobStatusResponse = await response.json();
+
+      // Update elapsed time
+      setJobElapsedTime(data.elapsedSeconds);
+
+      // Update progress if available
+      if (data.progress) {
+        setJobProgress(data.progress);
+      }
+
+      // Sync logs from backend (only add new ones)
+      if (data.logs && data.logs.length > 0) {
+        const lastBackendLog = data.logs[data.logs.length - 1];
+        // Check if we need to add this log (simple check - could be improved)
+        setLogs(prev => {
+          const lastLocalLog = prev[prev.length - 1];
+          if (!lastLocalLog || lastLocalLog.message !== lastBackendLog.message) {
+            // Add logs from backend that we don't have
+            const newLogs = data.logs.map(log => ({
+              timestamp: new Date(log.timestamp).toLocaleTimeString(),
+              type: log.type as 'info' | 'error' | 'success',
+              message: log.message,
+            }));
+            localStorage.setItem('code_generation_logs', JSON.stringify(newLogs));
+            return newLogs;
+          }
+          return prev;
+        });
+      }
+
+      // Check if job is complete
+      if (data.status === 'completed') {
+        setOutput(data.output || 'Code generation completed.');
+        addLog('success', 'Code generation completed successfully');
+        setIsGenerating(false);
+        setCurrentJobId(null);
+        localStorage.removeItem(JOB_ID_STORAGE_KEY);
+        stopPolling();
+        fetchCodeFiles(); // Refresh file list
+      } else if (data.status === 'failed') {
+        setError(data.error || 'Code generation failed');
+        addLog('error', `Failed: ${data.error || 'Unknown error'}`);
+        setIsGenerating(false);
+        setCurrentJobId(null);
+        localStorage.removeItem(JOB_ID_STORAGE_KEY);
+        stopPolling();
+      } else if (data.status === 'cancelled') {
+        addLog('info', 'Code generation was cancelled');
+        setIsGenerating(false);
+        setCurrentJobId(null);
+        localStorage.removeItem(JOB_ID_STORAGE_KEY);
+        stopPolling();
+      }
+      // For 'pending' or 'running', continue polling
+    } catch (err) {
+      console.error('Failed to poll job status:', err);
+      // Don't stop polling on network errors - keep trying
+    }
+  }, [stopPolling]);
+
+  // Start polling for a job
+  const startPolling = useCallback((jobId: string) => {
+    // Clear any existing polling
+    stopPolling();
+
+    // Poll immediately
+    pollJobStatus(jobId);
+
+    // Then poll on interval
+    pollingIntervalRef.current = setInterval(() => {
+      pollJobStatus(jobId);
+    }, POLL_INTERVAL_MS);
+  }, [pollJobStatus, stopPolling]);
+
+  // Check for existing job on mount (recovery after page refresh)
+  useEffect(() => {
+    const savedJobId = localStorage.getItem(JOB_ID_STORAGE_KEY);
+    if (savedJobId) {
+      addLog('info', `Recovering job: ${savedJobId.substring(0, 8)}...`);
+      setIsGenerating(true);
+      setCurrentJobId(savedJobId);
+      startPolling(savedJobId);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      stopPolling();
+    };
+  }, [startPolling, stopPolling]);
 
   const fetchCodeFiles = async () => {
     if (!currentWorkspace?.projectFolder) return;
@@ -198,6 +354,9 @@ export const Code: React.FC = () => {
   const handleGenerateCode = async () => {
     // Clear previous errors
     setApprovalError(null);
+    setError(null);
+    setJobProgress('');
+    setJobElapsedTime(0);
 
     if (!currentWorkspace?.projectFolder) {
       setError('No workspace selected or no project folder configured. Please select a workspace with a project folder in Workspace Settings.');
@@ -225,10 +384,10 @@ export const Code: React.FC = () => {
       ? `${baseCommand.trim()}\n\n${additionalCommands.trim()}`
       : baseCommand.trim();
 
-    setError(null);
     setIsGenerating(true);
-    setOutput('Starting code generation via Claude CLI...\n');
-    addLog('info', 'Starting code generation via Claude CLI...');
+    setOutput('');
+    clearLogs();
+    addLog('info', 'Starting code generation job...');
     addLog('info', `Workspace: ${currentWorkspace.projectFolder}`);
     addLog('info', `AI Preset: ${currentWorkspace.activeAIPreset || 'Not set'}`);
     addLog('info', `UI Framework: ${currentWorkspace.selectedUIFramework || 'None'}`);
@@ -236,14 +395,9 @@ export const Code: React.FC = () => {
       addLog('info', 'Additional commands will be appended to base command');
     }
 
-    // Create abort controller for this request
-    abortControllerRef.current = new AbortController();
-
     try {
-      addLog('info', 'Sending request to /generate-code-cli endpoint...');
-      addLog('info', 'Using Claude CLI for code generation (no API key required)');
-
-      const response = await fetch(`${INTEGRATION_URL}/generate-code-cli`, {
+      // Start the job via the new job-based endpoint
+      const response = await fetch(`${INTEGRATION_URL}/generate-code-job`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -252,42 +406,60 @@ export const Code: React.FC = () => {
           workspacePath: currentWorkspace.projectFolder,
           command: fullCommand,
         }),
-        signal: abortControllerRef.current.signal,
       });
 
-      addLog('info', `Response status: ${response.status} ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`Failed to start job: ${response.status} ${response.statusText}`);
+      }
 
       const data = await response.json();
 
       if (data.error) {
         setError(data.error);
-        setOutput('');
-        addLog('error', `CLI Error: ${data.error}`);
-      } else {
-        setOutput(data.response || 'Code generation completed.');
-        addLog('success', 'Code generation completed successfully');
-        // Refresh file list after generation
-        fetchCodeFiles();
-        addLog('info', 'Refreshing file list...');
+        setIsGenerating(false);
+        addLog('error', `Failed to start job: ${data.error}`);
+        return;
       }
+
+      const jobId = data.jobId;
+      addLog('info', `Job started with ID: ${jobId.substring(0, 8)}...`);
+      addLog('info', 'You can safely navigate away - the job will continue in the background');
+
+      // Save job ID for recovery
+      setCurrentJobId(jobId);
+      localStorage.setItem(JOB_ID_STORAGE_KEY, jobId);
+
+      // Start polling for status
+      startPolling(jobId);
+
     } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        setError('Code generation was stopped by user.');
-        addLog('info', 'Request aborted by user');
-      } else {
-        setError(`Failed to communicate with code generation service: ${err instanceof Error ? err.message : 'Unknown error'}`);
-        addLog('error', `Request failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      }
-    } finally {
+      setError(`Failed to start code generation: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      addLog('error', `Failed to start job: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setIsGenerating(false);
-      abortControllerRef.current = null;
     }
   };
 
-  const handleStop = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      addLog('info', 'Stopping code generation...');
+  const handleStop = async () => {
+    if (!currentJobId) {
+      addLog('info', 'No active job to stop');
+      return;
+    }
+
+    addLog('info', 'Requesting job cancellation...');
+
+    try {
+      const response = await fetch(`${INTEGRATION_URL}/generate-code-cancel/${currentJobId}`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        addLog('info', 'Job cancellation requested');
+        // The polling will detect the cancelled status and clean up
+      } else {
+        addLog('error', 'Failed to cancel job');
+      }
+    } catch (err) {
+      addLog('error', `Failed to cancel: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -369,10 +541,34 @@ All generated code respects the active UI Framework and AI Principles settings f
                 onClick={handleStop}
                 className="bg-red-600 hover:bg-red-700"
               >
-                Stop
+                Cancel
               </Button>
             )}
           </div>
+
+          {/* Job Status Display */}
+          {isGenerating && currentJobId && (
+            <div className="mt-4 p-3 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                  <span className="font-medium text-blue-700 dark:text-blue-300">Job Running</span>
+                </div>
+                <span className="text-sm font-mono text-blue-600 dark:text-blue-400">
+                  {formatElapsedTime(jobElapsedTime)}
+                </span>
+              </div>
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                Job ID: {currentJobId.substring(0, 8)}...
+              </p>
+              {jobProgress && (
+                <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{jobProgress}</p>
+              )}
+              <p className="text-xs text-gray-500 mt-2">
+                ✓ You can navigate away - the job will continue in the background
+              </p>
+            </div>
+          )}
         </Card>
       )}
 
